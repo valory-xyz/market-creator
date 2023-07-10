@@ -30,12 +30,20 @@ You must provide your response in the format specified under "OUTPUT_FORMAT".
 
 INSTRUCTIONS
 * Read the input under the label "INPUT" delimited by three backticks.
-* The "INPUT" specifies a list of recent news headlines and short descriptions.
-* Based on the "INPUT" and your training data you must provide a list of binary questions suitable to create prediction markets.
-  - Each question must be unknown at the present time, but its answer will be known in a period between 3 to 12 months.
-  - All questions must be different and not overlap semantically.
-  - The questions must be specific and reflect deterministic, measurable facts whose answer will be known for sure.
-  - Do not include questions whose response is subjective.
+* The "INPUT" specifies a list of recent news headlines, their date, and short descriptions.
+* Based on the "INPUT" and your training data, you must provide a list of binary questions, valid answers and resolution dates to create prediction markets.
+  Each market must satisfy the following conditions:
+  - The outcome of the market is unknown at the present date.
+  - The outcome of the market must be known by its resolution date.
+  - The outcome of the market must be related to a deterministic, measurable or verifiable fact.
+  - Questions whose answer is known at the present date are invalid.
+  - Questions whose answer is subjective or opinionated are invalid.
+  - Questions with relative dates are invalid.
+  - Questions about moral values, subjective opinions and not facts are invalid.
+  - Questions in which none of the answers are valid will resolve as invalid.
+  - Questions with multiple valid answers are invalid.
+  - Questions must not incentive to commit an immoral violent action.
+* The created markets must be different and not overlap semantically.
 * You must provide your response in the format specified under "OUTPUT_FORMAT".
 * Do not include any other contents in your response.
 
@@ -49,8 +57,8 @@ OUTPUT_FORMAT:
 * The JSON array must be of length 10. 
 * Each entry of the JSON array must be a JSON object containing the fields:
   - question: The binary question to open a prediction market.
-  - answers: The binary answers to the question.
-  - period: The expected period for the real answer to the question to be known.
+  - answers: The possible answers to the question.
+  - resolution_date: The resolution date for the outcome of the market to be verified.
 * Output only the JSON object. Do not include any other contents in your response.
 """
 
@@ -76,13 +84,15 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     }
 
     today = datetime.date.today()
+    from_date = today - datetime.timedelta(days=7)
+    to_date = today
 
     params = {
         "q": "arts OR business OR finance OR cryptocurrency OR politics OR science OR technology OR sports OR weather OR entertainment",
         "language": "en",
         "sortBy": "popularity",
-        "from": today - datetime.timedelta(days=7),
-        "to": today,
+        "from": from_date,
+        "to": to_date,
     }
 
     response = requests.get(newsapi_url, params=params, headers=newsapi_headers)
@@ -97,11 +107,13 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     for article in articles:
         title = article['title']
         content = article['content']
-        input_news += f"- {title}\n  {content}\n\n"
-
+        date = article['publishedAt']
+        input_news += f"- ({date}) {title}\n  {content}\n\n"
 
     market_creation_prompt = MARKET_CREATION_PROMPT.format(
-        input_news=input_news
+        input_news=input_news,
+        from_date=from_date,
+        to_date=to_date
     )
 
     print(market_creation_prompt)
