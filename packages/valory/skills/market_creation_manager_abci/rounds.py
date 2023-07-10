@@ -37,6 +37,7 @@ from packages.valory.skills.abstract_round_abci.base import (
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectRandomnessPayload,
     DataGatheringPayload,
+    SelectKeeperPayload,
     MarketIdentificationPayload,
     PrepareTransactionPayload,
 )
@@ -48,6 +49,7 @@ class Event(Enum):
     NO_MAJORITY = "no_majority"
     DONE = "done"
     ROUND_TIMEOUT = "round_timeout"
+    API_ERROR = "api_error"
 
 
 class SynchronizedData(BaseSynchronizedData):
@@ -78,6 +80,16 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
 
+
+class SelectKeeperRound(CollectSameUntilThresholdRound):
+    """A round in a which keeper is selected"""
+    
+    payload_class = SelectKeeperPayload
+    synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+    collection_key = get_name(SynchronizedData.participant_to_selection)
+    selection_key = get_name(SynchronizedData.most_voted_keeper_address)
 
 
 class MarketIdentificationRound(CollectSameUntilThresholdRound):
@@ -117,10 +129,15 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound
         },
         DataGatheringRound: {
-            Event.DONE: MarketIdentificationRound,
+            Event.DONE: SelectKeeperRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound
         },
+        SelectKeeperRound: {
+            Event.DONE: MarketIdentificationRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound
+        },        
         MarketIdentificationRound: {
             Event.DONE: PrepareTransactionRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
