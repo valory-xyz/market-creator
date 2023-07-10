@@ -25,7 +25,7 @@ from packages.valory.skills.abstract_round_abci.behaviours import (
     AbstractRoundBehaviour,
     BaseBehaviour,
 )
-from packages.valory.skills.market_creator_abci.composition import MarketCreatorAbciApp
+from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
 from packages.valory.skills.market_creation_manager_abci.behaviours import (
     MarketCreationManagerRoundBehaviour,
 )

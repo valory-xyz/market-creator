@@ -22,6 +22,11 @@
         "skill/valory/transaction_settlement_abci/0.1.0": "bafybeihuzoxkhnpep4zcekdq463hopohj3i7rkxvbc2ywmmcyppi3knbxy",
         "skill/valory/registration_abci/0.1.0": "bafybeie4suynydmpq2myqkdzhiqoro2hr4zexd5a2o4rvch7yefw65kjvq",
         "skill/valory/reset_pause_abci/0.1.0": "bafybeiaickab63rqbu3kywnwyrfaa4362ai7rbvhghehxnvqk54eiaaegm",
-        "skill/valory/termination_abci/0.1.0": "bafybeieqpy3nu7qoy6ztfxetgiuevmgcpylufou3ngh5nw2vsgsvghid54"
+        "skill/valory/termination_abci/0.1.0": "bafybeieqpy3nu7qoy6ztfxetgiuevmgcpylufou3ngh5nw2vsgsvghid54",
+        "protocol/valory/llm/1.0.0": "bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy",
+        "connection/valory/openai/0.1.0": "bafybeietimatztynqebwicxabplia6fctov4vswzbdrin5y32brbjewo2y",
+        "contract/valory/gnosis_safe_proxy_factory/0.1.0": "bafybeiaa6fgwtykrti6i7sbt22raavpsbobsq2xgem4nkbcg744agnmkae",
+        "contract/valory/gnosis_safe/0.1.0": "bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u",
+        "contract/valory/multisend/0.1.0": "bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje"
     }
 }

@@ -1,4 +1,4 @@
-name: market_creator_abci
+name: market_maker_abci
 author: valory
 version: 0.1.0
 type: skill
@@ -26,7 +26,6 @@ protocols:
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeiarzpxsy7ulitk5obs4zajhll2m77motjn5st7mi6qvjtkoirfikq
 - valory/oracle_deployment_abci:0.1.0:bafybeidttc7dz4ipc3nqc4624p4uor5ubql7mvze7qrsl4djwpz25rjtcq
-- valory/price_estimation_abci:0.1.0:bafybeig4q2ugqkiyvvgwn647t6hl2sqzvxpcaoph4utbqhowxgvtl54w7u
 - valory/registration_abci:0.1.0:bafybeie4suynydmpq2myqkdzhiqoro2hr4zexd5a2o4rvch7yefw65kjvq
 - valory/reset_pause_abci:0.1.0:bafybeiaickab63rqbu3kywnwyrfaa4362ai7rbvhghehxnvqk54eiaaegm
 - valory/termination_abci:0.1.0:bafybeieqpy3nu7qoy6ztfxetgiuevmgcpylufou3ngh5nw2vsgsvghid54
