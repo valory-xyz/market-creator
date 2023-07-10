@@ -1,0 +1,33 @@
+[build-system]
+requires = [ "poetry-core>=1.0.0",]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "market-creator"
+version = "0.1.0"
+description = ""
+authors = []
+readme = "README.md"
+repository = "https://github.com/valory-xyz/dev-template"
+keywords = [ "autonomy", "autonomous", "autonolas", "service", "multi", "agent",]
+classifiers = [ "Environment :: Console", "Environment :: Web Environment", "Development Status :: 2 - Pre-Alpha", "Intended Audience :: Developers", "License :: OSI Approved :: Apache Software License", "Natural Language :: English", "Operating System :: MacOS", "Operating System :: Microsoft", "Operating System :: Unix", "Programming Language :: Python :: 3.7", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Topic :: Communications", "Topic :: Internet", "Topic :: Scientific/Engineering", "Topic :: Software Development", "Topic :: System",]
+[[tool.poetry.packages]]
+include = "packages"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+open-autonomy = "==0.10.7"
+toml = "^0.10.2"
+hypothesis = "^6.80.0"
+grpcio = "^1.56.0"
+typing-extensions = "^4.7.1"
+py-ecc = "==5.2.0"
+aiohttp = "^3.8.4"
+asn1crypto = "^1.5.1"
+open-aea-ledger-ethereum = "==1.35.0"
+openai = "^0.27.8"
+
+
+[tool.poetry.group.dev.dependencies.tomte]
+version = "==0.2.12"
+extras = [ "cli", "tests",]
