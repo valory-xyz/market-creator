@@ -141,7 +141,7 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
                 self.most_voted_payload
                 == DataGatheringRound.MAX_MARKETS_REACHED
             ):
-                return self.synchronized_data, Event.MAX_MARKETS_CREATED
+                return self.synchronized_data, Event.MAX_MARKETS_REACHED
 
             #TODO convert to JSON at this point? Needs to update SynchronizedData type
             payload = self.most_voted_payload
