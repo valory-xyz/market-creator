@@ -52,7 +52,7 @@ class Event(Enum):
     ROUND_TIMEOUT = "round_timeout"
     API_ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
-    MAX_MARKETS_CREATED = "max_markets_created"
+    MAX_MARKETS_REACHED = "max_markets_reached"
 
 
 class SynchronizedData(BaseSynchronizedData):
@@ -139,7 +139,7 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
             
             if (
                 self.most_voted_payload
-                == DataGatheringRound.MAX_MARKETS_CREATED
+                == DataGatheringRound.MAX_MARKETS_REACHED
             ):
                 return self.synchronized_data, Event.MAX_MARKETS_CREATED
 
@@ -260,7 +260,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         DataGatheringRound: {
             Event.DONE: SelectKeeperRound,
-            Event.MAX_MARKETS_CREATED: SkippedMarketCreationManagerRound,
+            Event.MAX_MARKETS_REACHED: SkippedMarketCreationManagerRound,
             Event.API_ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,

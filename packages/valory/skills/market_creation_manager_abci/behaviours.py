@@ -177,7 +177,7 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
             if self.synchronized_data.markets_created < self.params.num_markets:
                 gathered_data = yield from  self._gather_data()
             else:
-                gathered_data = DataGatheringRound.MAX_MARKETS_CREATED
+                gathered_data = DataGatheringRound.MAX_MARKETS_REACHED
 
             payload = DataGatheringPayload(sender=sender, gathered_data=gathered_data)
 
@@ -217,7 +217,7 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
             return DataGatheringRound.ERROR_PAYLOAD
         
         self.context.logger.info(f"Response received from {self.params.newsapi_endpoint}:\n {response.json()}")
-        return json.dumps(response.json(), sorted=True)
+        return json.dumps(response.json(),  sort_keys=True)
 
 
 
