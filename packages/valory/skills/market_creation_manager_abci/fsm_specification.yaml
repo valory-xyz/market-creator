@@ -2,6 +2,7 @@ alphabet_in:
 - DONE
 - NO_MAJORITY
 - ROUND_TIMEOUT
+- API_ERROR
 default_start_state: CollectRandomnessRound
 final_states:
 - FinishedMarketCreationManagerRound
@@ -20,6 +21,7 @@ transition_func:
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
     (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
     (DataGatheringRound, DONE): SelectKeeperRound
+    (DataGatheringRound, API_ERROR): CollectRandomnessRound
     (DataGatheringRound, NO_MAJORITY): CollectRandomnessRound
     (DataGatheringRound, ROUND_TIMEOUT): CollectRandomnessRound
     (SelectKeeperRound, DONE): MarketIdentificationRound
