@@ -206,6 +206,7 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
             headers=headers,
             parameters=parameters,
         )
+
         if response.status_code != HTTP_OK:
             self.context.logger.error(
                 f"Could not retrieve response from {self.params.newsapi_endpoint}."
@@ -215,9 +216,11 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
             if retries >= MAX_RETRIES:
                 return DataGatheringRound.MAX_RETRIES_PAYLOAD
             return DataGatheringRound.ERROR_PAYLOAD
-        
-        self.context.logger.info(f"Response received from {self.params.newsapi_endpoint}:\n {response.json()}")
-        return json.dumps(response.json(),  sort_keys=True)
+
+        response_json = json.loads(response.body)
+
+        self.context.logger.info(f"Response received from {self.params.newsapi_endpoint}:\n {response_json}")
+        return json.dumps(response_json,  sort_keys=True)
 
 
 
@@ -284,13 +287,6 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_llm_response(self) -> Generator[None, None, Optional[dict]]:
         """Get the LLM response"""
 
-        return {
-            "answers": ["Yes", "No"],
-            "language": "en_US",
-            "question": "Will AI progress even further in the next 4 weeks before 2023-07-30?",
-            "resolution_time": 1690675200,
-            "topic": "science",
-        }
 
         data = json.loads(self.synchronized_data.gathered_data)
         articles = data["articles"]
@@ -298,7 +294,7 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
         random.shuffle(articles)
 
         input_news = ""
-        for article in articles[0:5]:
+        for article in articles[0:10]:
             title = article["title"]
             content = article["content"]
             date = article["publishedAt"]
@@ -327,6 +323,7 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
         )
         result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
         self.context.logger.info(f"Got LLM response: {result}")
+        import pdb; pdb.set_trace()
         data = json.loads(result)
         valid_responses = []
         minimum_resolution_date = datetime.datetime.fromtimestamp(
