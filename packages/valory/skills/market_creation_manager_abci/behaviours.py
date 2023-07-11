@@ -359,7 +359,6 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
         if len(valid_responses) == 0:
             return None
         
-        import pdb; pdb.set_trace()
         return valid_responses[0]
 
     def _do_request(
