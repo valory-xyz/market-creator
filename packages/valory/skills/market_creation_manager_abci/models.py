@@ -46,6 +46,7 @@ class MarketCreationManagerParams(BaseParams):
 
         self.newsapi_api_key = kwargs.get("newsapi_api_key")
         self.newsapi_endpoint = kwargs.get("newsapi_endpoint")
+        self.newsapi_endpoint = kwargs.get("num_markets")
         super().__init__(*args, **kwargs)
 
 class RandomnessApi(ApiSpecs):
