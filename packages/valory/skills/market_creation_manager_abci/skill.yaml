@@ -6,14 +6,15 @@ description: The scaffold skill is a scaffold for your own skill implementation.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
+  .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeifotgt5johrebg3iaokvi5jkfiy3mk5dtkfyuersobinhzxp3ilba
-  behaviours.py: bafybeicrm6p2uplmvbva6burejq6je7j2c7w6hcb4l67gwgl4kiktvbwgy
-  dialogues.py: bafybeignhvmpiyjyby5ls726hkeawtw6q4ob6br7bqtwf5ujk2z6mlkyiq
-  fsm_specification.yaml: bafybeig3ro2adoi6wd2xoxkp4dxvqe4kypatvw4nw7wrhuzbfvyp2anlca
+  behaviours.py: bafybeid5znpptplr22q2lawr2ri6vpnykepftsvr6sj37hm6z5y4wwqduu
+  dialogues.py: bafybeibiklamb4pf32ojme7cxnf6jlmlkf54phrnuyv77nhvykkcmktnke
+  fsm_specification.yaml: bafybeiacanirz5htb7uieurfjqbssdn7j73qkse77ype56fqxaxe34nm4e
   handlers.py: bafybeihteow3fq4pt23ivbdoxsnyilvyvtr5uakz42dkyltvgik5zkrshe
-  models.py: bafybeigqixvhbcjzlcdeueut6fq2s2da2fhnx5kr4j7ln64vyqplcyrdde
-  payloads.py: bafybeiezykfzgehmemkkmca5umpwush4b7rre5xrp5gbf3mv6plksmwjzi
-  rounds.py: bafybeigkgfscocq74yirgu7oevfg2qbo2uuyr2qotyxcdowqyxbkux335u
+  models.py: bafybeidpe2w3un7ds4rhlzvxgxhlitkngiwcydsp4674mhpnweazogy4ji
+  payloads.py: bafybeigiwevmsujskfpgyplg6ss45ckfx77i4bu63g7dnxzna2kwdhteh4
+  rounds.py: bafybeieqhbzvhdmtxxssihpewibj6siqefukq5ms7cu75stsr2jk2dqhpm
   tests/__init__.py: bafybeic3534aro4pdtsdcuxywzlgkccczx2elhnwisiq3r6okvnrdu4aia
 fingerprint_ignore_patterns: []
 connections: []
@@ -69,7 +70,8 @@ models:
     class_name: LedgerApiDialogues
   params:
     args:
-      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      newsapi_endpoint: https://newsapi.org/v2/everything
+      newsapi_api_key: 0
       cleanup_history_depth: 1
       cleanup_history_depth_current: null
       drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31

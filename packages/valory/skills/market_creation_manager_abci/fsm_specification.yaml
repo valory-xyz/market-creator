@@ -11,6 +11,7 @@ start_states:
 states:
 - CollectRandomnessRound
 - DataGatheringRound
+- SelectKeeperRound
 - MarketIdentificationRound
 - PrepareTransactionRound
 - FinishedMarketCreationManagerRound
@@ -18,9 +19,12 @@ transition_func:
     (CollectRandomnessRound, DONE): DataGatheringRound
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
     (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (DataGatheringRound, DONE): MarketIdentificationRound
+    (DataGatheringRound, DONE): SelectKeeperRound
     (DataGatheringRound, NO_MAJORITY): CollectRandomnessRound
     (DataGatheringRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (SelectKeeperRound, DONE): MarketIdentificationRound
+    (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
+    (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
     (MarketIdentificationRound, DONE): PrepareTransactionRound
     (MarketIdentificationRound, NO_MAJORITY): CollectRandomnessRound
     (MarketIdentificationRound, ROUND_TIMEOUT): CollectRandomnessRound
