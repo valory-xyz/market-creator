@@ -14,6 +14,7 @@ packages/valory/contracts/service_registry
 packages/valory/contracts/gnosis_safe_proxy_factory
 packages/valory/contracts/multisend
 packages/valory/contracts/service_registry
+packages/valory/contracts/delegate
 packages/valory/protocols
 packages/valory/skills/__pycache__
 packages/valory/skills/abstract_abci
@@ -25,3 +26,5 @@ packages/valory/skills/transaction_settlement_abci
 packages/open_aea
 leak_report
 /Pipfile.lock
+
+temp/

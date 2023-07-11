@@ -36,8 +36,13 @@ class CollectRandomnessPayload(BaseTxPayload):
 class DataGatheringPayload(BaseTxPayload):
     """Represent a transaction payload for the DataGatheringRound."""
 
-    content: str
+    gathered_data: str
 
+@dataclass(frozen=True)
+class SelectKeeperPayload(BaseTxPayload):
+    """Represent a transaction payload of type 'select_keeper'."""
+
+    keeper: str
 
 @dataclass(frozen=True)
 class MarketIdentificationPayload(BaseTxPayload):

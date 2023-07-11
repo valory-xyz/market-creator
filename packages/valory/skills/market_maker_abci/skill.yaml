@@ -6,15 +6,15 @@ description: The scaffold skill is a scaffold for your own skill implementation.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: bafybeicg5eg7f4fhaxflzaz6h73xklax6cfggg6d4sjl27tcs3rjqgflza
-  __init__.py: bafybeihlgffzmngu3ydky57kchhrdsfakmvpbq5mcmyrsdnolfnimftktm
-  behaviours.py: bafybeig3klyi5thvogwcdrqqzswaad3c3xihq5wa4op6dnkrtxfpedlorq
-  composition.py: bafybeie67y75ajuijisina4pm6l557vx2wu5tftr6a62d6mctgg3mh2r4q
+  README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
+  __init__.py: bafybeighu2gs3dhms32cdajklf36wmsi4z347wlwiw4dg3uvje47v2zh5a
+  behaviours.py: bafybeigx76ejcsvlpsqkd4v2ana6tlir3plss4zagxus5ar7smvinotjhi
+  composition.py: bafybeiamj2il5sioaejefddsmm73zurwmgohszzuolf6uf5jja6g2ogfjy
   dialogues.py: bafybeigabhaykiyzbluu4mk6bbrmqhzld2kyp32pg24bvjmzrrb74einwm
   fsm_specification.yaml: bafybeicvtoez7ahmyl25h66edgjywx5ymxtqnyexzq73ouyu2p6smi3uoa
-  handlers.py: bafybeieied5iol2p7t4rgpkxlonfuc6jhtjdaktpkpgobsfc3xyawptuwa
-  models.py: bafybeibniz6je7wwa5lr3oxlgkw55mb36hl46mn7bozjguqrblw4hvbbhm
-  tests/__init__.py: bafybeihlgffzmngu3ydky57kchhrdsfakmvpbq5mcmyrsdnolfnimftktm
+  handlers.py: bafybeifcsb46xvr5rhl72qc2pywgckucktf27fba6uisvzqsnueafuht7a
+  models.py: bafybeifq3gzmzyhnnemwr75bcelipgacf2bp54gvkl34kz5r2l5adlbxke
+  tests/__init__.py: bafybeia2oc2rlsm3kjz74t2obgnhueb6xilx6r5eeairy3l2xqnb5lrdbu
 fingerprint_ignore_patterns: []
 connections:
 - valory/ledger:0.19.0:bafybeicgfupeudtmvehbwziqfxiz6ztsxr5rxzvalzvsdsspzz73o5fzfi
@@ -24,12 +24,11 @@ protocols:
 - valory/contract_api:1.0.0:bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy
 - valory/ledger_api:1.0.0:bafybeibo4bdtcrxi2suyzldwoetjar6pqfzm6vt5xal22ravkkcvdmtksi
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeiarzpxsy7ulitk5obs4zajhll2m77motjn5st7mi6qvjtkoirfikq
-- valory/oracle_deployment_abci:0.1.0:bafybeidttc7dz4ipc3nqc4624p4uor5ubql7mvze7qrsl4djwpz25rjtcq
-- valory/registration_abci:0.1.0:bafybeie4suynydmpq2myqkdzhiqoro2hr4zexd5a2o4rvch7yefw65kjvq
-- valory/reset_pause_abci:0.1.0:bafybeiaickab63rqbu3kywnwyrfaa4362ai7rbvhghehxnvqk54eiaaegm
-- valory/termination_abci:0.1.0:bafybeieqpy3nu7qoy6ztfxetgiuevmgcpylufou3ngh5nw2vsgsvghid54
-- valory/transaction_settlement_abci:0.1.0:bafybeihuzoxkhnpep4zcekdq463hopohj3i7rkxvbc2ywmmcyppi3knbxy
+- valory/abstract_round_abci:0.1.0:bafybeihlcferdpjhcorbrgp3zplikxkuxmlx3x7mc4g5sjxxm2mgzryfia
+- valory/registration_abci:0.1.0:bafybeift43mkwgakbx4j76lrp6ixqgk33wgy6wti7uoq2evny6h2pewkti
+- valory/reset_pause_abci:0.1.0:bafybeibs25kzoyxcxdnczdvvhnllratimhwuuytgu4zybzkmpglkice4um
+- valory/termination_abci:0.1.0:bafybeibnay7kov2akox6kv3jeyffvzgizeck3eixisprwhb4xmlvnjdo6q
+- valory/transaction_settlement_abci:0.1.0:bafybeiewwmr2bcxcle5x2kxbbpes2xca775kft7bom6pqtocsvfgjnzxbq
 behaviours:
   main:
     args: {}
