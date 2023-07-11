@@ -1,4 +1,4 @@
-name: market_creator_abci
+name: market_maker_abci
 author: valory
 version: 0.1.0
 type: skill
@@ -7,14 +7,14 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
-  __init__.py: bafybeiggomi7fnpsyytwm2fxkkukphinbtcostnbcwyldqv5fumajpyh4m
-  behaviours.py: bafybeicfytvkypyyb2zqfq4fcma6l3sdebzfj2utoyipfh5tk7jjoxzdwe
+  __init__.py: bafybeighu2gs3dhms32cdajklf36wmsi4z347wlwiw4dg3uvje47v2zh5a
+  behaviours.py: bafybeigx76ejcsvlpsqkd4v2ana6tlir3plss4zagxus5ar7smvinotjhi
   composition.py: bafybeiamj2il5sioaejefddsmm73zurwmgohszzuolf6uf5jja6g2ogfjy
   dialogues.py: bafybeigabhaykiyzbluu4mk6bbrmqhzld2kyp32pg24bvjmzrrb74einwm
   fsm_specification.yaml: bafybeicvtoez7ahmyl25h66edgjywx5ymxtqnyexzq73ouyu2p6smi3uoa
   handlers.py: bafybeifcsb46xvr5rhl72qc2pywgckucktf27fba6uisvzqsnueafuht7a
-  models.py: bafybeifenf3zhpbf2f33i44btbzrrtc6bltv4edxjmhwg77bvb2on4rcnu
-  tests/__init__.py: bafybeicpj455mv4zlxsmos5exxjtddczwmpfa7rw6m4epdd2fssv5nbw7u
+  models.py: bafybeifq3gzmzyhnnemwr75bcelipgacf2bp54gvkl34kz5r2l5adlbxke
+  tests/__init__.py: bafybeia2oc2rlsm3kjz74t2obgnhueb6xilx6r5eeairy3l2xqnb5lrdbu
 fingerprint_ignore_patterns: []
 connections:
 - valory/ledger:0.19.0:bafybeicgfupeudtmvehbwziqfxiz6ztsxr5rxzvalzvsdsspzz73o5fzfi
@@ -25,11 +25,10 @@ protocols:
 - valory/ledger_api:1.0.0:bafybeibo4bdtcrxi2suyzldwoetjar6pqfzm6vt5xal22ravkkcvdmtksi
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeihlcferdpjhcorbrgp3zplikxkuxmlx3x7mc4g5sjxxm2mgzryfia
-- valory/market_creation_manager_abci:0.1.0:bafybeibdstgecwxibliw4emwspdoxg3gdtg25qi7cktkjqyzim7pv5clz4
 - valory/registration_abci:0.1.0:bafybeift43mkwgakbx4j76lrp6ixqgk33wgy6wti7uoq2evny6h2pewkti
 - valory/reset_pause_abci:0.1.0:bafybeibs25kzoyxcxdnczdvvhnllratimhwuuytgu4zybzkmpglkice4um
-- valory/termination_abci:0.1.0:bafybeiabozz2ta2hizq5u2lnkrp3v345unb6xug7ncls6ad4st57lg5seq
-- valory/transaction_settlement_abci:0.1.0:bafybeiapapnnfwuto7gu2izdyciir7tbegktizccoe5ya63gp2gyt4p4ki
+- valory/termination_abci:0.1.0:bafybeibnay7kov2akox6kv3jeyffvzgizeck3eixisprwhb4xmlvnjdo6q
+- valory/transaction_settlement_abci:0.1.0:bafybeiewwmr2bcxcle5x2kxbbpes2xca775kft7bom6pqtocsvfgjnzxbq
 behaviours:
   main:
     args: {}

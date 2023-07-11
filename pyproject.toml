@@ -24,7 +24,7 @@ typing-extensions = "^4.7.1"
 py-ecc = "==5.2.0"
 aiohttp = "^3.8.4"
 asn1crypto = "^1.5.1"
-open-aea-ledger-ethereum = "==1.35.0"
+open-aea-ledger-ethereum = "1.35.0"
 openai = "^0.27.8"
 
 

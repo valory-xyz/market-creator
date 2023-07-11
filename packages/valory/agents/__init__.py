@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2023 Valory AG
+#   Copyright 2023 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,13 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This module contains the ABCI cryptocurrency oracle skill for an AEA.
-
-It does so through aggregation of observations from different sources.
-"""
-
-from aea.configurations.base import PublicId
-
-
-PUBLIC_ID = PublicId.from_str("valory/market_creator_abci:0.1.0")
+"""Agents authored by 'valory'."""
