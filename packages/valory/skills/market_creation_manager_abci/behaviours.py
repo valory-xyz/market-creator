@@ -177,11 +177,13 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Could not retrieve response from {self.params.newsapi_endpoint}."
                 f"Received status code {response.status_code}.\n{response}"
             )
-            #retries = self.synchronized_data.newsapi_endpoint_retries + 1
-            # TODO Error handling.
-            return "{ }"
-
-        return response.json()
+            retries = self.synchronized_data.newsapi_endpoint_retries + 1
+            if retries >= MAX_RETRIES:
+                return DataGatheringRound.MAX_RETRIES_PAYLOAD
+            return DataGatheringRound.ERROR_PAYLOAD
+        
+        self.context.logger.info(f"Response received from {self.params.newsapi_endpoint}:\n {response.json()}")
+        return json.dumps(response.json(), sorted=True)
 
 
 class SelectKeeperOracleBehaviour(SelectKeeperBehaviour):

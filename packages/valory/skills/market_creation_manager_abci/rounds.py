@@ -19,7 +19,9 @@
 
 """This package contains the rounds of MarketCreationManagerAbciApp."""
 
+from ctypes import cast
 from enum import Enum
+import json
 from typing import Dict, List, Optional, Set, Tuple
 
 from packages.valory.skills.abstract_round_abci.base import (
@@ -59,6 +61,16 @@ class SynchronizedData(BaseSynchronizedData):
     This data is replicated by the tendermint application.
     """
 
+    @property
+    def gathered_data(self) -> str:
+        """Get the llm_values."""
+        return cast(str, self.db.get_strict("gathered_data"))
+    
+    @property
+    def newsapi_api_retries(self) -> int:
+        """Get the amount of API call retries."""
+        return cast(int, self.db.get("newsapi_api_retries", 0))
+
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
     """A round for generating collecting randomness"""
@@ -74,12 +86,56 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
 class DataGatheringRound(CollectSameUntilThresholdRound):
     """DataGatheringRound"""
 
-    payload_class = DataGatheringPayload
-    payload_attribute = "content"
-    synchronized_data_class = SynchronizedData
-    done_event = Event.DONE
-    no_majority_event = Event.NO_MAJORITY
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
 
+    payload_class = DataGatheringPayload
+    #payload_attribute = "gathered_data"
+    synchronized_data_class = SynchronizedData
+    #done_event = Event.DONE
+    #no_majority_event = Event.NO_MAJORITY
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                newsapi_api_retries = cast(
+                    SynchronizedData, self.synchronized_data
+                ).newsapi_api_retries
+                synchronized_data = self.synchronized_data.update(
+                    synchronized_data_class=SynchronizedData,
+                    **{
+                        get_name(
+                            SynchronizedData.newsapi_api_retries
+                        ): newsapi_api_retries
+                        + 1,
+                    },
+                )
+                return synchronized_data, Event.API_ERROR
+
+            if (
+                self.most_voted_payload
+                == DataGatheringRound.MAX_RETRIES_PAYLOAD
+            ):
+                return self.synchronized_data, Event.DONE
+
+            #TODO convert to JSON at this point? Needs to update SynchronizedData type
+            payload = self.most_voted_payload
+
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(SynchronizedData.gathered_data): payload,
+                },
+            )
+            return synchronized_data, Event.DONE
+        
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+        return None
 
 class SelectKeeperRound(CollectSameUntilThresholdRound):
     """A round in a which keeper is selected"""
@@ -130,6 +186,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         DataGatheringRound: {
             Event.DONE: SelectKeeperRound,
+            Event.API_ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound
         },
