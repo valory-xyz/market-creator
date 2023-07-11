@@ -323,7 +323,6 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
         )
         result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
         self.context.logger.info(f"Got LLM response: {result}")
-        import pdb; pdb.set_trace()
         data = json.loads(result)
         valid_responses = []
         minimum_resolution_date = datetime.datetime.fromtimestamp(
@@ -359,6 +358,8 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
                 continue
         if len(valid_responses) == 0:
             return None
+        
+        import pdb; pdb.set_trace()
         return valid_responses[0]
 
     def _do_request(

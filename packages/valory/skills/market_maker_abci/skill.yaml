@@ -23,7 +23,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
-- valory/market_creation_manager_abci:0.1.0:bafybeics5ujfpqpwlua5f6v5cqis4yymmrnoncyvs5emicsp7zsxl6oomm
+- valory/market_creation_manager_abci:0.1.0:bafybeifnl6c4lcqkfokiq7h2jeev6jh7ihejvrsdai43bb7eacbnye3xdi
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
 behaviours:
@@ -82,7 +82,7 @@ models:
     args:
       num_markets: 1
       newsapi_endpoint: https://newsapi.org/v2/everything
-      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      newsapi_api_key: abcd0000000000000000000000000000
       broadcast_to_server: false
       cleanup_history_depth: 1
       cleanup_history_depth_current: null

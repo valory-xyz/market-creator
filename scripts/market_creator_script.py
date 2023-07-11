@@ -93,6 +93,8 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     response = requests.get(newsapi_url, params=params, headers=newsapi_headers)
     data = response.json()
 
+    print(data)
+
     # Create the string with the desired format
     articles = data["articles"]
     random.shuffle(articles)
