@@ -1,14 +1,31 @@
-import requests
-import json
-import openai
-import json
-import random
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2023 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""Script for creating market creator."""
+
 import datetime
 import os
+import random
+from typing import Any, Dict, Optional, Tuple
 
-
-from typing import Any, Dict, List, Optional, Tuple
-
+import openai
+import requests
 
 
 DEFAULT_OPENAI_SETTINGS = {
@@ -17,7 +34,7 @@ DEFAULT_OPENAI_SETTINGS = {
 }
 
 TOOL_TO_ENGINE = {
-    #"market-creator": "gpt-3.5-turbo",
+    # "market-creator": "gpt-3.5-turbo",
     "market-creator": "gpt-4",
 }
 
@@ -54,7 +71,7 @@ INPUT:
 
 OUTPUT_FORMAT:
 * Your output response must be only a single JSON array to be parsed by Python's "json.loads()".
-* The JSON array must be of length 10. 
+* The JSON array must be of length 10.
 * Each entry of the JSON array must be a JSON object containing the fields:
   - question: The binary question to open a prediction market.
   - answers: The possible answers to the question.
@@ -69,7 +86,6 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     newsapi_api_key = kwargs["api_keys"]["newsapi"]
     max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
     temperature = kwargs.get("temperature", DEFAULT_OPENAI_SETTINGS["temperature"])
-    prompt = kwargs["prompt"]
     tool = kwargs["tool"]
 
     if tool not in ALLOWED_TOOLS:
@@ -79,9 +95,7 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
 
     newsapi_url = "https://newsapi.org/v2/everything"
 
-    newsapi_headers = headers = {
-        'X-Api-Key': newsapi_api_key
-    }
+    newsapi_headers = {"X-Api-Key": newsapi_api_key}
 
     today = datetime.date.today()
     from_date = today - datetime.timedelta(days=7)
@@ -99,21 +113,19 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     data = response.json()
 
     # Create the string with the desired format
-    articles = data['articles']
+    articles = data["articles"]
     random.shuffle(articles)
     articles = articles[:20]
 
-    input_news = ''
+    input_news = ""
     for article in articles:
-        title = article['title']
-        content = article['content']
-        date = article['publishedAt']
+        title = article["title"]
+        content = article["content"]
+        date = article["publishedAt"]
         input_news += f"- ({date}) {title}\n  {content}\n\n"
 
     market_creation_prompt = MARKET_CREATION_PROMPT.format(
-        input_news=input_news,
-        from_date=from_date,
-        to_date=to_date
+        input_news=input_news, from_date=from_date, to_date=to_date
     )
 
     print(market_creation_prompt)
@@ -143,15 +155,14 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     return response.choices[0].message.content, None
 
 
-
-#Testing the script
-openai_api_key = os.environ.get('OPENAI_API_KEY')
-newsapi_api_key = os.environ.get('NEWSAPI_API_KEY')
+# Testing the script
+openai_api_key = os.environ.get("OPENAI_API_KEY")
+newsapi_api_key = os.environ.get("NEWSAPI_API_KEY")
 
 kwargs = {
     "prompt": "unused",
     "tool": "market-creator",
-    "api_keys": {"openai": openai_api_key, "newsapi": newsapi_api_key}
+    "api_keys": {"openai": openai_api_key, "newsapi": newsapi_api_key},
 }
 
 run(**kwargs)
