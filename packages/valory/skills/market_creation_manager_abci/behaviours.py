@@ -184,7 +184,7 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
         return response.json()
 
 
-class SelectKeeperOracleBehaviour(SelectKeeperBehaviour):
+class SelectKeeperMarketIdentificationBehaviour(SelectKeeperBehaviour):
     """Select the keeper agent."""
 
     matching_round = SelectKeeperRound
@@ -338,6 +338,7 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     behaviours: Set[Type[BaseBehaviour]] = [
         CollectRandomnessBehaviour,
         DataGatheringBehaviour,
+        SelectKeeperMarketIdentificationBehaviour,
         MarketIdentificationBehaviour,
         PrepareTransactionBehaviour
     ]
