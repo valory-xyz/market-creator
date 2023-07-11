@@ -583,7 +583,7 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     abci_app_cls = MarketCreationManagerAbciApp  # type: ignore
     behaviours: Set[Type[BaseBehaviour]] = {
         CollectRandomnessBehaviour,
-        SelectKeeperOracleBehaviour,
+        SelectKeeperMarketIdentificationBehaviour,
         DataGatheringBehaviour,
         SelectKeeperMarketIdentificationBehaviour,
         MarketIdentificationBehaviour,

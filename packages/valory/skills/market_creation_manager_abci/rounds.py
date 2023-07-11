@@ -283,8 +283,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         FinishedMarketCreationManagerRound: {},
+        SkippedMarketCreationManagerRound: {},
     }
-    final_states: Set[AppState] = {FinishedMarketCreationManagerRound}
+    final_states: Set[AppState] = {FinishedMarketCreationManagerRound, SkippedMarketCreationManagerRound}
     event_to_timeout: EventToTimeout = {}
     cross_period_persisted_keys: Set[str] = {}
     db_pre_conditions: Dict[AppState, Set[str]] = {
@@ -292,4 +293,5 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
         FinishedMarketCreationManagerRound: set(),
+        SkippedMarketCreationManagerRound: set(),
     }
