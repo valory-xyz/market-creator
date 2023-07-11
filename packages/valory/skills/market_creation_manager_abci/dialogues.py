@@ -22,6 +22,7 @@
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
+from typing import Any
 
 from packages.valory.protocols.llm.dialogues import LlmDialogue as BaseLlmDialogue
 from packages.valory.protocols.llm.dialogues import LlmDialogues as BaseLlmDialogues

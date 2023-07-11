@@ -23,10 +23,10 @@ from abc import ABC
 import datetime
 import json
 import random
-from typing import Generator, Set, Type, cast
+from typing import Generator, Set, Type, cast, Optional
 
 from packages.valory.protocols.llm.message import LlmMessage
-from packages.valory.skills.llm_abci.dialogues import LlmDialogue, LlmDialogues
+from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue, LlmDialogues
 from packages.valory.skills.abstract_round_abci.models import Requests
 
 
@@ -95,7 +95,7 @@ INPUT:
 
 OUTPUT_FORMAT:
 * Your output response must be only a single JSON array to be parsed by Python's "json.loads()".
-* The JSON array must be of length 10. 
+* The JSON array must be of length 10.
 * Each entry of the JSON array must be a JSON object containing the fields:
   - question: The binary question to open a prediction market.
   - answers: The possible answers to the question.
@@ -259,7 +259,7 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
 
 
         prompt_template = MARKET_IDENTIFICATION_PROMPT
-        prompt_values = {input_news: input_news}
+        prompt_values = {"input_news": input_news}
 
         self.context.logger.info(
             f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
