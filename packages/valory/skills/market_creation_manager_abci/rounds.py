@@ -52,6 +52,7 @@ class Event(Enum):
     ROUND_TIMEOUT = "round_timeout"
     API_ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
+    MAX_MARKETS_CREATED = "max_markets_created"
 
 
 class SynchronizedData(BaseSynchronizedData):
@@ -70,6 +71,11 @@ class SynchronizedData(BaseSynchronizedData):
     def newsapi_api_retries(self) -> int:
         """Get the amount of API call retries."""
         return cast(int, self.db.get("newsapi_api_retries", 0))
+    
+    @property
+    def markets_created(self) -> int:
+        """Get the amount of API call retries."""
+        return cast(int, self.db.get("markets_created", 0))
 
     @property
     def question_data(self) -> dict:
@@ -93,6 +99,7 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
+    MAX_MARKETS_REACHED = "MAX_MARKETS_REACHED"
 
     payload_class = DataGatheringPayload
     #payload_attribute = "gathered_data"
@@ -124,6 +131,12 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
                 == DataGatheringRound.MAX_RETRIES_PAYLOAD
             ):
                 return self.synchronized_data, Event.DONE
+            
+            if (
+                self.most_voted_payload
+                == DataGatheringRound.MAX_MARKETS_CREATED
+            ):
+                return self.synchronized_data, Event.MAX_MARKETS_CREATED
 
             #TODO convert to JSON at this point? Needs to update SynchronizedData type
             payload = self.most_voted_payload
@@ -134,6 +147,20 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
                     get_name(SynchronizedData.gathered_data): payload,
                 },
             )
+
+            markets_created = cast(
+                SynchronizedData, self.synchronized_data
+            ).markets_created
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(
+                        SynchronizedData.markets_created
+                    ): markets_created
+                    + 1,
+                },
+            )
+
             return synchronized_data, Event.DONE
         
         if not self.is_majority_possible(
@@ -214,6 +241,8 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
 class FinishedMarketCreationManagerRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
+class SkippedMarketCreationManagerRound(DegenerateRound):
+    """SkippedMarketCreationManagerRound"""
 
 class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
@@ -228,6 +257,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         DataGatheringRound: {
             Event.DONE: SelectKeeperRound,
+            Event.MAX_MARKETS_CREATED: SkippedMarketCreationManagerRound,
             Event.API_ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound
