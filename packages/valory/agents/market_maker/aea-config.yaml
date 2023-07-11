@@ -5,13 +5,7 @@ license: Apache-2.0
 description: The market maker agent.
 aea_version: '>=1.19.0, <2.0.0'
 fingerprint:
-  __init__.py: bafybeiguw4i7zplzdw65vdyrtj25rys2hifrzsnt57p32xtrzyzh2l77di
-  tests/__init__.py: bafybeihiyimopudltfy4riab6ariq2ktn6w2fqv77vd5t7k4xr7tlkthya
-  tests/helpers/__init__.py: bafybeif7verbag26h6i35gr5rlatxl7veq4drup5ykwdvhgtussf2jreei
-  tests/helpers/constants.py: bafybeibbokz7gzdlubnjwxrmh4tqckc7j75hfy3ae6l5a63mrbd4hp6l7u
-  tests/helpers/data/json_server/data.json: bafybeics26yd33ng22lhzb3had4eevbfkfdj2jbp3qhvjpygwhkwlzhrq4
-  tests/helpers/docker.py: bafybeibbi6m47mzsl43bmix4k7o7oyekzhzsljuf3dkwk23bfns6k7odkm
-  tests/helpers/fixtures.py: bafybeiarm4ezp54po7nv5m4e2w3eghetma5xymnzgoovvdwh7hp2lcitqu
+  __init__.py: bafybeifamf4vln3qgmifksv5icmhnkelqirbaauehuv5hpsu2twesb2vni
 fingerprint_ignore_patterns: []
 connections:
 - valory/abci:0.1.0:bafybeihofnsokowicviac6yz3uhur52l3mf54s2hz4i2je5ie4vlruouga
@@ -35,12 +29,12 @@ protocols:
 - valory/tendermint:0.1.0:bafybeicusvezoqlmyt6iqomcbwaz3xkhk2qf3d56q5zprmj3xdxfy64k54
 skills:
 - valory/abstract_abci:0.1.0:bafybeiff2dqnkeorf343fmb3547fhiznvdw4ewbwl4rqluek2cv6ibl5hi
-- valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
-- valory/market_maker_abci:0.1.0:bafybeiawhe4uyzqdsgvi2scmnuco6taui7h3cjx4en42jyk7ttdir3lgku
-- valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
-- valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
-- valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
-- valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
+- valory/abstract_round_abci:0.1.0:bafybeihlcferdpjhcorbrgp3zplikxkuxmlx3x7mc4g5sjxxm2mgzryfia
+- valory/market_maker_abci:0.1.0:bafybeigve2rvhtlxer7d33l3fymkivdmcyqrptb3dvo6oxyoxctaadhwoa
+- valory/registration_abci:0.1.0:bafybeift43mkwgakbx4j76lrp6ixqgk33wgy6wti7uoq2evny6h2pewkti
+- valory/reset_pause_abci:0.1.0:bafybeibs25kzoyxcxdnczdvvhnllratimhwuuytgu4zybzkmpglkice4um
+- valory/termination_abci:0.1.0:bafybeibnay7kov2akox6kv3jeyffvzgizeck3eixisprwhb4xmlvnjdo6q
+- valory/transaction_settlement_abci:0.1.0:bafybeiewwmr2bcxcle5x2kxbbpes2xca775kft7bom6pqtocsvfgjnzxbq
 default_ledger: ethereum
 required_ledgers:
 - ethereum
