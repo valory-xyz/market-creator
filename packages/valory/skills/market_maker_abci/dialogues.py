@@ -61,6 +61,12 @@ from packages.valory.skills.abstract_round_abci.dialogues import (
 from packages.valory.skills.abstract_round_abci.dialogues import (
     TendermintDialogues as BaseTendermintDialogues,
 )
+from packages.valory.skills.market_creation_manager_abci.dialogues import (
+    LlmDialogue as BaseLlmDialogue,
+)
+from packages.valory.skills.market_creation_manager_abci.dialogues import (
+    LlmDialogues as BaseLlmDialogues,
+)
 
 
 AbciDialogue = BaseAbciDialogue
@@ -89,3 +95,6 @@ TendermintDialogues = BaseTendermintDialogues
 
 IpfsDialogue = BaseIpfsDialogue
 IpfsDialogues = BaseIpfsDialogues
+
+LlmDialogue = BaseLlmDialogue
+LlmDialogues = BaseLlmDialogues

@@ -19,14 +19,14 @@
 
 """This module contains the dialogues of the MarketCreationManagerAbciApp."""
 
+from typing import Any
+
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
-from typing import Any
 
 from packages.valory.protocols.llm.dialogues import LlmDialogue as BaseLlmDialogue
 from packages.valory.protocols.llm.dialogues import LlmDialogues as BaseLlmDialogues
-
 from packages.valory.skills.abstract_round_abci.dialogues import (
     AbciDialogue as BaseAbciDialogue,
 )

@@ -8,6 +8,7 @@ htmlcov
 *.egg-info
 packages/__pycache__
 packages/valory/connections
+
 packages/valory/contracts/__pycache__
 packages/valory/contracts/gnosis_safe
 packages/valory/contracts/service_registry
@@ -15,7 +16,9 @@ packages/valory/contracts/gnosis_safe_proxy_factory
 packages/valory/contracts/multisend
 packages/valory/contracts/service_registry
 packages/valory/contracts/delegate
+
 packages/valory/protocols
+
 packages/valory/skills/__pycache__
 packages/valory/skills/abstract_abci
 packages/valory/skills/abstract_round_abci
@@ -24,7 +27,8 @@ packages/valory/skills/reset_pause_abci
 packages/valory/skills/termination_abci
 packages/valory/skills/transaction_settlement_abci
 packages/open_aea
-leak_report
-/Pipfile.lock
 
+leak_report
+__pycache__
 temp/
+agent/

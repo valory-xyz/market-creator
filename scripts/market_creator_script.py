@@ -1,14 +1,11 @@
-import requests
-import json
-import openai
-import json
-import random
 import datetime
+import json
 import os
-
-
+import random
 from typing import Any, Dict, List, Optional, Tuple
 
+import openai
+import requests
 
 
 DEFAULT_OPENAI_SETTINGS = {
@@ -17,7 +14,7 @@ DEFAULT_OPENAI_SETTINGS = {
 }
 
 TOOL_TO_ENGINE = {
-    #"market-creator": "gpt-3.5-turbo",
+    # "market-creator": "gpt-3.5-turbo",
     "market-creator": "gpt-4",
 }
 
@@ -79,9 +76,7 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
 
     newsapi_url = "https://newsapi.org/v2/everything"
 
-    newsapi_headers = headers = {
-        'X-Api-Key': newsapi_api_key
-    }
+    newsapi_headers = headers = {"X-Api-Key": newsapi_api_key}
 
     today = datetime.date.today()
     from_date = today - datetime.timedelta(days=7)
@@ -99,21 +94,19 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     data = response.json()
 
     # Create the string with the desired format
-    articles = data['articles']
+    articles = data["articles"]
     random.shuffle(articles)
     articles = articles[:20]
 
-    input_news = ''
+    input_news = ""
     for article in articles:
-        title = article['title']
-        content = article['content']
-        date = article['publishedAt']
+        title = article["title"]
+        content = article["content"]
+        date = article["publishedAt"]
         input_news += f"- ({date}) {title}\n  {content}\n\n"
 
     market_creation_prompt = MARKET_CREATION_PROMPT.format(
-        input_news=input_news,
-        from_date=from_date,
-        to_date=to_date
+        input_news=input_news, from_date=from_date, to_date=to_date
     )
 
     print(market_creation_prompt)
@@ -143,15 +136,14 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     return response.choices[0].message.content, None
 
 
-
-#Testing the script
-openai_api_key = os.environ.get('OPENAI_API_KEY')
-newsapi_api_key = os.environ.get('NEWSAPI_API_KEY')
+# Testing the script
+openai_api_key = os.environ.get("OPENAI_API_KEY")
+newsapi_api_key = os.environ.get("NEWSAPI_API_KEY")
 
 kwargs = {
     "prompt": "unused",
     "tool": "market-creator",
-    "api_keys": {"openai": openai_api_key, "newsapi": newsapi_api_key}
+    "api_keys": {"openai": openai_api_key, "newsapi": newsapi_api_key},
 }
 
 run(**kwargs)

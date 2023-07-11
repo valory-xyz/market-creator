@@ -24,9 +24,10 @@ from packages.valory.skills.abstract_round_abci.abci_app_chain import (
     chain,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
-    MarketCreationManagerAbciApp,
     CollectRandomnessRound,
     DataGatheringRound,
+    FinishedMarketCreationManagerRound,
+    MarketCreationManagerAbciApp,
     MarketIdentificationRound,
     PrepareTransactionRound,
     FinishedMarketCreationManagerRound,
