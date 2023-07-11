@@ -20,8 +20,8 @@
 """This package contains the rounds of MarketCreationManagerAbciApp."""
 
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
-
+from typing import Dict, List, Optional, Set, Tuple, cast
+import json
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
     AbciAppTransitionFunction,
@@ -29,6 +29,7 @@ from packages.valory.skills.abstract_round_abci.base import (
     AppState,
     BaseSynchronizedData,
     CollectSameUntilThresholdRound,
+    OnlyKeeperSendsRound,
     DegenerateRound,
     EventToTimeout,
     get_name
@@ -50,6 +51,7 @@ class Event(Enum):
     DONE = "done"
     ROUND_TIMEOUT = "round_timeout"
     API_ERROR = "api_error"
+    DID_NOT_SEND = "did_not_send"
 
 
 class SynchronizedData(BaseSynchronizedData):
@@ -58,6 +60,11 @@ class SynchronizedData(BaseSynchronizedData):
 
     This data is replicated by the tendermint application.
     """
+
+    @property
+    def question_data(self) -> dict:
+        """Get the question_data."""
+        return cast(dict, self.db.get_strict("question_data"))
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -83,7 +90,7 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
 
 class SelectKeeperRound(CollectSameUntilThresholdRound):
     """A round in a which keeper is selected"""
-    
+
     payload_class = SelectKeeperPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
@@ -92,7 +99,7 @@ class SelectKeeperRound(CollectSameUntilThresholdRound):
     selection_key = get_name(SynchronizedData.most_voted_keeper_address)
 
 
-class MarketIdentificationRound(CollectSameUntilThresholdRound):
+class MarketIdentificationRound(OnlyKeeperSendsRound):
     """MarketIdentificationRound"""
 
     payload_class = MarketIdentificationPayload
@@ -100,6 +107,43 @@ class MarketIdentificationRound(CollectSameUntilThresholdRound):
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
+
+    ERROR_PAYLOAD = "error"
+
+    def end_block(
+        self,
+    ) -> Optional[
+        Tuple[BaseSynchronizedData, Enum]
+    ]:  # pylint: disable=too-many-return-statements
+        """Process the end of the block."""
+        if self.keeper_payload is None:
+            return None
+
+        # Keeper did not send
+        if self.keeper_payload is None:  # pragma: no cover
+            return self.synchronized_data, Event.DID_NOT_SEND
+
+        # API error
+        if (
+            cast(MarketIdentificationPayload, self.keeper_payload).content
+            == self.ERROR_PAYLOAD
+        ):
+            return self.synchronized_data, Event.API_ERROR
+
+        # Happy path
+        llm_response = json.loads(cast(MarketIdentificationPayload, self.keeper_payload).content)  # there could be problems loading this from the LLM response
+        question_data = llm_response[0]  # Get the first question
+
+        synchronized_data = self.synchronized_data.update(
+            synchronized_data_class=SynchronizedData,
+            **{
+                get_name(
+                    SynchronizedData.question_data
+                ): question_data,
+            }
+        )
+
+        return synchronized_data, Event.DONE
 
 
 
@@ -137,11 +181,13 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.DONE: MarketIdentificationRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound
-        },        
+        },
         MarketIdentificationRound: {
             Event.DONE: PrepareTransactionRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.DID_NOT_SEND: CollectRandomnessRound,
+            Event.API_ERROR: CollectRandomnessRound,
         },
         PrepareTransactionRound: {
             Event.DONE: FinishedMarketCreationManagerRound,
