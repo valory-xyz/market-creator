@@ -8,27 +8,24 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeighu2gs3dhms32cdajklf36wmsi4z347wlwiw4dg3uvje47v2zh5a
-  behaviours.py: bafybeigx76ejcsvlpsqkd4v2ana6tlir3plss4zagxus5ar7smvinotjhi
-  composition.py: bafybeiamj2il5sioaejefddsmm73zurwmgohszzuolf6uf5jja6g2ogfjy
-  dialogues.py: bafybeigabhaykiyzbluu4mk6bbrmqhzld2kyp32pg24bvjmzrrb74einwm
+  behaviours.py: bafybeianp3tdiev4rg7q3sg6fpc2mda3vdpat2yprnextrxxxoxp4ld674
+  composition.py: bafybeibtvudaoqcbkprusuferkhgst4apcss3jfdluxk36lgmwlefkgk3e
+  dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeicvtoez7ahmyl25h66edgjywx5ymxtqnyexzq73ouyu2p6smi3uoa
-  handlers.py: bafybeifcsb46xvr5rhl72qc2pywgckucktf27fba6uisvzqsnueafuht7a
-  models.py: bafybeifq3gzmzyhnnemwr75bcelipgacf2bp54gvkl34kz5r2l5adlbxke
+  handlers.py: bafybeietmks2uhnc7cuskzaksvv5hix5vj2crl67pvuzqn7wca4atzwixu
+  models.py: bafybeieagk5wihiorhd3nzqgyq7g735ww2bltg7olpkzmstxu2mjkeuazu
   tests/__init__.py: bafybeia2oc2rlsm3kjz74t2obgnhueb6xilx6r5eeairy3l2xqnb5lrdbu
 fingerprint_ignore_patterns: []
-connections:
-- valory/ledger:0.19.0:bafybeicgfupeudtmvehbwziqfxiz6ztsxr5rxzvalzvsdsspzz73o5fzfi
+connections: []
 contracts: []
-protocols:
-- open_aea/signing:1.0.0:bafybeibqlfmikg5hk4phzak6gqzhpkt6akckx7xppbp53mvwt6r73h7tk4
-- valory/contract_api:1.0.0:bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy
-- valory/ledger_api:1.0.0:bafybeibo4bdtcrxi2suyzldwoetjar6pqfzm6vt5xal22ravkkcvdmtksi
+protocols: []
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeihlcferdpjhcorbrgp3zplikxkuxmlx3x7mc4g5sjxxm2mgzryfia
-- valory/registration_abci:0.1.0:bafybeift43mkwgakbx4j76lrp6ixqgk33wgy6wti7uoq2evny6h2pewkti
-- valory/reset_pause_abci:0.1.0:bafybeibs25kzoyxcxdnczdvvhnllratimhwuuytgu4zybzkmpglkice4um
-- valory/termination_abci:0.1.0:bafybeibnay7kov2akox6kv3jeyffvzgizeck3eixisprwhb4xmlvnjdo6q
-- valory/transaction_settlement_abci:0.1.0:bafybeiewwmr2bcxcle5x2kxbbpes2xca775kft7bom6pqtocsvfgjnzxbq
+- valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
+- valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
+- valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
+- valory/market_creation_manager_abci:0.1.0:bafybeiaavgaguxo5rydbgw6xdsdhbiz2hg7s3aurc34pi6xoeg36yqi4lm
+- valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
+- valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
 behaviours:
   main:
     args: {}
@@ -55,6 +52,9 @@ handlers:
   tendermint:
     args: {}
     class_name: TendermintHandler
+  llm:
+    args: {}
+    class_name: LlmHandler
 models:
   abci_dialogues:
     args: {}
@@ -75,8 +75,12 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
+  llm_dialogues:
+    args: {}
+    class_name: LlmDialogues
   params:
     args:
+      newsapi_endpoint: https://newsapi.org/v2/everything
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       broadcast_to_server: false
       cleanup_history_depth: 1
@@ -132,8 +136,8 @@ models:
       tendermint_url: http://localhost:26657
       termination_sleep: 900
       tx_timeout: 10.0
-      use_termination: false
       validate_timeout: 1205
+      use_termination: false
     class_name: Params
   randomness_api:
     args:
@@ -160,5 +164,5 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.10.6
+    version: ==0.10.7
 is_abstract: false
