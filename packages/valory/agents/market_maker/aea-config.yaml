@@ -29,12 +29,13 @@ protocols:
 - valory/tendermint:0.1.0:bafybeicusvezoqlmyt6iqomcbwaz3xkhk2qf3d56q5zprmj3xdxfy64k54
 skills:
 - valory/abstract_abci:0.1.0:bafybeiff2dqnkeorf343fmb3547fhiznvdw4ewbwl4rqluek2cv6ibl5hi
-- valory/abstract_round_abci:0.1.0:bafybeihlcferdpjhcorbrgp3zplikxkuxmlx3x7mc4g5sjxxm2mgzryfia
-- valory/market_maker_abci:0.1.0:bafybeigve2rvhtlxer7d33l3fymkivdmcyqrptb3dvo6oxyoxctaadhwoa
-- valory/registration_abci:0.1.0:bafybeift43mkwgakbx4j76lrp6ixqgk33wgy6wti7uoq2evny6h2pewkti
-- valory/reset_pause_abci:0.1.0:bafybeibs25kzoyxcxdnczdvvhnllratimhwuuytgu4zybzkmpglkice4um
-- valory/termination_abci:0.1.0:bafybeibnay7kov2akox6kv3jeyffvzgizeck3eixisprwhb4xmlvnjdo6q
-- valory/transaction_settlement_abci:0.1.0:bafybeiewwmr2bcxcle5x2kxbbpes2xca775kft7bom6pqtocsvfgjnzxbq
+- valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
+- valory/market_maker_abci:0.1.0:bafybeienmssl5v4uaderoz2sfr2s7w7dc7hrjgqrcgblxutezjbl33zdrm
+- valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
+- valory/market_creation_manager_abci:0.1.0:bafybeic65muygsisuorxyhmtndjao2yiej53zt4venxl5u5lsubjsgl4pm
+- valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
+- valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
+- valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -83,8 +84,8 @@ type: connection
 config:
   ledger_apis:
     ethereum:
-      address: ${str:http://localhost:8545}
-      chain_id: ${int:1}
+      address: ${str:https://rpc.gnosischain.com}
+      chain_id: ${int:100}
       poa_chain: ${bool:false}
       default_gas_price_strategy: ${str:eip1559}
 ---

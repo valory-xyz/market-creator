@@ -29,7 +29,9 @@ from packages.valory.skills.abstract_round_abci.models import Requests as BaseRe
 from packages.valory.skills.abstract_round_abci.models import (
     SharedState as BaseSharedState,
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import MarketCreationManagerAbciApp
+from packages.valory.skills.market_creation_manager_abci.rounds import (
+    MarketCreationManagerAbciApp,
+)
 
 
 class SharedState(BaseSharedState):
@@ -46,7 +48,9 @@ class MarketCreationManagerParams(BaseParams):
 
         self.newsapi_api_key = kwargs.get("newsapi_api_key")
         self.newsapi_endpoint = kwargs.get("newsapi_endpoint")
+        self.multisend_address = kwargs.get("multisend_address", None)
         super().__init__(*args, **kwargs)
+
 
 class RandomnessApi(ApiSpecs):
     """A model for randomness api specifications."""
