@@ -19,7 +19,6 @@
 
 """This package contains the rounds of MarketCreationManagerAbciApp."""
 
-from ctypes import cast
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, cast
 import json
