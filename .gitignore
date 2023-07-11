@@ -26,3 +26,5 @@ packages/valory/skills/transaction_settlement_abci
 packages/open_aea
 leak_report
 /Pipfile.lock
+
+temp/
