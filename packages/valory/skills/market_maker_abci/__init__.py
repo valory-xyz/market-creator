@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contains the ABCI cryptocurrency oracle skill for an AEA.
+This module contains the ABCI skill for the market maker.
 
 It does so through aggregation of observations from different sources.
 """
