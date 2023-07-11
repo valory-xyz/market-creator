@@ -1,0 +1,115 @@
+name: market-maker
+author: valory
+version: 0.1.0
+description: The market maker service.
+aea_version: '>=1.0.0, <2.0.0'
+license: Apache-2.0
+fingerprint:
+  README.md: bafybeifvddbrix4wlzp5mfaxjg7bargwbcqxjdfvaz5tctxfvzowggkusu
+fingerprint_ignore_patterns: []
+agent: valory/market_maker:0.1.0:bafybeibf7bj3i7ecsy7iyjmam7xvrimdyflfju63xspg4k3ya2nvf24cy4
+number_of_agents: 1
+deployment:
+  agent:
+    ports:
+      0:
+        8000: 8000
+---
+public_id: valory/market_maker_abci:0.1.0
+type: skill
+models:
+  benchmark_tool:
+    args:
+      log_dir: /logs
+  params:
+    args:
+      cleanup_history_depth: 1
+      cleanup_history_depth_current: null
+      drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
+      finalize_timeout: 60.0
+      genesis_config:
+        genesis_time: '2022-09-26T00:00:00.000000000Z'
+        chain_id: chain-c4daS1
+        consensus_params:
+          block:
+            max_bytes: '22020096'
+            max_gas: '-1'
+            time_iota_ms: '1000'
+          evidence:
+            max_age_num_blocks: '100000'
+            max_age_duration: '172800000000000'
+            max_bytes: '1048576'
+          validator:
+            pub_key_types:
+            - ed25519
+          version: {}
+        voting_power: '10'
+      history_check_timeout: 1205
+      init_fallback_gas: 0
+      keeper_allowed_retries: 3
+      keeper_timeout: 30.0
+      max_attempts: 10
+      max_healthcheck: 120
+      on_chain_service_id: null
+      reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:30}
+      retry_attempts: 400
+      retry_timeout: 3
+      reset_pause_duration: ${RESET_PAUSE_DURATION:int:10}
+      request_retry_delay: 1.0
+      request_timeout: 10.0
+      round_timeout_seconds: 30.0
+      service_id: market_maker
+      service_registry_address: null
+      setup:
+        all_participants:
+        - '0xBfE475AF374AB552ff22F995b8732DFee25694ea'
+        safe_contract_address: '0x7b2a08Fae878E88efE0aa82599C167E9B0e9BdC4'
+        consensus_threshold: null
+      share_tm_config_on_startup: ${USE_ACN:bool:false}
+      sleep_time: 1
+      tendermint_check_sleep_delay: 3
+      tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
+      tendermint_max_retries: 5
+      tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
+      tendermint_p2p_url: localhost:26656
+      tx_timeout: 10.0
+      use_termination: ${USE_TERMINATION:bool:false}
+      validate_timeout: 1205
+      multisend_address: ${MULTISEND_ADDRESS:str:0x0000000000000000000000000000000000000000}
+      num_markets: ${NUM_MARKETS:int:1}
+      newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/everything}
+      newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
+
+---
+public_id: valory/ledger:0.19.0
+type: connection
+config:
+  ledger_apis:
+    ethereum:
+      address: ${ETHEREUM_LEDGER_RPC:str:http://host.docker.internal:8545}
+      chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
+      poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
+      default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+---
+public_id: valory/openai:0.1.0
+type: connection
+config:
+  engine: ${ENGINE:str:text-davinci-003}
+  max_tokens: ${MAX_TOKENS:int:500}
+  openai_api_key: ${OPENAI_API_KEY:str:null}
+  temperature: ${TEMPERATURE:float:0.7}
+---
+public_id: valory/p2p_libp2p_client:0.1.0
+type: connection
+config:
+  nodes:
+  - uri: ${ACN_URI:str:acn.staging.autonolas.tech:9005}
+    public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
+cert_requests:
+- identifier: acn
+  ledger_id: ethereum
+  message_format: '{public_key}'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
+  public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
+  save_path: .certs/acn_cosmos_11000.txt

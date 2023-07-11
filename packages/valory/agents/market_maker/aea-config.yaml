@@ -121,7 +121,7 @@ models:
       log_dir: ${str:/logs}
   params:
     args:
-      num_markets: 1
+      num_markets: ${int:1}
       newsapi_endpoint: ${str:https://newsapi.org/v2/everything}
       newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
       multisend_address: ${str:0x0000000000000000000000000000000000000000}
