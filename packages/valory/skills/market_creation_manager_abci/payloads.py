@@ -38,11 +38,13 @@ class DataGatheringPayload(BaseTxPayload):
 
     gathered_data: str
 
+
 @dataclass(frozen=True)
 class SelectKeeperPayload(BaseTxPayload):
     """Represent a transaction payload of type 'select_keeper'."""
 
     keeper: str
+
 
 @dataclass(frozen=True)
 class MarketIdentificationPayload(BaseTxPayload):
@@ -56,4 +58,3 @@ class PrepareTransactionPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 
     content: str
-

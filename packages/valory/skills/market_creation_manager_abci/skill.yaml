@@ -7,22 +7,31 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
-  __init__.py: bafybeifotgt5johrebg3iaokvi5jkfiy3mk5dtkfyuersobinhzxp3ilba
-  behaviours.py: bafybeid5znpptplr22q2lawr2ri6vpnykepftsvr6sj37hm6z5y4wwqduu
-  dialogues.py: bafybeibiklamb4pf32ojme7cxnf6jlmlkf54phrnuyv77nhvykkcmktnke
+  __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
+  behaviours.py: bafybeidxzwgb7j3klbllglg3yn6ob2jp67o7ay5w34a76iiu3jkkuwhjiq
+  dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiacanirz5htb7uieurfjqbssdn7j73qkse77ype56fqxaxe34nm4e
-  handlers.py: bafybeihteow3fq4pt23ivbdoxsnyilvyvtr5uakz42dkyltvgik5zkrshe
-  models.py: bafybeidpe2w3un7ds4rhlzvxgxhlitkngiwcydsp4674mhpnweazogy4ji
-  payloads.py: bafybeigiwevmsujskfpgyplg6ss45ckfx77i4bu63g7dnxzna2kwdhteh4
-  rounds.py: bafybeieqhbzvhdmtxxssihpewibj6siqefukq5ms7cu75stsr2jk2dqhpm
-  tests/__init__.py: bafybeic3534aro4pdtsdcuxywzlgkccczx2elhnwisiq3r6okvnrdu4aia
+  handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
+  models.py: bafybeidvcnuqgs3kknamhagvf72vhr3rlc5gb4jdfv3cyenoaworarvqii
+  payloads.py: bafybeigqc6yzvpw6k5vqnwy2zaixnzp2obafedmw5muaggn6m7hzeeqwii
+  rounds.py: bafybeihi77sfixllbo6oezzjtaot3pq6zdzmwafiquckszijr3m3dpvnfi
+  tests/__init__.py: bafybeic6evwhxdwtdjvz7xv3dqqhdhd7uxyr55xhymeiqfe4ga7mfdptxm
 fingerprint_ignore_patterns: []
 connections:
-- valory/openai:0.1.0:bafybeietimatztynqebwicxabplia6fctov4vswzbdrin5y32brbjewo2y
-contracts: []
-protocols: []
+- valory/openai:0.1.0:bafybeigtzv2wjlvx2gygi4ibja43zkdozla63javvhje7qpbfrltygmqtu
+contracts:
+- valory/delegate:0.1.0:bafybeiaslboosyvpzccaqgie56wta3aqrdkgfx5vs5ogxu7ebiez67wp6i
+- valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
+- valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
+- valory/realtio:0.1.0:bafybeiaxbtv5r72rbzztx3glfl4u3xr54nxhg2ten3z3pzbtvwo2tbdzsm
+- valory/conditional_tokens:0.1.0:bafybeig7cc63uvo6lv5mfv5fzga2evr3plozxdobnovanqmckdhenx45hm
+- valory/fpmm_deterministic_factory:0.1.0:bafybeifpnalylp4cjhruieqfxsj7sop5bgzdgumvik7akruhdil5ev2yzi
+protocols:
+- valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
+- valory/contract_api:1.0.0:bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeihlcferdpjhcorbrgp3zplikxkuxmlx3x7mc4g5sjxxm2mgzryfia
+- valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
+- valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
 behaviours:
   main:
     args: {}
@@ -34,9 +43,6 @@ handlers:
   contract_api:
     args: {}
     class_name: ContractApiHandler
-  http:
-    args: {}
-    class_name: HttpHandler
   ipfs:
     args: {}
     class_name: IpfsHandler
@@ -49,6 +55,9 @@ handlers:
   tendermint:
     args: {}
     class_name: TendermintHandler
+  llm:
+    args: {}
+    class_name: LlmHandler
 models:
   abci_dialogues:
     args: {}
@@ -69,10 +78,13 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
+  llm_dialogues:
+    args: {}
+    class_name: LlmDialogues
   params:
     args:
       newsapi_endpoint: https://newsapi.org/v2/everything
-      newsapi_api_key: 0
+      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       cleanup_history_depth: 1
       cleanup_history_depth_current: null
       drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
@@ -100,6 +112,7 @@ models:
       keeper_timeout: 30.0
       max_attempts: 10
       max_healthcheck: 120
+      multisend_address: '0x0000000000000000000000000000000000000000'
       on_chain_service_id: null
       request_retry_delay: 1.0
       request_timeout: 10.0
@@ -124,7 +137,8 @@ models:
       tendermint_url: http://localhost:26657
       tx_timeout: 10.0
       validate_timeout: 1205
-    class_name: Params
+      use_termination: false
+    class_name: MarketCreationManagerParams
   randomness_api:
     args:
       api_id: cloudflare
@@ -149,4 +163,4 @@ models:
     args: {}
     class_name: TendermintDialogues
 dependencies: {}
-is_abstract: false
+is_abstract: true

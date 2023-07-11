@@ -19,28 +19,27 @@
 
 """This package contains the rounds of MarketCreationManagerAbciApp."""
 
-from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple, cast
 import json
+from enum import Enum
+from typing import Dict, Optional, Set, Tuple, cast
+
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
     AbciAppTransitionFunction,
-    AbstractRound,
     AppState,
     BaseSynchronizedData,
     CollectSameUntilThresholdRound,
-    OnlyKeeperSendsRound,
     DegenerateRound,
     EventToTimeout,
-    get_name
+    OnlyKeeperSendsRound,
+    get_name,
 )
-
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectRandomnessPayload,
     DataGatheringPayload,
-    SelectKeeperPayload,
     MarketIdentificationPayload,
     PrepareTransactionPayload,
+    SelectKeeperPayload,
 )
 
 
@@ -66,6 +65,11 @@ class SynchronizedData(BaseSynchronizedData):
         """Get the question_data."""
         return cast(dict, self.db.get_strict("question_data"))
 
+    @property
+    def gathered_data(self) -> dict:
+        """Get the question_data."""
+        return cast(dict, self.db.get_strict("gathered_data"))
+
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
     """A round for generating collecting randomness"""
@@ -86,6 +90,8 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
+    selection_key = get_name(SynchronizedData.gathered_data)
+    collection_key = "articles"
 
 
 class SelectKeeperRound(CollectSameUntilThresholdRound):
@@ -131,20 +137,18 @@ class MarketIdentificationRound(OnlyKeeperSendsRound):
             return self.synchronized_data, Event.API_ERROR
 
         # Happy path
-        llm_response = json.loads(cast(MarketIdentificationPayload, self.keeper_payload).content)  # there could be problems loading this from the LLM response
-        question_data = llm_response[0]  # Get the first question
+        question_data = json.loads(
+            cast(MarketIdentificationPayload, self.keeper_payload).content
+        )  # there could be problems loading this from the LLM response
 
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
             **{
-                get_name(
-                    SynchronizedData.question_data
-                ): question_data,
+                get_name(SynchronizedData.question_data): question_data,
             }
         )
 
         return synchronized_data, Event.DONE
-
 
 
 class PrepareTransactionRound(CollectSameUntilThresholdRound):
@@ -170,17 +174,17 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         CollectRandomnessRound: {
             Event.DONE: DataGatheringRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         DataGatheringRound: {
             Event.DONE: SelectKeeperRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         SelectKeeperRound: {
             Event.DONE: MarketIdentificationRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         MarketIdentificationRound: {
             Event.DONE: PrepareTransactionRound,
@@ -192,16 +196,16 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         PrepareTransactionRound: {
             Event.DONE: FinishedMarketCreationManagerRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
-        FinishedMarketCreationManagerRound: {}
+        FinishedMarketCreationManagerRound: {},
     }
     final_states: Set[AppState] = {FinishedMarketCreationManagerRound}
     event_to_timeout: EventToTimeout = {}
-    cross_period_persisted_keys: Set[str] = []
+    cross_period_persisted_keys: Set[str] = {}
     db_pre_conditions: Dict[AppState, Set[str]] = {
-        CollectRandomnessRound: [],
+        CollectRandomnessRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
-        FinishedMarketCreationManagerRound: [],
+        FinishedMarketCreationManagerRound: set(),
     }
