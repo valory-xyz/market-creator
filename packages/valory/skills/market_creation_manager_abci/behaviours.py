@@ -136,7 +136,12 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            gathered_data = yield from  self._gather_data()
+            
+            if self.synchronized_data.markets_created < self.params.num_markets:
+                gathered_data = yield from  self._gather_data()
+            else:
+                gathered_data = DataGatheringRound.MAX_MARKETS_CREATED
+
             payload = DataGatheringPayload(sender=sender, gathered_data=gathered_data)
 
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():

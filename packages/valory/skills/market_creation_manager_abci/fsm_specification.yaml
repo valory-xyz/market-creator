@@ -3,9 +3,11 @@ alphabet_in:
 - NO_MAJORITY
 - ROUND_TIMEOUT
 - API_ERROR
+- MAX_MARKETS_CREATED
 default_start_state: CollectRandomnessRound
 final_states:
 - FinishedMarketCreationManagerRound
+- SkippedMarketCreationManagerRound
 label: MarketCreationManagerAbciApp
 start_states:
 - CollectRandomnessRound
@@ -16,11 +18,13 @@ states:
 - MarketIdentificationRound
 - PrepareTransactionRound
 - FinishedMarketCreationManagerRound
+- SkippedMarketCreationManagerRound
 transition_func:
     (CollectRandomnessRound, DONE): DataGatheringRound
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
     (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
     (DataGatheringRound, DONE): SelectKeeperRound
+    (DataGatheringRound, MAX_MARKETS_CREATED): SelectKeeperRound    
     (DataGatheringRound, API_ERROR): CollectRandomnessRound
     (DataGatheringRound, NO_MAJORITY): CollectRandomnessRound
     (DataGatheringRound, ROUND_TIMEOUT): CollectRandomnessRound

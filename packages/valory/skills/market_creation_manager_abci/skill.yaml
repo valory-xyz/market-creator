@@ -71,6 +71,7 @@ models:
     class_name: LedgerApiDialogues
   params:
     args:
+      num_markets: 1
       newsapi_endpoint: https://newsapi.org/v2/everything
       newsapi_api_key: 0
       cleanup_history_depth: 1
