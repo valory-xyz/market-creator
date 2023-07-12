@@ -32,3 +32,4 @@ leak_report
 __pycache__
 temp/
 agent/
+.env
