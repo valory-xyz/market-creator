@@ -19,7 +19,6 @@
 
 """This module contains the scaffold contract definition."""
 
-
 from typing import Any, List
 
 from aea.common import JSONLike

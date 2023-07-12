@@ -17,7 +17,7 @@ contracts:
 - valory/delegate:0.1.0:bafybeiaslboosyvpzccaqgie56wta3aqrdkgfx5vs5ogxu7ebiez67wp6i
 - valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeiaa6fgwtykrti6i7sbt22raavpsbobsq2xgem4nkbcg744agnmkae
-- valory/realtio:0.1.0:bafybeiaxbtv5r72rbzztx3glfl4u3xr54nxhg2ten3z3pzbtvwo2tbdzsm
+- valory/realtio:0.1.0:bafybeigdbw7ruum264ixwn5fvnww345k4exzeqtdienrk343744d43lxv4
 - valory/conditional_tokens:0.1.0:bafybeig7cc63uvo6lv5mfv5fzga2evr3plozxdobnovanqmckdhenx45hm
 - valory/fpmm_deterministic_factory:0.1.0:bafybeifpnalylp4cjhruieqfxsj7sop5bgzdgumvik7akruhdil5ev2yzi
 protocols:
@@ -33,9 +33,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiff2dqnkeorf343fmb3547fhiznvdw4ewbwl4rqluek2cv6ibl5hi
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
-- valory/market_maker_abci:0.1.0:bafybeihmqdttgpbfv4ulddwv5dohjpgq3majyaxu4t3hoprivrz74buo3a
+- valory/market_maker_abci:0.1.0:bafybeihyavv4ak6atgevpnm3alf4d5mi6arcu2dpvu5ihqtclsds65cjzi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
-- valory/market_creation_manager_abci:0.1.0:bafybeiaavgaguxo5rydbgw6xdsdhbiz2hg7s3aurc34pi6xoeg36yqi4lm
+- valory/market_creation_manager_abci:0.1.0:bafybeib53hixdshmjbjto2exg4p43oeoopaszq6xgsmbjuzohz4pm4un4q
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
@@ -124,6 +124,9 @@ models:
       log_dir: ${str:/logs}
   params:
     args:
+      num_markets: ${int:1}
+      newsapi_endpoint: ${str:https://newsapi.org/v2/everything}
+      newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
       multisend_address: ${str:0x0000000000000000000000000000000000000000}
       on_chain_service_id: ${int:null}
       reset_tendermint_after: ${int:2}

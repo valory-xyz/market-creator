@@ -182,16 +182,18 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            gathered_data = yield from self._gather_data()
+            if self.synchronized_data.markets_created < self.params.num_markets:
+                gathered_data = yield from self._gather_data()
+            else:
+                gathered_data = DataGatheringRound.MAX_MARKETS_REACHED
             payload = DataGatheringPayload(sender=sender, gathered_data=gathered_data)
-
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
 
         self.set_done()
 
-    def _gather_data(self) -> Generator:
+    def _gather_data(self) -> Generator[None, None, str]:
         """Auxiliary method to collect data from endpoint."""
         headers = {"X-Api-Key": self.params.newsapi_api_key}
         today = datetime.date.today()
@@ -215,12 +217,19 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Could not retrieve response from {self.params.newsapi_endpoint}."
                 f"Received status code {response.status_code}.\n{response}"
             )
-            # TODO Error handling.
-            return json.dumps({})
-        return response.body.decode()
+            retries = self.synchronized_data.newsapi_endpoint_retries + 1
+            if retries >= MAX_RETRIES:
+                return DataGatheringRound.MAX_RETRIES_PAYLOAD
+            return DataGatheringRound.ERROR_PAYLOAD
+
+        response_data = json.loads(response.body.decode())
+        self.context.logger.info(
+            f"Response received from {self.params.newsapi_endpoint}:\n {response_data}"
+        )
+        return json.dumps(response_data, sort_keys=True)
 
 
-class SelectKeeperOracleBehaviour(SelectKeeperBehaviour):
+class SelectKeeperMarketIdentificationBehaviour(SelectKeeperBehaviour):
     """Select the keeper agent."""
 
     matching_round = SelectKeeperRound
@@ -282,7 +291,6 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
 
     def _get_llm_response(self) -> Generator[None, None, Optional[dict]]:
         """Get the LLM response"""
-
         data = json.loads(self.synchronized_data.gathered_data)
         articles = data["articles"]
         random.seed(self.synchronized_data.most_voted_randomness, 2)  # nosec
@@ -297,7 +305,6 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
 
         prompt_template = MARKET_IDENTIFICATION_PROMPT
         prompt_values = {"input_news": input_news}
-
         self.context.logger.info(
             f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
         )
@@ -464,7 +471,6 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 f"get_ask_question_tx_data unsuccessful!: {response}"
             )
             return None
-
         return {
             "to": REALTIO_XDAI,
             "value": ETHER_VALUE,
@@ -659,8 +665,8 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     abci_app_cls = MarketCreationManagerAbciApp  # type: ignore
     behaviours: Set[Type[BaseBehaviour]] = {
         CollectRandomnessBehaviour,
-        SelectKeeperOracleBehaviour,
         DataGatheringBehaviour,
+        SelectKeeperMarketIdentificationBehaviour,
         MarketIdentificationBehaviour,
         PrepareTransactionBehaviour,
     }

@@ -48,6 +48,7 @@ class MarketCreationManagerParams(BaseParams):
 
         self.newsapi_api_key = kwargs.get("newsapi_api_key")
         self.newsapi_endpoint = kwargs.get("newsapi_endpoint")
+        self.num_markets = kwargs.get("num_markets")
         self.multisend_address = kwargs.get("multisend_address", None)
         super().__init__(*args, **kwargs)
 

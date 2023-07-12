@@ -20,6 +20,7 @@
 """Script for creating market creator."""
 
 import datetime
+import json
 import os
 import random
 from typing import Any, Dict, Optional, Tuple
@@ -95,7 +96,7 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
 
     newsapi_url = "https://newsapi.org/v2/everything"
 
-    newsapi_headers = {"X-Api-Key": newsapi_api_key}
+    newsapi_headers = headers = {"X-Api-Key": newsapi_api_key}
 
     today = datetime.date.today()
     from_date = today - datetime.timedelta(days=7)
@@ -111,6 +112,8 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
 
     response = requests.get(newsapi_url, params=params, headers=newsapi_headers)
     data = response.json()
+
+    print(data)
 
     # Create the string with the desired format
     articles = data["articles"]
