@@ -161,7 +161,9 @@ class RealtioContract(Contract):
         kwargs = {
             "template_id": template_id,
             "question": question,
-            "arbitrator": ledger_api.api.to_checksum_address(KLEROS_BRIDGE_XDAI),
+            "arbitrator": ledger_api.api.to_checksum_address(
+                KLEROS_BRIDGE_XDAI
+            ),  # TODO: Make configurable
             "timeout": timeout,
             "opening_ts": opening_timestamp,
             "nonce": question_nonce,
@@ -180,23 +182,26 @@ class RealtioContract(Contract):
         question_data: QuestionData,
         opening_timestamp: int,
         timeout: int,
+        sender: str,
         template_id: int = 2,
         question_nonce: int = 0,
     ) -> JSONLike:
         """Get ask question transaction."""
         question = build_question(question_data=question_data)
-        kwargs = {
-            "template_id": template_id,
-            "question": question,
-            "arbitrator": ledger_api.api.to_checksum_address(KLEROS_BRIDGE_XDAI),
-            "timeout": timeout,
-            "opening_ts": opening_timestamp,
-            "nonce": question_nonce,
-        }
-        contract_instance = cls.get_instance(
-            ledger_api=ledger_api, contract_address=contract_address
+        content_hash = ledger_api.api.solidity_keccak(
+            ["uint256", "uint32", "string"],
+            [template_id, opening_timestamp, question],
         )
-        return {
-            "question_id": "0x"
-            + contract_instance.functions.askQuestion(**kwargs).call().hex()
-        }
+        question_id = ledger_api.api.solidity_keccak(
+            ["bytes32", "address", "uint32", "address", "uint256"],
+            [
+                content_hash,
+                ledger_api.api.to_checksum_address(
+                    KLEROS_BRIDGE_XDAI
+                ),  # TODO: make configurable
+                timeout,
+                ledger_api.api.to_checksum_address(sender),
+                question_nonce,
+            ],
+        )
+        return {"question_id": question_id.hex()}
