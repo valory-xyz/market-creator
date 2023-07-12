@@ -92,7 +92,7 @@ class FPMMDeterministicFactory(Contract):
         raise NotImplementedError
 
     @classmethod
-    def create_fpmm_tx(
+    def get_create_fpmm_tx(
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
@@ -122,3 +122,38 @@ class FPMMDeterministicFactory(Contract):
             method_name="create2FixedProductMarketMaker",
             method_args=kwargs,
         )
+
+    @classmethod
+    def get_create_fpmm_tx_data(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        condition_id: str,
+        initial_funds: int,
+        market_fee: float = DEFAULT_MARKET_FEE,
+    ) -> JSONLike:
+        """Create FPMM tx"""
+        kwargs = {
+            "saltNonce": random.randint(
+                0, 1000000
+            ),  # https://github.com/protofire/omen-exchange/blob/923756c3a9ac370f8e89af8193393a53531e2c0f/app/src/services/cpk/fns.ts#L942
+            "conditionalTokens": ledger_api.api.to_checksum_address(
+                CONDIOTIONAL_TOKENS_XDAI
+            ),
+            "collateralToken": ledger_api.api.to_checksum_address(WXDAI_TOKEN),
+            "conditionIds": [condition_id],
+            "fee": ledger_api.api.to_wei(
+                number=market_fee / math.pow(10, 2),
+                unit="ether",
+            ),
+            "initialFunds": initial_funds,
+            "distributionHint": [],
+        }
+
+        contract_instance = cls.get_instance(
+            ledger_api=ledger_api, contract_address=contract_address
+        )
+        data = contract_instance.encodeABI(
+            fn_name="create2FixedProductMarketMaker", kwargs=kwargs
+        )
+        return {"data": bytes.fromhex(data[2:])}

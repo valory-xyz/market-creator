@@ -24,13 +24,17 @@ import json
 import math
 import random
 from abc import ABC
-from copy import deepcopy
 from typing import Dict, Generator, List, Optional, Set, Tuple, Type, cast
 
 from packages.valory.connections.openai.connection import (
     PUBLIC_ID as LLM_CONNECTION_PUBLIC_ID,
 )
-from packages.valory.contracts.delegate.contract import DelegateContract
+from packages.valory.contracts.conditional_tokens.contract import (
+    ConditionalTokensContract,
+)
+from packages.valory.contracts.fpmm_deterministic_factory.contract import (
+    FPMMDeterministicFactory,
+)
 from packages.valory.contracts.gnosis_safe.contract import (
     GnosisSafeContract,
     SafeOperation,
@@ -82,6 +86,12 @@ HTTP_OK = 200
 MAX_RETRIES = 3
 SAFE_TX_GAS = 0
 ETHER_VALUE = 0
+DEFAULT_MARKET_FEE = 2.0
+
+ORACLE_XDAI = "0xab16d643ba051c11962da645f74632d3130c81e2"
+REALTIO_XDAI = "0x79e32aE03fb27B07C89c0c568F80287C01ca2E57"
+CONDIOTIONAL_TOKENS_XDAI = "0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce"
+FPMM_DETERMINISTIC_FACTORY = "0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0"
 
 MARKET_IDENTIFICATION_PROMPT = """
 You are an LLM inside a multi-agent system. Your task is to propose a collection of prediction market questions based
@@ -130,8 +140,6 @@ AVAILABLE_FORMATS = (
     "%Y-%m-%d",
 )
 
-REALTIO_XDAI = "0x79e32aE03fb27B07C89c0c568F80287C01ca2E57"
-
 
 def parse_date_timestring(string: str) -> Optional[datetime.datetime]:
     """Parse and return a datetime string."""
@@ -175,19 +183,17 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             if self.synchronized_data.markets_created < self.params.num_markets:
-                gathered_data = yield from  self._gather_data()
+                gathered_data = yield from self._gather_data()
             else:
                 gathered_data = DataGatheringRound.MAX_MARKETS_REACHED
-
             payload = DataGatheringPayload(sender=sender, gathered_data=gathered_data)
-
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
 
         self.set_done()
 
-    def _gather_data(self) -> Generator:
+    def _gather_data(self) -> Generator[None, None, str]:
         """Auxiliary method to collect data from endpoint."""
         headers = {"X-Api-Key": self.params.newsapi_api_key}
         today = datetime.date.today()
@@ -206,7 +212,6 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
             headers=headers,
             parameters=parameters,
         )
-
         if response.status_code != HTTP_OK:
             self.context.logger.error(
                 f"Could not retrieve response from {self.params.newsapi_endpoint}."
@@ -217,11 +222,11 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
                 return DataGatheringRound.MAX_RETRIES_PAYLOAD
             return DataGatheringRound.ERROR_PAYLOAD
 
-        response_json = json.loads(response.body)
-
-        self.context.logger.info(f"Response received from {self.params.newsapi_endpoint}:\n {response_json}")
-        return json.dumps(response_json,  sort_keys=True)
-
+        response_data = json.loads(response.body.decode())
+        self.context.logger.info(
+            f"Response received from {self.params.newsapi_endpoint}:\n {response_data}"
+        )
+        return json.dumps(response_data, sort_keys=True)
 
 
 class SelectKeeperMarketIdentificationBehaviour(SelectKeeperBehaviour):
@@ -286,15 +291,13 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
 
     def _get_llm_response(self) -> Generator[None, None, Optional[dict]]:
         """Get the LLM response"""
-
-
         data = json.loads(self.synchronized_data.gathered_data)
         articles = data["articles"]
         random.seed(self.synchronized_data.most_voted_randomness, 2)  # nosec
         random.shuffle(articles)
 
         input_news = ""
-        for article in articles[0:10]:
+        for article in articles[0:5]:
             title = article["title"]
             content = article["content"]
             date = article["publishedAt"]
@@ -302,7 +305,6 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
 
         prompt_template = MARKET_IDENTIFICATION_PROMPT
         prompt_values = {"input_news": input_news}
-
         self.context.logger.info(
             f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
         )
@@ -334,12 +336,12 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
                 resolution_date = parse_date_timestring(q["resolution_date"])
                 if resolution_date is None:
                     self.context.logger.error(
-                        f"Cannot parse datestring " + q["resolution_date"]
+                        "Cannot parse datestring " + q["resolution_date"]
                     )
                     continue
                 if resolution_date < minimum_resolution_date:
                     self.context.logger.error(
-                        f"Invalid resolution date " + q["resolution_date"]
+                        "Invalid resolution date " + q["resolution_date"]
                     )
                     continue
                 valid_responses.append(
@@ -358,7 +360,6 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
                 continue
         if len(valid_responses) == 0:
             return None
-        
         return valid_responses[0]
 
     def _do_request(
@@ -411,7 +412,25 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             template_id=template_id,
             question_nonce=question_nonce,
         )
-        return response.state.body
+        return response.state.body["question_id"]
+
+    def _calculate_condition_id(
+        self,
+        oracle: str,
+        question_id: str,
+        outcome_slot_count: int = 2,
+    ) -> Generator[None, None, str]:
+        """Calculate question ID."""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=CONDIOTIONAL_TOKENS_XDAI,
+            contract_id=str(ConditionalTokensContract.contract_id),
+            contract_callable="calculate_condition_id",
+            oracle=oracle,
+            question_id=question_id,
+            outcome_slot_count=outcome_slot_count,
+        )
+        return response.state.body["condition_id"]
 
     def _calculate_time_parameters(self, resolution_time: float) -> Tuple[int, int]:
         """Calculate time params."""
@@ -424,9 +443,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         opening_time = int(
             datetime.datetime(year=ct.year, month=ct.month, day=ct.day).timestamp()
         ) + (days_to_opening * 24 * 60 * 60)
-        timeout = int(
-            datetime.datetime(year=rt.year, month=rt.month, day=rt.day).timestamp()
-        ) + (7 * 24 * 60 * 60)
+        timeout = 7 * 24 * 60 * 60
         return opening_time, timeout
 
     def _prepare_ask_question_mstx(
@@ -436,11 +453,11 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         timeout: int,
         template_id: int = 2,
         question_nonce: int = 0,
-    ) -> Dict:
-        """Prepare a tx for `askQuestionMethod`"""
+    ) -> Generator[None, None, Dict]:
+        """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=REALTIO_XDAI,
+            contract_address=CONDIOTIONAL_TOKENS_XDAI,
             contract_id=str(RealtioContract.contract_id),
             contract_callable="get_ask_question_tx_data",
             question_data=question_data,
@@ -460,9 +477,60 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             "data": response.state.body["data"],
         }
 
+    def _prepare_prepare_condition_mstx(
+        self,
+        question_id: str,
+        outcome_slot_count: int = 2,
+    ) -> Generator[None, None, Dict]:
+        """Prepare a multisend tx for `askQuestionMethod`"""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=CONDIOTIONAL_TOKENS_XDAI,
+            contract_id=str(ConditionalTokensContract.contract_id),
+            contract_callable="get_prepare_condition_tx_data",
+            question_id=question_id,
+            outcome_slot_count=outcome_slot_count,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"get_prepare_condition_tx_data unsuccessful!: {response}"
+            )
+            return None
+        return {
+            "to": CONDIOTIONAL_TOKENS_XDAI,
+            "value": ETHER_VALUE,
+            "data": response.state.body["data"],
+        }
+
+    def _prepare_create_fpmm_mstx(
+        self,
+        condition_id: str,
+        initial_funds: int,
+        market_fee: float = DEFAULT_MARKET_FEE,
+    ) -> Generator[None, None, Dict]:
+        """Prepare a multisend tx for `askQuestionMethod`"""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=FPMM_DETERMINISTIC_FACTORY,
+            contract_id=str(FPMMDeterministicFactory.contract_id),
+            contract_callable="get_create_fpmm_tx_data",
+            condition_id=condition_id,
+            initial_funds=initial_funds,
+            market_fee=market_fee,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"get_prepare_condition_tx_data unsuccessful!: {response}"
+            )
+            return None
+        return {
+            "to": FPMM_DETERMINISTIC_FACTORY,
+            "value": ETHER_VALUE,
+            "data": response.state.body["data"],
+        }
+
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
-
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             data = self.synchronized_data.question_data
             self.context.logger.info(f"Preparing txs for question {data}")
@@ -480,12 +548,29 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 opening_timestamp=opening_timestamp,
                 timeout=timeout,
             )
-
-            sender = self.context.agent_address
-            payload = PrepareTransactionPayload(
-                sender=sender, content="PrepareTransactionPayloadContent"
+            ask_question_tx = yield from self._prepare_ask_question_mstx(
+                question_data=question_data,
+                opening_timestamp=opening_timestamp,
+                timeout=timeout,
             )
-
+            prepare_condition_tx = yield from self._prepare_prepare_condition_mstx(
+                question_id=question_id,
+            )
+            condition_id = yield from self._calculate_condition_id(
+                oracle=ORACLE_XDAI,
+                question_id=question_id,
+            )
+            create_fpmm_tx = yield from self._prepare_create_fpmm_mstx(
+                condition_id=condition_id,
+                initial_funds=0,  # TODO: make configurable
+            )
+            tx_hash = yield from self._to_multisend(
+                transactions=[ask_question_tx, prepare_condition_tx, create_fpmm_tx]
+            )
+            payload = PrepareTransactionPayload(
+                sender=self.context.agent_address,
+                content=tx_hash,
+            )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -580,7 +665,6 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     abci_app_cls = MarketCreationManagerAbciApp  # type: ignore
     behaviours: Set[Type[BaseBehaviour]] = {
         CollectRandomnessBehaviour,
-        SelectKeeperMarketIdentificationBehaviour,
         DataGatheringBehaviour,
         SelectKeeperMarketIdentificationBehaviour,
         MarketIdentificationBehaviour,

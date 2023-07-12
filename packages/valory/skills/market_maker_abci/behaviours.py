@@ -53,7 +53,7 @@ class MarketCreatorRoundBehaviour(AbstractRoundBehaviour):
     behaviours: Set[Type[BaseBehaviour]] = {
         *MarketCreationManagerRoundBehaviour.behaviours,
         *AgentRegistrationRoundBehaviour.behaviours,
-        # *TransactionSettlementRoundBehaviour.behaviours,
+        *TransactionSettlementRoundBehaviour.behaviours,
         *ResetPauseABCIConsensusBehaviour.behaviours,
         *TerminationAbciBehaviours.behaviours,
     }

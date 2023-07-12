@@ -21,12 +21,11 @@
 
 import json
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple, cast
+from typing import Dict, Optional, Set, Tuple, cast
 
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
     AbciAppTransitionFunction,
-    AbstractRound,
     AppState,
     BaseSynchronizedData,
     CollectSameUntilThresholdRound,
@@ -66,12 +65,12 @@ class SynchronizedData(BaseSynchronizedData):
     def gathered_data(self) -> str:
         """Get the llm_values."""
         return cast(str, self.db.get_strict("gathered_data"))
-    
+
     @property
     def newsapi_api_retries(self) -> int:
         """Get the amount of API call retries."""
         return cast(int, self.db.get("newsapi_api_retries", 0))
-    
+
     @property
     def markets_created(self) -> int:
         """Get the amount of API call retries."""
@@ -81,11 +80,6 @@ class SynchronizedData(BaseSynchronizedData):
     def question_data(self) -> dict:
         """Get the question_data."""
         return cast(dict, self.db.get_strict("question_data"))
-
-    @property
-    def gathered_data(self) -> dict:
-        """Get the question_data."""
-        return cast(dict, self.db.get_strict("gathered_data"))
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -107,10 +101,7 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
     MAX_MARKETS_REACHED = "MAX_MARKETS_REACHED"
 
     payload_class = DataGatheringPayload
-    #payload_attribute = "gathered_data"
     synchronized_data_class = SynchronizedData
-    #done_event = Event.DONE
-    #no_majority_event = Event.NO_MAJORITY
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """Process the end of the block."""
@@ -131,19 +122,13 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
                 )
                 return synchronized_data, Event.API_ERROR
 
-            if (
-                self.most_voted_payload
-                == DataGatheringRound.MAX_RETRIES_PAYLOAD
-            ):
+            if self.most_voted_payload == DataGatheringRound.MAX_RETRIES_PAYLOAD:
                 return self.synchronized_data, Event.DONE
-            
-            if (
-                self.most_voted_payload
-                == DataGatheringRound.MAX_MARKETS_REACHED
-            ):
+
+            if self.most_voted_payload == DataGatheringRound.MAX_MARKETS_REACHED:
                 return self.synchronized_data, Event.MAX_MARKETS_REACHED
 
-            #TODO convert to JSON at this point? Needs to update SynchronizedData type
+            # TODO convert to JSON at this point? Needs to update SynchronizedData type
             payload = self.most_voted_payload
 
             synchronized_data = self.synchronized_data.update(
@@ -159,20 +144,18 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
             synchronized_data = self.synchronized_data.update(
                 synchronized_data_class=SynchronizedData,
                 **{
-                    get_name(
-                        SynchronizedData.markets_created
-                    ): markets_created
-                    + 1,
+                    get_name(SynchronizedData.markets_created): markets_created + 1,
                 },
             )
 
             return synchronized_data, Event.DONE
-        
+
         if not self.is_majority_possible(
             self.collection, self.synchronized_data.nb_participants
         ):
             return self.synchronized_data, Event.NO_MAJORITY
         return None
+
 
 class SelectKeeperRound(CollectSameUntilThresholdRound):
     """A round in a which keeper is selected"""
@@ -225,7 +208,7 @@ class MarketIdentificationRound(OnlyKeeperSendsRound):
             synchronized_data_class=SynchronizedData,
             **{
                 get_name(SynchronizedData.question_data): question_data,
-            }
+            },
         )
 
         return synchronized_data, Event.DONE
@@ -244,8 +227,10 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
 class FinishedMarketCreationManagerRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
+
 class SkippedMarketCreationManagerRound(DegenerateRound):
     """SkippedMarketCreationManagerRound"""
+
 
 class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
@@ -285,7 +270,10 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedMarketCreationManagerRound: {},
         SkippedMarketCreationManagerRound: {},
     }
-    final_states: Set[AppState] = {FinishedMarketCreationManagerRound, SkippedMarketCreationManagerRound}
+    final_states: Set[AppState] = {
+        FinishedMarketCreationManagerRound,
+        SkippedMarketCreationManagerRound,
+    }
     event_to_timeout: EventToTimeout = {}
     cross_period_persisted_keys: Set[str] = {}
     db_pre_conditions: Dict[AppState, Set[str]] = {

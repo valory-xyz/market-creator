@@ -1,8 +1,29 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2023 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""Script for creating market creator."""
+
 import datetime
 import json
 import os
 import random
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import openai
 import requests
@@ -51,7 +72,7 @@ INPUT:
 
 OUTPUT_FORMAT:
 * Your output response must be only a single JSON array to be parsed by Python's "json.loads()".
-* The JSON array must be of length 10. 
+* The JSON array must be of length 10.
 * Each entry of the JSON array must be a JSON object containing the fields:
   - question: The binary question to open a prediction market.
   - answers: The possible answers to the question.
@@ -66,7 +87,6 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
     newsapi_api_key = kwargs["api_keys"]["newsapi"]
     max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
     temperature = kwargs.get("temperature", DEFAULT_OPENAI_SETTINGS["temperature"])
-    prompt = kwargs["prompt"]
     tool = kwargs["tool"]
 
     if tool not in ALLOWED_TOOLS:

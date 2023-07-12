@@ -25,13 +25,9 @@ from packages.valory.skills.abstract_round_abci.abci_app_chain import (
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectRandomnessRound,
-    DataGatheringRound,
     FinishedMarketCreationManagerRound,
     MarketCreationManagerAbciApp,
-    MarketIdentificationRound,
-    PrepareTransactionRound,
-    FinishedMarketCreationManagerRound,
-    SkippedMarketCreationManagerRound
+    SkippedMarketCreationManagerRound,
 )
 from packages.valory.skills.registration_abci.rounds import (
     AgentRegistrationAbciApp,
@@ -47,12 +43,6 @@ from packages.valory.skills.reset_pause_abci.rounds import (
 from packages.valory.skills.termination_abci.rounds import BackgroundRound
 from packages.valory.skills.termination_abci.rounds import Event as TerminationEvent
 from packages.valory.skills.termination_abci.rounds import TerminationAbciApp
-from packages.valory.skills.transaction_settlement_abci.rounds import (
-    FailedRound,
-    FinishedTransactionSubmissionRound,
-    RandomnessTransactionSubmissionRound,
-    TransactionSubmissionAbciApp,
-)
 
 
 abci_app_transition_mapping: AbciAppTransitionMapping = {

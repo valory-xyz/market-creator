@@ -1,13 +1,13 @@
-name: market-maker
+name: market_maker
 author: valory
 version: 0.1.0
 description: The market maker service.
 aea_version: '>=1.0.0, <2.0.0'
 license: Apache-2.0
 fingerprint:
-  README.md: bafybeifvddbrix4wlzp5mfaxjg7bargwbcqxjdfvaz5tctxfvzowggkusu
+  README.md: bafybeiaqrtm7sxpddyfgef77qrj4wmwgqjy7mmhmyb65wq5yjph7tcyusa
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeibf7bj3i7ecsy7iyjmam7xvrimdyflfju63xspg4k3ya2nvf24cy4
+agent: valory/market_maker:0.1.0:bafybeigbrhw32ejvofxyytr64pc5ljf3ekisqxe3o4tk5pai2wlzg6dkni
 number_of_agents: 1
 deployment:
   agent:
@@ -79,7 +79,6 @@ models:
       num_markets: ${NUM_MARKETS:int:1}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/everything}
       newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
-
 ---
 public_id: valory/ledger:0.19.0
 type: connection
