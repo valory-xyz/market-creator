@@ -1,0 +1,8 @@
+token_id-"component_id"
+X-
+---
+token_id-"agent_id"
+X-
+---
+token_id-"service_id" (Gnosis)
+11-"service/valory/market_maker:0.1.0"
