@@ -7,13 +7,13 @@ make clean
 
 autonomy push-all
 
-autonomy fetch --local --service valory/market-maker && cd market-maker
+autonomy fetch --local --service valory/market_maker && cd market_maker
 
 # Build the image
 autonomy build-image
 
 # Copy keys and build the deployment
-cp $KEY_DIR/market-maker-key.json ./keys.json
+cp $KEY_DIR/keys.json ./keys.json
 
 autonomy deploy build -ltm
 

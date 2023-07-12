@@ -14,7 +14,6 @@ connections:
 - valory/openai:0.1.0:bafybeietimatztynqebwicxabplia6fctov4vswzbdrin5y32brbjewo2y
 - valory/p2p_libp2p_client:0.1.0:bafybeidwcobzb7ut3efegoedad7jfckvt2n6prcmd4g7xnkm6hp6aafrva
 contracts:
-- valory/delegate:0.1.0:bafybeiaslboosyvpzccaqgie56wta3aqrdkgfx5vs5ogxu7ebiez67wp6i
 - valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeiaa6fgwtykrti6i7sbt22raavpsbobsq2xgem4nkbcg744agnmkae
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
