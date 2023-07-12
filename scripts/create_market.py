@@ -25,10 +25,11 @@ import random
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
 from aea_ledger_ethereum.ethereum import EthereumApi, EthereumCrypto
 from typing_extensions import TypedDict
-from typing import List
+
 
 REALTIO_XDAI = "0x79e32aE03fb27B07C89c0c568F80287C01ca2E57"
 KLEROS_BRIDGE_XDAI = "0xe40dd83a262da3f56976038f1554fe541fa75ecd"

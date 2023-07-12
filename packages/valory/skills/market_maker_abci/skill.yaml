@@ -8,11 +8,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeie36nhohbz4t6hngy42nw7coe2hwrprywo4n6xmwqjkfz7ni3n6sq
-  behaviours.py: bafybeianp3tdiev4rg7q3sg6fpc2mda3vdpat2yprnextrxxxoxp4ld674
-  composition.py: bafybeic6s66ge6isf5pqpz6xpgrmckh2p2jo5kd7gx753hp56dy4stlgxu
+  behaviours.py: bafybeie4ugfyvbo6ezojakc4tngy4l2k37xvjqsqnsjex7vasvznfl4jjy
+  composition.py: bafybeigjxbkyynxvp3l4gtr6rogdpxruwcqkyzflu743wqdvo6ym7djwgy
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeicvtoez7ahmyl25h66edgjywx5ymxtqnyexzq73ouyu2p6smi3uoa
-  handlers.py: bafybeietmks2uhnc7cuskzaksvv5hix5vj2crl67pvuzqn7wca4atzwixu
+  handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
   models.py: bafybeieagk5wihiorhd3nzqgyq7g735ww2bltg7olpkzmstxu2mjkeuazu
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
 fingerprint_ignore_patterns: []
@@ -23,7 +23,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
-- valory/market_creation_manager_abci:0.1.0:bafybeifnl6c4lcqkfokiq7h2jeev6jh7ihejvrsdai43bb7eacbnye3xdi
+- valory/market_creation_manager_abci:0.1.0:bafybeib53hixdshmjbjto2exg4p43oeoopaszq6xgsmbjuzohz4pm4un4q
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
 behaviours:
@@ -82,7 +82,7 @@ models:
     args:
       num_markets: 1
       newsapi_endpoint: https://newsapi.org/v2/everything
-      newsapi_api_key: abcd0000000000000000000000000000
+      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       broadcast_to_server: false
       cleanup_history_depth: 1
       cleanup_history_depth_current: null

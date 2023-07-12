@@ -19,7 +19,6 @@
 
 """This module contains the scaffold contract definition."""
 
-from datetime import datetime
 from typing import Any, List
 
 from aea.common import JSONLike
@@ -46,7 +45,7 @@ class QuestionData(TypedDict):
 
 def format_answers(answers: List[str]) -> str:
     """Format answers."""
-    return ",".join(map(lambda x: f'"{x}"', answers))
+    return ",".join(map(lambda x: '"' + x + '"', answers))
 
 
 def build_question(question_data: QuestionData) -> str:

@@ -87,17 +87,18 @@ class ConditionalTokensContract(Contract):
         raise NotImplementedError
 
     @classmethod
-    def prepare_condition_tx(
+    def get_prepare_condition_tx(
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
         question_id: str,
+        outcome_slot_count: int = 2,
     ) -> JSONLike:
         """Tx for preparing condition for marker maker."""
         kwargs = {
             "oracle": ledger_api.api.to_checksum_address(ORACLE_XDAI),
             "questionId": question_id,
-            "outcomeSlotCount": 2,  # TODO: find out how is this calculated
+            "outcomeSlotCount": outcome_slot_count,  # TODO: find out how is this calculated
         }
         return ledger_api.build_transaction(
             contract_instance=cls.get_instance(
@@ -106,6 +107,47 @@ class ConditionalTokensContract(Contract):
             method_name="prepareCondition",
             method_args=kwargs,
         )
+
+    @classmethod
+    def get_prepare_condition_tx_data(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        question_id: str,
+        outcome_slot_count: int = 2,
+    ) -> JSONLike:
+        """Tx for preparing condition for marker maker."""
+        kwargs = {
+            "oracle": ledger_api.api.to_checksum_address(ORACLE_XDAI),
+            "questionId": question_id,
+            "outcomeSlotCount": outcome_slot_count,  # TODO: find out how is this calculated
+        }
+        contract_instance = cls.get_instance(
+            ledger_api=ledger_api, contract_address=contract_address
+        )
+        data = contract_instance.encodeABI(fn_name="prepareCondition", kwargs=kwargs)
+        return {"data": bytes.fromhex(data[2:])}
+
+    @classmethod
+    def calculate_condition_id(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        oracle: str,
+        question_id: str,
+        outcome_slot_count: int,
+    ) -> str:
+        """Calculate condition ID."""
+        return {
+            "condition_id": ledger_api.api.solidity_keccak(
+                ["address", "bytes32", "uint256"],
+                [
+                    ledger_api.api.to_checksum_address(oracle),
+                    bytes.fromhex(question_id[2:]),
+                    outcome_slot_count,
+                ],
+            ).hex()
+        }
 
     @classmethod
     def get_condition_id(
