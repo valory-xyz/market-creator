@@ -1,12 +1,12 @@
 {
     "dev": {
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeicaaebikpwgwg4qz5rekcsp5r5vj5eiqjoyiwl6wzumyfo7dcgu4q",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeic7ncr5lv4qh5ngocx3uqz3fvujpx452ooshrlny5cywfuoqxtqjq",
-        "agent/valory/market_maker/0.1.0": "bafybeiflyt44ultuoizn5do4zw453ycvw6nbutrsjlp6xpwpjvctok4f2a",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiatsty22p5c46p3vxygxmq33uuueawp6ilngkzgf6m3x2vs7ftxiy",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeihppbkpsv7ukh2febdrpocnd7pxp6koltoqiv7kd25t44nnqdx4gi",
+        "agent/valory/market_maker/0.1.0": "bafybeield5uz36qmlmfm3f3vwl4rwdqyg4to4vw3vowftiygwrfi6kymlq",
         "contract/valory/conditional_tokens/0.1.0": "bafybeig7cc63uvo6lv5mfv5fzga2evr3plozxdobnovanqmckdhenx45hm",
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeifpnalylp4cjhruieqfxsj7sop5bgzdgumvik7akruhdil5ev2yzi",
         "contract/valory/realtio/0.1.0": "bafybeigdbw7ruum264ixwn5fvnww345k4exzeqtdienrk343744d43lxv4",
-        "service/valory/market_maker/0.1.0": "bafybeibezvw3yrhsvh5brutlssajjxljykf5hvikofscrnhqbg52j4lovu"
+        "service/valory/market_maker/0.1.0": "bafybeibiqkmppxjrgjd36ijz2vsi2jnznvs5fmllmdsd3a73e4hbpswxgu"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy",
@@ -22,7 +22,7 @@
         "protocol/valory/tendermint/0.1.0": "bafybeicusvezoqlmyt6iqomcbwaz3xkhk2qf3d56q5zprmj3xdxfy64k54",
         "connection/valory/ledger/0.19.0": "bafybeicgfupeudtmvehbwziqfxiz6ztsxr5rxzvalzvsdsspzz73o5fzfi",
         "connection/valory/http_client/0.23.0": "bafybeidykl4elwbcjkqn32wt5h4h7tlpeqovrcq3c5bcplt6nhpznhgczi",
-        "connection/valory/openai/0.1.0": "bafybeigtzv2wjlvx2gygi4ibja43zkdozla63javvhje7qpbfrltygmqtu",
+        "connection/valory/openai/0.1.0": "bafybeietimatztynqebwicxabplia6fctov4vswzbdrin5y32brbjewo2y",
         "contract/valory/service_registry/0.1.0": "bafybeibdy55edqs3djptv77ljkmbf6m3zizhutmvwgj3hpsagvmzhr4jbm",
         "contract/valory/gnosis_safe/0.1.0": "bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u",
         "contract/valory/gnosis_safe_proxy_factory/0.1.0": "bafybeiaa6fgwtykrti6i7sbt22raavpsbobsq2xgem4nkbcg744agnmkae",
