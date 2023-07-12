@@ -66,7 +66,7 @@ jobs:
       - name: Check dependencies
         run: tox -e check-dependencies
       - name: Check doc links
-        run: tomte check-doc-links
+        run: tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git --url-skips https://newsapi.org/v2/everything --url-skips http://host.docker.internal:8545
       - name: Check doc IPFS hashes
         run: tox -e check-doc-hashes
 
@@ -91,7 +91,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tomte[tox,cli]==0.2.12 
+          pip install tomte[tox,cli]==0.2.12
           pip install --user --upgrade setuptools
 
           # install Protobuf compiler
