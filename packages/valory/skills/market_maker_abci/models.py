@@ -26,12 +26,16 @@ from packages.valory.skills.abstract_round_abci.models import Requests as BaseRe
 from packages.valory.skills.abstract_round_abci.models import (
     SharedState as BaseSharedState,
 )
-from packages.valory.skills.market_creator_abci.composition import MarketCreatorAbciApp
-from packages.valory.skills.market_creation_manager_abci.rounds import Event as MarketCreationManagerEvent
-from packages.valory.skills.market_creation_manager_abci.models import MarketCreationManagerParams
+from packages.valory.skills.market_creation_manager_abci.models import (
+    MarketCreationManagerParams,
+)
 from packages.valory.skills.market_creation_manager_abci.models import (
     RandomnessApi as MarketCreationManagerRandomnessApi,
 )
+from packages.valory.skills.market_creation_manager_abci.rounds import (
+    Event as MarketCreationManagerEvent,
+)
+from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
 from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEvent
 from packages.valory.skills.termination_abci.models import TerminationParams
 from packages.valory.skills.transaction_settlement_abci.rounds import Event as TSEvent
@@ -74,9 +78,9 @@ class SharedState(BaseSharedState):
         MarketCreatorAbciApp.event_to_timeout[
             TSEvent.CHECK_TIMEOUT
         ] = self.context.params.history_check_timeout
-        MarketCreatorAbciApp.event_to_timeout[ResetPauseEvent.RESET_AND_PAUSE_TIMEOUT] = (
-            self.context.params.reset_pause_duration + MARGIN
-        )
+        MarketCreatorAbciApp.event_to_timeout[
+            ResetPauseEvent.RESET_AND_PAUSE_TIMEOUT
+        ] = (self.context.params.reset_pause_duration + MARGIN)
 
 
 class Params(

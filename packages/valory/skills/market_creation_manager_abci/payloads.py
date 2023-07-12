@@ -36,7 +36,14 @@ class CollectRandomnessPayload(BaseTxPayload):
 class DataGatheringPayload(BaseTxPayload):
     """Represent a transaction payload for the DataGatheringRound."""
 
-    content: str
+    gathered_data: str
+
+
+@dataclass(frozen=True)
+class SelectKeeperPayload(BaseTxPayload):
+    """Represent a transaction payload of type 'select_keeper'."""
+
+    keeper: str
 
 
 @dataclass(frozen=True)
@@ -51,4 +58,3 @@ class PrepareTransactionPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 
     content: str
-

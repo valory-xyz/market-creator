@@ -6,21 +6,32 @@ description: The scaffold skill is a scaffold for your own skill implementation.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: bafybeifotgt5johrebg3iaokvi5jkfiy3mk5dtkfyuersobinhzxp3ilba
-  behaviours.py: bafybeict44b2iksswnyb7pvf3qo3yzeptcruaibx5i5doo33yuopmxl4l4
-  dialogues.py: bafybeignhvmpiyjyby5ls726hkeawtw6q4ob6br7bqtwf5ujk2z6mlkyiq
-  fsm_specification.yaml: bafybeiglkfuldn2z6lzf7qtffeaw3tk4ly4y33ayellrvkkxp3g4hjtbxi
-  handlers.py: bafybeihteow3fq4pt23ivbdoxsnyilvyvtr5uakz42dkyltvgik5zkrshe
-  models.py: bafybeihi2p5s6iy73wpsnny6sk4wpgjw7ck7nru3cvxrqhezxy7i5padxa
-  payloads.py: bafybeigykom4sregmkss4mmce3dastujg5nokcv5x4msu667ty4sjf4io4
-  rounds.py: bafybeifunvzqnthlmxj7vsywffpwl4laflt6gvlbcrrykltikx5hkatzpu
-  tests/__init__.py: bafybeic3534aro4pdtsdcuxywzlgkccczx2elhnwisiq3r6okvnrdu4aia
+  .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
+  __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
+  behaviours.py: bafybeidz2dez5k25qr5s6xft6mdgdvpnwikqh5unoex2jq5i7hbg3ee2t4
+  dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
+  fsm_specification.yaml: bafybeiavvdym5n466iu3sfpbcqz7ws5ktngkgq7cae3ews7uzn7qmu5hd4
+  handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
+  models.py: bafybeifqeprehs672or2lqxxuipwgnzjvuajylyanatppcpidop6x2lree
+  payloads.py: bafybeigqc6yzvpw6k5vqnwy2zaixnzp2obafedmw5muaggn6m7hzeeqwii
+  rounds.py: bafybeicbkikrbfopazeyv5g4egh7h73tvlhtc2kzbxalqiujduabo7kq4i
+  tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
-connections: []
-contracts: []
-protocols: []
+connections:
+- valory/openai:0.1.0:bafybeigtzv2wjlvx2gygi4ibja43zkdozla63javvhje7qpbfrltygmqtu
+contracts:
+- valory/delegate:0.1.0:bafybeiaslboosyvpzccaqgie56wta3aqrdkgfx5vs5ogxu7ebiez67wp6i
+- valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
+- valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
+- valory/realtio:0.1.0:bafybeigdbw7ruum264ixwn5fvnww345k4exzeqtdienrk343744d43lxv4
+- valory/conditional_tokens:0.1.0:bafybeig7cc63uvo6lv5mfv5fzga2evr3plozxdobnovanqmckdhenx45hm
+- valory/fpmm_deterministic_factory:0.1.0:bafybeifpnalylp4cjhruieqfxsj7sop5bgzdgumvik7akruhdil5ev2yzi
+protocols:
+- valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
+- valory/contract_api:1.0.0:bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy
 skills:
-- valory/abstract_round_abci:0.1.0
+- valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
+- valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
 behaviours:
   main:
     args: {}
@@ -32,9 +43,6 @@ handlers:
   contract_api:
     args: {}
     class_name: ContractApiHandler
-  http:
-    args: {}
-    class_name: HttpHandler
   ipfs:
     args: {}
     class_name: IpfsHandler
@@ -47,6 +55,9 @@ handlers:
   tendermint:
     args: {}
     class_name: TendermintHandler
+  llm:
+    args: {}
+    class_name: LlmHandler
 models:
   abci_dialogues:
     args: {}
@@ -67,8 +78,13 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
+  llm_dialogues:
+    args: {}
+    class_name: LlmDialogues
   params:
     args:
+      num_markets: 1
+      newsapi_endpoint: https://newsapi.org/v2/everything
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       cleanup_history_depth: 1
       cleanup_history_depth_current: null
@@ -97,6 +113,7 @@ models:
       keeper_timeout: 30.0
       max_attempts: 10
       max_healthcheck: 120
+      multisend_address: '0x0000000000000000000000000000000000000000'
       on_chain_service_id: null
       request_retry_delay: 1.0
       request_timeout: 10.0
@@ -121,7 +138,8 @@ models:
       tendermint_url: http://localhost:26657
       tx_timeout: 10.0
       validate_timeout: 1205
-    class_name: Params
+      use_termination: false
+    class_name: MarketCreationManagerParams
   randomness_api:
     args:
       api_id: cloudflare
@@ -146,4 +164,4 @@ models:
     args: {}
     class_name: TendermintDialogues
 dependencies: {}
-is_abstract: false
+is_abstract: true

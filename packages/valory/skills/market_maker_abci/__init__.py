@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contains the ABCI cryptocurrency oracle skill for an AEA.
+This module contains the ABCI skill for the market maker.
 
 It does so through aggregation of observations from different sources.
 """
@@ -26,4 +26,4 @@ It does so through aggregation of observations from different sources.
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("valory/market_creator_abci:0.1.0")
+PUBLIC_ID = PublicId.from_str("valory/market_maker_abci:0.1.0")
