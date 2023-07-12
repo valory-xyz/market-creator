@@ -8,24 +8,23 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeidz2dez5k25qr5s6xft6mdgdvpnwikqh5unoex2jq5i7hbg3ee2t4
+  behaviours.py: bafybeihnwlvy7nxc4lczcmfvmwbez2v333cl3q2cko25sedfxahboqlan4
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiavvdym5n466iu3sfpbcqz7ws5ktngkgq7cae3ews7uzn7qmu5hd4
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
   models.py: bafybeifqeprehs672or2lqxxuipwgnzjvuajylyanatppcpidop6x2lree
   payloads.py: bafybeigqc6yzvpw6k5vqnwy2zaixnzp2obafedmw5muaggn6m7hzeeqwii
-  rounds.py: bafybeicbkikrbfopazeyv5g4egh7h73tvlhtc2kzbxalqiujduabo7kq4i
+  rounds.py: bafybeiewpcumstqraagsm26gi2bwvlhwlfuumyrdql3fns747uuwmsowei
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
-- valory/openai:0.1.0:bafybeigtzv2wjlvx2gygi4ibja43zkdozla63javvhje7qpbfrltygmqtu
+- valory/openai:0.1.0:bafybeietimatztynqebwicxabplia6fctov4vswzbdrin5y32brbjewo2y
 contracts:
-- valory/delegate:0.1.0:bafybeiaslboosyvpzccaqgie56wta3aqrdkgfx5vs5ogxu7ebiez67wp6i
 - valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
-- valory/realtio:0.1.0:bafybeigdbw7ruum264ixwn5fvnww345k4exzeqtdienrk343744d43lxv4
+- valory/realtio:0.1.0:bafybeihrsxi2sjqyoormpgrsycajchfrglglvp72u2gfthbo6qu35pvhcq
 - valory/conditional_tokens:0.1.0:bafybeig7cc63uvo6lv5mfv5fzga2evr3plozxdobnovanqmckdhenx45hm
-- valory/fpmm_deterministic_factory:0.1.0:bafybeifpnalylp4cjhruieqfxsj7sop5bgzdgumvik7akruhdil5ev2yzi
+- valory/fpmm_deterministic_factory:0.1.0:bafybeihv5zuz2sn3yb67ndklqrmvfxtyfesooybe5maqeggfronunkbgsi
 protocols:
 - valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
 - valory/contract_api:1.0.0:bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy

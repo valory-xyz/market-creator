@@ -409,6 +409,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             question_data=question_data,
             opening_timestamp=opening_timestamp,
             timeout=timeout,
+            sender=self.synchronized_data.safe_contract_address,
             template_id=template_id,
             question_nonce=question_nonce,
         )
@@ -432,7 +433,10 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         )
         return response.state.body["condition_id"]
 
-    def _calculate_time_parameters(self, resolution_time: float) -> Tuple[int, int]:
+    def _calculate_time_parameters(
+        self,
+        resolution_time: float,
+    ) -> Tuple[int, int]:
         """Calculate time params."""
         rt = datetime.datetime.fromtimestamp(resolution_time)
         ct = datetime.datetime.fromtimestamp(
@@ -562,7 +566,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             create_fpmm_tx = yield from self._prepare_create_fpmm_mstx(
                 condition_id=condition_id,
-                initial_funds=0,  # TODO: make configurable
+                initial_funds=1,  # TODO: make configurable
             )
             tx_hash = yield from self._to_multisend(
                 transactions=[ask_question_tx, prepare_condition_tx, create_fpmm_tx]
