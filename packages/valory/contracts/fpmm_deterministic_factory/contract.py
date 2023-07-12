@@ -133,6 +133,10 @@ class FPMMDeterministicFactory(Contract):
         market_fee: float = DEFAULT_MARKET_FEE,
     ) -> JSONLike:
         """Create FPMM tx"""
+        initial_funds = ledger_api.api.to_wei(
+            number=market_fee / math.pow(10, 2),
+            unit="ether",
+        )
         kwargs = {
             "saltNonce": random.randint(
                 0, 1000000
@@ -149,11 +153,10 @@ class FPMMDeterministicFactory(Contract):
             "initialFunds": initial_funds,
             "distributionHint": [],
         }
-
         contract_instance = cls.get_instance(
             ledger_api=ledger_api, contract_address=contract_address
         )
         data = contract_instance.encodeABI(
             fn_name="create2FixedProductMarketMaker", kwargs=kwargs
         )
-        return {"data": bytes.fromhex(data[2:])}
+        return {"data": bytes.fromhex(data[2:]), "value": initial_funds}

@@ -41,6 +41,9 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     PrepareTransactionPayload,
     SelectKeeperPayload,
 )
+from packages.valory.skills.transaction_settlement_abci.rounds import (
+    SynchronizedData as TxSynchronizedData,
+)
 
 
 class Event(Enum):
@@ -54,7 +57,7 @@ class Event(Enum):
     MAX_MARKETS_REACHED = "max_markets_reached"
 
 
-class SynchronizedData(BaseSynchronizedData):
+class SynchronizedData(TxSynchronizedData):
     """
     Class to represent the synchronized data.
 
@@ -80,6 +83,16 @@ class SynchronizedData(BaseSynchronizedData):
     def question_data(self) -> dict:
         """Get the question_data."""
         return cast(dict, self.db.get_strict("question_data"))
+
+    @property
+    def most_voted_tx_hash(self) -> str:
+        """Get the most_voted_tx_hash."""
+        return cast(str, self.db.get_strict("most_voted_tx_hash"))
+
+    @property
+    def most_voted_keeper_address(self) -> str:
+        """Get the most_voted_keeper_address."""
+        return cast(str, self.db.get_strict("most_voted_keeper_address"))
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -218,10 +231,29 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
     """PrepareTransactionRound"""
 
     payload_class = PrepareTransactionPayload
-    payload_attribute = "content"
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
+    collection_key = "content"
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
+        "End block."
+        # TODO: incomplete implementation
+        if self.threshold_reached and any(
+            [val is not None for val in self.most_voted_payload_values]
+        ):
+            return (
+                self.synchronized_data.update(
+                    synchronized_data_class=self.synchronized_data_class,
+                    **{
+                        get_name(
+                            SynchronizedData.most_voted_tx_hash
+                        ): self.most_voted_payload
+                    },
+                ),
+                Event.DONE,
+            )
+        return None
 
 
 class FinishedMarketCreationManagerRound(DegenerateRound):
@@ -280,6 +312,8 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         CollectRandomnessRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
-        FinishedMarketCreationManagerRound: set(),
+        FinishedMarketCreationManagerRound: {
+            get_name(SynchronizedData.most_voted_tx_hash),
+        },
         SkippedMarketCreationManagerRound: set(),
     }
