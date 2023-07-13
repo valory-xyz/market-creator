@@ -19,26 +19,16 @@
 
 """This module contains the scaffold contract definition."""
 
-from typing import Any, List
+from typing import Any, Dict, List
 
 from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-from typing_extensions import TypedDict
 
 
 MARKET_FEE = 2.0
 UNIT_SEPARATOR = "␟"
-
-
-class QuestionData(TypedDict):
-    """Question data."""
-
-    question: str
-    answers: List[str]
-    topic: str
-    language: str
 
 
 def format_answers(answers: List[str]) -> str:
@@ -46,7 +36,7 @@ def format_answers(answers: List[str]) -> str:
     return ",".join(map(lambda x: '"' + x + '"', answers))
 
 
-def build_question(question_data: QuestionData) -> str:
+def build_question(question_data: Dict) -> str:
     """Build question."""
     return UNIT_SEPARATOR.join(
         [
@@ -119,7 +109,7 @@ class RealtioContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        question_data: QuestionData,
+        question_data: Dict,
         opening_timestamp: int,
         timeout: int,
         arbitrator_contract: str,
@@ -149,7 +139,7 @@ class RealtioContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        question_data: QuestionData,
+        question_data: Dict,
         opening_timestamp: int,
         timeout: int,
         arbitrator_contract: str,
@@ -177,7 +167,7 @@ class RealtioContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        question_data: QuestionData,
+        question_data: Dict,
         opening_timestamp: int,
         timeout: int,
         arbitrator_contract: str,

@@ -37,6 +37,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 DEFAULT_MARKET_FEE = 2.0
 DEFAULT_INITIAL_FUNDS = 1.0
 DEFAULT_MARKET_TIMEOUT = 7  # days
+DEFAULT_MAX_ALLOWED_MARKETS = 1
 
 
 class SharedState(BaseSharedState):
@@ -51,9 +52,13 @@ class MarketCreationManagerParams(BaseParams):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the parameters object."""
 
-        self.newsapi_api_key = kwargs.get("newsapi_api_key")
-        self.newsapi_endpoint = kwargs.get("newsapi_endpoint")
-        self.num_markets = kwargs.get("num_markets")
+        self.newsapi_api_key = self._ensure(
+            key="newsapi_api_key", kwargs=kwargs, type_=str
+        )
+        self.newsapi_endpoint = self._ensure(
+            key="newsapi_endpoint", kwargs=kwargs, type_=str
+        )
+        self.num_markets = kwargs.get("num_markets", DEFAULT_MAX_ALLOWED_MARKETS)
         self.multisend_address = self._ensure(
             key="multisend_address", kwargs=kwargs, type_=str
         )

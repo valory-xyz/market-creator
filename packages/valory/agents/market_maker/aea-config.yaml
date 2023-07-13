@@ -17,9 +17,9 @@ contracts:
 - valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeiaa6fgwtykrti6i7sbt22raavpsbobsq2xgem4nkbcg744agnmkae
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
-- valory/realtio:0.1.0:bafybeibcltyfex5oziehzfnvlpslumqocmgbpapgnvr4yawtrs3ysm7fva
+- valory/realtio:0.1.0:bafybeihoj7w5dqdyo6ds2rdmi326cvl5wuc7xp6yms7lwks35m4nqypk4q
 - valory/conditional_tokens:0.1.0:bafybeig5vtn7bzpegfrzehdgeezqcnox3xlb5i54ehnqndazhcfh3bkdcq
-- valory/fpmm_deterministic_factory:0.1.0:bafybeif2pktoawt4afesmcupwddvsdcez5qhdfdlge25amvjthlhrcmu5q
+- valory/fpmm_deterministic_factory:0.1.0:bafybeihm5cufzmywrcxzmhemhnuekitl5bkrzlj7gybdksuf4ljqjvkbg4
 - valory/service_registry:0.1.0:bafybeibdy55edqs3djptv77ljkmbf6m3zizhutmvwgj3hpsagvmzhr4jbm
 protocols:
 - open_aea/signing:1.0.0:bafybeibqlfmikg5hk4phzak6gqzhpkt6akckx7xppbp53mvwt6r73h7tk4
@@ -34,9 +34,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiff2dqnkeorf343fmb3547fhiznvdw4ewbwl4rqluek2cv6ibl5hi
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
-- valory/market_maker_abci:0.1.0:bafybeigj3is3boxjio3c5pcllsbeykmuyqwbim3atygs7kbshgoq7reg7y
+- valory/market_maker_abci:0.1.0:bafybeidrjdb4hbejzrosbun2awwoohrxb5fu3sn3t74pegbcz4evxqcmbi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
-- valory/market_creation_manager_abci:0.1.0:bafybeihnanzjuyzpw3wv2s3x5uozl7h7tl47f4ixlz5v73m5f5k2ito2xq
+- valory/market_creation_manager_abci:0.1.0:bafybeigpehizcggqvr46fktyil7bn5ir5hab2l7qa5easqrynpgmshv7bm
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi

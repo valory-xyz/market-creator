@@ -101,7 +101,7 @@ class FPMMDeterministicFactory(Contract):
     ) -> JSONLike:
         """Create FPMM tx"""
         kwargs = {
-            "saltNonce": random.randint(
+            "saltNonce": random.randint(  # nosec
                 0, 1000000
             ),  # https://github.com/protofire/omen-exchange/blob/923756c3a9ac370f8e89af8193393a53531e2c0f/app/src/services/cpk/fns.ts#L942
             "conditionalTokens": ledger_api.api.to_checksum_address(conditional_tokens),
@@ -142,7 +142,7 @@ class FPMMDeterministicFactory(Contract):
             unit="ether",
         )
         kwargs = {
-            "saltNonce": random.randint(
+            "saltNonce": random.randint(  # nosec
                 0, 1000000
             ),  # https://github.com/protofire/omen-exchange/blob/923756c3a9ac370f8e89af8193393a53531e2c0f/app/src/services/cpk/fns.ts#L942
             "conditionalTokens": ledger_api.api.to_checksum_address(conditional_tokens),

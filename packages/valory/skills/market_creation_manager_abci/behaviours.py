@@ -88,11 +88,6 @@ SAFE_TX_GAS = 0
 ETHER_VALUE = 0
 
 
-# ORACLE_XDAI = "0xab16d643ba051c11962da645f74632d3130c81e2"
-# REALTIO_XDAI = "0x79e32aE03fb27B07C89c0c568F80287C01ca2E57"
-# CONDIOTIONAL_TOKENS_XDAI = "0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce"
-# FPMM_DETERMINISTIC_FACTORY = "0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0"
-
 MARKET_IDENTIFICATION_PROMPT = """
 You are an LLM inside a multi-agent system. Your task is to propose a collection of prediction market questions based
 on your input. Your input is under the label "INPUT". You must follow the instructions under "INSTRUCTIONS".
@@ -185,7 +180,9 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            if self.synchronized_data.markets_created < self.params.num_markets:
+            if self.synchronized_data.markets_created < cast(
+                int, self.params.num_markets
+            ):
                 gathered_data = yield from self._gather_data()
             else:
                 gathered_data = DataGatheringRound.MAX_MARKETS_REACHED
@@ -220,7 +217,7 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Could not retrieve response from {self.params.newsapi_endpoint}."
                 f"Received status code {response.status_code}.\n{response}"
             )
-            retries = self.synchronized_data.newsapi_endpoint_retries + 1
+            retries = 3  # TODO: Make params
             if retries >= MAX_RETRIES:
                 return DataGatheringRound.MAX_RETRIES_PAYLOAD
             return DataGatheringRound.ERROR_PAYLOAD
@@ -323,7 +320,7 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
         )
         request_llm_message = cast(LlmMessage, request_llm_message)
         llm_dialogue = cast(LlmDialogue, llm_dialogue)
-        llm_response_message = yield from self._do_request(
+        llm_response_message = yield from self._do_llm_request(
             request_llm_message, llm_dialogue
         )
         result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
@@ -365,7 +362,7 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
             return None
         return valid_responses[0]
 
-    def _do_request(
+    def _do_llm_request(
         self,
         llm_message: LlmMessage,
         llm_dialogue: LlmDialogue,
@@ -398,7 +395,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     def _calculate_time_parameters(
         self,
         resolution_time: float,
-        timeout: Optional[int] = None,
+        timeout: int,
     ) -> Tuple[int, int]:
         """Calculate time params."""
         rt = datetime.datetime.fromtimestamp(resolution_time)
@@ -410,7 +407,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         opening_time = int(
             datetime.datetime(year=ct.year, month=ct.month, day=ct.day).timestamp()
         ) + (days_to_opening * _ONE_DAY)
-        return opening_time, (timeout or DEFAULT_MARKET_TIMEOUT) * _ONE_DAY
+        return opening_time, timeout * _ONE_DAY
 
     def _calculate_question_id(
         self,
@@ -434,7 +431,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             template_id=template_id,
             question_nonce=question_nonce,
         )
-        return response.state.body["question_id"]
+        return cast(str, response.state.body["question_id"])
 
     def _calculate_condition_id(
         self,
@@ -452,7 +449,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             question_id=question_id,
             outcome_slot_count=outcome_slot_count,
         )
-        return response.state.body["condition_id"]
+        return cast(str, response.state.body["condition_id"])
 
     def _prepare_ask_question_mstx(
         self,
@@ -461,7 +458,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         timeout: int,
         template_id: int = 2,
         question_nonce: int = 0,
-    ) -> Generator[None, None, Dict]:
+    ) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
@@ -490,7 +487,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         self,
         question_id: str,
         outcome_slot_count: int = 2,
-    ) -> Generator[None, None, Dict]:
+    ) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
@@ -517,7 +514,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         condition_id: str,
         initial_funds: int,
         market_fee: float,
-    ) -> Generator[None, None, Dict]:
+    ) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
@@ -545,41 +542,64 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             data = self.synchronized_data.question_data
-            self.context.logger.info(f"Preparing txs for question {data}")
             question_data = {
                 "question": data["question"],
                 "answers": data["answers"],
                 "topic": data["topic"],
                 "language": data["language"],
             }
+            self.context.logger.info(f"Preparing txs for {question_data=}")
+
             opening_timestamp, timeout = self._calculate_time_parameters(
-                resolution_time=data["resolution_time"]
+                resolution_time=data["resolution_time"],
+                timeout=self.params.market_timeout,
             )
+            self.context.logger.info(
+                f"Opening time = {datetime.datetime.fromtimestamp(opening_timestamp)}"
+            )
+            self.context.logger.info(
+                f"Closing time = {datetime.datetime.fromtimestamp(opening_timestamp + timeout)}"
+            )
+
             question_id = yield from self._calculate_question_id(
                 question_data=question_data,
                 opening_timestamp=opening_timestamp,
                 timeout=timeout,
             )
+            self.context.logger.info(f"Calculated {question_id=}")
+
             ask_question_tx = yield from self._prepare_ask_question_mstx(
                 question_data=question_data,
                 opening_timestamp=opening_timestamp,
                 timeout=timeout,
             )
+            if ask_question_tx is None:
+                return
             prepare_condition_tx = yield from self._prepare_prepare_condition_mstx(
                 question_id=question_id,
             )
+            if prepare_condition_tx is None:
+                return
             condition_id = yield from self._calculate_condition_id(
                 oracle_contract=self.params.realitio_oracle_proxy_contract,
                 question_id=question_id,
             )
+            self.context.logger.info(f"Calculated {condition_id=}")
+
             create_fpmm_tx = yield from self._prepare_create_fpmm_mstx(
                 condition_id=condition_id,
                 initial_funds=self.params.initial_funds,
                 market_fee=self.params.market_fee,
             )
+            if create_fpmm_tx is None:
+                return
+
             tx_hash = yield from self._to_multisend(
                 transactions=[ask_question_tx, prepare_condition_tx, create_fpmm_tx]
             )
+            if tx_hash is None:
+                return
+
             payload = PrepareTransactionPayload(
                 sender=self.context.agent_address,
                 content=tx_hash,
@@ -644,6 +664,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         Note that this is the transaction that the safe will execute, with the provided data.
 
         :param data: the safe tx data.
+        :yield: None
         :return: the tx hash
         """
         response = yield from self.get_contract_api_response(
