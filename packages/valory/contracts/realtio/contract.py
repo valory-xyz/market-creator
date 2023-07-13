@@ -31,8 +31,6 @@ from typing_extensions import TypedDict
 MARKET_FEE = 2.0
 UNIT_SEPARATOR = "␟"
 
-KLEROS_BRIDGE_XDAI = "0xe40dd83a262da3f56976038f1554fe541fa75ecd"
-
 
 class QuestionData(TypedDict):
     """Question data."""
@@ -124,6 +122,7 @@ class RealtioContract(Contract):
         question_data: QuestionData,
         opening_timestamp: int,
         timeout: int,
+        arbitrator_contract: str,
         template_id: int = 2,
         question_nonce: int = 0,
     ) -> JSONLike:
@@ -132,7 +131,7 @@ class RealtioContract(Contract):
         kwargs = {
             "template_id": template_id,
             "question": question,
-            "arbitrator": ledger_api.api.to_checksum_address(KLEROS_BRIDGE_XDAI),
+            "arbitrator": ledger_api.api.to_checksum_address(arbitrator_contract),
             "timeout": timeout,
             "opening_ts": opening_timestamp,
             "nonce": question_nonce,
@@ -153,6 +152,7 @@ class RealtioContract(Contract):
         question_data: QuestionData,
         opening_timestamp: int,
         timeout: int,
+        arbitrator_contract: str,
         template_id: int = 2,
         question_nonce: int = 0,
     ) -> JSONLike:
@@ -161,9 +161,7 @@ class RealtioContract(Contract):
         kwargs = {
             "template_id": template_id,
             "question": question,
-            "arbitrator": ledger_api.api.to_checksum_address(
-                KLEROS_BRIDGE_XDAI
-            ),  # TODO: Make configurable
+            "arbitrator": ledger_api.api.to_checksum_address(arbitrator_contract),
             "timeout": timeout,
             "opening_ts": opening_timestamp,
             "nonce": question_nonce,
@@ -182,6 +180,7 @@ class RealtioContract(Contract):
         question_data: QuestionData,
         opening_timestamp: int,
         timeout: int,
+        arbitrator_contract: str,
         sender: str,
         template_id: int = 2,
         question_nonce: int = 0,
@@ -196,9 +195,7 @@ class RealtioContract(Contract):
             ["bytes32", "address", "uint32", "address", "uint256"],
             [
                 content_hash,
-                ledger_api.api.to_checksum_address(
-                    KLEROS_BRIDGE_XDAI
-                ),  # TODO: make configurable
+                ledger_api.api.to_checksum_address(arbitrator_contract),
                 timeout,
                 ledger_api.api.to_checksum_address(sender),
                 question_nonce,

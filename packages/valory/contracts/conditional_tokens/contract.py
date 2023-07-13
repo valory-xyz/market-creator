@@ -27,7 +27,7 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-ORACLE_XDAI = "0xab16d643ba051c11962da645f74632d3130c81e2"
+DEFAULT_OUTCOME_SLOT = 2
 
 
 class ConditionalTokensContract(Contract):
@@ -92,13 +92,14 @@ class ConditionalTokensContract(Contract):
         ledger_api: LedgerApi,
         contract_address: str,
         question_id: str,
-        outcome_slot_count: int = 2,
+        oracle_contract: str,
+        outcome_slot_count: int = DEFAULT_OUTCOME_SLOT,
     ) -> JSONLike:
         """Tx for preparing condition for marker maker."""
         kwargs = {
-            "oracle": ledger_api.api.to_checksum_address(ORACLE_XDAI),
+            "oracle": ledger_api.api.to_checksum_address(oracle_contract),
             "questionId": question_id,
-            "outcomeSlotCount": outcome_slot_count,  # TODO: find out how is this calculated
+            "outcomeSlotCount": outcome_slot_count,
         }
         return ledger_api.build_transaction(
             contract_instance=cls.get_instance(
@@ -114,13 +115,14 @@ class ConditionalTokensContract(Contract):
         ledger_api: LedgerApi,
         contract_address: str,
         question_id: str,
-        outcome_slot_count: int = 2,
+        oracle_contract: str,
+        outcome_slot_count: int = DEFAULT_OUTCOME_SLOT,
     ) -> JSONLike:
         """Tx for preparing condition for marker maker."""
         kwargs = {
-            "oracle": ledger_api.api.to_checksum_address(ORACLE_XDAI),
+            "oracle": ledger_api.api.to_checksum_address(oracle_contract),
             "questionId": question_id,
-            "outcomeSlotCount": outcome_slot_count,  # TODO: find out how is this calculated
+            "outcomeSlotCount": outcome_slot_count,
         }
         contract_instance = cls.get_instance(
             ledger_api=ledger_api, contract_address=contract_address
@@ -133,7 +135,7 @@ class ConditionalTokensContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        oracle: str,
+        oracle_contract: str,
         question_id: str,
         outcome_slot_count: int,
     ) -> str:
@@ -142,7 +144,7 @@ class ConditionalTokensContract(Contract):
             "condition_id": ledger_api.api.solidity_keccak(
                 ["address", "bytes32", "uint256"],
                 [
-                    ledger_api.api.to_checksum_address(oracle),
+                    ledger_api.api.to_checksum_address(oracle_contract),
                     bytes.fromhex(question_id[2:]),
                     outcome_slot_count,
                 ],
