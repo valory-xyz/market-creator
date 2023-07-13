@@ -23,7 +23,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
-- valory/market_creation_manager_abci:0.1.0:bafybeidqacmhp5lk5xix6qfvtikwdszhdguziwm2w3exgyeroutnupqrei
+- valory/market_creation_manager_abci:0.1.0:bafybeihnanzjuyzpw3wv2s3x5uozl7h7tl47f4ixlz5v73m5f5k2ito2xq
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
 behaviours:
@@ -145,7 +145,7 @@ models:
       termination_sleep: 900
       tx_timeout: 10.0
       validate_timeout: 1205
-      use_termination: false 
+      use_termination: false
     class_name: Params
   randomness_api:
     args:
