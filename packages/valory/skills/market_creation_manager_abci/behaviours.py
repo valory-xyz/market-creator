@@ -481,7 +481,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         return {
             "to": self.params.realitio_contract,
             "data": response.state.body["data"],
-            "value": response.state.body.get("value", ETHER_VALUE),
+            "value": ETHER_VALUE,
         }
 
     def _prepare_prepare_condition_mstx(
@@ -507,13 +507,13 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         return {
             "to": self.params.conditional_tokens_contract,
             "data": response.state.body["data"],
-            "value": response.state.body.get("value", ETHER_VALUE),
+            "value": ETHER_VALUE,
         }
 
     def _prepare_create_fpmm_mstx(
         self,
         condition_id: str,
-        initial_funds: int,
+        initial_funds: float,
         market_fee: float,
     ) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
@@ -536,7 +536,8 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         return {
             "to": self.params.fpmm_deterministic_factory_contract,
             "data": response.state.body["data"],
-            "value": response.state.body.get("value", ETHER_VALUE),
+            "value": ETHER_VALUE,
+            "approval_amount": response.state.body["value"],
         }
 
     def _get_approve_tx(self, amount: int) -> Generator[None, None, Optional[Dict]]:
@@ -555,9 +556,9 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
         return {
-            "to": self.params.fpmm_deterministic_factory_contract,
+            "to": self.params.collateral_tokens_contract,
             "data": response.state.body["data"],
-            "value": response.state.body.get("value", ETHER_VALUE),
+            "value": ETHER_VALUE,
         }
 
     def async_act(self) -> Generator:
@@ -616,12 +617,12 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             if create_fpmm_tx is None:
                 return
 
-            wxdai_approval_tx = yield from self._get_approve_tx(
-                amount=create_fpmm_tx["value"]
-            )
+            amount = cast(int, create_fpmm_tx["approval_amount"])
+            wxdai_approval_tx = yield from self._get_approve_tx(amount=amount)
             if wxdai_approval_tx is None:
                 return
 
+            self.context.logger.info(f"Added approval for {amount}")
             tx_hash = yield from self._to_multisend(
                 transactions=[
                     wxdai_approval_tx,
