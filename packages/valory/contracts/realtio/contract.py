@@ -19,28 +19,16 @@
 
 """This module contains the scaffold contract definition."""
 
-from typing import Any, List
+from typing import Any, Dict, List
 
 from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-from typing_extensions import TypedDict
 
 
 MARKET_FEE = 2.0
 UNIT_SEPARATOR = "␟"
-
-KLEROS_BRIDGE_XDAI = "0xe40dd83a262da3f56976038f1554fe541fa75ecd"
-
-
-class QuestionData(TypedDict):
-    """Question data."""
-
-    question: str
-    answers: List[str]
-    topic: str
-    language: str
 
 
 def format_answers(answers: List[str]) -> str:
@@ -48,7 +36,7 @@ def format_answers(answers: List[str]) -> str:
     return ",".join(map(lambda x: '"' + x + '"', answers))
 
 
-def build_question(question_data: QuestionData) -> str:
+def build_question(question_data: Dict) -> str:
     """Build question."""
     return UNIT_SEPARATOR.join(
         [
@@ -121,9 +109,10 @@ class RealtioContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        question_data: QuestionData,
+        question_data: Dict,
         opening_timestamp: int,
         timeout: int,
+        arbitrator_contract: str,
         template_id: int = 2,
         question_nonce: int = 0,
     ) -> JSONLike:
@@ -132,7 +121,7 @@ class RealtioContract(Contract):
         kwargs = {
             "template_id": template_id,
             "question": question,
-            "arbitrator": ledger_api.api.to_checksum_address(KLEROS_BRIDGE_XDAI),
+            "arbitrator": ledger_api.api.to_checksum_address(arbitrator_contract),
             "timeout": timeout,
             "opening_ts": opening_timestamp,
             "nonce": question_nonce,
@@ -150,9 +139,10 @@ class RealtioContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        question_data: QuestionData,
+        question_data: Dict,
         opening_timestamp: int,
         timeout: int,
+        arbitrator_contract: str,
         template_id: int = 2,
         question_nonce: int = 0,
     ) -> JSONLike:
@@ -161,9 +151,7 @@ class RealtioContract(Contract):
         kwargs = {
             "template_id": template_id,
             "question": question,
-            "arbitrator": ledger_api.api.to_checksum_address(
-                KLEROS_BRIDGE_XDAI
-            ),  # TODO: Make configurable
+            "arbitrator": ledger_api.api.to_checksum_address(arbitrator_contract),
             "timeout": timeout,
             "opening_ts": opening_timestamp,
             "nonce": question_nonce,
@@ -179,9 +167,10 @@ class RealtioContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        question_data: QuestionData,
+        question_data: Dict,
         opening_timestamp: int,
         timeout: int,
+        arbitrator_contract: str,
         sender: str,
         template_id: int = 2,
         question_nonce: int = 0,
@@ -196,9 +185,7 @@ class RealtioContract(Contract):
             ["bytes32", "address", "uint32", "address", "uint256"],
             [
                 content_hash,
-                ledger_api.api.to_checksum_address(
-                    KLEROS_BRIDGE_XDAI
-                ),  # TODO: make configurable
+                ledger_api.api.to_checksum_address(arbitrator_contract),
                 timeout,
                 ledger_api.api.to_checksum_address(sender),
                 question_nonce,

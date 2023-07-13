@@ -1,4 +1,4 @@
-name: realtio
+name: wxdai
 author: valory
 version: 0.1.0
 type: contract
@@ -7,11 +7,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
-  build/Realtio.json: bafybeifhuqnulohagjvlzvwis3uj3wgq4jdfugdtjeam5ic2m6eln4ldba
-  contract.py: bafybeieafc7xncks7ly6xrxidnjdjviguy3xxiopn467yt7xmqjhnl2pge
+  build/WxDAI.json: bafybeieypq5oupeqr76i5dpskjpydykj4olfkchdkd75u7dshyylzl42za
+  contract.py: bafybeibanqw3lagpm43oah2k6jrc6kir77klec2uo6n4utktzz7xivbkcq
 fingerprint_ignore_patterns: []
-class_name: RealtioContract
+class_name: WxDAIContract
 contract_interface_paths:
-  ethereum: build/Realtio.json
+  ethereum: build/WxDAI.json
 dependencies: {}
 contracts: []

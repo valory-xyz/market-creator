@@ -23,7 +23,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
-- valory/market_creation_manager_abci:0.1.0:bafybeidqacmhp5lk5xix6qfvtikwdszhdguziwm2w3exgyeroutnupqrei
+- valory/market_creation_manager_abci:0.1.0:bafybeig53w2dazti54swf6uixq4pbrbr5d7ghdfdwvplnq2gj4xftsyndq
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
 behaviours:
@@ -83,7 +83,15 @@ models:
       num_markets: 1
       newsapi_endpoint: https://newsapi.org/v2/everything
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
-      broadcast_to_server: false
+      market_fee: 2.0
+      initial_funds: 1.0
+      market_timeout: 7
+      realitio_contract: '0x0000000000000000000000000000000000000000'
+      realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
+      conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
+      fpmm_deterministic_factory_contract: '0x0000000000000000000000000000000000000000'
+      collateral_tokens_contract: '0x0000000000000000000000000000000000000000'
+      arbitrator_contract: '0x0000000000000000000000000000000000000000'
       cleanup_history_depth: 1
       cleanup_history_depth_current: null
       drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31

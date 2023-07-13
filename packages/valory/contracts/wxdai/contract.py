@@ -27,13 +27,10 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-DEFAULT_OUTCOME_SLOT = 2
-
-
-class ConditionalTokensContract(Contract):
+class WxDAIContract(Contract):
     """The scaffold contract class for a smart contract."""
 
-    contract_id = PublicId.from_str("valory/conditional_tokens:0.1.0")
+    contract_id = PublicId.from_str("valory/wxdai:0.1.0")
 
     @classmethod
     def get_raw_transaction(
@@ -87,83 +84,20 @@ class ConditionalTokensContract(Contract):
         raise NotImplementedError
 
     @classmethod
-    def get_prepare_condition_tx(
+    def get_approve_tx_data(
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        question_id: str,
-        oracle_contract: str,
-        outcome_slot_count: int = DEFAULT_OUTCOME_SLOT,
+        guy: str,
+        amount: int,
     ) -> JSONLike:
-        """Tx for preparing condition for marker maker."""
-        kwargs = {
-            "oracle": ledger_api.api.to_checksum_address(oracle_contract),
-            "questionId": question_id,
-            "outcomeSlotCount": outcome_slot_count,
-        }
-        return ledger_api.build_transaction(
-            contract_instance=cls.get_instance(
-                ledger_api=ledger_api, contract_address=contract_address
-            ),
-            method_name="prepareCondition",
-            method_args=kwargs,
+        """Build approve tx."""
+        contract = cls.get_instance(ledger_api, contract_address)
+        data = contract.encodeABI(
+            fn_name="approve",
+            kwargs={
+                "guy": ledger_api.api.toChecksumAddress(guy),
+                "wad": amount,
+            },
         )
-
-    @classmethod
-    def get_prepare_condition_tx_data(
-        cls,
-        ledger_api: LedgerApi,
-        contract_address: str,
-        question_id: str,
-        oracle_contract: str,
-        outcome_slot_count: int = DEFAULT_OUTCOME_SLOT,
-    ) -> JSONLike:
-        """Tx for preparing condition for marker maker."""
-        kwargs = {
-            "oracle": ledger_api.api.to_checksum_address(oracle_contract),
-            "questionId": question_id,
-            "outcomeSlotCount": outcome_slot_count,
-        }
-        contract_instance = cls.get_instance(
-            ledger_api=ledger_api, contract_address=contract_address
-        )
-        data = contract_instance.encodeABI(fn_name="prepareCondition", kwargs=kwargs)
-        return {"data": bytes.fromhex(data[2:])}
-
-    @classmethod
-    def calculate_condition_id(
-        cls,
-        ledger_api: LedgerApi,
-        contract_address: str,
-        oracle_contract: str,
-        question_id: str,
-        outcome_slot_count: int,
-    ) -> str:
-        """Calculate condition ID."""
-        return {
-            "condition_id": ledger_api.api.solidity_keccak(
-                ["address", "bytes32", "uint256"],
-                [
-                    ledger_api.api.to_checksum_address(oracle_contract),
-                    bytes.fromhex(question_id[2:]),
-                    outcome_slot_count,
-                ],
-            ).hex()
-        }
-
-    @classmethod
-    def get_condition_id(
-        cls,
-        ledger_api: LedgerApi,
-        contract_address: str,
-        tx_digest: str,  # retrieved from `prepareCondition` tx
-    ) -> JSONLike:
-        """Tx for preparing condition for marker maker."""
-        contract_instance = cls.get_instance(
-            ledger_api=ledger_api, contract_address=contract_address
-        )
-        tx_receipt = ledger_api.api.eth.getTransactionReceipt(tx_digest)
-        (log,) = contract_instance.events.ConditionPreparation().processReceipt(
-            tx_receipt
-        )
-        return "0x" + log["args"]["conditionId"].hex()
+        return {"data": bytes.fromhex(data[2:])}  # type: ignore

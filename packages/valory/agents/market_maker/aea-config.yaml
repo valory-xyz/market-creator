@@ -17,9 +17,9 @@ contracts:
 - valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeiaa6fgwtykrti6i7sbt22raavpsbobsq2xgem4nkbcg744agnmkae
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
-- valory/realtio:0.1.0:bafybeihrsxi2sjqyoormpgrsycajchfrglglvp72u2gfthbo6qu35pvhcq
-- valory/conditional_tokens:0.1.0:bafybeig7cc63uvo6lv5mfv5fzga2evr3plozxdobnovanqmckdhenx45hm
-- valory/fpmm_deterministic_factory:0.1.0:bafybeihv5zuz2sn3yb67ndklqrmvfxtyfesooybe5maqeggfronunkbgsi
+- valory/realtio:0.1.0:bafybeihoj7w5dqdyo6ds2rdmi326cvl5wuc7xp6yms7lwks35m4nqypk4q
+- valory/conditional_tokens:0.1.0:bafybeig5vtn7bzpegfrzehdgeezqcnox3xlb5i54ehnqndazhcfh3bkdcq
+- valory/fpmm_deterministic_factory:0.1.0:bafybeihm5cufzmywrcxzmhemhnuekitl5bkrzlj7gybdksuf4ljqjvkbg4
 - valory/service_registry:0.1.0:bafybeibdy55edqs3djptv77ljkmbf6m3zizhutmvwgj3hpsagvmzhr4jbm
 protocols:
 - open_aea/signing:1.0.0:bafybeibqlfmikg5hk4phzak6gqzhpkt6akckx7xppbp53mvwt6r73h7tk4
@@ -34,9 +34,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiff2dqnkeorf343fmb3547fhiznvdw4ewbwl4rqluek2cv6ibl5hi
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
-- valory/market_maker_abci:0.1.0:bafybeiapwaftebohefc5wyx5lmgiovqvlrc3efq4ir47yjwi4w2arjth2e
+- valory/market_maker_abci:0.1.0:bafybeibidcblbety5yctejzlbl3eozgy5x32ov2qacvibkb5iyagkeyooi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
-- valory/market_creation_manager_abci:0.1.0:bafybeidqacmhp5lk5xix6qfvtikwdszhdguziwm2w3exgyeroutnupqrei
+- valory/market_creation_manager_abci:0.1.0:bafybeig53w2dazti54swf6uixq4pbrbr5d7ghdfdwvplnq2gj4xftsyndq
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
@@ -128,6 +128,15 @@ models:
       num_markets: ${int:1}
       newsapi_endpoint: ${str:https://newsapi.org/v2/everything}
       newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
+      market_fee: ${float:2.0}
+      initial_funds: ${float:1.0}
+      market_timeout: ${int:7}
+      realitio_contract: ${str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
+      realitio_oracle_proxy_contract: ${str:0xab16d643ba051c11962da645f74632d3130c81e2}
+      conditional_tokens_contract: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
+      fpmm_deterministic_factory_contract: ${str:0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0}
+      collateral_tokens_contract: ${str:0xe91d153e0b41518a2ce8dd3d7944fa863463a97d}
+      arbitrator_contract: ${str:0xe40dd83a262da3f56976038f1554fe541fa75ecd}
       multisend_address: ${str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       on_chain_service_id: ${int:null}
       reset_tendermint_after: ${int:2}

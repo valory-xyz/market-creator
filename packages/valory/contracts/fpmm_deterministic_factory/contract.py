@@ -31,9 +31,6 @@ from aea.crypto.base import LedgerApi
 
 DEFAULT_MARKET_FEE = 2.0
 
-CONDIOTIONAL_TOKENS_XDAI = "0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce"
-WXDAI_TOKEN = "0xe91d153e0b41518a2ce8dd3d7944fa863463a97d"  # as collateral tokens
-
 
 class FPMMDeterministicFactory(Contract):
     """The scaffold contract class for a smart contract."""
@@ -97,22 +94,27 @@ class FPMMDeterministicFactory(Contract):
         ledger_api: LedgerApi,
         contract_address: str,
         condition_id: str,
+        conditional_tokens: str,
+        collateral_token: str,
         initial_funds: int,
         market_fee: float = DEFAULT_MARKET_FEE,
     ) -> JSONLike:
         """Create FPMM tx"""
         kwargs = {
-            "saltNonce": random.randint(
+            "saltNonce": random.randint(  # nosec
                 0, 1000000
             ),  # https://github.com/protofire/omen-exchange/blob/923756c3a9ac370f8e89af8193393a53531e2c0f/app/src/services/cpk/fns.ts#L942
-            "conditionalTokens": CONDIOTIONAL_TOKENS_XDAI,
-            "collateralToken": WXDAI_TOKEN,
+            "conditionalTokens": ledger_api.api.to_checksum_address(conditional_tokens),
+            "collateralToken": ledger_api.api.to_checksum_address(collateral_token),
             "conditionIds": [condition_id],
             "fee": ledger_api.api.to_wei(
                 number=market_fee / math.pow(10, 2),
                 unit="ether",
             ),
-            "initialFunds": initial_funds,
+            "initialFunds": ledger_api.api.to_wei(
+                number=initial_funds / math.pow(10, 2),
+                unit="ether",
+            ),
             "distributionHint": [],
         }
         return ledger_api.build_transaction(
@@ -129,22 +131,22 @@ class FPMMDeterministicFactory(Contract):
         ledger_api: LedgerApi,
         contract_address: str,
         condition_id: str,
+        conditional_tokens: str,
+        collateral_token: str,
         initial_funds: int,
         market_fee: float = DEFAULT_MARKET_FEE,
     ) -> JSONLike:
         """Create FPMM tx"""
         initial_funds = ledger_api.api.to_wei(
-            number=market_fee / math.pow(10, 2),
+            number=initial_funds / math.pow(10, 2),
             unit="ether",
         )
         kwargs = {
-            "saltNonce": random.randint(
+            "saltNonce": random.randint(  # nosec
                 0, 1000000
             ),  # https://github.com/protofire/omen-exchange/blob/923756c3a9ac370f8e89af8193393a53531e2c0f/app/src/services/cpk/fns.ts#L942
-            "conditionalTokens": ledger_api.api.to_checksum_address(
-                CONDIOTIONAL_TOKENS_XDAI
-            ),
-            "collateralToken": ledger_api.api.to_checksum_address(WXDAI_TOKEN),
+            "conditionalTokens": ledger_api.api.to_checksum_address(conditional_tokens),
+            "collateralToken": ledger_api.api.to_checksum_address(collateral_token),
             "conditionIds": [condition_id],
             "fee": ledger_api.api.to_wei(
                 number=market_fee / math.pow(10, 2),

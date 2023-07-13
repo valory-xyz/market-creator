@@ -20,7 +20,6 @@
 """Script for creating market creator."""
 
 import datetime
-import json
 import os
 import random
 from typing import Any, Dict, Optional, Tuple
@@ -81,7 +80,9 @@ OUTPUT_FORMAT:
 """
 
 
-def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
+def run(  # pylint: disable=too-many-locals
+    **kwargs,
+) -> Tuple[str, Optional[Dict[str, Any]]]:
     """Run the task"""
     openai.api_key = kwargs["api_keys"]["openai"]
     newsapi_api_key = kwargs["api_keys"]["newsapi"]
@@ -96,7 +97,7 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
 
     newsapi_url = "https://newsapi.org/v2/everything"
 
-    newsapi_headers = headers = {"X-Api-Key": newsapi_api_key}
+    newsapi_headers = {"X-Api-Key": newsapi_api_key}
 
     today = datetime.date.today()
     from_date = today - datetime.timedelta(days=7)
@@ -159,13 +160,13 @@ def run(**kwargs) -> Tuple[str, Optional[Dict[str, Any]]]:
 
 
 # Testing the script
-openai_api_key = os.environ.get("OPENAI_API_KEY")
-newsapi_api_key = os.environ.get("NEWSAPI_API_KEY")
-
-kwargs = {
-    "prompt": "unused",
-    "tool": "market-creator",
-    "api_keys": {"openai": openai_api_key, "newsapi": newsapi_api_key},
-}
-
-run(**kwargs)
+run(
+    **{
+        "prompt": "unused",
+        "tool": "market-creator",
+        "api_keys": {
+            "openai": os.environ.get("OPENAI_API_KEY"),
+            "newsapi": os.environ.get("NEWSAPI_API_KEY"),
+        },
+    }
+)

@@ -237,7 +237,7 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
     collection_key = "content"
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
-        "End block."
+        """End block."""
         # TODO: incomplete implementation
         if self.threshold_reached and any(
             [val is not None for val in self.most_voted_payload_values]
@@ -307,7 +307,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         SkippedMarketCreationManagerRound,
     }
     event_to_timeout: EventToTimeout = {}
-    cross_period_persisted_keys: Set[str] = {}
+    cross_period_persisted_keys: Set[str] = set()  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),
     }
