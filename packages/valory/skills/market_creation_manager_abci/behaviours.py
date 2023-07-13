@@ -86,12 +86,12 @@ HTTP_OK = 200
 MAX_RETRIES = 3
 SAFE_TX_GAS = 0
 ETHER_VALUE = 0
-DEFAULT_MARKET_FEE = 2.0
 
-ORACLE_XDAI = "0xab16d643ba051c11962da645f74632d3130c81e2"
-REALTIO_XDAI = "0x79e32aE03fb27B07C89c0c568F80287C01ca2E57"
-CONDIOTIONAL_TOKENS_XDAI = "0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce"
-FPMM_DETERMINISTIC_FACTORY = "0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0"
+
+# ORACLE_XDAI = "0xab16d643ba051c11962da645f74632d3130c81e2"
+# REALTIO_XDAI = "0x79e32aE03fb27B07C89c0c568F80287C01ca2E57"
+# CONDIOTIONAL_TOKENS_XDAI = "0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce"
+# FPMM_DETERMINISTIC_FACTORY = "0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0"
 
 MARKET_IDENTIFICATION_PROMPT = """
 You are an LLM inside a multi-agent system. Your task is to propose a collection of prediction market questions based
@@ -139,6 +139,9 @@ AVAILABLE_FORMATS = (
     "%Y-%m-%dT%H:%M:%SZ",
     "%Y-%m-%d",
 )
+
+
+_ONE_DAY = 86400
 
 
 def parse_date_timestring(string: str) -> Optional[datetime.datetime]:
@@ -392,6 +395,23 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
 
     matching_round: Type[AbstractRound] = PrepareTransactionRound
 
+    def _calculate_time_parameters(
+        self,
+        resolution_time: float,
+        timeout: Optional[int] = None,
+    ) -> Tuple[int, int]:
+        """Calculate time params."""
+        rt = datetime.datetime.fromtimestamp(resolution_time)
+        ct = datetime.datetime.fromtimestamp(
+            self.context.state.round_sequence.last_round_transition_timestamp.timestamp()
+        )
+        time_remaining = rt.day - ct.day
+        days_to_opening = math.floor(time_remaining / 2)
+        opening_time = int(
+            datetime.datetime(year=ct.year, month=ct.month, day=ct.day).timestamp()
+        ) + (days_to_opening * _ONE_DAY)
+        return opening_time, (timeout or DEFAULT_MARKET_TIMEOUT) * _ONE_DAY
+
     def _calculate_question_id(
         self,
         question_data: Dict,
@@ -403,12 +423,13 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         """Calculate question ID."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=REALTIO_XDAI,
+            contract_address=self.params.realitio_contract,
             contract_id=str(RealtioContract.contract_id),
             contract_callable="calculate_question_id",
             question_data=question_data,
             opening_timestamp=opening_timestamp,
             timeout=timeout,
+            arbitrator_contract=self.params.arbitrator_contract,
             sender=self.synchronized_data.safe_contract_address,
             template_id=template_id,
             question_nonce=question_nonce,
@@ -417,38 +438,21 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
 
     def _calculate_condition_id(
         self,
-        oracle: str,
+        oracle_contract: str,
         question_id: str,
         outcome_slot_count: int = 2,
     ) -> Generator[None, None, str]:
         """Calculate question ID."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=CONDIOTIONAL_TOKENS_XDAI,
+            contract_address=self.params.conditional_tokens_contract,
             contract_id=str(ConditionalTokensContract.contract_id),
             contract_callable="calculate_condition_id",
-            oracle=oracle,
+            oracle_contract=oracle_contract,
             question_id=question_id,
             outcome_slot_count=outcome_slot_count,
         )
         return response.state.body["condition_id"]
-
-    def _calculate_time_parameters(
-        self,
-        resolution_time: float,
-    ) -> Tuple[int, int]:
-        """Calculate time params."""
-        rt = datetime.datetime.fromtimestamp(resolution_time)
-        ct = datetime.datetime.fromtimestamp(
-            self.context.state.round_sequence.last_round_transition_timestamp.timestamp()
-        )
-        time_remaining = rt.day - ct.day
-        days_to_opening = math.floor(time_remaining / 2)
-        opening_time = int(
-            datetime.datetime(year=ct.year, month=ct.month, day=ct.day).timestamp()
-        ) + (days_to_opening * 24 * 60 * 60)
-        timeout = 7 * 24 * 60 * 60
-        return opening_time, timeout
 
     def _prepare_ask_question_mstx(
         self,
@@ -461,12 +465,13 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=CONDIOTIONAL_TOKENS_XDAI,
+            contract_address=self.params.conditional_tokens_contract,
             contract_id=str(RealtioContract.contract_id),
             contract_callable="get_ask_question_tx_data",
             question_data=question_data,
             opening_timestamp=opening_timestamp,
             timeout=timeout,
+            arbitrator_contract=self.params.arbitrator_contract,
             template_id=template_id,
             question_nonce=question_nonce,
         )
@@ -476,9 +481,9 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
         return {
-            "to": REALTIO_XDAI,
-            "value": ETHER_VALUE,
+            "to": self.params.realitio_contract,
             "data": response.state.body["data"],
+            "value": response.state.body.get("value", ETHER_VALUE),
         }
 
     def _prepare_prepare_condition_mstx(
@@ -489,10 +494,11 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=CONDIOTIONAL_TOKENS_XDAI,
+            contract_address=self.params.conditional_tokens_contract,
             contract_id=str(ConditionalTokensContract.contract_id),
             contract_callable="get_prepare_condition_tx_data",
             question_id=question_id,
+            oracle_contract=self.params.realitio_oracle_proxy_contract,
             outcome_slot_count=outcome_slot_count,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
@@ -501,24 +507,26 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
         return {
-            "to": CONDIOTIONAL_TOKENS_XDAI,
-            "value": ETHER_VALUE,
+            "to": self.params.conditional_tokens_contract,
             "data": response.state.body["data"],
+            "value": response.state.body.get("value", ETHER_VALUE),
         }
 
     def _prepare_create_fpmm_mstx(
         self,
         condition_id: str,
         initial_funds: int,
-        market_fee: float = DEFAULT_MARKET_FEE,
+        market_fee: float,
     ) -> Generator[None, None, Dict]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=FPMM_DETERMINISTIC_FACTORY,
+            contract_address=self.params.fpmm_deterministic_factory_contract,
             contract_id=str(FPMMDeterministicFactory.contract_id),
             contract_callable="get_create_fpmm_tx_data",
             condition_id=condition_id,
+            conditional_tokens=self.params.conditional_tokens_contract,
+            collateral_token=self.params.collateral_tokens_contract,
             initial_funds=initial_funds,
             market_fee=market_fee,
         )
@@ -528,9 +536,9 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
         return {
-            "to": FPMM_DETERMINISTIC_FACTORY,
-            "value": ETHER_VALUE,
+            "to": self.params.fpmm_deterministic_factory_contract,
             "data": response.state.body["data"],
+            "value": response.state.body.get("value", ETHER_VALUE),
         }
 
     def async_act(self) -> Generator:
@@ -561,12 +569,13 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 question_id=question_id,
             )
             condition_id = yield from self._calculate_condition_id(
-                oracle=ORACLE_XDAI,
+                oracle_contract=self.params.realitio_oracle_proxy_contract,
                 question_id=question_id,
             )
             create_fpmm_tx = yield from self._prepare_create_fpmm_mstx(
                 condition_id=condition_id,
-                initial_funds=1,  # TODO: make configurable
+                initial_funds=self.params.initial_funds,
+                market_fee=self.params.market_fee,
             )
             tx_hash = yield from self._to_multisend(
                 transactions=[ask_question_tx, prepare_condition_tx, create_fpmm_tx]
