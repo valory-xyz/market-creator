@@ -44,6 +44,7 @@ from packages.valory.contracts.multisend.contract import (
     MultiSendOperation,
 )
 from packages.valory.contracts.realtio.contract import RealtioContract
+from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.llm.message import LlmMessage
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
@@ -538,6 +539,27 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             "value": response.state.body.get("value", ETHER_VALUE),
         }
 
+    def _get_approve_tx(self, amount: int) -> Generator[None, None, Optional[Dict]]:
+        """Prepare a multisend tx for `askQuestionMethod`"""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=self.params.collateral_tokens_contract,
+            contract_id=str(WxDAIContract.contract_id),
+            contract_callable="get_approve_tx_data",
+            guy=self.params.fpmm_deterministic_factory_contract,
+            amount=amount,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"get_approve_tx_data unsuccessful!: {response}"
+            )
+            return None
+        return {
+            "to": self.params.fpmm_deterministic_factory_contract,
+            "data": response.state.body["data"],
+            "value": response.state.body.get("value", ETHER_VALUE),
+        }
+
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
@@ -594,8 +616,19 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             if create_fpmm_tx is None:
                 return
 
+            wxdai_approval_tx = yield from self._get_approve_tx(
+                amount=create_fpmm_tx["value"]
+            )
+            if wxdai_approval_tx is None:
+                return
+
             tx_hash = yield from self._to_multisend(
-                transactions=[ask_question_tx, prepare_condition_tx, create_fpmm_tx]
+                transactions=[
+                    wxdai_approval_tx,
+                    ask_question_tx,
+                    prepare_condition_tx,
+                    create_fpmm_tx,
+                ]
             )
             if tx_hash is None:
                 return
