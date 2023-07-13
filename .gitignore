@@ -33,3 +33,5 @@ __pycache__
 temp/
 agent/
 .env
+
+ethereum_private_key.txt

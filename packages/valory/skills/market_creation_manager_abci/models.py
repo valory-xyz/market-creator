@@ -49,6 +49,8 @@ class SharedState(BaseSharedState):
 class MarketCreationManagerParams(BaseParams):
     """Parameters."""
 
+    multisend_address: str
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the parameters object."""
 
@@ -59,9 +61,6 @@ class MarketCreationManagerParams(BaseParams):
             key="newsapi_endpoint", kwargs=kwargs, type_=str
         )
         self.num_markets = kwargs.get("num_markets", DEFAULT_MAX_ALLOWED_MARKETS)
-        self.multisend_address = self._ensure(
-            key="multisend_address", kwargs=kwargs, type_=str
-        )
         self.realitio_contract = self._ensure(
             key="realitio_contract",
             kwargs=kwargs,

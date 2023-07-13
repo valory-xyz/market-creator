@@ -96,7 +96,7 @@ class FPMMDeterministicFactory(Contract):
         condition_id: str,
         conditional_tokens: str,
         collateral_token: str,
-        initial_funds: int,
+        initial_funds: float,
         market_fee: float = DEFAULT_MARKET_FEE,
     ) -> JSONLike:
         """Create FPMM tx"""
@@ -133,7 +133,7 @@ class FPMMDeterministicFactory(Contract):
         condition_id: str,
         conditional_tokens: str,
         collateral_token: str,
-        initial_funds: int,
+        initial_funds: float,
         market_fee: float = DEFAULT_MARKET_FEE,
     ) -> JSONLike:
         """Create FPMM tx"""
