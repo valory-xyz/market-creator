@@ -128,6 +128,15 @@ models:
       num_markets: ${int:1}
       newsapi_endpoint: ${str:https://newsapi.org/v2/everything}
       newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
+      market_fee: ${float:2.0}
+      initial_funds: ${float:1.0}
+      market_timeout: ${int:7}
+      realitio_contract: ${str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
+      realitio_oracle_proxy_contract: ${str:0xab16d643ba051c11962da645f74632d3130c81e2}
+      conditional_tokens_contract: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
+      fpmm_deterministic_factory_contract: ${str:0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0}
+      collateral_tokens_contract: ${str:0xe91d153e0b41518a2ce8dd3d7944fa863463a97d}
+      arbitrator_contract: ${str:0xe40dd83a262da3f56976038f1554fe541fa75ecd}
       multisend_address: ${str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       on_chain_service_id: ${int:null}
       reset_tendermint_after: ${int:2}

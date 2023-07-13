@@ -23,62 +23,36 @@ models:
       log_dir: /logs
   params:
     args:
-      cleanup_history_depth: 1
-      cleanup_history_depth_current: null
-      drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
-      finalize_timeout: 60.0
-      genesis_config:
-        genesis_time: '2022-09-26T00:00:00.000000000Z'
-        chain_id: chain-c4daS1
-        consensus_params:
-          block:
-            max_bytes: '22020096'
-            max_gas: '-1'
-            time_iota_ms: '1000'
-          evidence:
-            max_age_num_blocks: '100000'
-            max_age_duration: '172800000000000'
-            max_bytes: '1048576'
-          validator:
-            pub_key_types:
-            - ed25519
-          version: {}
-        voting_power: '10'
-      history_check_timeout: 1205
-      init_fallback_gas: 0
-      keeper_allowed_retries: 3
-      keeper_timeout: 30.0
-      max_attempts: 10
-      max_healthcheck: 120
-      on_chain_service_id: null
-      reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:30}
-      retry_attempts: 400
-      retry_timeout: 3
-      reset_pause_duration: ${RESET_PAUSE_DURATION:int:10}
-      request_retry_delay: 1.0
-      request_timeout: 10.0
-      round_timeout_seconds: 30.0
-      service_id: market_maker
-      service_registry_address: null
-      setup:
-        all_participants:
-        - '0xBfE475AF374AB552ff22F995b8732DFee25694ea'
-        safe_contract_address: '0x7b2a08Fae878E88efE0aa82599C167E9B0e9BdC4'
-        consensus_threshold: null
-      share_tm_config_on_startup: ${USE_ACN:bool:false}
-      sleep_time: 1
-      tendermint_check_sleep_delay: 3
-      tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
-      tendermint_max_retries: 5
-      tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
-      tendermint_p2p_url: localhost:26656
-      tx_timeout: 10.0
-      use_termination: ${USE_TERMINATION:bool:false}
-      validate_timeout: 1205
-      multisend_address: ${MULTISEND_ADDRESS:str:0x0000000000000000000000000000000000000000}
       num_markets: ${NUM_MARKETS:int:1}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/everything}
       newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
+      market_fee: ${MARKET_FEE:float:2.0}
+      initial_funds: ${INITIAL_FUNDS:float:1.0}
+      market_timeout: ${MARKET_TIMEOUT:int:7}
+      realitio_contract: ${REALITIO_CONTRACT:str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
+      realitio_oracle_proxy_contract: ${REALITIO_ORACLE_PROXY_CONTRACT:str:0xab16d643ba051c11962da645f74632d3130c81e2}
+      conditional_tokens_contract: ${CONDITIONAL_TOKENS_CONTRACT:str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
+      fpmm_deterministic_factory_contract: ${FPMM_DETERMINISTIC_FACTORY_CONTRACT:str:0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0}
+      collateral_tokens_contract: ${COLLATERAL_TOKENS_CONTRACT:str:0xe91d153e0b41518a2ce8dd3d7944fa863463a97d}
+      arbitrator_contract: ${ARBITRATOR_CONTRACT:str:0xe40dd83a262da3f56976038f1554fe541fa75ecd}
+      multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
+      on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
+      reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:2}
+      service_id: market_maker
+      service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
+      setup:
+        all_participants: ${ALL_PARTICIPANTS:list:["0x10E867Ac2Fb0Aa156ca81eF440a5cdf373bE1AaC"]}
+        safe_contract_address: ${SAFE_CONTRACT_ADDRESS:str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}
+        consensus_threshold: ${CONSENSUS_THRESHOLD:int:null}
+      share_tm_config_on_startup: ${SHARE_TM_CONFIG_ON_STARTUP:bool:false}
+      tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
+      tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
+      tendermint_max_retries: ${TENDERMINT_MAX_RETRIES:int:5}
+      tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
+      tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
+      termination_sleep: ${TERMINATION_SLEEP:int:900}
+      tx_timeout: ${TX_TIMEOUT:float:10.0}
+      use_termination: ${USE_TERMINATION:bool:false}
 ---
 public_id: valory/ledger:0.19.0
 type: connection
