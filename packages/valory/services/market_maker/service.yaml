@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeiaqrtm7sxpddyfgef77qrj4wmwgqjy7mmhmyb65wq5yjph7tcyusa
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeihokxrmogo42ows5jfpr6rzt7k6kfwwfl6obj2zgidrcjhhlkxvra
+agent: valory/market_maker:0.1.0:bafybeideivcepy4ho3culphhnpsbbkywvhp5ymtpzwehszocsvpnr4inni
 number_of_agents: 1
 deployment:
   agent:
@@ -59,8 +59,8 @@ type: connection
 config:
   ledger_apis:
     ethereum:
-      address: ${ETHEREUM_LEDGER_RPC:str:http://host.docker.internal:8545}
-      chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
+      address: ${ETHEREUM_LEDGER_RPC:str:https://rpc.gnosischain.com}
+      chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:100}
       poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
       default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
 ---
