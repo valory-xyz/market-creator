@@ -107,6 +107,9 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     ETHEREUM_LEDGER_CHAIN_ID=<chain_id>
     ALL_PARTICIPANTS='["<your_agent_address>"]'
     RESET_PAUSE_DURATION=10
+
+    # The directory specified in KEY_DIR must contain a keys.json file
+    # with the addresses and private keys of the agents.
     KEY_DIR=<path_to_the_folder_containing_your_keys>
     ```
 
