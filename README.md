@@ -10,11 +10,11 @@ MArket creator is an autonomous service that processes worlwide news using an LL
 
 - System requirements:
 
-    - Python `== 3.10`
-    - [Tendermint](https://docs.tendermint.com/v0.34/introduction/install.html) `==0.34.19`
-    - [Poetry](https://python-poetry.org/docs/) `>=1.4.0`
-    - [Docker Engine](https://docs.docker.com/engine/install/)
-    - [Docker Compose](https://docs.docker.com/compose/install/)
+  - Python `== 3.10`
+  - [Tendermint](https://docs.tendermint.com/v0.34/introduction/install.html) `==0.34.19`
+  - [Poetry](https://python-poetry.org/docs/) `>=1.4.0`
+  - [Docker Engine](https://docs.docker.com/engine/install/)
+  - [Docker Compose](https://docs.docker.com/compose/install/)
 
 - Create development environment:
 
@@ -43,20 +43,19 @@ Market creator has following configurable parameters for creating markets and th
 - `collateral_tokens_contract`: Address of the collateral token to be used for market, default is [WxDAI](https://gnosisscan.io/address/0xe91d153e0b41518a2ce8dd3d7944fa863463a97d)
 - `arbitrator_contract`: Address of the arbitration provider contract, default is [kleros](https://gnosisscan.io/address/0xe40DD83a262da3f56976038F1554Fe541Fa75ecd)
 
-
 The market maker agent is configured to work with the gnosis chain by default, if you want to use the agent with other chains you can figure out what contracts to use from [here](https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md)
 
 ## Testing a single agent locally
 
 Run a tendermint node using
 
-```
+```bash
 bash run_tm.sh
 ```
 
 and in a separate terminal, run 
 
-```
+```bash
 bash run_agent.sh
 ```
 
@@ -74,7 +73,8 @@ Also make sure your multisig safe account holds some amount of the tokens which 
 ## Testing the service against Gnosis Mainnet
 
 * Prepare the agent keys:
-    ```
+
+    ```bash
     cat > keys.json << EOF
     [
     {
@@ -85,20 +85,22 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     EOF
     ```
 
-* Prepare an .env file with the following environment variables:
-    ```
+* Prepare an .env file with the following environment variables.
+    Note that if you do not specify an environment variable, it will take its default value from the service configuration file [`packages/valory/services/market_maker/service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml).
+
+    ```bash
     NUM_MARKETS=1
     NEWSAPI_ENDPOINT=https://newsapi.org/v2/everything
     NEWSAPI_API_KEY=<your_news_api_key>
     MARKET_FEE=1
     INITIAL_FUNDS=1
     MARKET_TIMEOUT=7
-    REALITIO_CONTRACT=<realitio_oracle_contract>
-    REALITIO_ORACLE_PROXY_CONTRACT=<realitio_oracle_procy_contract>
-    CONDITIONAL_TOKENS_CONTRACT=<conditional_tokens_contract>
-    FPMM_DETERMINISTIC_FACTORY_CONTRACT=<fpmm_deterministic_factory_contract>
-    COLLATERAL_TOKENS_CONTRACT=<collateral_tokens_contract>
-    ARBITRATOR_CONTRACT=<arbitrator_contract>
+    REALITIO_CONTRACT=0x79e32aE03fb27B07C89c0c568F80287C01ca2E57
+    REALITIO_ORACLE_PROXY_CONTRACT=0xab16d643ba051c11962da645f74632d3130c81e2
+    CONDITIONAL_TOKENS_CONTRACT=0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce
+    FPMM_DETERMINISTIC_FACTORY_CONTRACT=0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0
+    COLLATERAL_TOKENS_CONTRACT=0xe91d153e0b41518a2ce8dd3d7944fa863463a97d
+    ARBITRATOR_CONTRACT=0xe40dd83a262da3f56976038f1554fe541fa75ecd
     MULTISEND_ADDRESS=<multisend_address>
     OPENAI_API_KEY=<your_openai_api_key>
     ETHEREUM_LEDGER_RPC=<chain_rpc_endpoint>
@@ -109,6 +111,7 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     ```
 
 * Build and run the service:
-    ```
+
+    ```bash
     bash run_service.sh
     ```
