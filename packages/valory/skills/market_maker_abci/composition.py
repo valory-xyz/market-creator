@@ -20,6 +20,7 @@
 """This module contains the price estimation ABCI application."""
 
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
+import packages.valory.skills.market_validation_abci.rounds as MarketValidationAbci
 import packages.valory.skills.transaction_settlement_abci.rounds as TransactionSettlementAbci
 from packages.valory.skills.abstract_round_abci.abci_app_chain import (
     AbciAppTransitionMapping,
@@ -45,7 +46,8 @@ abci_app_transition_mapping: AbciAppTransitionMapping = {
     FinishedRegistrationRound: MarketCreationManagerAbci.CollectRandomnessRound,
     MarketCreationManagerAbci.SkippedMarketCreationManagerRound: ResetAndPauseRound,
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    TransactionSettlementAbci.FinishedTransactionSubmissionRound: ResetAndPauseRound,
+    TransactionSettlementAbci.FinishedTransactionSubmissionRound: MarketValidationAbci.MarketValidationRound,
+    MarketValidationAbci.FinishedMarketValidationRound: ResetAndPauseRound,
     TransactionSettlementAbci.FailedRound: ResetAndPauseRound,
     FinishedResetAndPauseRound: MarketCreationManagerAbci.CollectRandomnessRound,
     FinishedResetAndPauseErrorRound: RegistrationRound,
@@ -55,8 +57,9 @@ MarketCreatorAbciApp = chain(
     (
         AgentRegistrationAbciApp,
         MarketCreationManagerAbci.MarketCreationManagerAbciApp,
-        ResetPauseAbciApp,
         TransactionSettlementAbci.TransactionSubmissionAbciApp,
+        MarketValidationAbci.MarketValidationAbciApp,
+        ResetPauseAbciApp,
     ),
     abci_app_transition_mapping,
 ).add_termination(

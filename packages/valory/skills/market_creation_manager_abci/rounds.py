@@ -119,7 +119,6 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """Process the end of the block."""
         if self.threshold_reached:
-
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 newsapi_api_retries = cast(
                     SynchronizedData, self.synchronized_data
@@ -141,26 +140,12 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
             if self.most_voted_payload == DataGatheringRound.MAX_MARKETS_REACHED:
                 return self.synchronized_data, Event.MAX_MARKETS_REACHED
 
-            # TODO convert to JSON at this point? Needs to update SynchronizedData type
-            payload = self.most_voted_payload
-
             synchronized_data = self.synchronized_data.update(
                 synchronized_data_class=SynchronizedData,
                 **{
-                    get_name(SynchronizedData.gathered_data): payload,
+                    get_name(SynchronizedData.gathered_data): self.most_voted_payload,
                 },
             )
-
-            markets_created = cast(
-                SynchronizedData, self.synchronized_data
-            ).markets_created
-            synchronized_data = self.synchronized_data.update(
-                synchronized_data_class=SynchronizedData,
-                **{
-                    get_name(SynchronizedData.markets_created): markets_created + 1,
-                },
-            )
-
             return synchronized_data, Event.DONE
 
         if not self.is_majority_possible(
@@ -307,7 +292,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         SkippedMarketCreationManagerRound,
     }
     event_to_timeout: EventToTimeout = {}
-    cross_period_persisted_keys: Set[str] = set()  # type: ignore
+    cross_period_persisted_keys: Set[str] = {
+        get_name(SynchronizedData.markets_created),
+    }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),
     }

@@ -1,4 +1,4 @@
-name: market_creation_manager_abci
+name: market_validation_abci
 author: valory
 version: 0.1.0
 type: skill
@@ -6,29 +6,18 @@ description: The scaffold skill is a scaffold for your own skill implementation.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
-  __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeibk6m7coeuwe7oein5sfrdokru5sdufnqfasteq22gwddibfvgn3a
-  dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
-  fsm_specification.yaml: bafybeiavvdym5n466iu3sfpbcqz7ws5ktngkgq7cae3ews7uzn7qmu5hd4
-  handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeia2tysbh5wcnydrac4nl6p3c6obcvbrenxiitmleefj25nao4j5lq
-  payloads.py: bafybeigqc6yzvpw6k5vqnwy2zaixnzp2obafedmw5muaggn6m7hzeeqwii
-  rounds.py: bafybeiezvg5pjhuat7xn2u4wgtgfbd6toxftbw5n4flfpm3hf2agnk3wwm
-  tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
+  __init__.py: bafybeiawwcetwfooxyf4n4escdhxxpskwughjjdjjjaxqp2qigsl4galuu
+  behaviours.py: bafybeibcp3bpthlww2h6exvodgvg2nf4hjv5lyuqnlyrdt7iupguuvyldq
+  dialogues.py: bafybeifjczqf2hux2tizbrpkf2qm2hxdbniltjxs5dq2rae465aqh5bx7u
+  handlers.py: bafybeicch7szc3fjgt5kcm2uckc42yejmuiqbnhdv7ikcime6g3zl4i4hy
+  models.py: bafybeibuknwe3b3cbaqmxy2pnlzpd7izhxz45tpxa3u2yfjj47juz3nqga
+  payloads.py: bafybeiba3epzsg2f7ob2smnv2nrvc3tdxjbozjq7avtmsybtqrsv3cwpei
+  rounds.py: bafybeify37qbhmxd34ve2vac2ujcgkpq45zo32po23gn5prtn3i5pigrvu
+  tests/__init__.py: bafybeie3yyutjsurwy2yftglik53gbw7f7jmxjc4rrp55imsqc7pcbmvgy
 fingerprint_ignore_patterns: []
-connections:
-- valory/openai:0.1.0:bafybeietimatztynqebwicxabplia6fctov4vswzbdrin5y32brbjewo2y
-contracts:
-- valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
-- valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
-- valory/realtio:0.1.0:bafybeihoj7w5dqdyo6ds2rdmi326cvl5wuc7xp6yms7lwks35m4nqypk4q
-- valory/conditional_tokens:0.1.0:bafybeig5vtn7bzpegfrzehdgeezqcnox3xlb5i54ehnqndazhcfh3bkdcq
-- valory/fpmm_deterministic_factory:0.1.0:bafybeig4ztnqgyaespzlcmcom56nvmi4c4paddsxsjsh5q7olnylu3z7ou
-- valory/wxdai:0.1.0:bafybeie3c5enerf54jt75xc62mbzck4kjqxpjx2mzo6v4rrz4dmcy4xdgy
-protocols:
-- valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
-- valory/contract_api:1.0.0:bafybeidv6wxpjyb2sdyibnmmum45et4zcla6tl63bnol6ztyoqvpl4spmy
+connections: []
+contracts: []
+protocols: []
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
@@ -83,18 +72,6 @@ models:
     class_name: LlmDialogues
   params:
     args:
-      num_markets: 1
-      newsapi_endpoint: https://newsapi.org/v2/everything
-      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
-      market_fee: 2.0
-      initial_funds: 1.0
-      market_timeout: 7
-      realitio_contract: '0x0000000000000000000000000000000000000000'
-      realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
-      conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
-      fpmm_deterministic_factory_contract: '0x0000000000000000000000000000000000000000'
-      collateral_tokens_contract: '0x0000000000000000000000000000000000000000'
-      arbitrator_contract: '0x0000000000000000000000000000000000000000'
       cleanup_history_depth: 1
       cleanup_history_depth_current: null
       drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
