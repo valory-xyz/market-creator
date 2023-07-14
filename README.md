@@ -36,12 +36,12 @@ Market creator has following configurable parameters for creating markets and th
 - `market_fee`: Fees for creating a market, default is 2 unit (Eth, xDAI, etc...)
 - `initial_funds`: Initial funds for the market, default is 1 unit (Eth, xDAI, WxDAI, etc...)
 - `market_timeout`: Time for which the market should be active after opening, default is 7 days
-- `realitio_contract`: Address of the realitio oracle contract, [default](https://blockscout.com/poa/xdai/address/0x79e32aE03fb27B07C89c0c568F80287C01ca2E57/)
-- `realitio_oracle_proxy_contract`: Address of the realitio oracle proxy contract, [default](https://blockscout.com/poa/xdai/address/0x2bf1BFb0eB6276a4F4B60044068Cb8CdEB89f79B/)
-- `conditional_tokens_contract`: Address of the conditional tokens that are going to be used, [default](https://blockscout.com/poa/xdai/address/0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce/)
-- `fpmm_deterministic_factory_contract`: Address of the fixed product marker maker contract, [default](https://blockscout.com/poa/xdai/address/0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0)
-- `collateral_tokens_contract`: Address of the collateral token to be used for market, default is [WxDAI](https://blockscout.com/poa/xdai/address/0xe91d153e0b41518a2ce8dd3d7944fa863463a97d)
-- `arbitrator_contract`: Address of the arbitration provider contract, default is [kleros](https://blockscout.com/poa/xdai/address/0xe40DD83a262da3f56976038F1554Fe541Fa75ecd)
+- `realitio_contract`: Address of the realitio oracle contract, [default](https://gnosisscan.io/address/0x79e32aE03fb27B07C89c0c568F80287C01ca2E57/)
+- `realitio_oracle_proxy_contract`: Address of the realitio oracle proxy contract, [default](https://gnosisscan.io/address/0x2bf1BFb0eB6276a4F4B60044068Cb8CdEB89f79B/)
+- `conditional_tokens_contract`: Address of the conditional tokens that are going to be used, [default](https://gnosisscan.io/address/0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce/)
+- `fpmm_deterministic_factory_contract`: Address of the fixed product marker maker contract, [default](https://gnosisscan.io/address/0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0)
+- `collateral_tokens_contract`: Address of the collateral token to be used for market, default is [WxDAI](https://gnosisscan.io/address/0xe91d153e0b41518a2ce8dd3d7944fa863463a97d)
+- `arbitrator_contract`: Address of the arbitration provider contract, default is [kleros](https://gnosisscan.io/address/0xe40DD83a262da3f56976038F1554Fe541Fa75ecd)
 
 
 The market maker agent is configured to work with the gnosis chain by default, if you want to use the agent with other chains you can figure out what contracts to use from [here](https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md)
@@ -85,7 +85,7 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     EOF
     ```
 
-* Prepare an .env file like the following:
+* Prepare an .env file with the following environment variables:
     ```
     NUM_MARKETS=1
     NEWSAPI_ENDPOINT=https://newsapi.org/v2/everything
