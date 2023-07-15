@@ -1,6 +1,6 @@
 # Market creator
 
-Market creator is an autonomous service created with the [Open Autonomy framework](https://docs.autonolas.network/open-autonomy/) that processes worldwide news using an LLM and opens prediction markets on the Gnosis chain. The service roughly works as follows:
+Market creator (market maker) is an autonomous service created with the [Open Autonomy framework](https://docs.autonolas.network/open-autonomy/) that processes worldwide news using an LLM and opens prediction markets on the Gnosis chain. The service roughly works as follows:
 
 1. Gather headlines and summaries of recent news through a third-party provider.
 2. Interact with an LLM (using the gathered information in the previous step) to obtain a collection of suitable questions to open prediction markets associated to future events.
@@ -36,7 +36,7 @@ Market creator is an autonomous service created with the [Open Autonomy framewor
 
 ## Market maker runtime parameters
 
-Market creator has several configurable parameters for creating markets. These parameters can be configured at agent level (i.e., when running the code as a single agent) in the file [`packages/valory/agents/market_maker/aea-config.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/agents/market_maker/aea-config.yaml) ); and at service level (i.e., when running the code as a service composed of agent(s)) in the file [`packages/valory/services/market_maker/service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml)).
+Market maker has several configurable parameters for creating markets. These parameters can be configured at agent level (i.e., when running the code as a single agent) in the file [`packages/valory/agents/market_maker/aea-config.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/agents/market_maker/aea-config.yaml) ); and at service level (i.e., when running the code as a service composed of agent(s)) in the file [`packages/valory/services/market_maker/service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml)).
 
 - `num_markets`: Number of markets an agent to allowed to create before, default is 1
 - `market_fee`: Fees for creating a market, default is 2 unit (Eth, xDAI, etc...)
