@@ -1,12 +1,14 @@
 # Market creator
 
-MArket creator is an autonomous service that processes worlwide news using an LLM and creates bets on prediction markets on the Gnosis chain.
+Market creator is an autonomous service created with the [Open Autonomy framework](https://docs.autonolas.network/open-autonomy/) that processes worldwide news using an LLM and opens prediction markets on the Gnosis chain. The service roughly works as follows:
+
+1. Gather headlines and summaries of recent news through a third-party provider.
+2. Interact with an LLM (using the gathered information in the previous step) to obtain a collection of suitable questions to open prediction markets associated to future events.
+3. Filter/choose an appropriate question from the previous step.
+4. Send the necessary transactions to the Gnosis chain to open and fund the chosen prediction market.
+5. Repeat the steps 1-4. When NUM_MARKETS (configurable) have been created, the service will cycle in a waiting state.
 
 ## Developers
-
-- Clone the repository:
-
-      git clone https://github.com/valory-xyz/market-creator.git
 
 - System requirements:
 
@@ -15,6 +17,10 @@ MArket creator is an autonomous service that processes worlwide news using an LL
   - [Poetry](https://python-poetry.org/docs/) `>=1.4.0`
   - [Docker Engine](https://docs.docker.com/engine/install/)
   - [Docker Compose](https://docs.docker.com/compose/install/)
+
+- Clone the repository:
+
+      git clone https://github.com/valory-xyz/market-creator.git
 
 - Create development environment:
 
@@ -28,9 +34,9 @@ MArket creator is an autonomous service that processes worlwide news using an LL
 
       autonomy packages sync --update-packages
 
-## Market maker runtime paramaters
+## Market maker runtime parameters
 
-Market creator has following configurable parameters for creating markets and these can be configured at both agent and service level.
+Market creator has following configurable parameters for creating markets and these can be configured when running the service at agent level (file [`packages/valory/agents/market_maker/aea-config.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/agents/market_maker/aea-config.yaml) ) and service level (file [`packages/valory/services/market_maker/service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml)).
 
 - `num_markets`: Number of markets an agent to allowed to create before, default is 1
 - `market_fee`: Fees for creating a market, default is 2 unit (Eth, xDAI, etc...)
@@ -43,17 +49,17 @@ Market creator has following configurable parameters for creating markets and th
 - `collateral_tokens_contract`: Address of the collateral token to be used for market, default is [WxDAI](https://gnosisscan.io/address/0xe91d153e0b41518a2ce8dd3d7944fa863463a97d)
 - `arbitrator_contract`: Address of the arbitration provider contract, default is [kleros](https://gnosisscan.io/address/0xe40DD83a262da3f56976038F1554Fe541Fa75ecd)
 
-The market maker agent is configured to work with the gnosis chain by default, if you want to use the agent with other chains you can figure out what contracts to use from [here](https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md)
+The market maker agent is configured to work with the Gnosis chain by default, if you want to use the agent with other chains you can figure out what contracts to use from [here](https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md)
 
 ## Testing a single agent locally
 
-Run a tendermint node using
+Run a Tendermint node using
 
 ```bash
 bash run_tm.sh
 ```
 
-and in a separate terminal, run 
+and in a separate terminal, run
 
 ```bash
 bash run_agent.sh
@@ -61,14 +67,13 @@ bash run_agent.sh
 
 Now running an agent this way, will not create any market since the agent depends on gnosis multisig contract to execute the final transactions which actually creates the agent. So if you want to run an agent end 2 end you will require a gnosis multisig safe with 1 registered member. To do this run following in your terminal
 
-```
+```bash
 aea generate-key ethereum
 ```
 
 This will generate a ethereum private in your working directory in a file named `ethereum_private_key.txt`. You can add some funds to this key and create a gnosis multisig using their [app](https://app.safe.global/welcome). Once you create a multisig, update the [safe_contract_address](https://github.com/valory-xyz/market-creator/blob/0bab9ff6b41c2f024cc1f0d2aa149347fd0f47a9/packages/valory/agents/market_maker/aea-config.yaml#L149) parameter on the `aea-config.yaml` and use the `ethereum_private_key.txt` to run the agent using the script mentioned above. 
 
 Also make sure your multisig safe account holds some amount of the tokens which you're planning on using as collateral. By default the agent uses `WxDAI` as collateral.
-
 
 ## Testing the service against Gnosis Mainnet
 
