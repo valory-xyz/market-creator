@@ -36,7 +36,7 @@ Market creator is an autonomous service created with the [Open Autonomy framewor
 
 ## Market maker runtime parameters
 
-Market creator has following configurable parameters for creating markets and these can be configured when running the service at agent level (file [`packages/valory/agents/market_maker/aea-config.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/agents/market_maker/aea-config.yaml) ) and service level (file [`packages/valory/services/market_maker/service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml)).
+Market creator has several configurable parameters for creating markets. These parameters can be configured at agent level (i.e., when running the code as a single agent) in the file [`packages/valory/agents/market_maker/aea-config.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/agents/market_maker/aea-config.yaml) ); and at service level (i.e., when running the code as a service composed of agent(s)) in the file [`packages/valory/services/market_maker/service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml)).
 
 - `num_markets`: Number of markets an agent to allowed to create before, default is 1
 - `market_fee`: Fees for creating a market, default is 2 unit (Eth, xDAI, etc...)
