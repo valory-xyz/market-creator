@@ -6,7 +6,7 @@ Market creator is an autonomous service created with the [Open Autonomy framewor
 2. Interact with an LLM (using the gathered information in the previous step) to obtain a collection of suitable questions to open prediction markets associated to future events.
 3. Filter/choose an appropriate question from the previous step.
 4. Send the necessary transactions to the Gnosis chain to open and fund the chosen prediction market.
-5. Repeat the steps 1-4. When NUM_MARKETS (configurable) have been created, the service will cycle in a waiting state.
+5. Repeat steps 1-4. When `NUM_MARKETS` (configurable) have been created, the service will cycle in a waiting state.
 
 ## Developers
 
