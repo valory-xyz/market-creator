@@ -19,7 +19,7 @@
 
 """This module contains the shared state for the abci skill of MarketCreationManagerAbciApp."""
 
-from typing import Any
+from typing import Any, List
 
 from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
 from packages.valory.skills.abstract_round_abci.models import (
@@ -60,7 +60,7 @@ class MarketCreationManagerParams(BaseParams):
         self.newsapi_endpoint = self._ensure(
             key="newsapi_endpoint", kwargs=kwargs, type_=str
         )
-        self.topics = self._ensure(key="topics", kwargs=kwargs, type_=list)
+        self.topics = self._ensure(key="topics", kwargs=kwargs, type_=List[str])
         self.num_markets = kwargs.get("num_markets", DEFAULT_MAX_ALLOWED_MARKETS)
         self.realitio_contract = self._ensure(
             key="realitio_contract",
