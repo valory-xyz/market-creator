@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeiaqrtm7sxpddyfgef77qrj4wmwgqjy7mmhmyb65wq5yjph7tcyusa
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeideivcepy4ho3culphhnpsbbkywvhp5ymtpzwehszocsvpnr4inni
+agent: valory/market_maker:0.1.0:bafybeiglszehadci65i5zornrm7lgamytbsfvcognpo3rzc6t4quciyfsy
 number_of_agents: 1
 deployment:
   agent:
@@ -26,6 +26,8 @@ models:
       num_markets: ${NUM_MARKETS:int:1}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/everything}
       newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
+      topics: ${TOPICS:list:["business", "cryptocurrency", "politics", "science",
+        "technology"]}
       market_fee: ${MARKET_FEE:float:2.0}
       initial_funds: ${INITIAL_FUNDS:float:1.0}
       market_timeout: ${MARKET_TIMEOUT:int:7}
@@ -67,7 +69,7 @@ config:
 public_id: valory/openai:0.1.0
 type: connection
 config:
-  engine: ${ENGINE:str:text-davinci-003}
+  engine: ${ENGINE:str:gpt-4}
   max_tokens: ${MAX_TOKENS:int:500}
   openai_api_key: ${OPENAI_API_KEY:str:null}
   temperature: ${TEMPERATURE:float:0.7}

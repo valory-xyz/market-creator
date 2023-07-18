@@ -60,6 +60,7 @@ class MarketCreationManagerParams(BaseParams):
         self.newsapi_endpoint = self._ensure(
             key="newsapi_endpoint", kwargs=kwargs, type_=str
         )
+        self.topics = self._ensure(key="topics", kwargs=kwargs, type_=list)
         self.num_markets = kwargs.get("num_markets", DEFAULT_MAX_ALLOWED_MARKETS)
         self.realitio_contract = self._ensure(
             key="realitio_contract",

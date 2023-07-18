@@ -11,7 +11,7 @@ connections:
 - valory/abci:0.1.0:bafybeihofnsokowicviac6yz3uhur52l3mf54s2hz4i2je5ie4vlruouga
 - valory/http_client:0.23.0:bafybeidykl4elwbcjkqn32wt5h4h7tlpeqovrcq3c5bcplt6nhpznhgczi
 - valory/ledger:0.19.0:bafybeicgfupeudtmvehbwziqfxiz6ztsxr5rxzvalzvsdsspzz73o5fzfi
-- valory/openai:0.1.0:bafybeietimatztynqebwicxabplia6fctov4vswzbdrin5y32brbjewo2y
+- valory/openai:0.1.0:bafybeidnryrgq6jp3mqvjcpei4nesbey54fhyrcvginby7fer32z32kpai
 - valory/p2p_libp2p_client:0.1.0:bafybeidwcobzb7ut3efegoedad7jfckvt2n6prcmd4g7xnkm6hp6aafrva
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
@@ -35,9 +35,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiff2dqnkeorf343fmb3547fhiznvdw4ewbwl4rqluek2cv6ibl5hi
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
-- valory/market_maker_abci:0.1.0:bafybeidgyj5mizwayhrksxwurdrkq6qt6bk7kp74bdhwlronanvday5nfq
+- valory/market_maker_abci:0.1.0:bafybeidytjnmvuwtdm6vnovlsuacxjf4w4pdv75bepkje7rxgym3gqcity
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
-- valory/market_creation_manager_abci:0.1.0:bafybeicflt5saxi5zy35wczb5ne7aqfavbkegvvx4h3dqc3dg5cz5j6o6a
+- valory/market_creation_manager_abci:0.1.0:bafybeihmfdsjaw6mktoeo7k3yzfvbd6p6bo6oakbxco47bxa3xjymk6t44
 - valory/market_validation_abci:0.1.0:bafybeibh52btg2eiil5jhlhjzr4s4wplns2bqtqcal2mlt26nhqoulecye
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
@@ -98,7 +98,7 @@ config:
 public_id: valory/openai:0.1.0
 type: connection
 config:
-  engine: ${str:text-davinci-003}
+  engine: ${str:gpt-4}
   max_tokens: ${int:500}
   openai_api_key: ${str:null}
   temperature: ${float:0.7}
@@ -130,6 +130,12 @@ models:
       num_markets: ${int:1}
       newsapi_endpoint: ${str:https://newsapi.org/v2/everything}
       newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
+      topics:
+      - business
+      - cryptocurrency
+      - politics
+      - science
+      - technology
       market_fee: ${float:2.0}
       initial_funds: ${float:1.0}
       market_timeout: ${int:7}

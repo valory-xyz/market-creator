@@ -127,7 +127,7 @@ OUTPUT_FORMAT:
   - question: The binary question to open a prediction market.
   - answers: The possible answers to the question.
   - resolution_date: The resolution date for the outcome of the market to be verified.
-  - topic: One word description of topic the news and it should be one of the business, cryptocurrency, politics, science, technology.
+  - topic: One word description of topic the news and it should be one of: {topics}.
 * Output only the JSON object. Do not include any other contents in your response.
 """
 
@@ -200,8 +200,10 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
         today = datetime.date.today()
         from_date = today - datetime.timedelta(days=7)
         to_date = today
+        topics_string = " OR ".join(self.params.topics)
+
         parameters = {
-            "q": "business OR cryptocurrency OR politics OR science OR technology",
+            "q": topics_string,
             "language": "en",
             "sortBy": "popularity",
             "from": from_date.strftime("%y-%m-%d"),
@@ -304,8 +306,10 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
             date = article["publishedAt"]
             input_news += f"- ({date}) {title}\n  {content}\n\n"
 
+        topics = ", ".join(self.params.topics)
         prompt_template = MARKET_IDENTIFICATION_PROMPT
-        prompt_values = {"input_news": input_news}
+        prompt_values = {"input_news": input_news, "topics": topics}
+
         self.context.logger.info(
             f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
         )
