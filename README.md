@@ -15,11 +15,14 @@ MArket creator is an autonomous service that processes worlwide news using an LL
     - [Poetry](https://python-poetry.org/docs/) `>=1.4.0`
     - [Docker Engine](https://docs.docker.com/engine/install/)
     - [Docker Compose](https://docs.docker.com/compose/install/)
-
+ 
 - Create development environment:
 
+      poetry run pip install "cython<3"
+      poetry run pip install wheel==0.40.0
+      poetry run pip install --no-build-isolation pyyaml==5.4.1
       poetry install && poetry shell
-
+  
 - Configure command line:
 
       autonomy init --reset --author valory --remote --ipfs --ipfs-node "/dns/registry.autonolas.tech/tcp/443/https"
