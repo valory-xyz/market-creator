@@ -19,7 +19,7 @@ MArket creator is an autonomous service that processes worlwide news using an LL
 - Create development environment:
 
       poetry run pip install "cython<3"
-      poetry run pip install wheel
+      poetry run pip install wheel==0.40.0
       poetry run pip install --no-build-isolation pyyaml==5.4.1
       poetry install && poetry shell
   
