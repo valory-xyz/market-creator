@@ -23,7 +23,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
-- valory/market_creation_manager_abci:0.1.0:bafybeibnamhslciyhw554m6bdhb5u7fhlp2xbllytpxzkgz3fqi64qzsfm
+- valory/market_creation_manager_abci:0.1.0:bafybeibtggzbymf2a44yikpzbhcoq4xlywr6cpy2k5weo4e32kvr4tfwky
 - valory/market_validation_abci:0.1.0:bafybeibh52btg2eiil5jhlhjzr4s4wplns2bqtqcal2mlt26nhqoulecye
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
@@ -81,6 +81,7 @@ models:
     class_name: LlmDialogues
   params:
     args:
+      market_identification_prompt: market_identification_prompt
       num_markets: 1
       newsapi_endpoint: https://newsapi.org/v2/everything
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
