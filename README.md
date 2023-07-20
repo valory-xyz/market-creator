@@ -70,10 +70,9 @@ This will generate a ethereum private in your working directory in a file named 
 
 Also make sure your multisig safe account holds some amount of the tokens which you're planning on using as collateral. By default the agent uses `WxDAI` as collateral.
 
-
 ## Testing the service against Gnosis Mainnet
 
-* Prepare the agent keys:
+- Prepare the agent keys:
     ```
     cat > keys.json << EOF
     [
@@ -85,7 +84,7 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     EOF
     ```
 
-* Prepare an .env file with the following environment variables:
+- Prepare an .env file with the following environment variables:
     ```
     NUM_MARKETS=1
     NEWSAPI_ENDPOINT=https://newsapi.org/v2/everything
@@ -106,9 +105,14 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     ALL_PARTICIPANTS='["<your_agent_address>"]'
     RESET_PAUSE_DURATION=10
     KEY_DIR=<path_to_the_folder_containing_your_keys>
+
+    # Topics to create questions 
+    TOPICS='["business","science","technology","politics","arts","weather"]'
     ```
 
-* Build and run the service:
-    ```
+- Edit the file `market_identification_prompt.txt`. You must include the placeholders `{input_news}` and `{topics}` in the prompt.
+
+- Build and run the service:
+    ```bash
     bash run_service.sh
     ```
