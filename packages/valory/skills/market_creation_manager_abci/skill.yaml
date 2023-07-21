@@ -8,17 +8,17 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeidi5uqweqoa2ysz52rxfbakyibvfcjrnmifsx7kjiw4bjrnpmwqqq
+  behaviours.py: bafybeidvgj3ykbqllais6ghxc5cxfnsi5bfm3ghvqw2z2ak3vg3wloye3m
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiavvdym5n466iu3sfpbcqz7ws5ktngkgq7cae3ews7uzn7qmu5hd4
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeia2tysbh5wcnydrac4nl6p3c6obcvbrenxiitmleefj25nao4j5lq
+  models.py: bafybeibwd6fqkzexrcqqkflqfdyhzam72g552rtcl3jbof2ioygrwvmqdm
   payloads.py: bafybeigqc6yzvpw6k5vqnwy2zaixnzp2obafedmw5muaggn6m7hzeeqwii
   rounds.py: bafybeiezvg5pjhuat7xn2u4wgtgfbd6toxftbw5n4flfpm3hf2agnk3wwm
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
-- valory/openai:0.1.0:bafybeietimatztynqebwicxabplia6fctov4vswzbdrin5y32brbjewo2y
+- valory/openai:0.1.0:bafybeidnryrgq6jp3mqvjcpei4nesbey54fhyrcvginby7fer32z32kpai
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeif5fdwoxq5mscrurtuimadmtctyxxeeui45u4g6leqobzls7bsl3u
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
@@ -83,9 +83,16 @@ models:
     class_name: LlmDialogues
   params:
     args:
+      market_identification_prompt: market_identification_prompt
       num_markets: 1
       newsapi_endpoint: https://newsapi.org/v2/everything
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      topics:
+      - business
+      - cryptocurrency
+      - politics
+      - science
+      - technology
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 7

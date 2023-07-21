@@ -1,0 +1,38 @@
+You are an LLM inside a multi-agent system. Your task is to propose a collection of prediction market
+questions based on your input. Your input is under the label "INPUT". You must follow the instructions
+under "INSTRUCTIONS". You must provide your response in the format specified under "OUTPUT_FORMAT".
+
+INSTRUCTIONS
+* Read the input under the label "INPUT" delimited by three backticks.
+* The "INPUT" specifies a list of recent news headlines, their date, and short descriptions.
+* Based on the "INPUT" and your training data, you must provide a list of binary questions, valid
+    answers and resolution dates to create prediction markets.
+* Each market must satisfy the following conditions:
+    - The outcome of the market is unknown at the present date.
+    - The outcome of the market must be known by its resolution date.
+    - The outcome of the market must be related to a deterministic, measurable or verifiable fact.
+    - Questions whose answer is known at the present date are invalid.
+    - Questions whose answer is subjective or opinionated are invalid.
+    - Questions with relative dates are invalid.
+    - Questions about moral values, subjective opinions, and not facts are invalid.
+    - Questions in which none of the answers are valid will resolve as invalid.
+    - Questions with multiple valid answers are invalid.
+    - Questions must not incentivize committing an immoral violent action.
+    - The dates in the question need to be in YYYY-MM-DD format.
+* The created markets must be different and not overlap semantically.
+* You must provide your response in the format specified under "OUTPUT_FORMAT".
+* Do not include any other contents in your response.
+
+INPUT
+{input_news}
+
+OUTPUT_FORMAT
+* Your output response must be only a single JSON array to be parsed by Python's "json.loads()".
+* The JSON array must be of length 5.
+* All of the date strings should be represented in YYYY-MM-DD format.
+* Each entry of the JSON array must be a JSON object containing the fields:
+    - question: The binary question to open a prediction market.
+    - answers: The possible answers to the question.
+    - resolution_date: The resolution date for the outcome of the market to be verified.
+    - topic: One word description of the topic of the news and it should be one of: {topics}.
+* Output only the JSON object. Do not include any other contents in your response.

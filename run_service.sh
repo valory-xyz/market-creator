@@ -2,9 +2,16 @@
 
 # Load env vars
 export $(grep -v '^#' .env | xargs)
+export MARKET_IDENTIFICATION_PROMPT=$(sed -e ':a' -e 'N' -e '$!ba' \
+  -e 's/"/\\"/g' \
+  -e "s/'/\\\'/g" \
+  -e 's/:/;/g' \
+  -e 's/\n/\\n/g' \
+  market_identification_prompt.txt)
 
 make clean
 
+autonomy packages lock
 autonomy push-all
 
 autonomy fetch --local --service valory/market_maker && cd market_maker

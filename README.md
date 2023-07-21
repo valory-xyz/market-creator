@@ -80,7 +80,7 @@ Also make sure your multisig safe account holds some amount of the tokens which 
 
 ## Testing the service against Gnosis Mainnet
 
-* Prepare the agent keys:
+- Prepare the agent keys:
 
     ```bash
     cat > keys.json << EOF
@@ -93,7 +93,8 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     EOF
     ```
 
-* Prepare an .env file with the following environment variables.
+
+- Prepare an .env file with the following environment variables.
     Note that if you do not specify an environment variable, it will take its default value from the service configuration file [`packages/valory/services/market_maker/service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml).
 
     ```bash
@@ -119,9 +120,14 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     # The directory specified in KEY_DIR must contain a keys.json file
     # with the addresses and private keys of the agents.
     KEY_DIR=<path_to_the_folder_containing_your_keys>
+
+    # Topics to create questions 
+    TOPICS='["business","science","technology","politics","arts","weather"]'
     ```
 
-* Build and run the service:
+- Edit the file `market_identification_prompt.txt`. You must include the placeholders `{input_news}` and `{topics}` in the prompt.
+
+- Build and run the service:
 
     ```bash
     bash run_service.sh
