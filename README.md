@@ -44,7 +44,8 @@ Market maker has several configurable parameters for creating markets. These par
 - `num_markets`: Number of markets an agent to allowed to create before, default is 1
 - `market_fee`: Fees for creating a market, default is 2 unit (Eth, xDAI, etc...)
 - `initial_funds`: Initial funds for the market, default is 1 unit (Eth, xDAI, WxDAI, etc...)
-- `market_timeout`: Time for which the market should be active after opening, default is 7 days
+- `market_timeout`: Maximum time allowed for finalizing answer on `realitio`, default is 7 days
+- `minimum_market_time`: Minimum time for which the market should be active after opening, default is 7 days
 - `realitio_contract`: Address of the realitio oracle contract, [default](https://gnosisscan.io/address/0x79e32aE03fb27B07C89c0c568F80287C01ca2E57/)
 - `realitio_oracle_proxy_contract`: Address of the realitio oracle proxy contract, [default](https://gnosisscan.io/address/0x2bf1BFb0eB6276a4F4B60044068Cb8CdEB89f79B/)
 - `conditional_tokens_contract`: Address of the conditional tokens that are going to be used, [default](https://gnosisscan.io/address/0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce/)
