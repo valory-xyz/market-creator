@@ -8,11 +8,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeidvgj3ykbqllais6ghxc5cxfnsi5bfm3ghvqw2z2ak3vg3wloye3m
+  behaviours.py: bafybeia46mxgimhoxmduet2pwttnfvghijzxfly47yf6j63m6itqy7kopy
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiavvdym5n466iu3sfpbcqz7ws5ktngkgq7cae3ews7uzn7qmu5hd4
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeibwd6fqkzexrcqqkflqfdyhzam72g552rtcl3jbof2ioygrwvmqdm
+  models.py: bafybeigawan3bvvblfsxr6tpqouykk2vrda3ooaizruzbioygz7o46u464
   payloads.py: bafybeigqc6yzvpw6k5vqnwy2zaixnzp2obafedmw5muaggn6m7hzeeqwii
   rounds.py: bafybeiezvg5pjhuat7xn2u4wgtgfbd6toxftbw5n4flfpm3hf2agnk3wwm
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
@@ -96,6 +96,7 @@ models:
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 7
+      minimum_market_time: 7
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'

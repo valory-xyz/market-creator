@@ -37,6 +37,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 DEFAULT_MARKET_FEE = 2.0
 DEFAULT_INITIAL_FUNDS = 1.0
 DEFAULT_MARKET_TIMEOUT = 7  # days
+DEFAULT_MINIMUM_MARKET_TIME = 7  # days
 DEFAULT_MAX_ALLOWED_MARKETS = 1
 
 
@@ -97,8 +98,10 @@ class MarketCreationManagerParams(BaseParams):
         )
         self.market_fee = kwargs.get("market_fee", DEFAULT_MARKET_FEE)
         self.market_timeout = kwargs.get("market_timeout", DEFAULT_MARKET_TIMEOUT)
+        self.minimum_market_time = kwargs.get(
+            "minimum_market_time", DEFAULT_MINIMUM_MARKET_TIME
+        )
         self.initial_funds = kwargs.get("initial_funds", DEFAULT_INITIAL_FUNDS)
-
         super().__init__(*args, **kwargs)
 
 

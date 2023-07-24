@@ -290,19 +290,22 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
         self.context.logger.info(f"Got LLM response: {result}")
         data = json.loads(result)
         valid_responses = []
-        minimum_resolution_date = datetime.datetime.fromtimestamp(
+        # Opening date for realitio oracle contract and closing date
+        # for answering question on omen market
+        minimum_opening_date = datetime.datetime.fromtimestamp(
             self.context.state.round_sequence.last_round_transition_timestamp.timestamp()
-            + (3600 * 24)
+            + (_ONE_DAY * self.params.minimum_market_time)
         )
         for q in data:
             try:
+                # Date of the outcome
                 resolution_date = parse_date_timestring(q["resolution_date"])
                 if resolution_date is None:
                     self.context.logger.error(
                         "Cannot parse datestring " + q["resolution_date"]
                     )
                     continue
-                if resolution_date < minimum_resolution_date:
+                if resolution_date < minimum_opening_date:
                     self.context.logger.error(
                         "Invalid resolution date " + q["resolution_date"]
                     )
