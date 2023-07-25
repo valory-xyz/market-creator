@@ -6,7 +6,14 @@
 <body>
     <h1>Market Approval Server</h1>
     
-    Server running at {{ server_ip }}.
+    <p>Server running at {{ server_ip }}.</p>
+
+    <p>This server is used to obtain user approval of automatically proposed prediction markets:</p>
+    <ol>
+        <li>The market creator service proposes tentative markets (<code>proposed_markets</code> database).</li>
+        <li>The user reviews the proposed markets and approves or rejects them. Markets are moved to <code>approved_markets</code> or <code>rejected_markets</code>, respectively.</li>
+        <li>The market creator service reads the <code>approved_markets</code> database and process them. Processed markets are placed on the <code>processed_markets</code> database.</li>
+    </ol>
 
     <h2>View the server databases</h2>
     <ul>
