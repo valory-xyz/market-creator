@@ -54,6 +54,13 @@ class MarketProposalPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
+class RetrieveApprovedMarketPayload(BaseTxPayload):
+    """Represent a transaction payload for the RetrieveApprovedMarketRound."""
+
+    content: str
+
+
+@dataclass(frozen=True)
 class PrepareTransactionPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 

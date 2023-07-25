@@ -39,6 +39,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     DataGatheringPayload,
     MarketProposalPayload,
     PrepareTransactionPayload,
+    RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
@@ -55,6 +56,7 @@ class Event(Enum):
     API_ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
     MAX_MARKETS_REACHED = "max_markets_reached"
+    NO_MARKETS_RETRIEVED = "no_markets_retrieved"
 
 
 class SynchronizedData(TxSynchronizedData):
@@ -80,9 +82,14 @@ class SynchronizedData(TxSynchronizedData):
         return cast(int, self.db.get("markets_created", 0))
 
     @property
-    def question_data(self) -> dict:
-        """Get the question_data."""
-        return cast(dict, self.db.get_strict("question_data"))
+    def proposed_question_data(self) -> dict:
+        """Get the proposed_question_data."""
+        return cast(dict, self.db.get_strict("proposed_question_data"))
+
+    @property
+    def approved_question_data(self) -> dict:
+        """Get the approved_question_data."""
+        return cast(dict, self.db.get_strict("approved_question_data"))
 
     @property
     def most_voted_tx_hash(self) -> str:
@@ -198,14 +205,73 @@ class MarketProposalRound(OnlyKeeperSendsRound):
             return self.synchronized_data, Event.API_ERROR
 
         # Happy path
-        question_data = json.loads(
+        proposed_question_data = json.loads(
             cast(MarketProposalPayload, self.keeper_payload).content
         )  # there could be problems loading this from the LLM response
 
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
             **{
-                get_name(SynchronizedData.question_data): question_data,
+                get_name(
+                    SynchronizedData.proposed_question_data
+                ): proposed_question_data,
+            },
+        )
+
+        return synchronized_data, Event.DONE
+
+
+class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
+    """RetrieveApprovedMarketRound"""
+
+    payload_class = RetrieveApprovedMarketPayload
+    payload_attribute = "content"
+    synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
+    NO_MARKETS_RETRIEVED_PAYLOAD = "NO_MARKETS_RETRIEVED_PAYLOAD"
+
+    def end_block(
+        self,
+    ) -> Optional[
+        Tuple[BaseSynchronizedData, Enum]
+    ]:  # pylint: disable=too-many-return-statements
+        """Process the end of the block."""
+        if self.keeper_payload is None:
+            return None
+
+        # Keeper did not send
+        if self.keeper_payload is None:  # pragma: no cover
+            return self.synchronized_data, Event.DID_NOT_SEND
+
+        # API error
+        if (
+            cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
+            == self.ERROR_PAYLOAD
+        ):
+            return self.synchronized_data, Event.API_ERROR
+
+        # No markets available
+        if (
+            cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
+            == self.NO_MARKETS_RETRIEVED_PAYLOAD
+        ):
+            return self.synchronized_data, Event.NO_MARKETS_RETRIEVED
+
+        # Happy path
+        approved_question_data = json.loads(
+            cast(MarketProposalPayload, self.keeper_payload).content
+        )
+
+        synchronized_data = self.synchronized_data.update(
+            synchronized_data_class=SynchronizedData,
+            **{
+                get_name(
+                    SynchronizedData.approved_question_data
+                ): approved_question_data,
             },
         )
 
@@ -273,11 +339,19 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         MarketProposalRound: {
+            Event.DONE: RetrieveApprovedMarketRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.DID_NOT_SEND: CollectRandomnessRound,
+            Event.API_ERROR: CollectRandomnessRound,
+        },
+        RetrieveApprovedMarketRound: {
             Event.DONE: PrepareTransactionRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
             Event.DID_NOT_SEND: CollectRandomnessRound,
             Event.API_ERROR: CollectRandomnessRound,
+            Event.NO_MARKETS_RETRIEVED: SkippedMarketCreationManagerRound,
         },
         PrepareTransactionRound: {
             Event.DONE: FinishedMarketCreationManagerRound,
