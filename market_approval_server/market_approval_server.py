@@ -299,8 +299,8 @@ load_config()
 if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
     # Run with SSL/TLS (HTTPS)
     logger.info("Running server in HTTPS mode")
-    app.run(debug=True, ssl_context=(CERT_FILE, KEY_FILE))
+    app.run(debug=False, ssl_context=(CERT_FILE, KEY_FILE))
 else:
     # Run without SSL/TLS (HTTP)
     logger.info("Running server in HTTP mode")
-    app.run(debug=True)
+    app.run(debug=False)
