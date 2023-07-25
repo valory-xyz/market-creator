@@ -35,7 +35,7 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiff2dqnkeorf343fmb3547fhiznvdw4ewbwl4rqluek2cv6ibl5hi
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
-- valory/market_maker_abci:0.1.0:bafybeignuwnyimpjjyszvbrfiibhpbvf6hngkpaqgtmqs3moduhu345lqi
+- valory/market_maker_abci:0.1.0:bafybeibd36qejc5syzaqd6sf3nav3ovigt772txjijlpqquqqw7vb4tdnm
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
 - valory/market_creation_manager_abci:0.1.0:bafybeidxyk4iaq3u67nnxkvrddbqxav2qdlw3lkaemxhgfnlsujqnwspqm
 - valory/market_validation_abci:0.1.0:bafybeibh52btg2eiil5jhlhjzr4s4wplns2bqtqcal2mlt26nhqoulecye
@@ -74,7 +74,7 @@ logging_config:
 skill_exception_policy: stop_and_exit
 dependencies:
   open-aea-ledger-ethereum:
-    version: ==1.35.0
+    version: ==1.36.0
 default_connection: null
 ---
 public_id: valory/abci:0.1.0
