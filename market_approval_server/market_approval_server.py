@@ -46,6 +46,7 @@ CLI Usage:
 """
 
 
+import hashlib
 import logging
 import os
 import uuid
@@ -61,7 +62,7 @@ CONFIG_FILE = "server_config.json"
 LOG_FILE = "market_approval_server.log"
 CERT_FILE = "server_cert.pem"
 KEY_FILE = "server_key.pem"
-DEFAULT_API_KEYS = {"f4b253f69ce3b3d2626891b6adf035a5": "default_user"}
+DEFAULT_API_KEYS = {"454d31ff03590ff36836e991d3287b23146a7a84c79d082732b56268fe472823": "default_user"}
 
 # Global variable to store the markets
 proposed_markets: Dict[str, Any] = {}
@@ -69,7 +70,7 @@ approved_markets: Dict[str, Any] = {}
 rejected_markets: Dict[str, Any] = {}
 processed_markets: Dict[str, Any] = {}
 
-# Dictionary to store valid API keys and associated data
+# Dictionary to store the SHA-256 hash of valid API keys and user names.
 api_keys: Dict[str, str] = {}
 
 
@@ -109,9 +110,14 @@ def save_config() -> None:
         json.dump(data, f, indent=4)
 
 
+def hash(m: str) -> str:
+    """Generate the SHA-256 hash of the API key."""
+    return hashlib.sha256(m.encode(encoding='utf-8')).hexdigest()
+
+
 def check_api_key(api_key: str) -> bool:
     """Checks the API key."""
-    return api_key in api_keys
+    return hash(api_key) in api_keys
 
 
 @app.route("/proposed_markets", methods=["GET"])
@@ -298,8 +304,8 @@ load_config()
 if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
     # Run with SSL/TLS (HTTPS)
     logger.info("Running server in HTTPS mode")
-    app.run(debug=False, ssl_context=(CERT_FILE, KEY_FILE))
+    app.run(debug=True, ssl_context=(CERT_FILE, KEY_FILE))
 else:
     # Run without SSL/TLS (HTTP)
     logger.info("Running server in HTTP mode")
-    app.run(debug=False)
+    app.run(debug=True)
