@@ -33,6 +33,7 @@ CLI Usage:
     - Service API:
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k http://127.0.0.1:5000/propose_market
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/process_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -k http://127.0.0.1:5000/get_process_random_approved_market
 
     - User API
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/approve_market
@@ -49,6 +50,7 @@ CLI Usage:
 import hashlib
 import logging
 import os
+import random
 import uuid
 from logging.handlers import RotatingFileHandler
 from typing import Any, Dict, Tuple
@@ -62,7 +64,9 @@ CONFIG_FILE = "server_config.json"
 LOG_FILE = "market_approval_server.log"
 CERT_FILE = "server_cert.pem"
 KEY_FILE = "server_key.pem"
-DEFAULT_API_KEYS = {"454d31ff03590ff36836e991d3287b23146a7a84c79d082732b56268fe472823": "default_user"}
+DEFAULT_API_KEYS = {
+    "454d31ff03590ff36836e991d3287b23146a7a84c79d082732b56268fe472823": "default_user"
+}
 
 # Global variable to store the markets
 proposed_markets: Dict[str, Any] = {}
@@ -112,7 +116,7 @@ def save_config() -> None:
 
 def hash(m: str) -> str:
     """Generate the SHA-256 hash of the API key."""
-    return hashlib.sha256(m.encode(encoding='utf-8')).hexdigest()
+    return hashlib.sha256(m.encode(encoding="utf-8")).hexdigest()
 
 
 def check_api_key(api_key: str) -> bool:
@@ -223,7 +227,7 @@ def propose_market() -> Tuple[Response, int]:
 
         proposed_markets[market_id] = market
         save_config()
-        return jsonify({"info": f"Market ID {market_id} added successfully."}), 201
+        return jsonify({"info": f"Market ID {market_id} added successfully."}), 200
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
 
@@ -270,6 +274,31 @@ def move_market() -> Tuple[Response, int]:
         move_to[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} {action_msg}."}), 200
+
+    except Exception as e:  # pylint: disable=broad-except
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/get_process_random_approved_market", methods=["POST"])
+def get_random_approved_market() -> Tuple[Response, int]:
+    """Gets a random approved market and moves it to the processed markets."""
+    try:
+        api_key = request.headers.get("Authorization")
+        if not check_api_key(api_key):
+            return jsonify({"error": "Unauthorized access. Invalid API key."}), 401
+
+        if not approved_markets:
+            return (
+                jsonify({"info": "No approved markets available."}),
+                204,
+            )  # No content
+
+        market_id = random.choice(list(approved_markets.keys()))
+        market = approved_markets[market_id]
+        del approved_markets[market_id]
+        processed_markets[market_id] = market
+        save_config()
+        return jsonify(market), 200
 
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500

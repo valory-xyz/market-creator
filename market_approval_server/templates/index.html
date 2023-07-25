@@ -38,6 +38,10 @@
             <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k {{ server_ip }}/process_market</pre>
         </li>
 
+        <li>Get a random accepted market and mark it as processed:
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -k {{ server_ip }}/get_process_random_approved_market</pre>
+        </li>
+
         <li>Clear <code>proposed_markets</code> database:
             <pre>curl -X DELETE -H "Authorization: YOUR_API_KEY" -k {{ server_ip }}/clear_proposed_markets</pre>
         </li>
