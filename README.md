@@ -44,7 +44,7 @@ Market maker has several configurable parameters for creating markets. These par
 - `num_markets`: Number of markets an agent to allowed to create before, default is 1
 - `market_fee`: Fees for creating a market, default is 2 unit (Eth, xDAI, etc...)
 - `initial_funds`: Initial funds for the market, default is 1 unit (Eth, xDAI, WxDAI, etc...)
-- `market_timeout`: Maximum time allowed for finalizing answer on `realitio`, default is 7 days
+- `market_timeout`: Maximum time allowed for finalizing answer on `realitio`, default is 1 day
 - `minimum_market_time`: Minimum time for which the market should be active after opening, default is 7 days
 - `realitio_contract`: Address of the realitio oracle contract, [default](https://gnosisscan.io/address/0x79e32aE03fb27B07C89c0c568F80287C01ca2E57/)
 - `realitio_oracle_proxy_contract`: Address of the realitio oracle proxy contract, [default](https://gnosisscan.io/address/0x2bf1BFb0eB6276a4F4B60044068Cb8CdEB89f79B/)
@@ -104,7 +104,7 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     NEWSAPI_API_KEY=<your_news_api_key>
     MARKET_FEE=1
     INITIAL_FUNDS=1
-    MARKET_TIMEOUT=7
+    MARKET_TIMEOUT=1
     REALITIO_CONTRACT=0x79e32aE03fb27B07C89c0c568F80287C01ca2E57
     REALITIO_ORACLE_PROXY_CONTRACT=0xab16d643ba051c11962da645f74632d3130c81e2
     CONDITIONAL_TOKENS_CONTRACT=0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce

@@ -21,7 +21,6 @@
 
 import datetime
 import json
-import math
 import random
 from abc import ABC
 from typing import Dict, Generator, List, Optional, Set, Tuple, Type, cast
@@ -364,15 +363,8 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         timeout: int,
     ) -> Tuple[int, int]:
         """Calculate time params."""
-        rt = datetime.datetime.fromtimestamp(resolution_time)
-        ct = datetime.datetime.fromtimestamp(
-            self.context.state.round_sequence.last_round_transition_timestamp.timestamp()
-        )
-        time_remaining = rt.day - ct.day
-        days_to_opening = math.floor(time_remaining / 2)
-        opening_time = int(
-            datetime.datetime(year=ct.year, month=ct.month, day=ct.day).timestamp()
-        ) + (days_to_opening * _ONE_DAY)
+        days_to_opening = datetime.datetime.fromtimestamp(resolution_time + _ONE_DAY)
+        opening_time = int(days_to_opening.timestamp())
         return opening_time, timeout * _ONE_DAY
 
     def _calculate_question_id(

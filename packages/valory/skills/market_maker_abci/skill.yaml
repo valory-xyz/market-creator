@@ -23,7 +23,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
-- valory/market_creation_manager_abci:0.1.0:bafybeidxyk4iaq3u67nnxkvrddbqxav2qdlw3lkaemxhgfnlsujqnwspqm
+- valory/market_creation_manager_abci:0.1.0:bafybeibzkagwhyryodk64xwpil5ks6zzyeovaxezhte6itba34coyqxpe4
 - valory/market_validation_abci:0.1.0:bafybeibh52btg2eiil5jhlhjzr4s4wplns2bqtqcal2mlt26nhqoulecye
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
 - valory/transaction_settlement_abci:0.1.0:bafybeihdpac4ayfgop3ixflimlb3zzyeejlpqtljfptdak6tc7aq4u5fzi
@@ -93,7 +93,7 @@ models:
       - technology
       market_fee: 2.0
       initial_funds: 1.0
-      market_timeout: 7
+      market_timeout: 1
       minimum_market_time: 7
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'

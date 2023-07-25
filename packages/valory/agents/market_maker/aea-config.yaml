@@ -35,9 +35,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiff2dqnkeorf343fmb3547fhiznvdw4ewbwl4rqluek2cv6ibl5hi
 - valory/abstract_round_abci:0.1.0:bafybeiac62ennpw54gns2quk4g3yoaili2mb72nj6c52czobz5dcwj4mwi
-- valory/market_maker_abci:0.1.0:bafybeibd36qejc5syzaqd6sf3nav3ovigt772txjijlpqquqqw7vb4tdnm
+- valory/market_maker_abci:0.1.0:bafybeihli27l5nehhmfgi7n37q5i2rcl7kmsxd3xdypqfffy47nr36gdgi
 - valory/registration_abci:0.1.0:bafybeib6fsfur5jnflcveidnaeylneybwazewufzwa5twnwovdqgwtwsxm
-- valory/market_creation_manager_abci:0.1.0:bafybeidxyk4iaq3u67nnxkvrddbqxav2qdlw3lkaemxhgfnlsujqnwspqm
+- valory/market_creation_manager_abci:0.1.0:bafybeibzkagwhyryodk64xwpil5ks6zzyeovaxezhte6itba34coyqxpe4
 - valory/market_validation_abci:0.1.0:bafybeibh52btg2eiil5jhlhjzr4s4wplns2bqtqcal2mlt26nhqoulecye
 - valory/reset_pause_abci:0.1.0:bafybeibqz7y3i4aepuprhijwdydkcsbqjtpeea6gdzpp5fgc6abrvjz25a
 - valory/termination_abci:0.1.0:bafybeieb3gnvjxxsh73g67m7rivzknwb63xu4qeagpkv7f4mqz33ecikem
@@ -165,7 +165,7 @@ models:
       topics: ${list:["business","cryptocurrency","politics","science","technology"]}
       market_fee: ${float:2.0}
       initial_funds: ${float:1.0}
-      market_timeout: ${int:7}
+      market_timeout: ${int:1}
       minimum_market_time: ${int:7}
       realitio_contract: ${str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
       realitio_oracle_proxy_contract: ${str:0xab16d643ba051c11962da645f74632d3130c81e2}

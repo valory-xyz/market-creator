@@ -36,7 +36,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 
 DEFAULT_MARKET_FEE = 2.0
 DEFAULT_INITIAL_FUNDS = 1.0
-DEFAULT_MARKET_TIMEOUT = 7  # days
+DEFAULT_MARKET_TIMEOUT = 1  # days
 DEFAULT_MINIMUM_MARKET_TIME = 7  # days
 DEFAULT_MAX_ALLOWED_MARKETS = 1
 
