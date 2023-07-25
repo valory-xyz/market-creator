@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeiaqrtm7sxpddyfgef77qrj4wmwgqjy7mmhmyb65wq5yjph7tcyusa
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeif2yrqbzmyjjdewccyjgk5pow74ofvgxbijxsjgzyv6mpzcj4fdxu
+agent: valory/market_maker:0.1.0:bafybeiet2tz3eztfcjkhczlwmc6lor3d4bhb3mccwt5sramf6j2dq2z67q
 number_of_agents: 1
 deployment:
   agent:
@@ -61,7 +61,8 @@ models:
       topics: ${TOPICS:list:["business","cryptocurrency","politics","science","technology"]}
       market_fee: ${MARKET_FEE:float:2.0}
       initial_funds: ${INITIAL_FUNDS:float:1.0}
-      market_timeout: ${MARKET_TIMEOUT:int:7}
+      market_timeout: ${MARKET_TIMEOUT:int:1}
+      minimum_market_time: ${MINIMUM_MARKET_TIME:int:7}
       realitio_contract: ${REALITIO_CONTRACT:str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
       realitio_oracle_proxy_contract: ${REALITIO_ORACLE_PROXY_CONTRACT:str:0xab16d643ba051c11962da645f74632d3130c81e2}
       conditional_tokens_contract: ${CONDITIONAL_TOKENS_CONTRACT:str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
