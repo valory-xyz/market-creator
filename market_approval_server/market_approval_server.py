@@ -228,7 +228,6 @@ def propose_market() -> Tuple[Response, int]:
 def move_market() -> Tuple[Response, int]:
     """Moves a market from one database to another accordingly."""
 
-    logging.info("move_market")
     try:
         api_key = request.headers.get("Authorization")
         if not check_api_key(api_key):
