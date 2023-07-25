@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Market Approval Server</title>
+</head>
+<body>
+    <h1>Market Approval Server</h1>
+    
+    Server running at {{ server_ip }}.
+
+    <h2>View the server databases</h2>
+    <ul>
+        <li><a href="/proposed_markets">Proposed markets</a></li>
+        <li><a href="/approved_markets">Approved markets</a></li>
+        <li><a href="/rejected_markets">Rejected markets</a></li>
+        <li><a href="/processed_markets">Processed markets</a></li>
+    </ul>
+
+    <h2>Main interaction methods</h2>
+
+    <ul>
+        <li>Approve a market:
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k {{ server_ip }}/approve_market</pre>
+        </li>
+
+        <li>Reject a market:
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k {{ server_ip }}/reject_market</pre>
+        </li>
+    </ul>
+
+    <h2>Other methods</h2>
+    <ul>
+        <li>Propose a market:
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k {{ server_ip }}/propose_market</pre>
+        </li>
+
+        <li>Mark a market as processed:
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k {{ server_ip }}/process_market</pre>
+        </li>
+
+        <li>Clear <code>proposed_markets</code> database:
+            <pre>curl -X DELETE -H "Authorization: YOUR_API_KEY" -k {{ server_ip }}/clear_proposed_markets</pre>
+        </li>
+
+        <li>Clear <code>approved_markets</code> database:
+            <pre>curl -X DELETE -H "Authorization: YOUR_API_KEY" -k {{ server_ip }}/clear_approved_markets</pre>
+        </li>
+
+        <li>Clear <code>rejected_markets</code> database:
+            <pre>curl -X DELETE -H "Authorization: YOUR_API_KEY" -k {{ server_ip }}/clear_rejected_markets</pre>
+        </li>
+
+        <li>Clear <code>processed_markets</code> database:
+            <pre>curl -X DELETE -H "Authorization: YOUR_API_KEY" -k {{ server_ip }}/clear_processed_markets</pre>
+        </li>
+
+        <li>Clear all markets databases:
+            <pre>curl -X DELETE -H "Authorization: YOUR_API_KEY" -k {{ server_ip }}/clear_all</pre>
+        </li> 
+    </ul>
+</body>
+</html>
