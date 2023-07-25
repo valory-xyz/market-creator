@@ -143,7 +143,8 @@ def get_markets() -> Tuple[Response, int]:
         else:
             return jsonify({"error": "Invalid endpoint."}), 404
 
-        return jsonify({endpoint: markets}), 200
+        response_json = json.dumps({endpoint: markets}, indent=4)
+        return Response(response_json, status=200, content_type="application/json")
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
 
