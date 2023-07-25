@@ -37,7 +37,7 @@ from packages.valory.skills.abstract_round_abci.base import (
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectRandomnessPayload,
     DataGatheringPayload,
-    MarketIdentificationPayload,
+    MarketProposalPayload,
     PrepareTransactionPayload,
     SelectKeeperPayload,
 )
@@ -166,10 +166,10 @@ class SelectKeeperRound(CollectSameUntilThresholdRound):
     selection_key = get_name(SynchronizedData.most_voted_keeper_address)
 
 
-class MarketIdentificationRound(OnlyKeeperSendsRound):
-    """MarketIdentificationRound"""
+class MarketProposalRound(OnlyKeeperSendsRound):
+    """MarketProposalRound"""
 
-    payload_class = MarketIdentificationPayload
+    payload_class = MarketProposalPayload
     payload_attribute = "content"
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
@@ -192,14 +192,14 @@ class MarketIdentificationRound(OnlyKeeperSendsRound):
 
         # API error
         if (
-            cast(MarketIdentificationPayload, self.keeper_payload).content
+            cast(MarketProposalPayload, self.keeper_payload).content
             == self.ERROR_PAYLOAD
         ):
             return self.synchronized_data, Event.API_ERROR
 
         # Happy path
         question_data = json.loads(
-            cast(MarketIdentificationPayload, self.keeper_payload).content
+            cast(MarketProposalPayload, self.keeper_payload).content
         )  # there could be problems loading this from the LLM response
 
         synchronized_data = self.synchronized_data.update(
@@ -268,11 +268,11 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         SelectKeeperRound: {
-            Event.DONE: MarketIdentificationRound,
+            Event.DONE: MarketProposalRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
-        MarketIdentificationRound: {
+        MarketProposalRound: {
             Event.DONE: PrepareTransactionRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,

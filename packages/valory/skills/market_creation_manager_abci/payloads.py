@@ -47,8 +47,8 @@ class SelectKeeperPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
-class MarketIdentificationPayload(BaseTxPayload):
-    """Represent a transaction payload for the MarketIdentificationRound."""
+class MarketProposalPayload(BaseTxPayload):
+    """Represent a transaction payload for the MarketProposalRound."""
 
     content: str
 

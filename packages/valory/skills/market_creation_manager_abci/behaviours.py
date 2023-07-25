@@ -69,8 +69,8 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     DataGatheringPayload,
     DataGatheringRound,
     MarketCreationManagerAbciApp,
-    MarketIdentificationPayload,
-    MarketIdentificationRound,
+    MarketProposalPayload,
+    MarketProposalRound,
     PrepareTransactionPayload,
     PrepareTransactionRound,
     SelectKeeperPayload,
@@ -189,17 +189,17 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
         return json.dumps(response_data, sort_keys=True)
 
 
-class SelectKeeperMarketIdentificationBehaviour(SelectKeeperBehaviour):
+class SelectKeeperMarketProposalBehaviour(SelectKeeperBehaviour):
     """Select the keeper agent."""
 
     matching_round = SelectKeeperRound
     payload_class = SelectKeeperPayload
 
 
-class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
-    """MarketIdentificationBehaviour"""
+class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
+    """MarketProposalBehaviour"""
 
-    matching_round: Type[AbstractRound] = MarketIdentificationRound
+    matching_round: Type[AbstractRound] = MarketProposalRound
 
     def _i_am_not_sending(self) -> bool:
         """Indicates if the current agent is the sender or not."""
@@ -239,7 +239,7 @@ class MarketIdentificationBehaviour(MarketCreationManagerBaseBehaviour):
             if payload_data is None:
                 return
             sender = self.context.agent_address
-            payload = MarketIdentificationPayload(
+            payload = MarketProposalPayload(
                 sender=sender, content=json.dumps(payload_data, sort_keys=True)
             )
 
@@ -691,7 +691,7 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     behaviours: Set[Type[BaseBehaviour]] = {
         CollectRandomnessBehaviour,
         DataGatheringBehaviour,
-        SelectKeeperMarketIdentificationBehaviour,
-        MarketIdentificationBehaviour,
+        SelectKeeperMarketProposalBehaviour,
+        MarketProposalBehaviour,
         PrepareTransactionBehaviour,
     }
