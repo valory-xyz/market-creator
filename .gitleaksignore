@@ -22,3 +22,5 @@ d6a9fc51493bdf246f5f857dfc0ebd6b4e7207c8:packages/valory/skills/market_creator_a
 d6a9fc51493bdf246f5f857dfc0ebd6b4e7207c8:packages/valory/skills/market_creator_abci/skill.yaml:generic-api-key:86
 098d5a3d9a9629ef4da44c21f3f7fdb1e02886fd:packages/valory/skills/market_creation_manager_abci/behaviours.py:generic-api-key:93
 32e26ca806ca67db802d9ca33d47b9de09819edb:packages/valory/skills/market_validation_abci/skill.yaml:generic-api-key:77
+d256f9c02981a48df2b4a9b2ec4ccd042d154e40:README.md:generic-api-key:100
+d256f9c02981a48df2b4a9b2ec4ccd042d154e40:README.md:generic-api-key:102
