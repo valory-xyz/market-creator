@@ -24,9 +24,6 @@ Market creator (market maker) is an autonomous service created with the [Open Au
 
 - Create development environment:
 
-      poetry run pip install "cython<3"
-      poetry run pip install wheel==0.40.0
-      poetry run pip install --no-build-isolation pyyaml==5.4.1
       poetry install && poetry shell
   
 - Configure command line:
