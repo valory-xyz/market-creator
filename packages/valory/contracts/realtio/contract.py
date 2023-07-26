@@ -192,3 +192,23 @@ class RealtioContract(Contract):
             ],
         )
         return {"question_id": question_id.hex()}
+
+    @classmethod
+    def get_questions(cls, ledger_api: LedgerApi, contract_address, user_address: str, **kwargs: Any) -> JSONLike:
+        """Get questions."""
+        contract = cls.get_instance(ledger_api=ledger_api, contract_address=contract_address)
+        entries = contract.events.Unbonding.createFilter(
+            fromBlock="earliest",
+            toBlock="latest",
+            argument_filters=dict(user=user_address),
+        ).get_all_entries()
+        events = list(
+            dict(
+                tx_hash=entry.transactionHash.hex(),
+                block_number=entry.blockNumber,
+                question=entry["args"]["question"],
+                opening_ts=entry["args"]["opening_ts"],
+            )
+            for entry in entries
+        )
+        return dict(data=events)

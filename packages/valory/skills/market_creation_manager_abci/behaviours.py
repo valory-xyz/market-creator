@@ -77,7 +77,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     RetrieveApprovedMarketRound,
     SelectKeeperPayload,
     SelectKeeperRound,
-    SynchronizedData,
+    SynchronizedData, RemoveFundingRound,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -123,12 +123,48 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         """Return the params."""
         return cast(MarketCreationManagerParams, super().params)
 
+    def _calculate_condition_id(
+        self,
+        oracle_contract: str,
+        question_id: str,
+        outcome_slot_count: int = 2,
+    ) -> Generator[None, None, str]:
+        """Calculate question ID."""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=self.params.conditional_tokens_contract,
+            contract_id=str(ConditionalTokensContract.contract_id),
+            contract_callable="calculate_condition_id",
+            oracle_contract=oracle_contract,
+            question_id=question_id,
+            outcome_slot_count=outcome_slot_count,
+        )
+        return cast(str, response.state.body["condition_id"])
+
 
 class CollectRandomnessBehaviour(RandomnessBehaviour):
     """CollectRandomnessBehaviour"""
 
     matching_round: Type[AbstractRound] = CollectRandomnessRound
     payload_class = CollectRandomnessPayload
+
+
+class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
+    """Remove funding behaviour."""
+
+    matching_round = RemoveFundingRound
+
+
+    def async_act(self) -> Generator:
+        """Do the act, supporting asynchronous execution."""
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            sender = self.context.agent_address
+            payload = PrepareTransactionPayload(sender=sender)
+        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+            yield from self.send_a2a_transaction(payload)
+            yield from self.wait_until_round_end()
+        self.set_done()
+
 
 
 class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
@@ -513,24 +549,6 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             question_nonce=question_nonce,
         )
         return cast(str, response.state.body["question_id"])
-
-    def _calculate_condition_id(
-        self,
-        oracle_contract: str,
-        question_id: str,
-        outcome_slot_count: int = 2,
-    ) -> Generator[None, None, str]:
-        """Calculate question ID."""
-        response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=self.params.conditional_tokens_contract,
-            contract_id=str(ConditionalTokensContract.contract_id),
-            contract_callable="calculate_condition_id",
-            oracle_contract=oracle_contract,
-            question_id=question_id,
-            outcome_slot_count=outcome_slot_count,
-        )
-        return cast(str, response.state.body["condition_id"])
 
     def _prepare_ask_question_mstx(
         self,

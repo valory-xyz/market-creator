@@ -162,3 +162,18 @@ class FPMMDeterministicFactory(Contract):
             fn_name="create2FixedProductMarketMaker", kwargs=kwargs
         )
         return {"data": bytes.fromhex(data[2:]), "value": initial_funds}
+
+    @classmethod
+    def get_market_creation(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+    ) -> JSONLike:
+        """Get market creation"""
+        return ledger_api.get_event(
+            contract_instance=cls.get_instance(
+                ledger_api=ledger_api, contract_address=contract_address
+            ),
+            event_name="MarketCreation",
+            tx_from_block="latest",
+        )

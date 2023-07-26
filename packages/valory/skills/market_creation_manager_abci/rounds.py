@@ -92,6 +92,11 @@ class SynchronizedData(TxSynchronizedData):
         return cast(dict, self.db.get_strict("approved_question_data"))
 
     @property
+    def all_approved_question_data(self) -> dict:
+        """Get the approved_question_data."""
+        return cast(dict, self.db.get_strict("all_approved_question_data"))`
+
+    @property
     def most_voted_tx_hash(self) -> str:
         """Get the most_voted_tx_hash."""
         return cast(str, self.db.get_strict("most_voted_tx_hash"))
@@ -112,6 +117,34 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     collection_key = get_name(SynchronizedData.participant_to_randomness)
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
 
+
+class RemoveFundingRound(CollectSameUntilThresholdRound):
+    """RemoveFundingRound"""
+
+    payload_class = PrepareTransactionPayload
+    synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+    collection_key = "content"
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
+        """End block."""
+        # TODO: incomplete implementation
+        if self.threshold_reached and any(
+            [val is not None for val in self.most_voted_payload_values]
+        ):
+            return (
+                self.synchronized_data.update(
+                    synchronized_data_class=self.synchronized_data_class,
+                    **{
+                        get_name(
+                            SynchronizedData.most_voted_tx_hash
+                        ): self.most_voted_payload
+                    },
+                ),
+                Event.DONE,
+            )
+        return None
 
 class DataGatheringRound(CollectSameUntilThresholdRound):
     """DataGatheringRound"""
