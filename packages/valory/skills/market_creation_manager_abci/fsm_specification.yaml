@@ -4,6 +4,7 @@ alphabet_in:
 - ROUND_TIMEOUT
 - API_ERROR
 - MAX_MARKETS_CREATED
+- NO_MARKETS_RETRIEVED
 default_start_state: CollectRandomnessRound
 final_states:
 - FinishedMarketCreationManagerRound
@@ -15,7 +16,8 @@ states:
 - CollectRandomnessRound
 - DataGatheringRound
 - SelectKeeperRound
-- MarketIdentificationRound
+- MarketProposalRound
+- RetrieveApprovedMarketRound
 - PrepareTransactionRound
 - FinishedMarketCreationManagerRound
 - SkippedMarketCreationManagerRound
@@ -24,16 +26,22 @@ transition_func:
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
     (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
     (DataGatheringRound, DONE): SelectKeeperRound
-    (DataGatheringRound, MAX_MARKETS_CREATED): SelectKeeperRound    
+    (DataGatheringRound, MAX_MARKETS_CREATED): SelectKeeperRound
     (DataGatheringRound, API_ERROR): CollectRandomnessRound
     (DataGatheringRound, NO_MAJORITY): CollectRandomnessRound
     (DataGatheringRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (SelectKeeperRound, DONE): MarketIdentificationRound
+    (SelectKeeperRound, DONE): MarketProposalRound
     (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
     (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (MarketIdentificationRound, DONE): PrepareTransactionRound
-    (MarketIdentificationRound, NO_MAJORITY): CollectRandomnessRound
-    (MarketIdentificationRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (MarketProposalRound, DONE): PrepareTransactionRound
+    (MarketProposalRound, NO_MAJORITY): CollectRandomnessRound
+    (MarketProposalRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, DONE): SelectKeeperRound
+    (RetrieveApprovedMarketRound, MAX_MARKETS_CREATED): SelectKeeperRound
+    (RetrieveApprovedMarketRound, API_ERROR): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, NO_MAJORITY): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): SkippedMarketCreationManagerRound
     (PrepareTransactionRound, DONE): FinishedMarketCreationManagerRound
     (PrepareTransactionRound, NO_MAJORITY): CollectRandomnessRound
     (PrepareTransactionRound, ROUND_TIMEOUT): CollectRandomnessRound
