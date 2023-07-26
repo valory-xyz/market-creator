@@ -1,6 +1,6 @@
-## Market Maker Service
+# Market Maker agent
 
-Market Maker service processes worldwide news using an LLM and opens prediction markets on the Gnosis chain. The service roughly works as follows:
+Market Maker agent processes worldwide news using an LLM and opens prediction markets on the Gnosis chain. The agent roughly works as follows:
 
 1. Gather headlines and summaries of recent news through a third-party provider.
 2. Interact with an LLM (using the gathered information in the previous step) to obtain a collection of suitable questions to open prediction markets associated to future events.
