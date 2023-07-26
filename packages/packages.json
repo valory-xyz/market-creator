@@ -5,8 +5,8 @@
         "contract/valory/realtio/0.1.0": "bafybeihoj7w5dqdyo6ds2rdmi326cvl5wuc7xp6yms7lwks35m4nqypk4q",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiakvlcgrmtiqb6ailf2mt5ecftlpahe4ysqye3kh2dbsquxxbvsca",
         "skill/valory/market_maker_abci/0.1.0": "bafybeicy2an4jprilo57tyqd3bsgrklspekzl7fgz6lxqiulg4xd5sxrje",
-        "agent/valory/market_maker/0.1.0": "bafybeifgknul2finqzjpu6zmv6v54fyiwab3tr5jivvvwpjhi7nlviubs4",
-        "service/valory/market_maker/0.1.0": "bafybeidryeudnxfkhftlg5wi5c62j3vnsoivqt5c26kcvsl35feg4fi3ia",
+        "agent/valory/market_maker/0.1.0": "bafybeiexen23qp67y26tklgtqs2nqmhjj5rlijnqjylgqd4unkqgao3lbe",
+        "service/valory/market_maker/0.1.0": "bafybeih7fumpgmcuuga3h5pp4dkw3qro2bc2kqcqul446haavxdtwxie3e",
         "contract/valory/wxdai/0.1.0": "bafybeie3c5enerf54jt75xc62mbzck4kjqxpjx2mzo6v4rrz4dmcy4xdgy",
         "skill/valory/market_validation_abci/0.1.0": "bafybeide4ixzpxii2mwv35llxdyzafl4ovdt5os5icu2zugvgdobg75cxu"
     },
