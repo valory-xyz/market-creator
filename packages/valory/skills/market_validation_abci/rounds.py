@@ -78,14 +78,12 @@ class MarketValidationRound(CollectSameUntilThresholdRound):
             return self.synchronized_data, Event.ERROR
 
         if self.threshold_reached and self.most_voted_payload is not None:
-            markets_created = cast(
-                SynchronizedData, self.synchronized_data
-            ).markets_created
-            markets_created += 1
             synchronized_data = self.synchronized_data.update(
                 synchronized_data_class=SynchronizedData,
                 **{
-                    get_name(SynchronizedData.markets_created): markets_created,
+                    get_name(SynchronizedData.markets_created): cast(
+                        SynchronizedData, self.synchronized_data
+                    ).markets_created,
                 },
             )
             return synchronized_data, Event.DONE
