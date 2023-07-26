@@ -55,6 +55,12 @@ class MarketCreationManagerParams(BaseParams):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the parameters object."""
 
+        self.market_approval_server_url = self._ensure(
+            key="market_approval_server_url", kwargs=kwargs, type_=str
+        )
+        self.market_approval_server_api_key = self._ensure(
+            key="market_approval_server_api_key", kwargs=kwargs, type_=str
+        )
         self.newsapi_api_key = self._ensure(
             key="newsapi_api_key", kwargs=kwargs, type_=str
         )
