@@ -4,9 +4,10 @@ Market creator (market maker) is an autonomous service created with the [Open Au
 
 1. Gather headlines and summaries of recent news through a third-party provider.
 2. Interact with an LLM (using the gathered information in the previous step) to obtain a collection of suitable questions to open prediction markets associated to future events.
-3. Filter/choose an appropriate question from the previous step.
-4. Send the necessary transactions to the Gnosis chain to open and fund the chosen prediction market.
-5. Repeat steps 1-4. When `NUM_MARKETS` (configurable) have been created, the service will cycle in a waiting state.
+3. Propose questions to a market approval service endpoint. Users manually approve suitable markets using that endpoint.
+4. Collect user-approved markets from the market approval service.
+5. Send the necessary transactions to the Gnosis chain to open and fund the chosen prediction market.
+6. Repeat steps 1-5. When `NUM_MARKETS` (configurable) have been created, the service will cycle in a waiting state.
 
 ## Developers
 
@@ -108,6 +109,8 @@ Also make sure your multisig safe account holds some amount of the tokens which 
     FPMM_DETERMINISTIC_FACTORY_CONTRACT=0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0
     COLLATERAL_TOKENS_CONTRACT=0xe91d153e0b41518a2ce8dd3d7944fa863463a97d
     ARBITRATOR_CONTRACT=0xe40dd83a262da3f56976038f1554fe541fa75ecd
+    MARKET_APPROVAL_SERVER_URL=<market_approval_server_url>
+    MARKET_APPROVAL_SERVER_API_KEY=<market_approval_server_api_key>
     MULTISEND_ADDRESS=<multisend_address>
     OPENAI_API_KEY=<your_openai_api_key>
     ETHEREUM_LEDGER_RPC=<chain_rpc_endpoint>

@@ -5,9 +5,9 @@ description: The market maker service.
 aea_version: '>=1.0.0, <2.0.0'
 license: Apache-2.0
 fingerprint:
-  README.md: bafybeiaqrtm7sxpddyfgef77qrj4wmwgqjy7mmhmyb65wq5yjph7tcyusa
+  README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeiei5e2bmvqeylwjxe5nspllpyo73f7b2p4ktadvcekyqth2ldorv4
+agent: valory/market_maker:0.1.0:bafybeifoxrymi2x46damslqhjlygnbcnutkwhs3cgnuhwtncda2ogjrxau
 number_of_agents: 1
 deployment:
   agent:
@@ -74,6 +74,7 @@ models:
       multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
       reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:2}
+      reset_pause_duration: ${RESET_PAUSE_DURATION:int:10}
       service_id: market_maker
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
       setup:
