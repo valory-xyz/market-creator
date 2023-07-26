@@ -248,6 +248,10 @@ class MarketProposalRound(OnlyKeeperSendsRound):
                 get_name(
                     SynchronizedData.proposed_question_data
                 ): proposed_question_data,
+                get_name(SynchronizedData.markets_created): cast(
+                    SynchronizedData, self.synchronized_data
+                ).markets_created
+                + 1,
             },
         )
 
