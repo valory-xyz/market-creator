@@ -292,7 +292,17 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
             cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
             == self.NO_MARKETS_RETRIEVED_PAYLOAD
         ):
-            return self.synchronized_data, Event.NO_MARKETS_RETRIEVED
+            return (
+                self.synchronized_data.update(
+                    synchronized_data_class=self.synchronized_data_class,
+                    **{
+                        get_name(SynchronizedData.markets_created): cast(
+                            SynchronizedData, self.synchronized_data
+                        ).markets_created,
+                    },
+                ),
+                Event.NO_MARKETS_RETRIEVED,
+            )
 
         # Happy path
         approved_question_data = json.loads(
