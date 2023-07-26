@@ -5,6 +5,7 @@ license: Apache-2.0
 description: The market maker agent.
 aea_version: '>=1.19.0, <2.0.0'
 fingerprint:
+  README.md: bafybeiayhfxag74adpnrcejngjx6n333kbhucrg2p3fktdgq4wqy3dl7ky
   __init__.py: bafybeifamf4vln3qgmifksv5icmhnkelqirbaauehuv5hpsu2twesb2vni
 fingerprint_ignore_patterns: []
 connections:
@@ -178,6 +179,7 @@ models:
       multisend_address: ${str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       on_chain_service_id: ${int:null}
       reset_tendermint_after: ${int:2}
+      reset_pause_duration: ${int:30}
       service_id: market_maker
       service_registry_address: ${str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
       setup:
