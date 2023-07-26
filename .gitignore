@@ -35,3 +35,5 @@ agent/
 .env
 
 ethereum_private_key.txt
+keys.json
+market_maker/
