@@ -12,7 +12,7 @@ INPUT
 {input_news}
 
 OUTPUT_FORMAT
-* Your output response must be only a single JSON array to be parsed by Python's "json.loads()".
+* Your output response must be only a single JSON array to be parsed by Python "json.loads()".
 * All of the date strings should be represented in YYYY-MM-DD format.
 * Each entry of the JSON array must be a JSON object containing the fields:
     - question: The binary question to open a prediction market.
