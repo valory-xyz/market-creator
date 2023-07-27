@@ -342,7 +342,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         DataGatheringRound: {
             Event.DONE: SelectKeeperRound,
-            Event.MAX_MARKETS_REACHED: SkippedMarketCreationManagerRound,
+            Event.MAX_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.API_ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
