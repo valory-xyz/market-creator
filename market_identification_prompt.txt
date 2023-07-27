@@ -1,11 +1,10 @@
-Based on the following news snippets under "INPUT", formulate 5 prediction market questions with clear, objective
-outcomes that can be verified on specific dates and leave no room for interpretation or subjectivity.
-Avoid incorporating questions that could potentially encourage unethical behavior or violence. Feel
-free to use the same event with different dates as necessary. Every question should be resolvable in a 
-random day between 1st and the 31st of August 2023, with a requirement that all questions
-be resolvable in a different day of the month.
+Based on the following news snippets under INPUT, formulate 5 prediction market questions with clear, objective
+outcomes that can be verified on a specific date and leave no room for interpretation or subjectivity.
+Avoid incorporating questions that could potentially encourage unethical behavior or violence.
+Every question must be related to an event happening on or by {event_day}. The answer to the question
+must be unknown until that day, but it must be known after that day.
 Your questions should follow a structure similar to this:
-"Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION occur on SPECIFIC_DAY_OF_AUGUST_2023".
+"Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION occur on {event_day}".
 Your output must follow the output format detailed under "OUTPUT FORMAT".
 
 INPUT
