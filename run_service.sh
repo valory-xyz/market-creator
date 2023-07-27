@@ -2,6 +2,7 @@
 
 # Load env vars
 export $(grep -v '^#' .env | xargs)
+
 export MARKET_IDENTIFICATION_PROMPT=$(sed -e ':a' -e 'N' -e '$!ba' \
   -e 's/"/\\"/g' \
   -e "s/'/\\\'/g" \
@@ -14,7 +15,7 @@ make clean
 autonomy packages lock
 autonomy push-all
 
-autonomy fetch --local --service valory/market_maker && cd market_maker
+autonomy fetch --local --service valory/market_maker --alias fetched_service && cd fetched_service
 
 # Build the image
 autonomy build-image

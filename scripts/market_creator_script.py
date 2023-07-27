@@ -22,6 +22,7 @@
 import datetime
 import os
 import random
+import time
 from typing import Any, Dict, Optional, Tuple
 
 import openai
@@ -41,43 +42,29 @@ TOOL_TO_ENGINE = {
 ALLOWED_TOOLS = list(TOOL_TO_ENGINE.keys())
 
 MARKET_CREATION_PROMPT = """
-You are an LLM inside a multi-agent system. Your task is to propose a collection of prediction market questions based
-on your input. Your input is under the label "INPUT". You must follow the instructions under "INSTRUCTIONS".
-You must provide your response in the format specified under "OUTPUT_FORMAT".
+Based on the following news snippets under "INPUT", formulate 5 prediction market questions with clear, objective
+outcomes that can be verified on specific dates and leave no room for interpretation or subjectivity.
+Avoid incorporating questions that could potentially encourage unethical behavior or violence.
+Every question should be resolvable on  of August 2023.
+Your questions should follow a structure similar to this:
+"Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION occur on SPECIFIC_DAY_OF_AUGUST_2023".
+Your output must follow the output format detailed under "OUTPUT FORMAT".
 
-INSTRUCTIONS
-* Read the input under the label "INPUT" delimited by three backticks.
-* The "INPUT" specifies a list of recent news headlines, their date, and short descriptions.
-* Based on the "INPUT" and your training data, you must provide a list of binary questions, valid answers and resolution dates to create prediction markets.
-  Each market must satisfy the following conditions:
-  - The outcome of the market is unknown at the present date.
-  - The outcome of the market must be known by its resolution date.
-  - The outcome of the market must be related to a deterministic, measurable or verifiable fact.
-  - Questions whose answer is known at the present date are invalid.
-  - Questions whose answer is subjective or opinionated are invalid.
-  - Questions with relative dates are invalid.
-  - Questions about moral values, subjective opinions and not facts are invalid.
-  - Questions in which none of the answers are valid will resolve as invalid.
-  - Questions with multiple valid answers are invalid.
-  - Questions must not incentive to commit an immoral violent action.
-* The created markets must be different and not overlap semantically.
-* You must provide your response in the format specified under "OUTPUT_FORMAT".
-* Do not include any other contents in your response.
-
-INPUT:
-```
+INPUT
 {input_news}
-```
 
-OUTPUT_FORMAT:
+OUTPUT_FORMAT
 * Your output response must be only a single JSON array to be parsed by Python's "json.loads()".
-* The JSON array must be of length 10.
+* All of the date strings should be represented in YYYY-MM-DD format.
 * Each entry of the JSON array must be a JSON object containing the fields:
-  - question: The binary question to open a prediction market.
-  - answers: The possible answers to the question.
-  - resolution_date: The resolution date for the outcome of the market to be verified.
+    - question: The binary question to open a prediction market.
+    - answers: The possible answers to the question.
+    - resolution_date: The resolution date for the outcome of the market to be verified.
+    - topic: One word description of the topic of the news and it should be one of: {topics}.
 * Output only the JSON object. Do not include any other contents in your response.
 """
+
+TOPICS = '["business","science","technology","politics","arts","weather"]'
 
 
 def run(  # pylint: disable=too-many-locals
@@ -129,10 +116,12 @@ def run(  # pylint: disable=too-many-locals
         input_news += f"- ({date}) {title}\n  {content}\n\n"
 
     market_creation_prompt = MARKET_CREATION_PROMPT.format(
-        input_news=input_news, from_date=from_date, to_date=to_date
+        input_news=input_news, from_date=from_date, to_date=to_date, topics=TOPICS
     )
 
     print(market_creation_prompt)
+
+    start_time = time.time()
 
     moderation_result = openai.Moderation.create(market_creation_prompt)
 
@@ -154,7 +143,13 @@ def run(  # pylint: disable=too-many-locals
         stop=None,
     )
 
+    end_time = time.time()
+
     print(response.choices[0].message.content)
+
+    elapsed_time = end_time - start_time
+
+    print(f"Function took {elapsed_time:.2f} seconds to execute.")
 
     return response.choices[0].message.content, None
 
