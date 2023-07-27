@@ -20,9 +20,9 @@
 """Script for creating market creator."""
 
 import datetime
-import time
 import os
 import random
+import time
 from typing import Any, Dict, Optional, Tuple
 
 import openai
@@ -44,7 +44,7 @@ ALLOWED_TOOLS = list(TOOL_TO_ENGINE.keys())
 MARKET_CREATION_PROMPT = """
 Based on the following news snippets under "INPUT", formulate 5 prediction market questions with clear, objective
 outcomes that can be verified on specific dates and leave no room for interpretation or subjectivity.
-Avoid incorporating questions that could potentially encourage unethical behavior or violence. 
+Avoid incorporating questions that could potentially encourage unethical behavior or violence.
 Every question should be resolvable on  of August 2023.
 Your questions should follow a structure similar to this:
 "Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION occur on SPECIFIC_DAY_OF_AUGUST_2023".
@@ -64,7 +64,7 @@ OUTPUT_FORMAT
 * Output only the JSON object. Do not include any other contents in your response.
 """
 
-TOPICS='["business","science","technology","politics","arts","weather"]'
+TOPICS = '["business","science","technology","politics","arts","weather"]'
 
 
 def run(  # pylint: disable=too-many-locals
@@ -123,7 +123,6 @@ def run(  # pylint: disable=too-many-locals
 
     start_time = time.time()
 
-
     moderation_result = openai.Moderation.create(market_creation_prompt)
 
     if moderation_result["results"][0]["flagged"]:
@@ -145,7 +144,6 @@ def run(  # pylint: disable=too-many-locals
     )
 
     end_time = time.time()
-
 
     print(response.choices[0].message.content)
 
