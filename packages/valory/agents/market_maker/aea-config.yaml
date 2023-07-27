@@ -128,38 +128,25 @@ models:
       log_dir: ${str:/logs}
   params:
     args:
-      market_identification_prompt: ${str:You are an LLM inside a multi-agent system.
-        Your task is to propose a collection of prediction market\nquestions based
-        on your input. Your input is under the label \"INPUT\". You must follow the
-        instructions\nunder \"INSTRUCTIONS\". You must provide your response in the
-        format specified under \"OUTPUT_FORMAT\".\n\nINSTRUCTIONS\n* Read the input
-        under the label \"INPUT\" delimited by three backticks.\n* The \"INPUT\" specifies
-        a list of recent news headlines, their date, and short descriptions.\n* Based
-        on the \"INPUT\" and your training data, you must provide a list of binary
-        questions, valid\n    answers and resolution dates to create prediction markets.\n*
-        Each market must satisfy the following conditions;\n    - The outcome of the
-        market is unknown at the present date.\n    - The outcome of the market must
-        be known by its resolution date.\n    - The outcome of the market must be
-        related to a deterministic, measurable or verifiable fact.\n    - Questions
-        whose answer is known at the present date are invalid.\n    - Questions whose
-        answer is subjective or opinionated are invalid.\n    - Questions with relative
-        dates are invalid.\n    - Questions about moral values, subjective opinions,
-        and not facts are invalid.\n    - Questions in which none of the answers are
-        valid will resolve as invalid.\n    - Questions with multiple valid answers
-        are invalid.\n    - Questions must not incentivize committing an immoral violent
-        action.\n    - The dates in the question need to be in YYYY-MM-DD format.\n*
-        The created markets must be different and not overlap semantically.\n* You
-        must provide your response in the format specified under \"OUTPUT_FORMAT\".\n*
-        Do not include any other contents in your response.\n\nINPUT\n{input_news}\n\nOUTPUT_FORMAT\n*
+      market_identification_prompt: ${str:Based on the following news snippets under
+        \"INPUT\", formulate 5 prediction market questions with clear, objective\noutcomes
+        that can be verified on specific dates and leave no room for interpretation
+        or subjectivity.\nAvoid incorporating questions that could potentially encourage
+        unethical behavior or violence. Feel\nfree to use the same event with different
+        dates as necessary. Every question should be resolvable in a \nrandom day
+        between 1st and the 31st of August 2023, with a requirement that all questions\nbe
+        resolvable in a different day of the month.\nYour questions should follow
+        a structure similar to this;\n\"Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION
+        occur on SPECIFIC_DAY_OF_AUGUST_2023\".\nYour output must follow the output
+        format detailed under \"OUTPUT FORMAT\".\n\nINPUT\n{input_news}\n\nOUTPUT_FORMAT\n*
         Your output response must be only a single JSON array to be parsed by Python\'s
-        \"json.loads()\".\n* The JSON array must be of length 5.\n* All of the date
-        strings should be represented in YYYY-MM-DD format.\n* Each entry of the JSON
-        array must be a JSON object containing the fields;\n    - question; The binary
-        question to open a prediction market.\n    - answers; The possible answers
-        to the question.\n    - resolution_date; The resolution date for the outcome
-        of the market to be verified.\n    - topic; One word description of the topic
-        of the news and it should be one of; {topics}.\n* Output only the JSON object.
-        Do not include any other contents in your response.}
+        \"json.loads()\".\n* All of the date strings should be represented in YYYY-MM-DD
+        format.\n* Each entry of the JSON array must be a JSON object containing the
+        fields;\n - question; The binary question to open a prediction market.\n -
+        answers; The possible answers to the question.\n - resolution_date; The resolution
+        date for the outcome of the market to be verified.\n - topic; One word description
+        of the topic of the news and it should be one of; {topics}.\n* Output only
+        the JSON object. Do not include any other contents in your response.}
       num_markets: ${int:1}
       market_approval_server_url: ${str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${str:api_key}
