@@ -269,9 +269,14 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
             date = article["publishedAt"]
             input_news += f"- ({date}) {title}\n  {content}\n\n"
 
+        event_day = self._get_event_day()
         topics = ", ".join(self.params.topics)
         prompt_template = self.params.market_identification_prompt
-        prompt_values = {"input_news": input_news, "topics": topics}
+        prompt_values = {
+            "input_news": input_news,
+            "topics": topics,
+            "event_day": event_day,
+        }
 
         self.context.logger.info(
             f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
@@ -332,6 +337,27 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         if len(valid_responses) == 0:
             return None
         return valid_responses[0]
+
+    def _get_event_day(self) -> str:
+        # Get the current date
+        n = self.synchronized_data.markets_created
+        today = datetime.datetime.now().date()
+
+        # Set the target year and month
+        target_year = 2023
+        target_month = 8
+        minimum_days_until_event = self.params.minimum_market_time + 1
+
+        # Calculate the start_date in August (at least today + 2 days)
+        start_date = max(
+            datetime.date(target_year, target_month, 1),
+            today + datetime.timedelta(days=minimum_days_until_event),
+        )
+        end_date = datetime.date(target_year, target_month, 31)
+        days_difference = abs((end_date - start_date).days)
+        event_day = start_date + datetime.timedelta(n % (days_difference + 1))
+
+        return event_day.strftime("%-d %B %Y")
 
     def _do_llm_request(
         self,
