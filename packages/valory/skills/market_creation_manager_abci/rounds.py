@@ -369,19 +369,19 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     initial_states: Set[AppState] = {CollectRandomnessRound}
     transition_function: AbciAppTransitionFunction = {
         CollectRandomnessRound: {
+            Event.DONE: SelectKeeperRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        },
+        SelectKeeperRound: {
             Event.DONE: DataGatheringRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         DataGatheringRound: {
-            Event.DONE: SelectKeeperRound,
+            Event.DONE: MarketProposalRound,
             Event.MAX_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.API_ERROR: CollectRandomnessRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
-        },
-        SelectKeeperRound: {
-            Event.DONE: MarketProposalRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
