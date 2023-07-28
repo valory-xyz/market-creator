@@ -18,16 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the scaffold contract definition."""
-
-import math
-import random
-from typing import Any
+import logging
+from typing import Any, List
 
 from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
+PUBLIC_ID = PublicId.from_str("valory/fpmm:0.1.0")
+_logger = logging.getLogger(
+    f"aea.packages.{PUBLIC_ID.author}.contracts.{PUBLIC_ID.name}.contract"
+)
 
 
 class FPMMContract(Contract):
@@ -101,3 +103,24 @@ class FPMMContract(Contract):
         return dict(
             data=data,
         )
+    @classmethod
+    def get_markets_with_funds(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        markets: List[str],
+        **kwargs: Any,
+    ) -> JSONLike:
+        """Get markets with funds."""
+        markets_with_liq = []
+        # TODO: improve this by introducing multicall2 or constructor trick
+        for market_address in markets:
+            try:
+                instance = cls.get_instance(ledger_api, market_address)
+                total_supply = instance.functions.totalSupply().call()
+                if total_supply > 0:
+                    markets_with_liq.append(market_address)
+            except Exception as e:
+                _logger.warning(f"Error while getting totalSupply for {market_address}: {e}")
+
+        return dict(data=markets_with_liq)

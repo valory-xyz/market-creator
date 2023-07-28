@@ -8,13 +8,13 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeicvgjl3efqzc3yb5przgeui3qetsv3htjjeessr5gz37b66xy4voy
+  behaviours.py: bafybeigkasjdofzi4r7zhn5v6pr4snbmxdg3ycxsbcjhwq2v5n7hmpoxnq
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiay4aepnfdkcsriajxqige65bsszrujin57riubflm7dyw2keapoi
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
   models.py: bafybeidpprylojhopdp4aoxwxri2kp7nmv5f3acdok4n5c6ak3a5wnn5cu
-  payloads.py: bafybeihk7pgygq775k2o6p4wohlgrqigbgvgfg5p6m3q5c65guhbq3it6y
-  rounds.py: bafybeigwycte5b6wgv67v23zanhbrznfujtpa7o2t6ekiz7kgten7iii7i
+  payloads.py: bafybeibebnjaq5l3p64vfvjkcu4gauu4kvh23yleushkpe7igo3yllhoba
+  rounds.py: bafybeibbjikc5fttosejfbx3iwc6hqnfzmxvbvxpipua42s4qkl2nhxxxa
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -22,9 +22,9 @@ connections:
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeic3ajabs7sl6qgkzy452szlsdeitj746kdzfd7k4m4ixtxw4g33qi
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
-- valory/realtio:0.1.0:bafybeihoj7w5dqdyo6ds2rdmi326cvl5wuc7xp6yms7lwks35m4nqypk4q
-- valory/conditional_tokens:0.1.0:bafybeig5vtn7bzpegfrzehdgeezqcnox3xlb5i54ehnqndazhcfh3bkdcq
-- valory/fpmm_deterministic_factory:0.1.0:bafybeig4ztnqgyaespzlcmcom56nvmi4c4paddsxsjsh5q7olnylu3z7ou
+- valory/realtio:0.1.0:bafybeie3frhjqyjrw63zxlvmkflnwfixwk4e7ghpjupkt4pvvusbr65hna
+- valory/conditional_tokens:0.1.0:bafybeibiladatj7sfk6yuehceq4tfia2lrdmgctjqfpgx2qaioc3hxrav4
+- valory/fpmm_deterministic_factory:0.1.0:bafybeigz4ezwa24iqvrvckybwul5ro7uo5rrz3z6fjbvmx7ouf2j2ibv2i
 - valory/wxdai:0.1.0:bafybeie3c5enerf54jt75xc62mbzck4kjqxpjx2mzo6v4rrz4dmcy4xdgy
 protocols:
 - valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy

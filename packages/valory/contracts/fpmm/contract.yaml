@@ -7,8 +7,8 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
-  build/FPMMContract.json: bafybeic3vlqb4m4lk4nps5alt4a6ewvq2dcyotoj6qdvte3pzdcq3g4xdi
-  contract.py: bafybeiathlompztd25ayhzkr6lmkabdkaiybtszsxiioctrir7dfl3fauq
+  build/FPMM.json: bafybeidvvevt5hderny4jme6oml4srnm3jf2gwht2hxcxjixjeygejyrvy
+  contract.py: bafybeig2wlqaal6h2gz3tbhiotyqi5qdif5gtyxo7eae67jl4apidzquki
 fingerprint_ignore_patterns: []
 class_name: FPMMContract
 contract_interface_paths:

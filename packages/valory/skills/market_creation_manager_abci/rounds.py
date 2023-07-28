@@ -41,6 +41,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     PrepareTransactionPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
+    SyncMarketsPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -53,7 +54,7 @@ class Event(Enum):
     NO_MAJORITY = "no_majority"
     DONE = "done"
     ROUND_TIMEOUT = "round_timeout"
-    API_ERROR = "api_error"
+    ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
     MAX_MARKETS_REACHED = "max_markets_reached"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
@@ -94,7 +95,7 @@ class SynchronizedData(TxSynchronizedData):
     @property
     def all_approved_question_data(self) -> dict:
         """Get the approved_question_data."""
-        return cast(dict, self.db.get_strict("all_approved_question_data"))`
+        return cast(dict, self.db.get_strict("all_approved_question_data"))
 
     @property
     def most_voted_tx_hash(self) -> str:
@@ -105,6 +106,16 @@ class SynchronizedData(TxSynchronizedData):
     def most_voted_keeper_address(self) -> str:
         """Get the most_voted_keeper_address."""
         return cast(str, self.db.get_strict("most_voted_keeper_address"))
+
+    @property
+    def market_to_remove_funds_deadline(self) -> Dict[str, int]:
+        """Get the market_to_remove_funds_deadline."""
+        return cast(Dict[str, int], self.db.get("market_to_remove_funds_deadline", {}))
+
+    @property
+    def market_from_block(self) -> int:
+        """Get the market_from_block."""
+        return cast(int, self.db.get("market_from_block", 0))
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -121,30 +132,89 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
 class RemoveFundingRound(CollectSameUntilThresholdRound):
     """RemoveFundingRound"""
 
-    payload_class = PrepareTransactionPayload
-    synchronized_data_class = SynchronizedData
-    done_event = Event.DONE
-    no_majority_event = Event.NO_MAJORITY
-    collection_key = "content"
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    NO_UPDATE_PAYLOAD = "NO_UPDATE"
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
-        """End block."""
-        # TODO: incomplete implementation
-        if self.threshold_reached and any(
-            [val is not None for val in self.most_voted_payload_values]
-        ):
-            return (
-                self.synchronized_data.update(
-                    synchronized_data_class=self.synchronized_data_class,
-                    **{
-                        get_name(
-                            SynchronizedData.most_voted_tx_hash
-                        ): self.most_voted_payload
-                    },
-                ),
-                Event.DONE,
+    payload_class = SyncMarketsPayload
+    synchronized_data_class = SynchronizedData
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                return self.synchronized_data, Event.ERROR
+
+            if self.most_voted_payload == self.NO_UPDATE_PAYLOAD:
+                return self.synchronized_data, Event.DONE
+
+            payload = json.loads(self.most_voted_payload)
+            #
+            tx_data, market_address = payload["tx"], payload["market"]
+
+            # Note that popping the market_to_remove_funds_deadline here
+            # is optimistically assuming that the transaction will be successful.
+            market_to_remove_funds_deadline = cast(
+                SynchronizedData,
+                self.synchronized_data,
+            ).market_to_remove_funds_deadline.pop(market_address)
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(
+                        SynchronizedData.market_to_remove_funds_deadline
+                    ): market_to_remove_funds_deadline,
+                    get_name(SynchronizedData.most_voted_tx_hash): tx_data,
+                },
             )
+            return synchronized_data, Event.DONE
+
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
         return None
+
+
+class SyncMarketsRound(CollectSameUntilThresholdRound):
+    """SyncMarketsRound"""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    NO_UPDATE_PAYLOAD = "NO_UPDATE"
+
+    payload_class = SyncMarketsPayload
+    synchronized_data_class = SynchronizedData
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                return self.synchronized_data, Event.ERROR
+
+            if self.most_voted_payload == self.NO_UPDATE_PAYLOAD:
+                return self.synchronized_data, Event.DONE
+
+            payload = json.loads(self.most_voted_payload)
+            market_to_remove_funds_deadline, from_block = (
+                payload["mapping"],
+                payload["from_block"],
+            )
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(
+                        SynchronizedData.market_to_remove_funds_deadline
+                    ): market_to_remove_funds_deadline,
+                    get_name(SynchronizedData.market_from_block): from_block,
+                },
+            )
+            return synchronized_data, Event.DONE
+
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+        return None
+
 
 class DataGatheringRound(CollectSameUntilThresholdRound):
     """DataGatheringRound"""
@@ -172,7 +242,7 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
                         + 1,
                     },
                 )
-                return synchronized_data, Event.API_ERROR
+                return synchronized_data, Event.ERROR
 
             if self.most_voted_payload == DataGatheringRound.MAX_RETRIES_PAYLOAD:
                 return self.synchronized_data, Event.DONE
@@ -235,7 +305,7 @@ class MarketProposalRound(OnlyKeeperSendsRound):
             cast(MarketProposalPayload, self.keeper_payload).content
             == self.ERROR_PAYLOAD
         ):
-            return self.synchronized_data, Event.API_ERROR
+            return self.synchronized_data, Event.ERROR
 
         # Happy path
         proposed_question_data = json.loads(
@@ -289,7 +359,7 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
             cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
             == self.ERROR_PAYLOAD
         ):
-            return self.synchronized_data, Event.API_ERROR
+            return self.synchronized_data, Event.ERROR
 
         # No markets available
         if (
@@ -381,7 +451,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         DataGatheringRound: {
             Event.DONE: MarketProposalRound,
             Event.MAX_MARKETS_REACHED: RetrieveApprovedMarketRound,
-            Event.API_ERROR: CollectRandomnessRound,
+            Event.ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
@@ -390,14 +460,14 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
             Event.DID_NOT_SEND: CollectRandomnessRound,
-            Event.API_ERROR: CollectRandomnessRound,
+            Event.ERROR: CollectRandomnessRound,
         },
         RetrieveApprovedMarketRound: {
             Event.DONE: PrepareTransactionRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
             Event.DID_NOT_SEND: CollectRandomnessRound,
-            Event.API_ERROR: CollectRandomnessRound,
+            Event.ERROR: CollectRandomnessRound,
             Event.NO_MARKETS_RETRIEVED: SkippedMarketCreationManagerRound,
         },
         PrepareTransactionRound: {
