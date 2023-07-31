@@ -41,7 +41,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     PrepareTransactionPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
-    SyncMarketsPayload,
+    SyncMarketsPayload, RemoveFundingPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -136,7 +136,7 @@ class RemoveFundingRound(CollectSameUntilThresholdRound):
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     NO_UPDATE_PAYLOAD = "NO_UPDATE"
 
-    payload_class = SyncMarketsPayload
+    payload_class = RemoveFundingPayload
     synchronized_data_class = SynchronizedData
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:

@@ -191,7 +191,6 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def get_payload(self) -> Generator[None, None, str]:
         """Get the payload."""
-        # it means we have already synced
         market_removal = yield from self.get_markets_to_removal_ts()
         if market_removal is None:
             # something went wrong
@@ -202,6 +201,8 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             # no markets to sync
             return SyncMarketsRound.NO_UPDATE_PAYLOAD
 
+        self.context.logger.info(f"Markets to removal ts: {market_removal_ts}")
+        self.context.logger.info(f"Latest synced block: {from_block}")
         market_removal_ts_str = json.dumps(
             dict(mapping=market_removal_ts, from_block=from_block), sort_keys=True
         )
@@ -226,7 +227,9 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         # if no markets, no need to execute the rest of the code
         if len(markets) == 0:
+            self.context.logger.info("No markets found.")
             return {}, 0
+        self.context.logger.info(f"Markets with funds found: {markets}")
 
         # get conditions associated with those markets
         condition_id_to_market = {}
@@ -410,8 +413,10 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         """Get payload."""
         market_to_close = self._get_market_to_close()
         if market_to_close is None:
+            self.context.logger.info("No market to close.")
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
+        self.context.logger.info(f"Closing market: {market_to_close}")
         tx_data = yield from self._get_remove_funding_tx(market_to_close)
         if tx_data is None:
             # something went wrong
