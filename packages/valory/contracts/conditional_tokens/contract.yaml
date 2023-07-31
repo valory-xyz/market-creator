@@ -13,5 +13,8 @@ fingerprint_ignore_patterns: []
 class_name: ConditionalTokensContract
 contract_interface_paths:
   ethereum: build/ConditionalTokens.json
-dependencies: {}
+dependencies:
+  hexbytes: {}
+  web3:
+    version: ==5.31.4
 contracts: []

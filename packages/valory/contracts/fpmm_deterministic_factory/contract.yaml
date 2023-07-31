@@ -13,5 +13,8 @@ fingerprint_ignore_patterns: []
 class_name: FPMMDeterministicFactory
 contract_interface_paths:
   ethereum: build/FPMMDeterministicFactory.json
-dependencies: {}
+dependencies:
+  hexbytes: {}
+  web3:
+    version: ==5.31.4
 contracts: []

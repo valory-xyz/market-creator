@@ -22,9 +22,9 @@ connections:
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeic3ajabs7sl6qgkzy452szlsdeitj746kdzfd7k4m4ixtxw4g33qi
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
-- valory/realtio:0.1.0:bafybeibcmm5no5oaunh6pbzgoqdippiv376dm4m7fioaswjfyesu6ztrbm
-- valory/conditional_tokens:0.1.0:bafybeibiladatj7sfk6yuehceq4tfia2lrdmgctjqfpgx2qaioc3hxrav4
-- valory/fpmm_deterministic_factory:0.1.0:bafybeigz4ezwa24iqvrvckybwul5ro7uo5rrz3z6fjbvmx7ouf2j2ibv2i
+- valory/realtio:0.1.0:bafybeigsciwpawqiyxtk7klpnx6vyaz4nic5s6afl4eahab5ub4hftu4du
+- valory/conditional_tokens:0.1.0:bafybeibpzhbknohnx5mp653ky5betjfiz3ed3agj554oecsszqq4uxe4qi
+- valory/fpmm_deterministic_factory:0.1.0:bafybeif7hgwamqm6iljhtr32ap6eazn5yhmxrtlvicmpo746gv2s4tyzqq
 - valory/wxdai:0.1.0:bafybeie3c5enerf54jt75xc62mbzck4kjqxpjx2mzo6v4rrz4dmcy4xdgy
 - valory/fpmm:0.1.0:bafybeihoczslmqbfpx57tmjps663r2ib7ycc3dfa4smdhufb4wbnidewtq
 protocols:
