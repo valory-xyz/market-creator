@@ -103,6 +103,7 @@ class FPMMContract(Contract):
         return dict(
             data=data,
         )
+
     @classmethod
     def get_markets_with_funds(
         cls,

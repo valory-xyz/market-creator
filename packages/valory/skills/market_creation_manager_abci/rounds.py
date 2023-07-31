@@ -457,19 +457,19 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: RemoveFundingRound,
         },
         CollectRandomnessRound: {
-            Event.DONE: DataGatheringRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
-        },
-        DataGatheringRound: {
             Event.DONE: SelectKeeperRound,
-            Event.MAX_MARKETS_REACHED: SkippedMarketCreationManagerRound,
-            Event.ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         SelectKeeperRound: {
             Event.DONE: DataGatheringRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        },
+        DataGatheringRound: {
+            Event.DONE: MarketProposalRound,
+            Event.MAX_MARKETS_REACHED: SkippedMarketCreationManagerRound,
+            Event.ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },

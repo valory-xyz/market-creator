@@ -25,6 +25,7 @@ from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
+from web3.types import BlockIdentifier
 
 
 MARKET_FEE = 2.0
@@ -195,16 +196,21 @@ class RealtioContract(Contract):
 
     @classmethod
     def get_question_events(
-        cls, ledger_api: LedgerApi, contract_address: str, question_ids: List[bytes]
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        question_ids: List[bytes],
+        from_block: BlockIdentifier = "earliest",
+        to_block: BlockIdentifier = "latest",
     ) -> JSONLike:
         """Get questions."""
         # TODO: consider using multicall2 or constructor trick instead of filters
         contract = cls.get_instance(
             ledger_api=ledger_api, contract_address=contract_address
         )
-        entries = contract.events.Unbonding.createFilter(
-            fromBlock="earliest",
-            toBlock="latest",
+        entries = contract.events.LogNewQuestion.createFilter(
+            fromBlock=from_block,
+            toBlock=to_block,
             argument_filters=dict(question_id=question_ids),
         ).get_all_entries()
         events = list(

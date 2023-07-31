@@ -66,6 +66,7 @@ from packages.valory.skills.market_creation_manager_abci.models import (
     SharedState,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
+    RemoveFundingPayload,
     SyncMarketsPayload,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
@@ -399,7 +400,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             content = yield from self.get_payload()
-            payload = PrepareTransactionPayload(sender=sender, content=content)
+            payload = RemoveFundingPayload(sender=sender, content=content)
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
