@@ -27,6 +27,7 @@ from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
+from web3.types import BlockIdentifier
 
 
 DEFAULT_MARKET_FEE = 2.0
@@ -162,3 +163,39 @@ class FPMMDeterministicFactory(Contract):
             fn_name="create2FixedProductMarketMaker", kwargs=kwargs
         )
         return {"data": bytes.fromhex(data[2:]), "value": initial_funds}
+
+    @classmethod
+    def get_market_creation_events(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        creator_address: str,
+        from_block: BlockIdentifier = "earliest",
+        to_block: BlockIdentifier = "latest",
+    ) -> JSONLike:
+        """Get market creation"""
+        contract_instance = cls.get_instance(
+            ledger_api=ledger_api, contract_address=contract_address
+        )
+        entries = (
+            contract_instance.events.FixedProductMarketMakerCreation()
+            .createFilter(
+                fromBlock=from_block,
+                toBlock=to_block,
+                argument_filters={"creator": creator_address},
+            )
+            .get_all_entries()
+        )
+        events = list(
+            dict(
+                tx_hash=entry.transactionHash.hex(),
+                block_number=entry.blockNumber,
+                condition_ids=entry["args"]["conditionIds"],
+                collateral_token=entry["args"]["collateralToken"],
+                conditional_tokens=entry["args"]["conditionalTokens"],
+                fixed_product_market_maker=entry["args"]["fixedProductMarketMaker"],
+                fee=entry["args"]["fee"],
+            )
+            for entry in entries
+        )
+        return dict(data=events)

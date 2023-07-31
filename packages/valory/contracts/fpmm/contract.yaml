@@ -1,4 +1,4 @@
-name: conditional_tokens
+name: fpmm
 author: valory
 version: 0.1.0
 type: contract
@@ -7,14 +7,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
-  build/ConditionalTokens.json: bafybeihhorqa54r2kxw6iavwdc427dqipltwehnjhxb3afjzox7moihesi
-  contract.py: bafybeihqah46zvullbgf5qpml3kwlngcrlj6lnj2vvnlrdpjizoxmuaepu
+  build/FPMM.json: bafybeidvvevt5hderny4jme6oml4srnm3jf2gwht2hxcxjixjeygejyrvy
+  contract.py: bafybeiguamok44bbaco2usty6pa3ie2hmabcqxmusaiwvfx2qe535ax4ne
 fingerprint_ignore_patterns: []
-class_name: ConditionalTokensContract
+class_name: FPMMContract
 contract_interface_paths:
-  ethereum: build/ConditionalTokens.json
-dependencies:
-  hexbytes: {}
-  web3:
-    version: ==5.31.4
+  ethereum: build/FPMM.json
+dependencies: {}
 contracts: []

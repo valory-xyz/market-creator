@@ -19,12 +19,13 @@
 
 """This module contains the scaffold contract definition."""
 
-from typing import Any
+from typing import Any, List
 
 from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
+from web3.types import BlockIdentifier
 
 
 DEFAULT_OUTCOME_SLOT = 2
@@ -167,3 +168,40 @@ class ConditionalTokensContract(Contract):
             tx_receipt
         )
         return "0x" + log["args"]["conditionId"].hex()
+
+    @classmethod
+    def get_condition_preparation_events(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        condition_ids: List[bytes],
+        from_block: BlockIdentifier = "earliest",
+        to_block: BlockIdentifier = "latest",
+    ) -> JSONLike:
+        """Get condition preparation events."""
+        contract_instance = cls.get_instance(
+            ledger_api=ledger_api, contract_address=contract_address
+        )
+        entries = (
+            contract_instance.events.ConditionPreparation()
+            .createFilter(
+                fromBlock=from_block,
+                toBlock=to_block,
+                argument_filters={
+                    "conditionId": condition_ids,
+                },
+            )
+            .get_all_entries()
+        )
+        events = list(
+            dict(
+                tx_hash=entry.transactionHash.hex(),
+                block_number=entry.blockNumber,
+                condition_id=entry["args"]["conditionId"],
+                oracle=entry["args"]["oracle"],
+                question_id=entry["args"]["questionId"],
+                outcome_slot_count=entry["args"]["outcomeSlotCount"],
+            )
+            for entry in entries
+        )
+        return dict(data=events)
