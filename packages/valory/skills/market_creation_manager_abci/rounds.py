@@ -433,7 +433,6 @@ class FinishedWithRemoveFundingRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
 
-
 class SkippedMarketCreationManagerRound(DegenerateRound):
     """SkippedMarketCreationManagerRound"""
 
@@ -495,6 +494,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         FinishedMarketCreationManagerRound: {},
+        FinishedWithRemoveFundingRound: {},
         SkippedMarketCreationManagerRound: {},
     }
     final_states: Set[AppState] = {
@@ -507,7 +507,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.markets_created),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
-        CollectRandomnessRound: set(),
+        SyncMarketsRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
         FinishedMarketCreationManagerRound: {

@@ -1,14 +1,15 @@
 {
     "dev": {
-        "contract/valory/conditional_tokens/0.1.0": "bafybeig5vtn7bzpegfrzehdgeezqcnox3xlb5i54ehnqndazhcfh3bkdcq",
-        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeig4ztnqgyaespzlcmcom56nvmi4c4paddsxsjsh5q7olnylu3z7ou",
-        "contract/valory/realtio/0.1.0": "bafybeihoj7w5dqdyo6ds2rdmi326cvl5wuc7xp6yms7lwks35m4nqypk4q",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeibaovti3jrf5syhtffkgnj34agk4decoiybeufh4yb6qpvvtqycve",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeibidkqzpqpx4cd2kil4f53ag32v4xyotxz5fn55iorgl7ylwdhcga",
-        "agent/valory/market_maker/0.1.0": "bafybeib4yddbk7kutldwubejzaqbscut7liwkwoncgepydaqbr3w7ztfaa",
-        "service/valory/market_maker/0.1.0": "bafybeigfi7bvtbqvvruherltjunkdlhsyxl3nlehno5nrbhvfgp4hizhhe",
+        "contract/valory/conditional_tokens/0.1.0": "bafybeibiladatj7sfk6yuehceq4tfia2lrdmgctjqfpgx2qaioc3hxrav4",
+        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeigz4ezwa24iqvrvckybwul5ro7uo5rrz3z6fjbvmx7ouf2j2ibv2i",
+        "contract/valory/realtio/0.1.0": "bafybeie3frhjqyjrw63zxlvmkflnwfixwk4e7ghpjupkt4pvvusbr65hna",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiflj2khdcnkoelwy7xfwvowwcdgjtlcljpbwo4kg7kmr7khy7ogpa",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeibivh3pfhvnkvtm3i2i3uhvixkmzxqnbxig3suuxdsgfh2jneypsq",
+        "agent/valory/market_maker/0.1.0": "bafybeidwrembh7pplvf7xq7uywuf4ojp3as5ga36rwvu3wfouwjpbuogui",
+        "service/valory/market_maker/0.1.0": "bafybeieudpgoczl2hmz6wujwk45ge7ik47nmtxnldxdavwadfhh5ecucdi",
         "contract/valory/wxdai/0.1.0": "bafybeie3c5enerf54jt75xc62mbzck4kjqxpjx2mzo6v4rrz4dmcy4xdgy",
-        "skill/valory/market_validation_abci/0.1.0": "bafybeifyfwynotmzg6wypbzbwsfnrplhjhumfx32dm2j3ddasp7ygrfoqa"
+        "skill/valory/market_validation_abci/0.1.0": "bafybeifyfwynotmzg6wypbzbwsfnrplhjhumfx32dm2j3ddasp7ygrfoqa",
+        "contract/valory/fpmm/0.1.0": "bafybeic2ybtgg77mztbrni3d6yd437fc675dlmmhchbpoqffzut3drclka"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeiasywsvax45qmugus5kxogejj66c5taen27h4voriodz7rgushtqa",
