@@ -39,9 +39,10 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     DataGatheringPayload,
     MarketProposalPayload,
     PrepareTransactionPayload,
+    RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
-    SyncMarketsPayload, RemoveFundingPayload,
+    SyncMarketsPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -468,7 +469,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         DataGatheringRound: {
             Event.DONE: MarketProposalRound,
-            Event.MAX_MARKETS_REACHED: SkippedMarketCreationManagerRound,
+            Event.MAX_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
