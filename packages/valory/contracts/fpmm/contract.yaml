@@ -1,0 +1,17 @@
+name: fpmm
+author: valory
+version: 0.1.0
+type: contract
+description: The scaffold contract scaffolds a contract to be implemented by the developer.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
+  build/FPMM.json: bafybeidvvevt5hderny4jme6oml4srnm3jf2gwht2hxcxjixjeygejyrvy
+  contract.py: bafybeig2wlqaal6h2gz3tbhiotyqi5qdif5gtyxo7eae67jl4apidzquki
+fingerprint_ignore_patterns: []
+class_name: FPMMContract
+contract_interface_paths:
+  ethereum: build/FPMM.json
+dependencies: {}
+contracts: []
