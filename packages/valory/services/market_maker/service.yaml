@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeigkbllrunopor5oy2xrv63tx3ql6a6rmjodczytb37joymnuzn6xq
+agent: valory/market_maker:0.1.0:bafybeiar7hafeq4ojwmscr376zkjttu2752fjqwrwh27xsbti2sg46xihy
 number_of_agents: 1
 deployment:
   agent:
@@ -76,7 +76,7 @@ models:
       termination_sleep: ${TERMINATION_SLEEP:int:900}
       tx_timeout: ${TX_TIMEOUT:float:10.0}
       use_termination: ${USE_TERMINATION:bool:false}
-      round_timeout_seconds: ${ROUND_TIMEOUT_SECONDS:int:120}
+      round_timeout_seconds: ${ROUND_TIMEOUT_SECONDS:float:120}
 ---
 public_id: valory/ledger:0.19.0
 type: connection
