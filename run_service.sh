@@ -39,7 +39,7 @@ autonomy fetch --local --service valory/market_maker && cd market_maker
 autonomy build-image
 
 # Copy keys and build the deployment
-# Modify this path if required
+# MODIFY THIS PATH IF REQUIRED
 cp ../keys.json ./keys.json
 
 # Build the deployment

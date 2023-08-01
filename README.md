@@ -7,7 +7,8 @@ Market Creator (or Market Maker) is an autonomous service that interacts with ne
 3. Propose the generated markets to a market approval server (a maximum of `NUM_MARKETS` are proposed). Users interact with this server, review and approve/reject the proposed markets.
 4. Collect an user-approved market from the server.
 5. Send the necessary transactions to the Gnosis chain to open and fund the market on [Omen](https://aiomen.eth.limo/).
-6. Repeat.
+6. Remove liquidity of markets whose closing date is <= 1 day.
+7. Repeat.
 
 The Market Creator service is an [agent service](https://docs.autonolas.network/open-autonomy/get_started/what_is_an_agent_service/) (or autonomous service) based on the [Open Autonomy framework](https://docs.autonolas.network/open-autonomy/). Below we show you how to prepare your environment, how to prepare the agent keys, and how to configure and run the service.
 
