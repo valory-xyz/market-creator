@@ -181,6 +181,6 @@ models:
       tendermint_p2p_url: ${str:localhost:26656}
       termination_sleep: ${int:900}
       tx_timeout: ${float:10.0}
-      round_timeout_seconds: ${int:60}
+      round_timeout_seconds: ${float:60}
       use_termination: ${bool:false}
 is_abstract: false
