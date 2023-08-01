@@ -79,3 +79,10 @@ class RemoveFundingPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 
     content: str
+
+
+@dataclass(frozen=True)
+class DepositDaiPayload(BaseTxPayload):
+    """Represent a transaction payload for the PrepareTransactionRound."""
+
+    content: str

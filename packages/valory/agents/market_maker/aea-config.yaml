@@ -22,7 +22,7 @@ contracts:
 - valory/conditional_tokens:0.1.0:bafybeibpzhbknohnx5mp653ky5betjfiz3ed3agj554oecsszqq4uxe4qi
 - valory/fpmm_deterministic_factory:0.1.0:bafybeif7hgwamqm6iljhtr32ap6eazn5yhmxrtlvicmpo746gv2s4tyzqq
 - valory/service_registry:0.1.0:bafybeiae7nr5fqn6ckt3ehol27qfd4o5ljzx6kk5k32lgtrvj3mtb62ufm
-- valory/wxdai:0.1.0:bafybeie3c5enerf54jt75xc62mbzck4kjqxpjx2mzo6v4rrz4dmcy4xdgy
+- valory/wxdai:0.1.0:bafybeidsp4dptfuxatr75vksdruzvqyhinj4nwiw5f3brzrewldprxuwg4
 - valory/fpmm:0.1.0:bafybeihoczslmqbfpx57tmjps663r2ib7ycc3dfa4smdhufb4wbnidewtq
 protocols:
 - open_aea/signing:1.0.0:bafybeifuxs7gdg2okbn7uofymenjlmnih2wxwkym44lsgwmklgwuckxm2m
@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiamr3cwetayz6lr72buhq6iviabtboj4hhpq47tlumimxolvvqjcy
 - valory/abstract_round_abci:0.1.0:bafybeiaseziuvbzh3trjggl5hx2tv3fduqrpiwiyksudaf6nvuxmwrg74i
-- valory/market_maker_abci:0.1.0:bafybeieu664wvp7pjnsvmg2dcuzej4tozseid74lvaflytwxtm57mu3kpu
+- valory/market_maker_abci:0.1.0:bafybeiaqxit7c2hlgtgovfgvthv6caqymsetma2qwfywblkqnpmcwyiju4
 - valory/registration_abci:0.1.0:bafybeibafy7qmcvvzaykimy3mbqdwtcuajmbghqilaa7zwkh6wla33cfce
-- valory/market_creation_manager_abci:0.1.0:bafybeihavargx3sto43zh66zn7v5q7px7zgeebxq47gdfya66n2tqi6laa
+- valory/market_creation_manager_abci:0.1.0:bafybeiclzuhmamrbm7vlafqspl6jkp5r54vxa2nlvuinmw6pzijb7u7f7i
 - valory/market_validation_abci:0.1.0:bafybeifyfwynotmzg6wypbzbwsfnrplhjhumfx32dm2j3ddasp7ygrfoqa
 - valory/reset_pause_abci:0.1.0:bafybeialcwck7fahrr23jckv5qjwg3cdq4ai2ihyjsofnbj44jzyl4cjmm
 - valory/termination_abci:0.1.0:bafybeifqsogqiar4yook5bu3j6z66dbdcizey7dr3e5oxeocdjijvfbaja
@@ -181,5 +181,6 @@ models:
       tendermint_p2p_url: ${str:localhost:26656}
       termination_sleep: ${int:900}
       tx_timeout: ${float:10.0}
+      round_timeout_seconds: ${int:60}
       use_termination: ${bool:false}
 is_abstract: false

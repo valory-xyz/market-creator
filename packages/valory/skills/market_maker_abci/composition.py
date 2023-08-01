@@ -43,14 +43,15 @@ from packages.valory.skills.termination_abci.rounds import TerminationAbciApp
 
 
 abci_app_transition_mapping: AbciAppTransitionMapping = {
-    FinishedRegistrationRound: MarketCreationManagerAbci.SyncMarketsRound,
-    MarketCreationManagerAbci.SkippedMarketCreationManagerRound: ResetAndPauseRound,
+    FinishedRegistrationRound: MarketCreationManagerAbci.CollectRandomnessRound,
+    MarketCreationManagerAbci.FinishedWithoutTxRound: ResetAndPauseRound,
+    MarketCreationManagerAbci.FinishedWithDepositDaiRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithRemoveFundingRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     TransactionSettlementAbci.FinishedTransactionSubmissionRound: MarketValidationAbci.MarketValidationRound,
     MarketValidationAbci.FinishedMarketValidationRound: ResetAndPauseRound,
     TransactionSettlementAbci.FailedRound: ResetAndPauseRound,
-    FinishedResetAndPauseRound: MarketCreationManagerAbci.SyncMarketsRound,
+    FinishedResetAndPauseRound: MarketCreationManagerAbci.CollectRandomnessRound,
     FinishedResetAndPauseErrorRound: RegistrationRound,
 }
 

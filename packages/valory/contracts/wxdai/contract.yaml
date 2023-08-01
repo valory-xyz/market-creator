@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
   build/WxDAI.json: bafybeieypq5oupeqr76i5dpskjpydykj4olfkchdkd75u7dshyylzl42za
-  contract.py: bafybeibanqw3lagpm43oah2k6jrc6kir77klec2uo6n4utktzz7xivbkcq
+  contract.py: bafybeiffkkhuns4genuvd4zyt3sspmdzhfhyhvpiisl3grwqgkduel6lom
 fingerprint_ignore_patterns: []
 class_name: WxDAIContract
 contract_interface_paths:

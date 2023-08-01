@@ -37,6 +37,7 @@ from packages.valory.skills.abstract_round_abci.base import (
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectRandomnessPayload,
     DataGatheringPayload,
+    DepositDaiPayload,
     MarketProposalPayload,
     PrepareTransactionPayload,
     RemoveFundingPayload,
@@ -129,6 +130,41 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     no_majority_event = Event.NO_MAJORITY
     collection_key = get_name(SynchronizedData.participant_to_randomness)
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
+
+
+class DepositDaiRound(CollectSameUntilThresholdRound):
+    """A round for depositing Dai"""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    NO_TX_PAYLOAD = "NO_TX"
+
+    payload_class = DepositDaiPayload
+    synchronized_data_class = SynchronizedData
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                return self.synchronized_data, Event.ERROR
+
+            if self.most_voted_payload == self.NO_TX_PAYLOAD:
+                return self.synchronized_data, Event.NO_TX
+
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(
+                        SynchronizedData.most_voted_tx_hash
+                    ): self.most_voted_payload,
+                },
+            )
+            return synchronized_data, Event.DONE
+
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+        return None
 
 
 class RemoveFundingRound(CollectSameUntilThresholdRound):
@@ -434,29 +470,20 @@ class FinishedWithRemoveFundingRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
 
-class SkippedMarketCreationManagerRound(DegenerateRound):
-    """SkippedMarketCreationManagerRound"""
+class FinishedWithDepositDaiRound(DegenerateRound):
+    """FinishedMarketCreationManagerRound"""
+
+
+class FinishedWithoutTxRound(DegenerateRound):
+    """FinishedWithoutTxRound"""
 
 
 class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
 
-    initial_round_cls: AppState = SyncMarketsRound
-    initial_states: Set[AppState] = {SyncMarketsRound}
+    initial_round_cls: AppState = CollectRandomnessRound
+    initial_states: Set[AppState] = {CollectRandomnessRound}
     transition_function: AbciAppTransitionFunction = {
-        SyncMarketsRound: {
-            Event.DONE: RemoveFundingRound,
-            Event.NO_MAJORITY: SyncMarketsRound,
-            Event.ERROR: SyncMarketsRound,
-            Event.ROUND_TIMEOUT: SyncMarketsRound,
-        },
-        RemoveFundingRound: {
-            Event.DONE: FinishedWithRemoveFundingRound,
-            Event.NO_TX: CollectRandomnessRound,
-            Event.NO_MAJORITY: RemoveFundingRound,
-            Event.ERROR: RemoveFundingRound,
-            Event.ROUND_TIMEOUT: RemoveFundingRound,
-        },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
@@ -487,35 +514,59 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
             Event.DID_NOT_SEND: CollectRandomnessRound,
             Event.ERROR: CollectRandomnessRound,
-            Event.NO_MARKETS_RETRIEVED: SkippedMarketCreationManagerRound,
+            Event.NO_MARKETS_RETRIEVED: DepositDaiRound,
         },
         PrepareTransactionRound: {
             Event.DONE: FinishedMarketCreationManagerRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
+        DepositDaiRound: {
+            Event.DONE: FinishedWithDepositDaiRound,
+            Event.NO_TX: SyncMarketsRound,
+            Event.NO_MAJORITY: DepositDaiRound,
+            Event.ERROR: DepositDaiRound,
+        },
+        SyncMarketsRound: {
+            Event.DONE: RemoveFundingRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ERROR: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        },
+        RemoveFundingRound: {
+            Event.DONE: FinishedWithRemoveFundingRound,
+            Event.NO_TX: FinishedWithoutTxRound,
+            Event.NO_MAJORITY: RemoveFundingRound,
+            Event.ERROR: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        },
         FinishedMarketCreationManagerRound: {},
         FinishedWithRemoveFundingRound: {},
-        SkippedMarketCreationManagerRound: {},
+        FinishedWithDepositDaiRound: {},
+        FinishedWithoutTxRound: {},
     }
     final_states: Set[AppState] = {
         FinishedMarketCreationManagerRound,
         FinishedWithRemoveFundingRound,
-        SkippedMarketCreationManagerRound,
+        FinishedWithDepositDaiRound,
+        FinishedWithoutTxRound,
     }
     event_to_timeout: EventToTimeout = {}
     cross_period_persisted_keys: Set[str] = {
         get_name(SynchronizedData.markets_created),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
-        SyncMarketsRound: set(),
+        CollectRandomnessRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
+        FinishedWithDepositDaiRound: {
+            get_name(SynchronizedData.most_voted_tx_hash),
+        },
         FinishedMarketCreationManagerRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
         FinishedWithRemoveFundingRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
-        SkippedMarketCreationManagerRound: set(),
+        FinishedWithoutTxRound: set(),
     }

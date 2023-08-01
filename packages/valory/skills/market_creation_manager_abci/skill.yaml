@@ -8,13 +8,13 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeige53mvufrlcpxmmt55qbjg6vhszec56ieopokjgveae3kzujaoje
+  behaviours.py: bafybeiar2uv3x2oiqeuyurgi2bkm6vk26n26kkudhwge32a64vepwkzdua
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiay4aepnfdkcsriajxqige65bsszrujin57riubflm7dyw2keapoi
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
   models.py: bafybeidpprylojhopdp4aoxwxri2kp7nmv5f3acdok4n5c6ak3a5wnn5cu
-  payloads.py: bafybeibebnjaq5l3p64vfvjkcu4gauu4kvh23yleushkpe7igo3yllhoba
-  rounds.py: bafybeib23ppy3vyjxxrg7bu22av7r2lncfy4mhanj5cniqzkjpksevca5y
+  payloads.py: bafybeib57gmbwstx646qxvxxl62n6of4vo2ei2nl32ogo5vhi3ukz6ldqe
+  rounds.py: bafybeifhj72msvgtp2upzawe4ynyagir4quexvr3lwz4clob3f3b4pqi6i
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -25,11 +25,12 @@ contracts:
 - valory/realtio:0.1.0:bafybeigsciwpawqiyxtk7klpnx6vyaz4nic5s6afl4eahab5ub4hftu4du
 - valory/conditional_tokens:0.1.0:bafybeibpzhbknohnx5mp653ky5betjfiz3ed3agj554oecsszqq4uxe4qi
 - valory/fpmm_deterministic_factory:0.1.0:bafybeif7hgwamqm6iljhtr32ap6eazn5yhmxrtlvicmpo746gv2s4tyzqq
-- valory/wxdai:0.1.0:bafybeie3c5enerf54jt75xc62mbzck4kjqxpjx2mzo6v4rrz4dmcy4xdgy
+- valory/wxdai:0.1.0:bafybeidsp4dptfuxatr75vksdruzvqyhinj4nwiw5f3brzrewldprxuwg4
 - valory/fpmm:0.1.0:bafybeihoczslmqbfpx57tmjps663r2ib7ycc3dfa4smdhufb4wbnidewtq
 protocols:
 - valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
 - valory/contract_api:1.0.0:bafybeiasywsvax45qmugus5kxogejj66c5taen27h4voriodz7rgushtqa
+- valory/ledger_api:1.0.0:bafybeigsvceac33asd6ecbqev34meyyjwu3rangenv6xp5rkxyz4krvcby
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaseziuvbzh3trjggl5hx2tv3fduqrpiwiyksudaf6nvuxmwrg74i
 - valory/transaction_settlement_abci:0.1.0:bafybeiacwr7p4nhhufoey7uz2jqkegrlykdrmc7mm3rzkvh2mslu66gyle
