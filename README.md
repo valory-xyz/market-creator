@@ -171,6 +171,8 @@ You can access the root address http://server_ip:5000 and examine the different 
     autonomy deploy run --build-dir abci_build/
     ```
 
+For convenience, we provide a template script [run_service.sh](https://github.com/valory-xyz/market-creator/blob/main/run_service.sh) that you can modify and experiment with different values.
+
 ## For advanced users
 
 The market maker agent is configured to work with the Gnosis chain by default, if you want to use the agent with other chains you can figure out what contracts to use from [here](https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md)
