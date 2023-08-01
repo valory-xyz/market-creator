@@ -101,3 +101,17 @@ class WxDAIContract(Contract):
             },
         )
         return {"data": bytes.fromhex(data[2:])}  # type: ignore
+
+    @classmethod
+    def build_deposit_tx(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+    ) -> JSONLike:
+        """Build deposit tx."""
+        contract = cls.get_instance(ledger_api, contract_address)
+        data = contract.encodeABI(
+            fn_name="deposit",
+            args=[],
+        )
+        return dict(data=data)

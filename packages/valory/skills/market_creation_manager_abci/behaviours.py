@@ -46,6 +46,7 @@ from packages.valory.contracts.multisend.contract import (
 from packages.valory.contracts.realtio.contract import RealtioContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
+from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.protocols.llm.message import LlmMessage
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.abstract_round_abci.behaviours import (
@@ -66,6 +67,7 @@ from packages.valory.skills.market_creation_manager_abci.models import (
     SharedState,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
+    DepositDaiPayload,
     RemoveFundingPayload,
     SyncMarketsPayload,
 )
@@ -74,6 +76,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectRandomnessRound,
     DataGatheringPayload,
     DataGatheringRound,
+    DepositDaiRound,
     MarketCreationManagerAbciApp,
     MarketProposalPayload,
     MarketProposalRound,
@@ -165,12 +168,138 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         )
         return cast(str, response.state.body["condition_id"])
 
+    def _get_safe_tx_hash(
+        self,
+        to_address: str,
+        data: bytes,
+        value: int = ETHER_VALUE,
+        safe_tx_gas: int = SAFE_TX_GAS,
+        operation: int = SafeOperation.CALL.value,
+    ) -> Generator[None, None, Optional[str]]:
+        """Prepares and returns the safe tx hash."""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.synchronized_data.safe_contract_address,  # the safe contract address
+            contract_id=str(GnosisSafeContract.contract_id),
+            contract_callable="get_raw_safe_transaction_hash",
+            to_address=to_address,  # the contract the safe will invoke
+            value=value,
+            data=data,
+            safe_tx_gas=safe_tx_gas,
+            operation=operation,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.error(
+                f"Couldn't get safe hash. "
+                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"received {response.performative.value}."
+            )
+            return None
+
+        # strip "0x" from the response hash
+        tx_hash = cast(str, response.state.body["tx_hash"])[2:]
+        return tx_hash
+
 
 class CollectRandomnessBehaviour(RandomnessBehaviour):
     """CollectRandomnessBehaviour"""
 
     matching_round: Type[AbstractRound] = CollectRandomnessRound
     payload_class = CollectRandomnessPayload
+
+
+class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
+    """DepositDaiBehaviour"""
+
+    matching_round = DepositDaiRound
+
+    def async_act(self) -> Generator:
+        """Implement the act."""
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            sender = self.context.agent_address
+            content = yield from self.get_payload()
+            payload = DepositDaiPayload(sender=sender, content=content)
+        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+            yield from self.send_a2a_transaction(payload)
+            yield from self.wait_until_round_end()
+        self.set_done()
+
+    def get_balance(self, address: str) -> Generator[None, None, Optional[int]]:
+        """Get the balance of the provided address"""
+        ledger_api_response = yield from self.get_ledger_api_response(
+            performative=LedgerApiMessage.Performative.GET_STATE,
+            ledger_callable="get_balance",
+            account=address,
+        )
+        if ledger_api_response.performative != LedgerApiMessage.Performative.STATE:
+            self.context.logger.error(
+                f"Couldn't get balance. "
+                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"received {ledger_api_response.performative.value}."
+            )
+            return None
+        balance = cast(int, ledger_api_response.state.body.get("get_balance_result"))
+        self.context.logger.info(f"balance: {balance / 10 ** 18} xDAI")
+        return balance
+
+    def get_payload(self) -> Generator[None, None, str]:
+        """Get the payload."""
+        safe_address = self.synchronized_data.safe_contract_address
+        balance = yield from self.get_balance(safe_address)
+        if balance is None:
+            # something went wrong
+            return DepositDaiRound.ERROR_PAYLOAD
+
+        if balance == 0:
+            # no balance in the safe
+            return DepositDaiRound.NO_TX_PAYLOAD
+
+        # in case there is balance in the safe, fully deposit it to the wxDAI contract
+        wxdai_address = self.params.collateral_tokens_contract
+        tx_data = yield from self._get_deposit_tx(wxdai_address)
+        if tx_data is None:
+            # something went wrong
+            return DepositDaiRound.ERROR_PAYLOAD
+
+        safe_tx_hash = yield from self._get_safe_tx_hash(
+            to_address=wxdai_address, value=balance, data=tx_data
+        )
+        if safe_tx_hash is None:
+            # something went wrong
+            return DepositDaiRound.ERROR_PAYLOAD
+
+        tx_payload_data = hash_payload_to_hex(
+            safe_tx_hash=safe_tx_hash,
+            ether_value=balance,
+            safe_tx_gas=SAFE_TX_GAS,
+            to_address=wxdai_address,
+            data=tx_data,
+        )
+        return tx_payload_data
+
+    def _get_deposit_tx(
+        self,
+        wxdai_address: str,
+    ) -> Generator[None, None, Optional[bytes]]:
+        """This function returns the encoded FPMMContract.removeFunds() function call."""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_id=str(WxDAIContract.contract_id),
+            contract_callable="build_deposit_tx",
+            contract_address=wxdai_address,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.error(
+                f"Couldn't get tx data for WxDAIContract.build_deposit_tx. "
+                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"received {response.performative.value}."
+            )
+            return None
+
+        # strip "0x" from the response data
+        data_str = cast(str, response.state.body["data"])[2:]
+        data = bytes.fromhex(data_str)
+        return data
 
 
 class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
@@ -464,7 +593,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
-                f"Couldn't get tx data for ManagedPoolContract.update_weights_gradually. "
+                f"Couldn't get tx data for FPMMContract.build_remove_funding_tx. "
                 f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
                 f"received {response.performative.value}."
             )
@@ -474,32 +603,6 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         data_str = cast(str, response.state.body["data"])[2:]
         data = bytes.fromhex(data_str)
         return data
-
-    def _get_safe_tx_hash(
-        self, market_address: str, data: bytes
-    ) -> Generator[None, None, Optional[str]]:
-        """Prepares and returns the safe tx hash."""
-        response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            contract_address=self.synchronized_data.safe_contract_address,  # the safe contract address
-            contract_id=str(GnosisSafeContract.contract_id),
-            contract_callable="get_raw_safe_transaction_hash",
-            to_address=market_address,  # the contract the safe will invoke
-            value=ETHER_VALUE,
-            data=data,
-            safe_tx_gas=SAFE_TX_GAS,
-        )
-        if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Couldn't get safe hash. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
-                f"received {response.performative.value}."
-            )
-            return None
-
-        # strip "0x" from the response hash
-        tx_hash = cast(str, response.state.body["tx_hash"])[2:]
-        return tx_hash
 
 
 class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
@@ -1109,7 +1212,11 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         # strip "0x" from the response
         multisend_data_str = cast(str, response.raw_transaction.body["data"])[2:]
         tx_data = bytes.fromhex(multisend_data_str)
-        tx_hash = yield from self._get_safe_tx_hash(tx_data)
+        tx_hash = yield from self._get_safe_tx_hash(
+            self.params.multisend_address,
+            tx_data,
+            operation=SafeOperation.DELEGATE_CALL.value,
+        )
         if tx_hash is None:
             return None
 
@@ -1123,54 +1230,20 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         )
         return payload_data
 
-    def _get_safe_tx_hash(self, data: bytes) -> Generator[None, None, Optional[str]]:
-        """
-        Prepares and returns the safe tx hash.
-
-        This hash will be signed later by the agents, and submitted to the safe contract.
-        Note that this is the transaction that the safe will execute, with the provided data.
-
-        :param data: the safe tx data.
-        :yield: None
-        :return: the tx hash
-        """
-        response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            contract_address=self.synchronized_data.safe_contract_address,
-            contract_id=str(GnosisSafeContract.contract_id),
-            contract_callable="get_raw_safe_transaction_hash",
-            to_address=self.params.multisend_address,  # we send the tx to the multisend address
-            value=ETHER_VALUE,
-            data=data,
-            safe_tx_gas=SAFE_TX_GAS,
-            operation=SafeOperation.DELEGATE_CALL.value,
-        )
-
-        if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Couldn't get safe hash. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
-                f"received {response.performative.value}."
-            )
-            return None
-
-        # strip "0x" from the response hash
-        tx_hash = cast(str, response.state.body["tx_hash"])[2:]
-        return tx_hash
-
 
 class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     """MarketCreationManagerRoundBehaviour"""
 
-    initial_behaviour_cls = SyncMarketsBehaviour
+    initial_behaviour_cls = CollectRandomnessBehaviour
     abci_app_cls = MarketCreationManagerAbciApp  # type: ignore
     behaviours: Set[Type[BaseBehaviour]] = {
-        SyncMarketsBehaviour,
-        RemoveFundingBehaviour,
         CollectRandomnessBehaviour,
         DataGatheringBehaviour,
         SelectKeeperMarketProposalBehaviour,
         MarketProposalBehaviour,
         RetrieveApprovedMarketBehaviour,
         PrepareTransactionBehaviour,
+        SyncMarketsBehaviour,
+        RemoveFundingBehaviour,
+        DepositDaiBehaviour,
     }
