@@ -115,5 +115,9 @@ class RandomnessApi(ApiSpecs):
     """A model for randomness api specifications."""
 
 
+class OmenSubgraph(ApiSpecs):
+    """A model that wraps ApiSpecs for the OMEN's subgraph specifications."""
+
+
 Requests = BaseRequests
 BenchmarkTool = BaseBenchmarkTool
