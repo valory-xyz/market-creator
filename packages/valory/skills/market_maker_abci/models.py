@@ -30,6 +30,9 @@ from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
 )
 from packages.valory.skills.market_creation_manager_abci.models import (
+    OmenSubgraph as BaseOmenSubgraph,
+)
+from packages.valory.skills.market_creation_manager_abci.models import (
     RandomnessApi as MarketCreationManagerRandomnessApi,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
@@ -47,6 +50,7 @@ MULTIPLIER = 2
 Requests = BaseRequests
 BenchmarkTool = BaseBenchmarkTool
 RandomnessApi = MarketCreationManagerRandomnessApi
+OmenSubgraph = BaseOmenSubgraph
 
 
 class SharedState(BaseSharedState):

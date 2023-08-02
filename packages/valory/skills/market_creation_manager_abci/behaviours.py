@@ -23,6 +23,7 @@ import datetime
 import json
 import random
 from abc import ABC
+from string import Template
 from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Type, cast
 
 from packages.valory.connections.openai.connection import (
@@ -111,6 +112,35 @@ AVAILABLE_FORMATS = (
 _ONE_DAY = 86400
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+
+CONDITIONS_QUERY = Template(
+    """{
+        conditions(where:{id_in:$conditions}){
+        id,
+        oracle,
+        questionId,
+        outcomeSlotCount
+    }
+}
+"""
+)
+
+QUESTIONS_QUERY = Template(
+    """{
+        questions(where:{id_in:$conditions}){
+        id,
+        openingTimestamp
+    }
+}"""
+)
+
+
+def to_content(query: str) -> bytes:
+    """Convert the given query string to payload content, i.e., add it under a `queries` key and convert it to bytes."""
+    finalized_query = {"query": query}
+    encoded_query = json.dumps(finalized_query, sort_keys=True).encode("utf-8")
+
+    return encoded_query
 
 
 def parse_date_timestring(string: str) -> Optional[datetime.datetime]:
@@ -364,11 +394,12 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         condition_id_to_market = {}
         for market in markets:
             for condition_id in market["condition_ids"]:
-                condition_id_to_market[condition_id] = market
+                condition_id_to_market[f"0x{condition_id.hex()}"] = market
         condition_ids = list(condition_id_to_market.keys())
         condition_preparations = yield from self._get_condition_preparation_events(
-            condition_ids, from_block
+            condition_ids=condition_ids
         )
+        self.context.logger.info(f"Conditions: {condition_preparations}")
         if condition_preparations is None:
             # something went wrong
             return None
@@ -390,7 +421,8 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         question_ids = [
             preparation["question_id"] for preparation in condition_preparations
         ]
-        questions = yield from self._get_questions(question_ids, from_block)
+        self.context.logger.info(f"Questions: {question_ids}")
+        questions = yield from self._get_questions(question_ids=question_ids)
         if questions is None:
             # something went wrong
             return None
@@ -474,51 +506,36 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         return markets_with_liq
 
     def _get_condition_preparation_events(
-        self,
-        condition_ids: List[bytes],
-        from_block: int,
+        self, condition_ids: List[str]
     ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
         """Get condition preparation events."""
-        contract_api_response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=self.params.conditional_tokens_contract,
-            contract_id=str(ConditionalTokensContract.contract_id),
-            contract_callable="get_condition_preparation_events",
-            condition_ids=condition_ids,
-            from_block=from_block,
+        query = CONDITIONS_QUERY.substitute(conditions=json.dumps(condition_ids))
+        response = yield from self.get_http_response(
+            content=to_content(query),
+            **self.context.omen_subgraph.get_spec(),
         )
-        if contract_api_response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Failed to get condition preparation events: {contract_api_response}"
-            )
-            return None
-        condition_preparation_events = cast(
-            Optional[List[Dict[str, Any]]],
-            contract_api_response.state.body.get("data", []),
-        )
+        data = json.loads(response.body.decode())
+        condition_preparation_events = data["data"]["conditions"]
+        for condition in condition_preparation_events:
+            condition["condition_id"] = condition.pop("id")
+            condition["question_id"] = condition.pop("questionId")
+            condition["outcome_slot_count"] = condition.pop("outcomeSlotCount")
         return condition_preparation_events
 
     def _get_questions(
-        self, question_ids: List[str], from_block: int
+        self, question_ids: List[str]
     ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
         """Get question ids."""
-        contract_api_response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=self.params.realitio_contract,
-            contract_id=str(RealtioContract.contract_id),
-            contract_callable="get_question_events",
-            question_ids=question_ids,
-            from_block=from_block,
+        query = QUESTIONS_QUERY.substitute(conditions=json.dumps(question_ids))
+        response = yield from self.get_http_response(
+            content=to_content(query),
+            **self.context.omen_subgraph.get_spec(),
         )
-        if contract_api_response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Failed to get question: {contract_api_response}"
-            )
-            return None
-        questions = cast(
-            Optional[List[Dict[str, Any]]],
-            contract_api_response.state.body.get("data", []),
-        )
+        data = json.loads(response.body.decode())
+        questions = data["data"]["questions"]
+        for condition in questions:
+            condition["question_id"] = condition.pop("id")
+            condition["opening_ts"] = int(condition.pop("openingTimestamp"))
         return questions
 
 
