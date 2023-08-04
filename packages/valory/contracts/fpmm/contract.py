@@ -89,11 +89,15 @@ class FPMMContract(Contract):
         raise NotImplementedError
 
     @classmethod
-    def build_remove_funding_tx(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> JSONLike:
+    def build_remove_funding_tx(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        amount: int,
+        **kwargs: Any,
+    ) -> JSONLike:
         """Build removeFunding tx."""
         instance = cls.get_instance(ledger_api, contract_address)
-        # remove everything
-        amount = instance.functions.totalSupply().call()
         data = instance.encodeABI(
             fn_name="removeFunding",
             args=[
@@ -122,6 +126,8 @@ class FPMMContract(Contract):
                 if total_supply > 0:
                     markets_with_liq.append(market_address)
             except Exception as e:
-                _logger.warning(f"Error while getting totalSupply for {market_address}: {e}")
+                _logger.warning(
+                    f"Error while getting totalSupply for {market_address}: {e}"
+                )
 
         return dict(data=markets_with_liq)

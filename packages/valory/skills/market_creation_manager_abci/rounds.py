@@ -21,7 +21,7 @@
 
 import json
 from enum import Enum
-from typing import Dict, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
@@ -111,9 +111,11 @@ class SynchronizedData(TxSynchronizedData):
         return cast(str, self.db.get_strict("most_voted_keeper_address"))
 
     @property
-    def market_to_remove_funds_deadline(self) -> Dict[str, int]:
-        """Get the market_to_remove_funds_deadline."""
-        return cast(Dict[str, int], self.db.get("market_to_remove_funds_deadline", {}))
+    def markets_to_remove_liquidity(self) -> List[Dict[str, Any]]:
+        """Get the markets_to_remove_liquidity."""
+        return cast(
+            List[Dict[str, Any]], self.db.get("markets_to_remove_liquidity", [])
+        )
 
     @property
     def market_from_block(self) -> int:
@@ -186,21 +188,25 @@ class RemoveFundingRound(CollectSameUntilThresholdRound):
                 return self.synchronized_data, Event.NO_TX
 
             payload = json.loads(self.most_voted_payload)
-            #
             tx_data, market_address = payload["tx"], payload["market"]
 
-            # Note that popping the market_to_remove_funds_deadline here
+            # Note that popping the markets_to_remove_liquidity here
             # is optimistically assuming that the transaction will be successful.
-            market_to_remove_funds_deadline = cast(
+            markets_to_remove_liquidity = cast(
                 SynchronizedData,
                 self.synchronized_data,
-            ).market_to_remove_funds_deadline.pop(market_address)
+            ).markets_to_remove_liquidity
+            markets_to_remove_liquidity = [
+                market
+                for market in markets_to_remove_liquidity
+                if market["address"] != market_address
+            ]
             synchronized_data = self.synchronized_data.update(
                 synchronized_data_class=SynchronizedData,
                 **{
                     get_name(
-                        SynchronizedData.market_to_remove_funds_deadline
-                    ): market_to_remove_funds_deadline,
+                        SynchronizedData.markets_to_remove_liquidity
+                    ): markets_to_remove_liquidity,
                     get_name(SynchronizedData.most_voted_tx_hash): tx_data,
                 },
             )
@@ -227,26 +233,19 @@ class SyncMarketsRound(CollectSameUntilThresholdRound):
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 return self.synchronized_data, Event.ERROR
-
             if self.most_voted_payload == self.NO_UPDATE_PAYLOAD:
                 return self.synchronized_data, Event.DONE
-
             payload = json.loads(self.most_voted_payload)
-            market_to_remove_funds_deadline, from_block = (
-                payload["mapping"],
-                payload["from_block"],
-            )
             synchronized_data = self.synchronized_data.update(
                 synchronized_data_class=SynchronizedData,
                 **{
-                    get_name(
-                        SynchronizedData.market_to_remove_funds_deadline
-                    ): market_to_remove_funds_deadline,
-                    get_name(SynchronizedData.market_from_block): from_block,
+                    get_name(SynchronizedData.markets_to_remove_liquidity): payload[
+                        "markets"
+                    ],
+                    get_name(SynchronizedData.market_from_block): payload["from_block"],
                 },
             )
             return synchronized_data, Event.DONE
-
         if not self.is_majority_possible(
             self.collection, self.synchronized_data.nb_participants
         ):
