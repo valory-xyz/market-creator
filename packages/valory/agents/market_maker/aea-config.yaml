@@ -19,11 +19,11 @@ contracts:
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeigbtbgzqlt4tufgymtjsyxiqvivxmtc4csx43hmo5nexmdfcxm6bi
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
 - valory/realtio:0.1.0:bafybeigsciwpawqiyxtk7klpnx6vyaz4nic5s6afl4eahab5ub4hftu4du
-- valory/conditional_tokens:0.1.0:bafybeibpzhbknohnx5mp653ky5betjfiz3ed3agj554oecsszqq4uxe4qi
+- valory/conditional_tokens:0.1.0:bafybeiaedqlsaonzski2hlqupjwjgtnqvt26unlbd6bpgpdq2kelfygj7u
 - valory/fpmm_deterministic_factory:0.1.0:bafybeif7hgwamqm6iljhtr32ap6eazn5yhmxrtlvicmpo746gv2s4tyzqq
 - valory/service_registry:0.1.0:bafybeiae7nr5fqn6ckt3ehol27qfd4o5ljzx6kk5k32lgtrvj3mtb62ufm
-- valory/wxdai:0.1.0:bafybeidsp4dptfuxatr75vksdruzvqyhinj4nwiw5f3brzrewldprxuwg4
-- valory/fpmm:0.1.0:bafybeihoczslmqbfpx57tmjps663r2ib7ycc3dfa4smdhufb4wbnidewtq
+- valory/wxdai:0.1.0:bafybeihn5dn4kbgybibgy7pjc22anuc5kdyfazv7ktz3guqfby2cwznnky
+- valory/fpmm:0.1.0:bafybeietty75psad4gzffzerax3nlhwob5dbqnafepyo77itsszkfrxsx4
 protocols:
 - open_aea/signing:1.0.0:bafybeifuxs7gdg2okbn7uofymenjlmnih2wxwkym44lsgwmklgwuckxm2m
 - valory/abci:0.1.0:bafybeigootsvqpk6th5xpdtzanxum3earifrrezfyhylfrit7yvqdrtgpe
@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiamr3cwetayz6lr72buhq6iviabtboj4hhpq47tlumimxolvvqjcy
 - valory/abstract_round_abci:0.1.0:bafybeiaseziuvbzh3trjggl5hx2tv3fduqrpiwiyksudaf6nvuxmwrg74i
-- valory/market_maker_abci:0.1.0:bafybeiaj3u2zigypkqazu5p63eysnc33cmapsm7lvnjdwfnsvaogxzf7dq
+- valory/market_maker_abci:0.1.0:bafybeiba7d3ccrmktwnhqadnvayuasuqbbmhn74blyoosmg7t4prqbt72i
 - valory/registration_abci:0.1.0:bafybeibafy7qmcvvzaykimy3mbqdwtcuajmbghqilaa7zwkh6wla33cfce
-- valory/market_creation_manager_abci:0.1.0:bafybeihsc2xenplve2nro63gr7ekerjlcuggxmlihykjzplb3gc6v6fqwy
+- valory/market_creation_manager_abci:0.1.0:bafybeicqlfgtwu3hx6eqtxzlnyd243zb5dg6t6vpy65llz4ztdedxvwdku
 - valory/market_validation_abci:0.1.0:bafybeifyfwynotmzg6wypbzbwsfnrplhjhumfx32dm2j3ddasp7ygrfoqa
 - valory/reset_pause_abci:0.1.0:bafybeialcwck7fahrr23jckv5qjwg3cdq4ai2ihyjsofnbj44jzyl4cjmm
 - valory/termination_abci:0.1.0:bafybeifqsogqiar4yook5bu3j6z66dbdcizey7dr3e5oxeocdjijvfbaja

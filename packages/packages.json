@@ -1,15 +1,15 @@
 {
     "dev": {
-        "contract/valory/conditional_tokens/0.1.0": "bafybeibpzhbknohnx5mp653ky5betjfiz3ed3agj554oecsszqq4uxe4qi",
+        "contract/valory/conditional_tokens/0.1.0": "bafybeiaedqlsaonzski2hlqupjwjgtnqvt26unlbd6bpgpdq2kelfygj7u",
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeif7hgwamqm6iljhtr32ap6eazn5yhmxrtlvicmpo746gv2s4tyzqq",
         "contract/valory/realtio/0.1.0": "bafybeigsciwpawqiyxtk7klpnx6vyaz4nic5s6afl4eahab5ub4hftu4du",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihsc2xenplve2nro63gr7ekerjlcuggxmlihykjzplb3gc6v6fqwy",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeiaj3u2zigypkqazu5p63eysnc33cmapsm7lvnjdwfnsvaogxzf7dq",
-        "agent/valory/market_maker/0.1.0": "bafybeifqlmv5e3nxh4a6uhaamvht3hvm2v5xilbapcbedpcztziuem33xq",
-        "service/valory/market_maker/0.1.0": "bafybeib5zgmrtquhyq6zfnnyikwcddzo3okrrivwhdmzftxlcofmebtrru",
-        "contract/valory/wxdai/0.1.0": "bafybeidsp4dptfuxatr75vksdruzvqyhinj4nwiw5f3brzrewldprxuwg4",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeicqlfgtwu3hx6eqtxzlnyd243zb5dg6t6vpy65llz4ztdedxvwdku",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeiba7d3ccrmktwnhqadnvayuasuqbbmhn74blyoosmg7t4prqbt72i",
+        "agent/valory/market_maker/0.1.0": "bafybeies6osnkllwtsjcgfbtstyycv7qsrf75olkh34cym7a5pyxouo4om",
+        "service/valory/market_maker/0.1.0": "bafybeie7q3s5fmdmhja5o3g5p5xrevqy5kgjr7ovm25k6mbo6ifrqlpjsm",
+        "contract/valory/wxdai/0.1.0": "bafybeihn5dn4kbgybibgy7pjc22anuc5kdyfazv7ktz3guqfby2cwznnky",
         "skill/valory/market_validation_abci/0.1.0": "bafybeifyfwynotmzg6wypbzbwsfnrplhjhumfx32dm2j3ddasp7ygrfoqa",
-        "contract/valory/fpmm/0.1.0": "bafybeihoczslmqbfpx57tmjps663r2ib7ycc3dfa4smdhufb4wbnidewtq"
+        "contract/valory/fpmm/0.1.0": "bafybeietty75psad4gzffzerax3nlhwob5dbqnafepyo77itsszkfrxsx4"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeiasywsvax45qmugus5kxogejj66c5taen27h4voriodz7rgushtqa",
