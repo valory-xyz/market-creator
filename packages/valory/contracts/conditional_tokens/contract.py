@@ -205,3 +205,32 @@ class ConditionalTokensContract(Contract):
             for entry in entries
         )
         return dict(data=events)
+
+    @classmethod
+    def build_merge_positions_tx(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        collateral_token: str,
+        parent_collection_id: bytes,
+        condition_id: bytes,
+        outcome_slot_count: int,
+        amount: int,
+        **kwargs: Any
+    ) -> JSONLike:
+        """Build mergePositions tx."""
+        instance = cls.get_instance(ledger_api, contract_address)
+        partition = list(map(lambda x: 1 << x, range(outcome_slot_count)))
+        data = instance.encodeABI(
+            fn_name="mergePositions",
+            args=[
+                ledger_api.api.to_checksum_address(collateral_token),
+                parent_collection_id,
+                condition_id,
+                partition,
+                amount,
+            ],
+        )
+        return dict(
+            data=data,
+        )
