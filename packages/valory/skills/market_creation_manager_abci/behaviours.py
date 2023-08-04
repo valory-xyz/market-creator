@@ -24,7 +24,18 @@ import json
 import random
 from abc import ABC
 from string import Template
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Type, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    cast,
+)
 
 from packages.valory.connections.openai.connection import (
     PUBLIC_ID as LLM_CONNECTION_PUBLIC_ID,
@@ -112,26 +123,24 @@ AVAILABLE_FORMATS = (
 _ONE_DAY = 86400
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-CONDITIONS_QUERY = Template(
-    """{
-        conditions(where:{id_in:$conditions}){
+FPMM_QUERY = Template(
+    """  {
+    fixedProductMarketMakers(where:{creator: "$creator"}) {
+      id,
+      openingTimestamp,
+      creator,
+      conditions {
         id,
-        oracle,
-        questionId,
-        outcomeSlotCount
-    }
-}
-"""
-)
-
-QUESTIONS_QUERY = Template(
-    """{
-        questions(where:{id_in:$conditions}){
-        id,
-        openingTimestamp
-    }
-}"""
+        question {
+          id,
+        },
+        outcomeSlotCount,
+      },
+      liquidityMeasure
+    },
+  }"""
 )
 
 
@@ -151,6 +160,11 @@ def parse_date_timestring(string: str) -> Optional[datetime.datetime]:
         except ValueError:
             continue
     return None
+
+
+def get_callable_name(method: Callable) -> str:
+    """Return callable name."""
+    return getattr(method, "__name__")  # noqa: B009
 
 
 class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
@@ -229,6 +243,56 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         # strip "0x" from the response hash
         tx_hash = cast(str, response.state.body["tx_hash"])[2:]
         return tx_hash
+
+    def _to_multisend(
+        self, transactions: List[Dict]
+    ) -> Generator[None, None, Optional[str]]:
+        """Transform payload to MultiSend."""
+        multi_send_txs = []
+        for transaction in transactions:
+            transaction = {
+                "operation": transaction.get("operation", MultiSendOperation.CALL),
+                "to": transaction["to"],
+                "value": transaction["value"],
+                "data": transaction.get("data", b""),
+            }
+            multi_send_txs.append(transaction)
+
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,  # type: ignore
+            contract_address=self.params.multisend_address,
+            contract_id=str(MultiSendContract.contract_id),
+            contract_callable="get_tx_data",
+            multi_send_txs=multi_send_txs,
+        )
+        if response.performative != ContractApiMessage.Performative.RAW_TRANSACTION:
+            self.context.logger.error(
+                f"Couldn't compile the multisend tx. "
+                f"Expected performative {ContractApiMessage.Performative.RAW_TRANSACTION.value}, "  # type: ignore
+                f"received {response.performative.value}."
+            )
+            return None
+
+        # strip "0x" from the response
+        multisend_data_str = cast(str, response.raw_transaction.body["data"])[2:]
+        tx_data = bytes.fromhex(multisend_data_str)
+        tx_hash = yield from self._get_safe_tx_hash(
+            self.params.multisend_address,
+            tx_data,
+            operation=SafeOperation.DELEGATE_CALL.value,
+        )
+        if tx_hash is None:
+            return None
+
+        payload_data = hash_payload_to_hex(
+            safe_tx_hash=tx_hash,
+            ether_value=ETHER_VALUE,
+            safe_tx_gas=SAFE_TX_GAS,
+            operation=SafeOperation.DELEGATE_CALL.value,
+            to_address=self.params.multisend_address,
+            data=tx_data,
+        )
+        return payload_data
 
 
 class CollectRandomnessBehaviour(RandomnessBehaviour):
@@ -350,193 +414,78 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def get_payload(self) -> Generator[None, None, str]:
         """Get the payload."""
-        market_removal = yield from self.get_markets_to_removal_ts()
+        market_removal = yield from self.get_markets()
         if market_removal is None:
             # something went wrong
             return SyncMarketsRound.ERROR_PAYLOAD
-
-        market_removal_ts, from_block = market_removal
-        if len(market_removal_ts) == 0:
+        markets, from_block = market_removal
+        if len(markets) == 0:
             # no markets to sync
             return SyncMarketsRound.NO_UPDATE_PAYLOAD
+        payload = dict(markets=markets, from_block=from_block)
+        return json.dumps(payload, sort_keys=True)
 
-        self.context.logger.info(f"Markets to removal ts: {market_removal_ts}")
-        self.context.logger.info(f"Latest synced block: {from_block}")
-        market_removal_ts_str = json.dumps(
-            dict(mapping=market_removal_ts, from_block=from_block), sort_keys=True
+    def get_markets(self) -> Generator[None, None, Tuple[List[Dict[str, Any]], int]]:
+        """Collect FMPMM from subgraph."""
+        response = yield from self._get_subgraph_result(
+            query=FPMM_QUERY.substitute(
+                creator=self.synchronized_data.safe_contract_address,
+            )
         )
-        return market_removal_ts_str
+        if response is None:
+            return [], 0
+        markets = []
+        for data in response["data"]["fixedProductMarketMakers"]:
+            market = {}
+            liquidity_measure = data.get("liquidityMeasure")
+            if liquidity_measure is None:
+                continue
 
-    def get_markets_to_removal_ts(
+            liquidity_measure = int(liquidity_measure)
+            if liquidity_measure == 0:
+                continue
+
+            if data["openingTimestamp"] is None:
+                continue
+
+            market["address"] = data["id"]
+            market["liquidity"] = liquidity_measure
+            market["opening_timestamp"] = int(data["openingTimestamp"])
+            market["removal_timestamp"] = market["opening_timestamp"] - _ONE_DAY
+
+            # The markets created by the agent will only have one condition per market
+            condition, *_ = data["conditions"]
+            market["condition_id"] = condition["id"]
+            market["outcome_slot_count"] = condition["outcomeSlotCount"]
+            if condition["question"] is None:
+                continue
+
+            market["question_id"] = condition["question"]["id"]
+            markets.append(market)
+            log_msg = "\n\t".join(
+                [
+                    "Adding market with",
+                    "Address: " + market["address"],
+                    "Liquidity: " + str(market["liquidity"]),
+                    "Opening time: "
+                    + str(datetime.datetime.fromtimestamp(market["opening_timestamp"])),
+                    "Liquidity removal time: "
+                    + str(datetime.datetime.fromtimestamp(market["removal_timestamp"])),
+                ]
+            )
+            self.context.logger.info(log_msg)
+        return markets, 0
+
+    def _get_subgraph_result(
         self,
-    ) -> Generator[None, None, Optional[Tuple[Dict[str, int], int]]]:
-        """
-        Sync markets.
-
-        :returns: a tuple of the markets to removal timestamp and the last block to be monitored.
-        :yields: None
-        """
-        # get created markets that still have funds
-        market_creator = self.synchronized_data.safe_contract_address
-        from_block = self.synchronized_data.market_from_block
-        markets = yield from self._get_markets_with_funds(market_creator, from_block)
-        if markets is None:
-            # something went wrong
-            return None
-
-        # if no markets, no need to execute the rest of the code
-        if len(markets) == 0:
-            self.context.logger.info("No markets found.")
-            return {}, 0
-        self.context.logger.info(f"Markets with funds found: {markets}")
-
-        # get conditions associated with those markets
-        condition_id_to_market = {}
-        for market in markets:
-            for condition_id in market["condition_ids"]:
-                condition_id_to_market[f"0x{condition_id.hex()}"] = market
-        condition_ids = list(condition_id_to_market.keys())
-        condition_preparations = yield from self._get_condition_preparation_events(
-            condition_ids=condition_ids
-        )
-        self.context.logger.info(f"Conditions: {condition_preparations}")
-        if condition_preparations is None:
-            # something went wrong
-            return None
-
-        question_to_market = {}
-        for condition_preparation in condition_preparations:
-            question_id = condition_preparation["question_id"]
-            condition_id = condition_preparation["condition_id"]
-            if condition_id not in condition_id_to_market:
-                # this condition is not associated with a market
-                self.context.logger.warning(
-                    f"{condition_id} is not associated with a market"
-                )
-                continue
-            market = condition_id_to_market[condition_id]
-            question_to_market[question_id] = market
-
-        # get question
-        question_ids = [
-            preparation["question_id"] for preparation in condition_preparations
-        ]
-        self.context.logger.info(f"Questions: {question_ids}")
-        questions = yield from self._get_questions(question_ids=question_ids)
-        if questions is None:
-            # something went wrong
-            return None
-
-        # market_to_removal_ts will act as a mapping between
-        # markets and their funds (liquidity) removal timestamp
-        market_to_removal_ts = {}
-        for question in questions:
-            question_id = question["question_id"]
-            if question_id not in question_to_market:
-                # this question is not associated with a market
-                self.context.logger.warning(
-                    f"{question_id} is not associated with a market"
-                )
-                continue
-            market = question_to_market[question_id]
-            market_address = market["fixed_product_market_maker"]
-            # we remove the funds 1 day before the opening ts
-            removal_ts = question["opening_ts"] - _ONE_DAY
-            market_to_removal_ts[market_address] = removal_ts
-
-        from_block_number = max([market["block_number"] for market in markets])
-        return market_to_removal_ts, from_block_number
-
-    def _get_created_markets(
-        self, creator_address: str, from_block: int
-    ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
-        """Get created markets."""
-        contract_api_response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=self.params.fpmm_deterministic_factory_contract,
-            contract_id=str(FPMMDeterministicFactory.contract_id),
-            contract_callable="get_market_creation_events",
-            creator_address=creator_address,
-            from_block=from_block,
-        )
-        if contract_api_response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Failed to get created markets: {contract_api_response}"
-            )
-            return None
-
-        markets = cast(
-            Optional[List[Dict[str, Any]]], contract_api_response.state.body.get("data")
-        )
-        return markets
-
-    def _get_markets_with_funds(
-        self, creator_address: str, from_block: int = 0
-    ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
-        """Get markets with liquidity."""
-        markets = yield from self._get_created_markets(creator_address, from_block)
-        if markets is None:
-            # something went wrong
-            return None
-
-        market_addresses = [market["fixed_product_market_maker"] for market in markets]
-        contract_api_response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
-            # the contract address is not used in the contract callable
-            # but is required by the contract api
-            contract_address=ZERO_ADDRESS,
-            contract_id=str(FPMMContract.contract_id),
-            contract_callable="get_markets_with_funds",
-            markets=market_addresses,
-        )
-        if contract_api_response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Failed to get markets with funds: {contract_api_response}"
-            )
-            return None
-        market_addresses_with_liq = cast(
-            List[str],
-            contract_api_response.state.body.get("data", []),
-        )
-        markets_with_liq = [
-            market
-            for market in markets
-            if market["fixed_product_market_maker"] in market_addresses_with_liq
-        ]
-        return markets_with_liq
-
-    def _get_condition_preparation_events(
-        self, condition_ids: List[str]
-    ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
-        """Get condition preparation events."""
-        query = CONDITIONS_QUERY.substitute(conditions=json.dumps(condition_ids))
-        response = yield from self.get_http_response(
-            content=to_content(query),
-            **self.context.omen_subgraph.get_spec(),
-        )
-        data = json.loads(response.body.decode())
-        condition_preparation_events = data["data"]["conditions"]
-        for condition in condition_preparation_events:
-            condition["condition_id"] = condition.pop("id")
-            condition["question_id"] = condition.pop("questionId")
-            condition["outcome_slot_count"] = condition.pop("outcomeSlotCount")
-        return condition_preparation_events
-
-    def _get_questions(
-        self, question_ids: List[str]
-    ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
+        query: str,
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Get question ids."""
-        query = QUESTIONS_QUERY.substitute(conditions=json.dumps(question_ids))
         response = yield from self.get_http_response(
             content=to_content(query),
             **self.context.omen_subgraph.get_spec(),
         )
-        data = json.loads(response.body.decode())
-        questions = data["data"]["questions"]
-        for condition in questions:
-            condition["question_id"] = condition.pop("id")
-            condition["opening_ts"] = int(condition.pop("openingTimestamp"))
-        return questions
+        return json.loads(response.body.decode())
 
 
 class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
@@ -557,56 +506,79 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
 
     def get_payload(self) -> Generator[None, None, str]:
         """Get payload."""
+
         market_to_close = self._get_market_to_close()
         if market_to_close is None:
             self.context.logger.info("No market to close.")
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
-        self.context.logger.info(f"Closing market: {market_to_close}")
-        tx_data = yield from self._get_remove_funding_tx(market_to_close)
-        if tx_data is None:
-            # something went wrong
-            return RemoveFundingRound.ERROR_PAYLOAD
-
-        safe_tx_hash = yield from self._get_safe_tx_hash(market_to_close, tx_data)
-        if safe_tx_hash is None:
-            # something went wrong
-            return RemoveFundingRound.ERROR_PAYLOAD
-
-        tx_payload_data = hash_payload_to_hex(
-            safe_tx_hash=safe_tx_hash,
-            ether_value=ETHER_VALUE,
-            safe_tx_gas=SAFE_TX_GAS,
-            to_address=market_to_close,
-            data=tx_data,
+        address = market_to_close["address"]
+        amount = market_to_close["liquidity"]
+        self.context.logger.info(
+            f"Closing market: {address} with total supply: {amount}"
         )
+        remove_funding_tx = yield from self._get_remove_funding_tx(
+            address=address, amount=amount
+        )
+        if remove_funding_tx is None:
+            return RemoveFundingRound.ERROR_PAYLOAD
+
+        merge_positions_tx = yield from self._get_merge_positions_tx(
+            collateral_token=self.params.collateral_tokens_contract,
+            parent_collection_id=ZERO_HASH,
+            condition_id=market_to_close["condition_id"],
+            outcome_slot_count=market_to_close["outcome_slot_count"],
+            amount=amount,
+        )
+        if merge_positions_tx is None:
+            return RemoveFundingRound.ERROR_PAYLOAD
+
+        withdraw_tx = yield from self._get_merge_positions_tx(
+            collateral_token=self.params.collateral_tokens_contract,
+            parent_collection_id=ZERO_HASH,
+            condition_id=market_to_close["condition_id"],
+            outcome_slot_count=market_to_close["outcome_slot_count"],
+            amount=amount,
+        )
+        if withdraw_tx is None:
+            return RemoveFundingRound.ERROR_PAYLOAD
+
+        tx_hash = yield from self._to_multisend(
+            transactions=[
+                remove_funding_tx,
+                merge_positions_tx,
+                withdraw_tx,
+            ]
+        )
+        if tx_hash is None:
+            return RemoveFundingRound.ERROR_PAYLOAD
 
         payload_content = {
-            "tx": tx_payload_data,
+            "tx": tx_hash,
             "market": market_to_close,
         }
         return json.dumps(payload_content)
 
-    def _get_market_to_close(self) -> Optional[str]:
+    def _get_market_to_close(self) -> Optional[Dict[str, Any]]:
         """Returns tx data for closing a tx."""
-        market_to_remove_funds_deadline = (
-            self.synchronized_data.market_to_remove_funds_deadline
-        )
-        for market, ts in market_to_remove_funds_deadline.items():
-            if ts < self.last_synced_timestamp:
+        markets_to_remove_liquidity = self.synchronized_data.markets_to_remove_liquidity
+        for market in markets_to_remove_liquidity:
+            if market["removal_timestamp"] < self.last_synced_timestamp:
                 return market
         return None
 
     def _get_remove_funding_tx(
         self,
-        market_address: str,
-    ) -> Generator[None, None, Optional[bytes]]:
+        address: str,
+        amount: int,
+    ) -> Generator[None, None, Optional[Dict]]:
         """This function returns the encoded FPMMContract.removeFunds() function call."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_id=str(FPMMContract.contract_id),
-            contract_callable="build_remove_funding_tx",
-            contract_address=market_address,
+            contract_callable=get_callable_name(FPMMContract.build_remove_funding_tx),
+            contract_address=address,
+            amount=amount,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
@@ -617,9 +589,65 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             return None
 
         # strip "0x" from the response data
-        data_str = cast(str, response.state.body["data"])[2:]
-        data = bytes.fromhex(data_str)
-        return data
+        return {
+            "to": address,
+            "data": response.state.body["data"],
+            "value": ETHER_VALUE,
+        }
+
+    def _get_merge_positions_tx(
+        self,
+        collateral_token: str,
+        parent_collection_id: str,
+        condition_id: str,
+        outcome_slot_count: int,
+        amount: int,
+    ) -> Generator[None, None, Optional[Dict]]:
+        """Prepare a multisend tx for `askQuestionMethod`"""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=self.params.conditional_tokens_contract,
+            contract_id=str(ConditionalTokensContract.contract_id),
+            contract_callable=get_callable_name(
+                ConditionalTokensContract.build_merge_positions_tx
+            ),
+            collateral_token=collateral_token,
+            parent_collection_id=parent_collection_id,
+            condition_id=condition_id,
+            outcome_slot_count=outcome_slot_count,
+            amount=amount,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
+            )
+            return None
+
+        return {
+            "to": self.params.conditional_tokens_contract,
+            "data": response.state.body["data"],
+            "value": ETHER_VALUE,
+        }
+
+    def _get_withdraw_tx(self, amount: int) -> Generator[None, None, Optional[Dict]]:
+        """Prepare a multisend tx for `askQuestionMethod`"""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=self.params.conditional_tokens_contract,
+            contract_id=str(WxDAIContract.contract_id),
+            contract_callable=get_callable_name(WxDAIContract.build_withdraw_tx),
+            amount=amount,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
+            )
+            return None
+        return {
+            "to": self.params.collateral_tokens_contract,
+            "data": response.state.body["data"],
+            "value": ETHER_VALUE,
+        }
 
 
 class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
@@ -1222,56 +1250,6 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             yield from self.wait_until_round_end()
 
         self.set_done()
-
-    def _to_multisend(
-        self, transactions: List[Dict]
-    ) -> Generator[None, None, Optional[str]]:
-        """Transform payload to MultiSend."""
-        multi_send_txs = []
-        for transaction in transactions:
-            transaction = {
-                "operation": transaction.get("operation", MultiSendOperation.CALL),
-                "to": transaction["to"],
-                "value": transaction["value"],
-                "data": transaction.get("data", b""),
-            }
-            multi_send_txs.append(transaction)
-
-        response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,  # type: ignore
-            contract_address=self.params.multisend_address,
-            contract_id=str(MultiSendContract.contract_id),
-            contract_callable="get_tx_data",
-            multi_send_txs=multi_send_txs,
-        )
-        if response.performative != ContractApiMessage.Performative.RAW_TRANSACTION:
-            self.context.logger.error(
-                f"Couldn't compile the multisend tx. "
-                f"Expected performative {ContractApiMessage.Performative.RAW_TRANSACTION.value}, "  # type: ignore
-                f"received {response.performative.value}."
-            )
-            return None
-
-        # strip "0x" from the response
-        multisend_data_str = cast(str, response.raw_transaction.body["data"])[2:]
-        tx_data = bytes.fromhex(multisend_data_str)
-        tx_hash = yield from self._get_safe_tx_hash(
-            self.params.multisend_address,
-            tx_data,
-            operation=SafeOperation.DELEGATE_CALL.value,
-        )
-        if tx_hash is None:
-            return None
-
-        payload_data = hash_payload_to_hex(
-            safe_tx_hash=tx_hash,
-            ether_value=ETHER_VALUE,
-            safe_tx_gas=SAFE_TX_GAS,
-            operation=SafeOperation.DELEGATE_CALL.value,
-            to_address=self.params.multisend_address,
-            data=tx_data,
-        )
-        return payload_data
 
 
 class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
