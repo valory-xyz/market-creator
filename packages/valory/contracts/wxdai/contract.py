@@ -115,3 +115,20 @@ class WxDAIContract(Contract):
             args=[],
         )
         return dict(data=data)
+
+    @classmethod
+    def build_withdraw_tx(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        amount: int,
+    ) -> JSONLike:
+        """Build deposit tx."""
+        contract = cls.get_instance(ledger_api, contract_address)
+        data = contract.encodeABI(
+            fn_name="withdraw",
+            args=[
+                amount,
+            ],
+        )
+        return dict(data=data)
