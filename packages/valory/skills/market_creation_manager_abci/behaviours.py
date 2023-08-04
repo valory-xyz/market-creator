@@ -533,11 +533,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         if merge_positions_tx is None:
             return RemoveFundingRound.ERROR_PAYLOAD
 
-        withdraw_tx = yield from self._get_merge_positions_tx(
-            collateral_token=self.params.collateral_tokens_contract,
-            parent_collection_id=ZERO_HASH,
-            condition_id=market_to_close["condition_id"],
-            outcome_slot_count=market_to_close["outcome_slot_count"],
+        withdraw_tx = yield from self._get_withdraw_tx(
             amount=amount,
         )
         if withdraw_tx is None:
