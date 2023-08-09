@@ -138,7 +138,8 @@ FPMM_QUERY = Template(
         },
         outcomeSlotCount,
       },
-      liquidityMeasure
+      liquidityMeasure,
+      outcomeTokenAmounts
     },
   }"""
 )
@@ -449,7 +450,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 continue
 
             market["address"] = data["id"]
-            market["liquidity"] = liquidity_measure
+            market["amount"] = sum(map(int, data["outcomeTokenAmounts"]))
             market["opening_timestamp"] = int(data["openingTimestamp"])
             market["removal_timestamp"] = market["opening_timestamp"] - _ONE_DAY
 
@@ -466,7 +467,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 [
                     "Adding market with",
                     "Address: " + market["address"],
-                    "Liquidity: " + str(market["liquidity"]),
+                    "Liquidity: " + str(market["amount"]),
                     "Opening time: "
                     + str(datetime.datetime.fromtimestamp(market["opening_timestamp"])),
                     "Liquidity removal time: "
@@ -513,7 +514,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
         address = market_to_close["address"]
-        amount = market_to_close["liquidity"]
+        amount = market_to_close["amount"]
         self.context.logger.info(
             f"Closing market: {address} with total supply: {amount}"
         )
