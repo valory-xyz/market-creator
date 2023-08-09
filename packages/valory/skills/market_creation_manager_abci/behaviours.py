@@ -518,9 +518,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         self.context.logger.info(
             f"Closing market: {address} with total supply: {amount}"
         )
-        remove_funding_tx = yield from self._get_remove_funding_tx(
-            address=address, amount=amount
-        )
+        remove_funding_tx = yield from self._get_remove_funding_tx(address=address)
         if remove_funding_tx is None:
             return RemoveFundingRound.ERROR_PAYLOAD
 
@@ -567,7 +565,6 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_remove_funding_tx(
         self,
         address: str,
-        amount: int,
     ) -> Generator[None, None, Optional[Dict]]:
         """This function returns the encoded FPMMContract.removeFunds() function call."""
         response = yield from self.get_contract_api_response(
@@ -575,7 +572,6 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.build_remove_funding_tx),
             contract_address=address,
-            amount=amount,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(

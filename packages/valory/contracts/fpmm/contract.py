@@ -93,11 +93,12 @@ class FPMMContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        amount: int,
         **kwargs: Any,
     ) -> JSONLike:
         """Build removeFunding tx."""
         instance = cls.get_instance(ledger_api, contract_address)
+        # remove everything
+        amount = instance.functions.totalSupply().call()
         data = instance.encodeABI(
             fn_name="removeFunding",
             args=[

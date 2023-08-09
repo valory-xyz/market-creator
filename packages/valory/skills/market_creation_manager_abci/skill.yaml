@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeidtptbsmdu2wks7h2463mba2xszg4vkz5s4hxnxrvmjc3s22zaryu
+  behaviours.py: bafybeiabwmfyck4hlzvd6p2ex6n4bfisc2tjtt5kbdn7qptyxjenj3ek7a
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiay4aepnfdkcsriajxqige65bsszrujin57riubflm7dyw2keapoi
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
@@ -26,7 +26,7 @@ contracts:
 - valory/conditional_tokens:0.1.0:bafybeiaedqlsaonzski2hlqupjwjgtnqvt26unlbd6bpgpdq2kelfygj7u
 - valory/fpmm_deterministic_factory:0.1.0:bafybeif7hgwamqm6iljhtr32ap6eazn5yhmxrtlvicmpo746gv2s4tyzqq
 - valory/wxdai:0.1.0:bafybeihn5dn4kbgybibgy7pjc22anuc5kdyfazv7ktz3guqfby2cwznnky
-- valory/fpmm:0.1.0:bafybeietty75psad4gzffzerax3nlhwob5dbqnafepyo77itsszkfrxsx4
+- valory/fpmm:0.1.0:bafybeibboygvjwko2ozu74rfsjoj4f6vcf3rga52rhsqoy256r7sxgi26i
 protocols:
 - valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
 - valory/contract_api:1.0.0:bafybeiasywsvax45qmugus5kxogejj66c5taen27h4voriodz7rgushtqa
