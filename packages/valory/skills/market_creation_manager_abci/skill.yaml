@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeiabwmfyck4hlzvd6p2ex6n4bfisc2tjtt5kbdn7qptyxjenj3ek7a
+  behaviours.py: bafybeiadc2h2vqy74emz35zi5qosxh2baybesyf3vs5fhhx5lx55nkxbou
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiay4aepnfdkcsriajxqige65bsszrujin57riubflm7dyw2keapoi
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
@@ -23,10 +23,10 @@ contracts:
 - valory/gnosis_safe:0.1.0:bafybeibhezhwgi5ustv675gfohsq5l5xjijp36gqueuicyl2ofrtkrortm
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
 - valory/realtio:0.1.0:bafybeigsciwpawqiyxtk7klpnx6vyaz4nic5s6afl4eahab5ub4hftu4du
-- valory/conditional_tokens:0.1.0:bafybeiaedqlsaonzski2hlqupjwjgtnqvt26unlbd6bpgpdq2kelfygj7u
+- valory/conditional_tokens:0.1.0:bafybeicmh4kf4fqrjkqhzz7ni447exw2cwpsteuwsqtth5xehypzqbirhm
 - valory/fpmm_deterministic_factory:0.1.0:bafybeif7hgwamqm6iljhtr32ap6eazn5yhmxrtlvicmpo746gv2s4tyzqq
 - valory/wxdai:0.1.0:bafybeihn5dn4kbgybibgy7pjc22anuc5kdyfazv7ktz3guqfby2cwznnky
-- valory/fpmm:0.1.0:bafybeibboygvjwko2ozu74rfsjoj4f6vcf3rga52rhsqoy256r7sxgi26i
+- valory/fpmm:0.1.0:bafybeiepcjk7dxr56nh2b3cgf2folhod2iec626zgls6n3xzvf2mw2hgfq
 protocols:
 - valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
 - valory/contract_api:1.0.0:bafybeiasywsvax45qmugus5kxogejj66c5taen27h4voriodz7rgushtqa
