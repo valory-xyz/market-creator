@@ -534,7 +534,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
 
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=self.params.conditional_tokens_contract,
+            contract_address=market,
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_balance),
             address=self.synchronized_data.safe_contract_address,
@@ -550,7 +550,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         # FPMM.totalSupply() # noqa
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
-            contract_address=self.params.conditional_tokens_contract,
+            contract_address=market,
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_total_supply),
         )
@@ -560,12 +560,17 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
         total_pool_shares = cast(int, response.state.body["supply"])
-        send_amounts_after_removing_funding = [
-            int(h * amount_to_remove / total_pool_shares)
-            if total_pool_shares > 0
-            else 0
-            for h in holdings
-        ]
+        if amount_to_remove == total_pool_shares:
+            send_amounts_after_removing_funding = [
+                *holdings,
+            ]
+        else:
+            send_amounts_after_removing_funding = [
+                int(h * amount_to_remove / total_pool_shares)
+                if total_pool_shares > 0
+                else 0
+                for h in holdings
+            ]
         amount_to_merge = min(
             send_amounts_after_removing_funding[i] + shares[i]
             for i in range(len(send_amounts_after_removing_funding))
@@ -603,6 +608,8 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
         amount_to_remove, amount_to_merge = amounts
+        self.context.logger.info(f"Amount to remove: {amount_to_remove}")
+        self.context.logger.info(f"Amount to merge: {amount_to_merge}")
         remove_funding_tx = yield from self._get_remove_funding_tx(
             address=market, amount_to_remove=amount_to_remove
         )

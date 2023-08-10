@@ -111,7 +111,6 @@ class FPMMContract(Contract):
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
-        address: str,
         **kwargs: Any,
     ) -> JSONLike:
         """Build remove tx."""
