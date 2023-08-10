@@ -518,15 +518,12 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
+                f"ConditionalTokensContract.get_user_holdings unsuccessful! : {response}"
             )
             return None
 
-        data = json.loads(
-            response.data.decode(),
-        )
-        shares = data["shares"]
-        holdings = data["holdings"]
+        shares = response.state.body["shares"]
+        holdings = response.state.body["holdings"]
 
         # Shares to burn
         # https://github.com/protofire/omen-exchange/blob/88dc0149f61cc4aef7981d3acf187c35e6a24ead/app/src/hooks/market_data/useFundingBalance.tsx#L24
@@ -544,11 +541,10 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
+                f"FPMMContract.get_balance unsuccessful! : {response}"
             )
             return None
-        data = json.loads(response.data.decode())
-        amount_to_remove = cast(int, data["balance"])
+        amount_to_remove = cast(int, response.state.body["balance"])
 
         # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/hooks/market_data/useBlockchainMarketMakerData.tsx#L141-L145
         # FPMM.totalSupply() # noqa
@@ -560,11 +556,10 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
+                f"FPMMContract.get_total_supply unsuccessful! : {response}"
             )
             return None
-        data = json.loads(response.data.decode())
-        total_pool_shares = cast(int, data["supply"])
+        total_pool_shares = cast(int, response.state.body["supply"])
         send_amounts_after_removing_funding = [
             int(h * amount_to_remove / total_pool_shares)
             if total_pool_shares > 0
@@ -596,6 +591,9 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No market to close.")
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
+        market = market_to_close["address"]
+        self.context.logger.info(f"Closing market: {market}")
+
         amounts = yield from self._calculate_amounts(
             market=market_to_close["address"],
             condition_id=market_to_close["condition_id"],
@@ -605,8 +603,6 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
         amount_to_remove, amount_to_merge = amounts
-        market = market_to_close["address"]
-        self.context.logger.info(f"Closing market: {market}")
         remove_funding_tx = yield from self._get_remove_funding_tx(
             address=market, amount_to_remove=amount_to_remove
         )

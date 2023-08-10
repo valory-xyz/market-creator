@@ -23,7 +23,7 @@ contracts:
 - valory/gnosis_safe:0.1.0:bafybeibhezhwgi5ustv675gfohsq5l5xjijp36gqueuicyl2ofrtkrortm
 - valory/multisend:0.1.0:bafybeict2k3vf3c4fvzosaq5kku2ivtzsskbomrujmmoicut7eg52onnje
 - valory/realtio:0.1.0:bafybeigsciwpawqiyxtk7klpnx6vyaz4nic5s6afl4eahab5ub4hftu4du
-- valory/conditional_tokens:0.1.0:bafybeicmh4kf4fqrjkqhzz7ni447exw2cwpsteuwsqtth5xehypzqbirhm
+- valory/conditional_tokens:0.1.0:bafybeic5hrqfz7smtkbq4hmxfvx4f2fm64i2c7cyr6jwm4o4tz4lalenzq
 - valory/fpmm_deterministic_factory:0.1.0:bafybeif7hgwamqm6iljhtr32ap6eazn5yhmxrtlvicmpo746gv2s4tyzqq
 - valory/wxdai:0.1.0:bafybeihn5dn4kbgybibgy7pjc22anuc5kdyfazv7ktz3guqfby2cwznnky
 - valory/fpmm:0.1.0:bafybeiepcjk7dxr56nh2b3cgf2folhod2iec626zgls6n3xzvf2mw2hgfq
