@@ -522,8 +522,8 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
 
-        shares = response.state.body["shares"]
-        holdings = response.state.body["holdings"]
+        shares = cast(List[int], response.state.body["shares"])
+        holdings = cast(List[int], response.state.body["holdings"])
 
         # Shares to burn
         # https://github.com/protofire/omen-exchange/blob/88dc0149f61cc4aef7981d3acf187c35e6a24ead/app/src/hooks/market_data/useFundingBalance.tsx#L24
