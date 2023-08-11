@@ -89,20 +89,51 @@ class FPMMContract(Contract):
         raise NotImplementedError
 
     @classmethod
-    def build_remove_funding_tx(
+    def get_balance(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        address: str,
+        **kwargs: Any,
+    ) -> JSONLike:
+        """Build remove tx."""
+        instance = cls.get_instance(
+            ledger_api=ledger_api, contract_address=contract_address
+        )
+        return dict(
+            balance=instance.functions.balanceOf(
+                ledger_api.api.to_checksum_address(address)
+            ).call()
+        )
+
+    @classmethod
+    def get_total_supply(
         cls,
         ledger_api: LedgerApi,
         contract_address: str,
         **kwargs: Any,
     ) -> JSONLike:
+        """Build remove tx."""
+        instance = cls.get_instance(
+            ledger_api=ledger_api, contract_address=contract_address
+        )
+        return dict(supply=instance.functions.totalSupply().call())
+
+    @classmethod
+    def build_remove_funding_tx(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        amount_to_remove: int,
+        **kwargs: Any,
+    ) -> JSONLike:
         """Build removeFunding tx."""
         instance = cls.get_instance(ledger_api, contract_address)
         # remove everything
-        amount = instance.functions.totalSupply().call()
         data = instance.encodeABI(
             fn_name="removeFunding",
             args=[
-                amount,
+                amount_to_remove,
             ],
         )
         return dict(
