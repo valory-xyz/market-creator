@@ -494,6 +494,89 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
 
     matching_round = RemoveFundingRound
 
+    def _calculate_amounts(
+        self,
+        market: str,
+        condition_id: str,
+        outcome_slot_count: int,
+    ) -> Generator[None, None, Optional[Tuple[int, int]]]:
+        """Calculate amount to burn."""
+
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=self.params.conditional_tokens_contract,
+            contract_id=str(ConditionalTokensContract.contract_id),
+            contract_callable=get_callable_name(
+                ConditionalTokensContract.get_user_holdings
+            ),
+            outcome_slot_count=outcome_slot_count,
+            condition_id=condition_id,
+            creator=self.synchronized_data.safe_contract_address,
+            collateral_token=self.params.collateral_tokens_contract,
+            market=market,
+            parent_collection_id=ZERO_HASH,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"ConditionalTokensContract.get_user_holdings unsuccessful! : {response}"
+            )
+            return None
+
+        shares = cast(List[int], response.state.body["shares"])
+        holdings = cast(List[int], response.state.body["holdings"])
+
+        # Shares to burn
+        # https://github.com/protofire/omen-exchange/blob/88dc0149f61cc4aef7981d3acf187c35e6a24ead/app/src/hooks/market_data/useFundingBalance.tsx#L24
+        # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/components/market/market_pooling/scalar_market_pool_liquidity.tsx#L279
+        # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/pages/market_sections/market_pool_liquidity_container.tsx#L123
+        # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/pages/market_sections/market_pool_liquidity_container.tsx#L357
+        # FPMM.balanceOf(ADDRESS) # noqa
+
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=market,
+            contract_id=str(FPMMContract.contract_id),
+            contract_callable=get_callable_name(FPMMContract.get_balance),
+            address=self.synchronized_data.safe_contract_address,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"FPMMContract.get_balance unsuccessful! : {response}"
+            )
+            return None
+        amount_to_remove = cast(int, response.state.body["balance"])
+
+        # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/hooks/market_data/useBlockchainMarketMakerData.tsx#L141-L145
+        # FPMM.totalSupply() # noqa
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=market,
+            contract_id=str(FPMMContract.contract_id),
+            contract_callable=get_callable_name(FPMMContract.get_total_supply),
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"FPMMContract.get_total_supply unsuccessful! : {response}"
+            )
+            return None
+        total_pool_shares = cast(int, response.state.body["supply"])
+        if amount_to_remove == total_pool_shares:
+            send_amounts_after_removing_funding = [
+                *holdings,
+            ]
+        else:
+            send_amounts_after_removing_funding = [
+                int(h * amount_to_remove / total_pool_shares)
+                if total_pool_shares > 0
+                else 0
+                for h in holdings
+            ]
+        amount_to_merge = min(
+            send_amounts_after_removing_funding[i] + shares[i]
+            for i in range(len(send_amounts_after_removing_funding))
+        )
+        return amount_to_remove, amount_to_merge
+
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
@@ -513,13 +596,22 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No market to close.")
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
-        address = market_to_close["address"]
-        amount = market_to_close["amount"]
-        self.context.logger.info(
-            f"Closing market: {address} with total supply: {amount}"
+        market = market_to_close["address"]
+        self.context.logger.info(f"Closing market: {market}")
+
+        amounts = yield from self._calculate_amounts(
+            market=market_to_close["address"],
+            condition_id=market_to_close["condition_id"],
+            outcome_slot_count=market_to_close["outcome_slot_count"],
         )
+        if amounts is None:
+            return RemoveFundingRound.NO_UPDATE_PAYLOAD
+
+        amount_to_remove, amount_to_merge = amounts
+        self.context.logger.info(f"Amount to remove: {amount_to_remove}")
+        self.context.logger.info(f"Amount to merge: {amount_to_merge}")
         remove_funding_tx = yield from self._get_remove_funding_tx(
-            address=address, amount=amount
+            address=market, amount_to_remove=amount_to_remove
         )
         if remove_funding_tx is None:
             return RemoveFundingRound.ERROR_PAYLOAD
@@ -529,13 +621,13 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             parent_collection_id=ZERO_HASH,
             condition_id=market_to_close["condition_id"],
             outcome_slot_count=market_to_close["outcome_slot_count"],
-            amount=amount,
+            amount=amount_to_merge,
         )
         if merge_positions_tx is None:
             return RemoveFundingRound.ERROR_PAYLOAD
 
         withdraw_tx = yield from self._get_withdraw_tx(
-            amount=amount,
+            amount=amount_to_merge,
         )
         if withdraw_tx is None:
             return RemoveFundingRound.ERROR_PAYLOAD
@@ -567,7 +659,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_remove_funding_tx(
         self,
         address: str,
-        amount: int,
+        amount_to_remove: int,
     ) -> Generator[None, None, Optional[Dict]]:
         """This function returns the encoded FPMMContract.removeFunds() function call."""
         response = yield from self.get_contract_api_response(
@@ -575,7 +667,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.build_remove_funding_tx),
             contract_address=address,
-            amount=amount,
+            amount_to_remove=amount_to_remove,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
