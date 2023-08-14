@@ -463,6 +463,12 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
             market["question_id"] = condition["question"]["id"]
             markets.append(market)
+
+        market_addresses = [market["address"] for market in markets]
+        markets_with_funds = yield from self._get_markets_with_funds(market_addresses)
+        for market in markets:
+            if market["address"] not in markets_with_funds:
+                continue
             log_msg = "\n\t".join(
                 [
                     "Adding market with",
@@ -475,7 +481,32 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 ]
             )
             self.context.logger.info(log_msg)
+
         return markets, 0
+
+    def _get_markets_with_funds(
+        self, market_addresses: List[str]
+    ) -> Generator[None, None, List[str]]:
+        """Get markets with funds."""
+        # no need to query the contract if there are no markets
+        if len(market_addresses) == 0:
+            return []
+
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=ZERO_ADDRESS,  # NOT USED!
+            contract_id=str(FPMMContract.contract_id),
+            contract_callable=get_callable_name(FPMMContract.get_markets_with_funds),
+            markets=market_addresses,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.error(
+                f"Couldn't get tx data for FPMMContract.get_markets_with_funds. "
+                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"received {response.performative.value}."
+            )
+            return []
+        return cast(List[str], response.state.body["data"])
 
     def _get_subgraph_result(
         self,
