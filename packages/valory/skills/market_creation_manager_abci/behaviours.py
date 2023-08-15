@@ -466,8 +466,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         market_addresses = [market["address"] for market in markets]
         market_addresses_with_funds = yield from self._get_markets_with_funds(
-            market_addresses,
-            self.synchronized_data.safe_contract_address
+            market_addresses, self.synchronized_data.safe_contract_address
         )
         market_addresses_with_funds_str = [
             str(market).lower() for market in market_addresses_with_funds
