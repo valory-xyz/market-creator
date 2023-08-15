@@ -466,7 +466,8 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         market_addresses = [market["address"] for market in markets]
         market_addresses_with_funds = yield from self._get_markets_with_funds(
-            market_addresses
+            market_addresses,
+            self.synchronized_data.safe_contract_address
         )
         market_addresses_with_funds_str = [
             str(market).lower() for market in market_addresses_with_funds
@@ -492,7 +493,9 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         return markets_with_funds, 0
 
     def _get_markets_with_funds(
-        self, market_addresses: List[str]
+        self,
+        market_addresses: List[str],
+        safe_address: str,
     ) -> Generator[None, None, List[str]]:
         """Get markets with funds."""
         # no need to query the contract if there are no markets
@@ -505,6 +508,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_markets_with_funds),
             markets=market_addresses,
+            safe_address=safe_address,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
