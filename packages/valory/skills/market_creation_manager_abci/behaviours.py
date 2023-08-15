@@ -465,10 +465,17 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             markets.append(market)
 
         market_addresses = [market["address"] for market in markets]
-        markets_with_funds = yield from self._get_markets_with_funds(market_addresses)
+        market_addresses_with_funds = yield from self._get_markets_with_funds(
+            market_addresses
+        )
+        market_addresses_with_funds_str = [
+            str(market).lower() for market in market_addresses_with_funds
+        ]
+        markets_with_funds = []
         for market in markets:
-            if market["address"] not in markets_with_funds:
+            if str(market["address"]).lower() not in market_addresses_with_funds_str:
                 continue
+            markets_with_funds.append(market)
             log_msg = "\n\t".join(
                 [
                     "Adding market with",
@@ -482,7 +489,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             self.context.logger.info(log_msg)
 
-        return markets, 0
+        return markets_with_funds, 0
 
     def _get_markets_with_funds(
         self, market_addresses: List[str]
