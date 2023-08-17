@@ -22,11 +22,11 @@ connections:
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeigaeon5qhgdwhduw4wtjt7x7o3hpz62aifr5a7522ynll3nps3qnm
 - valory/multisend:0.1.0:bafybeiemglycsigpsf2f6ohfdlsha7w6lrc5nmhlydmocna4apa7b4cqcq
-- valory/realtio:0.1.0:bafybeiajiugyik5n3zj5qmqnuzpufsda6ql45fvtu4myzoak7ctu4ltryi
-- valory/conditional_tokens:0.1.0:bafybeibdpo34mopruz4umeov7ylaumquzn4tnd7jhrfmtillv253lq2sme
-- valory/fpmm_deterministic_factory:0.1.0:bafybeidtv3j5z7ucbd7chwrkn3mhdohal2vamffsli7bfwwwhf5ukjnw7m
-- valory/wxdai:0.1.0:bafybeihn5dn4kbgybibgy7pjc22anuc5kdyfazv7ktz3guqfby2cwznnky
-- valory/fpmm:0.1.0:bafybeife25lidzjbnbqv7mzdws2m3bvohffjrwjuj5dqcyqmzzzzw4sj4a
+- valory/realtio:0.1.0:bafybeid7gyn5t2v2bxvgdbheljvwclj3ks2gm6lwlirwjnbwmdry4ig6pi
+- valory/conditional_tokens:0.1.0:bafybeihufvbfz7l7fb3fvsalp6jmplkxoc3rs3b25apultqmoelrvvx2de
+- valory/fpmm_deterministic_factory:0.1.0:bafybeibveawsp3ir67otkyswyfozetesjwrhyt5gfix6fanjwfq4dd3vyy
+- valory/wxdai:0.1.0:bafybeicsbm2itxmmifkkyroozp6dh45aatrqabv6bcpkm7p2nin7j2trvm
+- valory/fpmm:0.1.0:bafybeie6wwsf2sb3il73hj5576ejti4idjgbblf7ad63pehytddi7gwi7u
 protocols:
 - valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
 - valory/contract_api:1.0.0:bafybeiasywsvax45qmugus5kxogejj66c5taen27h4voriodz7rgushtqa

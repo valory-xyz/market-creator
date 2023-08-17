@@ -164,7 +164,7 @@ class ConditionalTokensContract(Contract):
             ledger_api=ledger_api, contract_address=contract_address
         )
         tx_receipt = ledger_api.api.eth.getTransactionReceipt(tx_digest)
-        (log,) = contract_instance.events.ConditionPreparation().processReceipt(
+        (log,) = contract_instance.events.ConditionPreparation().process_receipt(
             tx_receipt
         )
         return "0x" + log["args"]["conditionId"].hex()
@@ -184,7 +184,7 @@ class ConditionalTokensContract(Contract):
         )
         entries = (
             contract_instance.events.ConditionPreparation()
-            .createFilter(
+            .create_filter(
                 fromBlock=from_block,
                 toBlock=to_block,
                 argument_filters={

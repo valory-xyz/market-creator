@@ -189,7 +189,7 @@ class FPMMContract(Contract):
         # the decoding returns a Tuple with a single element so we need to access the first element of the tuple,
         # which contains a tuple of markets that have funds
         non_zero_markets = [
-            ledger_api.api.toChecksumAddress(market_address)
+            ledger_api.api.to_checksum_address(market_address)
             for market_address in ledger_api.api.codec.decode_abi(["address[]"], encoded_markets)[0]
         ]
         return dict(data=non_zero_markets)

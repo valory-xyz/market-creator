@@ -179,7 +179,7 @@ class FPMMDeterministicFactory(Contract):
         )
         entries = (
             contract_instance.events.FixedProductMarketMakerCreation()
-            .createFilter(
+            .create_filter(
                 fromBlock=from_block,
                 toBlock=to_block,
                 argument_filters={"creator": creator_address},

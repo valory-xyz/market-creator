@@ -96,7 +96,7 @@ class WxDAIContract(Contract):
         data = contract.encodeABI(
             fn_name="approve",
             kwargs={
-                "guy": ledger_api.api.toChecksumAddress(guy),
+                "guy": ledger_api.api.to_checksum_address(guy),
                 "wad": amount,
             },
         )
