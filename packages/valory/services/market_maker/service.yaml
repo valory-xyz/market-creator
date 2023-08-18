@@ -59,8 +59,8 @@ models:
       arbitrator_contract: ${ARBITRATOR_CONTRACT:str:0xe40dd83a262da3f56976038f1554fe541fa75ecd}
       multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
-      reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:2}
-      reset_pause_duration: ${RESET_PAUSE_DURATION:int:10}
+      reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
+      reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
       service_id: market_maker
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
       setup:
