@@ -501,7 +501,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         MarketProposalRound: {
-            Event.DONE: RetrieveApprovedMarketRound,
+            Event.DONE: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
             Event.DID_NOT_SEND: CollectRandomnessRound,
