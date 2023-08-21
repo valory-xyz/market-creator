@@ -208,7 +208,7 @@ class RealtioContract(Contract):
         contract = cls.get_instance(
             ledger_api=ledger_api, contract_address=contract_address
         )
-        entries = contract.events.LogNewQuestion.createFilter(
+        entries = contract.events.LogNewQuestion.create_filter(
             fromBlock=from_block,
             toBlock=to_block,
             argument_filters=dict(question_id=question_ids),
