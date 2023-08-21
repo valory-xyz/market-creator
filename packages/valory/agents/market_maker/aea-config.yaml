@@ -37,10 +37,10 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeicg7dv7cff34nv2k2z47c4yp4kddsxp3wozonzow6tnvfvwndz3cy
 - valory/abstract_round_abci:0.1.0:bafybeigxjcci53vwytymzlhr37436yvenh7jup4astrn7dgyixo24aq2pq
-- valory/market_maker_abci:0.1.0:bafybeiblci5jqfzcl6k25hiqipmssyf2hddar3ge53djr4nqqdphwpyf3a
+- valory/market_maker_abci:0.1.0:bafybeibqseuulpwjyq3hvxa4uwg7fuhhzsrf42aj4mlbdbbnvnbl66gfvi
 - valory/registration_abci:0.1.0:bafybeibc4kczqbh23sc6tufrzn3axmhp3vjav7fa3u6cnpvolrbbc2fd7i
-- valory/market_creation_manager_abci:0.1.0:bafybeibjkrlqvk2da5kuunftkz23jnavd6hqdkfkwda7ysvco5xc7qai2y
-- valory/market_validation_abci:0.1.0:bafybeiekjxqrguqdthna62hsv4gb5yoldraa6o2qy462nyssra4e7maexi
+- valory/market_creation_manager_abci:0.1.0:bafybeihhtzwffrfs2owanv627tx53gtaapeelhwfemyzdmkysl7hwskf5q
+- valory/market_validation_abci:0.1.0:bafybeif6vkknvvlypvyflaqrdsxyk3qcngv2tckoeurpytsi7mr3q3zvaq
 - valory/reset_pause_abci:0.1.0:bafybeid445uy6wwvugf3byzl7r73c7teu6xr5ezxb4h7cxbenghg3copvy
 - valory/termination_abci:0.1.0:bafybeiguy7pkrcptg6c754ioig4mlkr7truccym3fpv6jwpjx2tmpdbzhi
 - valory/transaction_settlement_abci:0.1.0:bafybeidpsnguxizkpihtkqzojr3em7yy7c6qc7gxpbh5vglmwws5wke7bi
@@ -165,8 +165,8 @@ models:
       arbitrator_contract: ${str:0xe40dd83a262da3f56976038f1554fe541fa75ecd}
       multisend_address: ${str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       on_chain_service_id: ${int:null}
-      reset_tendermint_after: ${int:2}
-      reset_pause_duration: ${int:30}
+      reset_tendermint_after: ${int:1}
+      reset_pause_duration: ${int:1800}
       service_id: market_maker
       service_registry_address: ${str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
       setup:

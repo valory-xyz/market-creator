@@ -14,7 +14,7 @@ fingerprint:
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
   models.py: bafybeia226bfyqfnzkkp24wmabaof4umi7lqnjtmhb63goszboqk2krqsm
   payloads.py: bafybeib57gmbwstx646qxvxxl62n6of4vo2ei2nl32ogo5vhi3ukz6ldqe
-  rounds.py: bafybeibcrli5p53g3eiouop3cdncnhk667sivaky5btuwxy4dxaudwiooa
+  rounds.py: bafybeidldfmzrud6sa3f5mpxa2p2nr5e6tzipuvydrxu5n6bfgar6qntxq
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -138,8 +138,8 @@ models:
       on_chain_service_id: null
       request_retry_delay: 1.0
       request_timeout: 10.0
-      reset_pause_duration: 10
-      reset_tendermint_after: 2
+      reset_pause_duration: 1800
+      reset_tendermint_after: 1
       retry_attempts: 400
       retry_timeout: 3
       round_timeout_seconds: 60.0

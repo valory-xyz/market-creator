@@ -49,7 +49,7 @@ abci_app_transition_mapping: AbciAppTransitionMapping = {
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithRemoveFundingRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     TransactionSettlementAbci.FinishedTransactionSubmissionRound: MarketValidationAbci.MarketValidationRound,
-    MarketValidationAbci.FinishedMarketValidationRound: ResetAndPauseRound,
+    MarketValidationAbci.FinishedMarketValidationRound: MarketCreationManagerAbci.CollectRandomnessRound,
     TransactionSettlementAbci.FailedRound: ResetAndPauseRound,
     FinishedResetAndPauseRound: MarketCreationManagerAbci.CollectRandomnessRound,
     FinishedResetAndPauseErrorRound: RegistrationRound,
