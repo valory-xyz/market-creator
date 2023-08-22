@@ -8,8 +8,8 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeie36nhohbz4t6hngy42nw7coe2hwrprywo4n6xmwqjkfz7ni3n6sq
-  behaviours.py: bafybeid4jy4bx5djlksbyz7nog7ktynbnkwmjymityrbqzfxlbipiex3wi
-  composition.py: bafybeihlmnnq3g7rtos7bcdlxag5emkxi3rdnnvm6pbcqvba2cf5hbbg4m
+  behaviours.py: bafybeih6xvxovumcmyaqx5k6fvtp76scl54ovaz3kzinaiyxvyluei6twa
+  composition.py: bafybeidnibsij2esafteeoexewuip6n7mtbkmk2sbmuj4mndhuib7if6um
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeicvtoez7ahmyl25h66edgjywx5ymxtqnyexzq73ouyu2p6smi3uoa
   handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
@@ -24,7 +24,6 @@ skills:
 - valory/registration_abci:0.1.0:bafybeibc4kczqbh23sc6tufrzn3axmhp3vjav7fa3u6cnpvolrbbc2fd7i
 - valory/reset_pause_abci:0.1.0:bafybeid445uy6wwvugf3byzl7r73c7teu6xr5ezxb4h7cxbenghg3copvy
 - valory/market_creation_manager_abci:0.1.0:bafybeihhtzwffrfs2owanv627tx53gtaapeelhwfemyzdmkysl7hwskf5q
-- valory/market_validation_abci:0.1.0:bafybeif6vkknvvlypvyflaqrdsxyk3qcngv2tckoeurpytsi7mr3q3zvaq
 - valory/termination_abci:0.1.0:bafybeiguy7pkrcptg6c754ioig4mlkr7truccym3fpv6jwpjx2tmpdbzhi
 - valory/transaction_settlement_abci:0.1.0:bafybeidpsnguxizkpihtkqzojr3em7yy7c6qc7gxpbh5vglmwws5wke7bi
 behaviours:
