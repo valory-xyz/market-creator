@@ -2,13 +2,13 @@ name: wxdai
 author: valory
 version: 0.1.0
 type: contract
-description: The scaffold contract scaffolds a contract to be implemented by the developer.
+description: Gnosis WXDAI contract
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
   build/WxDAI.json: bafybeieypq5oupeqr76i5dpskjpydykj4olfkchdkd75u7dshyylzl42za
-  contract.py: bafybeidyyx25sibzs53hsgktiitqt3f3tfx6b7twmhge3fkzjehzldsxre
+  contract.py: bafybeifl33scjtxukcf4sanxy7avxb3kwpjnmq5v7anmrnbkrzxax2zrfq
 fingerprint_ignore_patterns: []
 class_name: WxDAIContract
 contract_interface_paths:

@@ -18,12 +18,12 @@ contracts:
 - valory/gnosis_safe:0.1.0:bafybeigvqg4lapdaa23dpc3pv67rdptdhey6e435mxqsw2gb2u74yw4yei
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeie4iivrxcd5dcwzj3y2t66mc5mdvtsuqu426gk2kcdc6fxbki6neu
 - valory/multisend:0.1.0:bafybeie7m7pjbnw7cccpbvmbgkut24dtlt4cgvug3tbac7gej37xvwbv3a
-- valory/realtio:0.1.0:bafybeid7gyn5t2v2bxvgdbheljvwclj3ks2gm6lwlirwjnbwmdry4ig6pi
-- valory/conditional_tokens:0.1.0:bafybeihufvbfz7l7fb3fvsalp6jmplkxoc3rs3b25apultqmoelrvvx2de
-- valory/fpmm_deterministic_factory:0.1.0:bafybeibveawsp3ir67otkyswyfozetesjwrhyt5gfix6fanjwfq4dd3vyy
+- valory/realtio:0.1.0:bafybeifxmrmv3zjrqrrr7yuzud2luka7e5muopwxeef5of7iahjpaziwsi
+- valory/conditional_tokens:0.1.0:bafybeibvmzokt7njh7xjwm3s6l2keumjx6z2ni7tosrw5fk2lpumvw444q
+- valory/fpmm_deterministic_factory:0.1.0:bafybeibk2v5op7xkd7htivvbbonoicrqrdgo2iylu6jlbcn6xx22anzlzq
 - valory/service_registry:0.1.0:bafybeif6x4zvsokwcetbrjdb4uyv4l3pqx756cg2ohv2zgcky5yuiwuqvi
-- valory/wxdai:0.1.0:bafybeicsbm2itxmmifkkyroozp6dh45aatrqabv6bcpkm7p2nin7j2trvm
-- valory/fpmm:0.1.0:bafybeihmzrpamqh654kb2vzzybzkirk75rmxj6rttrbhhkrju73jyjrjse
+- valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
+- valory/fpmm:0.1.0:bafybeib2w2czdjljrlpbdtp7yuzb2a4gow33qnce4thecoey4o2pclbcmu
 protocols:
 - open_aea/signing:1.0.0:bafybeifuxs7gdg2okbn7uofymenjlmnih2wxwkym44lsgwmklgwuckxm2m
 - valory/abci:0.1.0:bafybeigootsvqpk6th5xpdtzanxum3earifrrezfyhylfrit7yvqdrtgpe
@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeicg7dv7cff34nv2k2z47c4yp4kddsxp3wozonzow6tnvfvwndz3cy
 - valory/abstract_round_abci:0.1.0:bafybeigxjcci53vwytymzlhr37436yvenh7jup4astrn7dgyixo24aq2pq
-- valory/market_maker_abci:0.1.0:bafybeigw7ep2icp3xayuwkkuebw2vzahqfetryyxh5lekjjrdn4kyjkege
+- valory/market_maker_abci:0.1.0:bafybeihvlfsj3cgawrn56x3mbiwnryr7ue23nxoey74ryaluswxjvly524
 - valory/registration_abci:0.1.0:bafybeibc4kczqbh23sc6tufrzn3axmhp3vjav7fa3u6cnpvolrbbc2fd7i
-- valory/market_creation_manager_abci:0.1.0:bafybeihhtzwffrfs2owanv627tx53gtaapeelhwfemyzdmkysl7hwskf5q
+- valory/market_creation_manager_abci:0.1.0:bafybeibd5kkhaug7lrhl7mujqwo5dmuoqzdo53szbdkls4d6vugiluloeu
 - valory/reset_pause_abci:0.1.0:bafybeid445uy6wwvugf3byzl7r73c7teu6xr5ezxb4h7cxbenghg3copvy
 - valory/termination_abci:0.1.0:bafybeiguy7pkrcptg6c754ioig4mlkr7truccym3fpv6jwpjx2tmpdbzhi
 - valory/transaction_settlement_abci:0.1.0:bafybeidpsnguxizkpihtkqzojr3em7yy7c6qc7gxpbh5vglmwws5wke7bi

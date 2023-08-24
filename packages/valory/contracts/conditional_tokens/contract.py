@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the scaffold contract definition."""
+"""This module contains the class to connect to a Gnosis ConditionalTokens contract."""
 
 from typing import Any, List
 
@@ -32,7 +32,7 @@ DEFAULT_OUTCOME_SLOT = 2
 
 
 class ConditionalTokensContract(Contract):
-    """The scaffold contract class for a smart contract."""
+    """The Gnosis ConditionalTokens contract."""
 
     contract_id = PublicId.from_str("valory/conditional_tokens:0.1.0")
 

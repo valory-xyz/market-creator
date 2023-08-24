@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the scaffold contract definition."""
+"""This module contains the class to connect to a Reality.eth Realitio_v2_1 contract."""
 
 from typing import Any, Dict, List
 
@@ -50,7 +50,7 @@ def build_question(question_data: Dict) -> str:
 
 
 class RealtioContract(Contract):
-    """The scaffold contract class for a smart contract."""
+    """The Reality.eth Realitio_v2_1 contract."""
 
     contract_id = PublicId.from_str("valory/realtio:0.1.0")
 
