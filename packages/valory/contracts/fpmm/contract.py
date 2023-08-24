@@ -171,31 +171,35 @@ class FPMMContract(Contract):
         safe_address: str,
         **kwargs: Any,
     ) -> JSONLike:
-        """Get the markets with funds."""
-        # BatchTotalSupply contract is a special contract used specifically for checking getting markets with funds
-        # It is not deployed anywhere, nor it needs to be deployed
-        batch_workable_contract = ledger_api.api.eth.contract(
-            abi=BATCH_TOTAL_SUPPLY_DATA["abi"], bytecode=BATCH_TOTAL_SUPPLY_DATA["bytecode"]
-        )
+        try: 
+            """Get the markets with funds."""
+            # BatchTotalSupply contract is a special contract used specifically for checking getting markets with funds
+            # It is not deployed anywhere, nor it needs to be deployed
+            batch_workable_contract = ledger_api.api.eth.contract(
+                abi=BATCH_TOTAL_SUPPLY_DATA["abi"], bytecode=BATCH_TOTAL_SUPPLY_DATA["bytecode"]
+            )
 
-        # Encode the input data (constructor params)
-        encoded_input_data = ledger_api.api.codec.encode_abi(
-            ["address[]", "address"], [markets, safe_address]
-        )
+            # Encode the input data (constructor params)
+            encoded_input_data = ledger_api.api.codec.encode_abi(
+                ["address[]", "address"], [markets, safe_address]
+            )
 
-        # Concatenate the bytecode with the encoded input data to create the contract creation code
-        contract_creation_code = batch_workable_contract.bytecode + encoded_input_data
+            # Concatenate the bytecode with the encoded input data to create the contract creation code
+            contract_creation_code = batch_workable_contract.bytecode + encoded_input_data
 
-        # Call the function with the contract creation code
-        # Note that we are not sending any transaction, we are just calling the function
-        # This is a special contract creation code that will return some result
-        encoded_markets = ledger_api.api.eth.call({"data": contract_creation_code})
+            # Call the function with the contract creation code
+            # Note that we are not sending any transaction, we are just calling the function
+            # This is a special contract creation code that will return some result
+            encoded_markets = ledger_api.api.eth.call({"data": contract_creation_code})
 
-        # Decode the response raw response
-        # the decoding returns a Tuple with a single element so we need to access the first element of the tuple,
-        # which contains a tuple of markets that have funds
-        non_zero_markets = [
-            ledger_api.api.to_checksum_address(market_address)
-            for market_address in ledger_api.api.codec.decode_abi(["address[]"], encoded_markets)[0]
-        ]
+            # Decode the response raw response
+            # the decoding returns a Tuple with a single element so we need to access the first element of the tuple,
+            # which contains a tuple of markets that have funds
+            non_zero_markets = [
+                ledger_api.api.to_checksum_address(market_address)
+                for market_address in ledger_api.api.codec.decode_abi(["address[]"], encoded_markets)[0]
+            ]
+        except Exception as e:
+            _logger.error("An exception occurred in get_markets_with_funds():", str(e))
+
         return dict(data=non_zero_markets)
