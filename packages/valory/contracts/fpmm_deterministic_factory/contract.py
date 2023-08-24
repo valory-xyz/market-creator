@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the scaffold contract definition."""
+"""This module contains the class to connect to a Gnosis FPMMDeterministicFactory contract."""
 
 import math
 import random
@@ -34,7 +34,7 @@ DEFAULT_MARKET_FEE = 2.0
 
 
 class FPMMDeterministicFactory(Contract):
-    """The scaffold contract class for a smart contract."""
+    """The Gnosis FPMMDeterministicFactory contract."""
 
     contract_id = PublicId.from_str("valory/fpmm_deterministic_factory:0.1.0")
 

@@ -1,14 +1,14 @@
 {
     "dev": {
-        "contract/valory/conditional_tokens/0.1.0": "bafybeihufvbfz7l7fb3fvsalp6jmplkxoc3rs3b25apultqmoelrvvx2de",
-        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeibveawsp3ir67otkyswyfozetesjwrhyt5gfix6fanjwfq4dd3vyy",
-        "contract/valory/realtio/0.1.0": "bafybeid7gyn5t2v2bxvgdbheljvwclj3ks2gm6lwlirwjnbwmdry4ig6pi",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihhtzwffrfs2owanv627tx53gtaapeelhwfemyzdmkysl7hwskf5q",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeigw7ep2icp3xayuwkkuebw2vzahqfetryyxh5lekjjrdn4kyjkege",
-        "agent/valory/market_maker/0.1.0": "bafybeic6rahdiklavnpdorryekpfgidoewrierjtmqvd33joaicc32fxca",
-        "service/valory/market_maker/0.1.0": "bafybeifvfkmimbpvdy3dn5vftgu3ckhp3se4bwfwdpszwl32432cvifg3y",
-        "contract/valory/wxdai/0.1.0": "bafybeicsbm2itxmmifkkyroozp6dh45aatrqabv6bcpkm7p2nin7j2trvm",
-        "contract/valory/fpmm/0.1.0": "bafybeihmzrpamqh654kb2vzzybzkirk75rmxj6rttrbhhkrju73jyjrjse"
+        "contract/valory/conditional_tokens/0.1.0": "bafybeibvmzokt7njh7xjwm3s6l2keumjx6z2ni7tosrw5fk2lpumvw444q",
+        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeibk2v5op7xkd7htivvbbonoicrqrdgo2iylu6jlbcn6xx22anzlzq",
+        "contract/valory/realtio/0.1.0": "bafybeifxmrmv3zjrqrrr7yuzud2luka7e5muopwxeef5of7iahjpaziwsi",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeibd5kkhaug7lrhl7mujqwo5dmuoqzdo53szbdkls4d6vugiluloeu",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeihvlfsj3cgawrn56x3mbiwnryr7ue23nxoey74ryaluswxjvly524",
+        "agent/valory/market_maker/0.1.0": "bafybeif422eopxhj5znhqeunr6st2hp7ad6xouemhpbxnpnrmfmrfyygny",
+        "service/valory/market_maker/0.1.0": "bafybeidkyrlia4pp5yha5k7orr6ko67oayedx57qjjp7c22awzxp3t4ox4",
+        "contract/valory/wxdai/0.1.0": "bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie",
+        "contract/valory/fpmm/0.1.0": "bafybeib2w2czdjljrlpbdtp7yuzb2a4gow33qnce4thecoey4o2pclbcmu"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeiasywsvax45qmugus5kxogejj66c5taen27h4voriodz7rgushtqa",
