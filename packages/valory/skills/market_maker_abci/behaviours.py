@@ -29,9 +29,6 @@ from packages.valory.skills.market_creation_manager_abci.behaviours import (
     MarketCreationManagerRoundBehaviour,
 )
 from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
-from packages.valory.skills.market_validation_abci.behaviours import (
-    MarketVerificationRoundBehaviour,
-)
 from packages.valory.skills.registration_abci.behaviours import (
     AgentRegistrationRoundBehaviour,
     RegistrationStartupBehaviour,
@@ -57,7 +54,6 @@ class MarketCreatorRoundBehaviour(AbstractRoundBehaviour):
         *AgentRegistrationRoundBehaviour.behaviours,
         *MarketCreationManagerRoundBehaviour.behaviours,
         *TransactionSettlementRoundBehaviour.behaviours,
-        *MarketVerificationRoundBehaviour.behaviours,
         *ResetPauseABCIConsensusBehaviour.behaviours,
         *TerminationAbciBehaviours.behaviours,
     }
