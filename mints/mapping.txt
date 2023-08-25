@@ -1,8 +1,14 @@
 token_id-"component_id"
-X-
+X-"contract/valory/conditional_tokens/0.1.0"
+X-"contract/valory/fpmm_deterministic_factory/0.1.0"
+X-"contract/valory/realtio/0.1.0"
+X-"contract/valory/wxdai/0.1.0"
+X-"contract/valory/fpmm/0.1.0"
+X-"skill/valory/market_creation_manager_abci/0.1.0" -> 3, 5, 14, 19, 20, 22, 57, 59, valory/realtio:0.1.0, valory/conditional_tokens:0.1.0, valory/fpmm_deterministic_factory:0.1.0, valory/wxdai:0.1.0, valory/fpmm:0.1.0
+X-"skill/valory/market_maker_abci/0.1.0" -> 14, 16, 17, 22, 33, "skill/valory/market_creation_manager_abci/0.1.0"
 ---
 token_id-"agent_id"
-X-
+X-"agent/valory/market_maker/0.1.0" -> 1, 2, 3, 4, 5, 6, 7, 39, 57, 59, 8, 9, 10, 11, 18, 19, 20, 12, 5 contracts above, 13, 14, 16, 17, 22, 33, 2 skills above
 ---
 token_id-"service_id" (Gnosis)
 11-"service/valory/market_maker:0.1.0"
