@@ -180,7 +180,7 @@ class FPMMContract(Contract):
             )
 
             # Encode the input data (constructor params)
-            encoded_input_data = ledger_api.api.codec.encode_abi(
+            encoded_input_data = ledger_api.api.codec.encode(
                 ["address[]", "address"], [markets, safe_address]
             )
 
@@ -197,8 +197,10 @@ class FPMMContract(Contract):
             # which contains a tuple of markets that have funds
             non_zero_markets = [
                 ledger_api.api.to_checksum_address(market_address)
-                for market_address in ledger_api.api.codec.decode_abi(["address[]"], encoded_markets)[0]
+                for market_address in ledger_api.api.codec.decode(["address[]"], encoded_markets)[0]
             ]
+
+            _logger.info(f"Markets with non-zero funds retrieved: {non_zero_markets}")
         except Exception as e:
             _logger.error("An exception occurred in get_markets_with_funds():", str(e))
 

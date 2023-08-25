@@ -28,7 +28,7 @@ contracts:
 - valory/conditional_tokens:0.1.0:bafybeibvmzokt7njh7xjwm3s6l2keumjx6z2ni7tosrw5fk2lpumvw444q
 - valory/fpmm_deterministic_factory:0.1.0:bafybeibk2v5op7xkd7htivvbbonoicrqrdgo2iylu6jlbcn6xx22anzlzq
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
-- valory/fpmm:0.1.0:bafybeifuywuyfusyi7rmlhpmeuljij4fpyxvozlcut4z5g746pyqbu6ztu
+- valory/fpmm:0.1.0:bafybeifq2hoevotmrcz53oy3qogbx6atom53gx6iw6k5xa4jw34kruzfci
 protocols:
 - valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
 - valory/contract_api:1.0.0:bafybeiasywsvax45qmugus5kxogejj66c5taen27h4voriodz7rgushtqa

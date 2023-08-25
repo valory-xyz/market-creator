@@ -23,7 +23,7 @@ contracts:
 - valory/fpmm_deterministic_factory:0.1.0:bafybeibk2v5op7xkd7htivvbbonoicrqrdgo2iylu6jlbcn6xx22anzlzq
 - valory/service_registry:0.1.0:bafybeif6x4zvsokwcetbrjdb4uyv4l3pqx756cg2ohv2zgcky5yuiwuqvi
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
-- valory/fpmm:0.1.0:bafybeifuywuyfusyi7rmlhpmeuljij4fpyxvozlcut4z5g746pyqbu6ztu
+- valory/fpmm:0.1.0:bafybeifq2hoevotmrcz53oy3qogbx6atom53gx6iw6k5xa4jw34kruzfci
 protocols:
 - open_aea/signing:1.0.0:bafybeifuxs7gdg2okbn7uofymenjlmnih2wxwkym44lsgwmklgwuckxm2m
 - valory/abci:0.1.0:bafybeigootsvqpk6th5xpdtzanxum3earifrrezfyhylfrit7yvqdrtgpe
@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeicg7dv7cff34nv2k2z47c4yp4kddsxp3wozonzow6tnvfvwndz3cy
 - valory/abstract_round_abci:0.1.0:bafybeigxjcci53vwytymzlhr37436yvenh7jup4astrn7dgyixo24aq2pq
-- valory/market_maker_abci:0.1.0:bafybeibil63b7q4te54ucaccesttbrgvvy5eo2ovejhfaiugbi4mjq5qje
+- valory/market_maker_abci:0.1.0:bafybeieiq5w4gcvgbp4xysegg7wcsrk37gcxa3s6jpu75gxn6wjqdd4day
 - valory/registration_abci:0.1.0:bafybeibc4kczqbh23sc6tufrzn3axmhp3vjav7fa3u6cnpvolrbbc2fd7i
-- valory/market_creation_manager_abci:0.1.0:bafybeidjlweiblvos2nvksvjeappjjpy7z5diahqll2fpsiy2opug7bxfq
+- valory/market_creation_manager_abci:0.1.0:bafybeibly4z3bboc4qcjg6yl4wqtfbbr6i5kkvpzbwdndg2l5ozuotuske
 - valory/reset_pause_abci:0.1.0:bafybeid445uy6wwvugf3byzl7r73c7teu6xr5ezxb4h7cxbenghg3copvy
 - valory/termination_abci:0.1.0:bafybeiguy7pkrcptg6c754ioig4mlkr7truccym3fpv6jwpjx2tmpdbzhi
 - valory/transaction_settlement_abci:0.1.0:bafybeidpsnguxizkpihtkqzojr3em7yy7c6qc7gxpbh5vglmwws5wke7bi
