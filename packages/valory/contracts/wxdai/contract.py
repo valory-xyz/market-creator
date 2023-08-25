@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the scaffold contract definition."""
+"""This module contains the class to connect to a Gnosis WXDAI contract."""
 
 from typing import Any
 
@@ -28,7 +28,7 @@ from aea.crypto.base import LedgerApi
 
 
 class WxDAIContract(Contract):
-    """The scaffold contract class for a smart contract."""
+    """The Gnosis WXDAI contract."""
 
     contract_id = PublicId.from_str("valory/wxdai:0.1.0")
 

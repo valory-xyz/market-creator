@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the scaffold contract definition."""
+"""This module contains the class to connect to an Gnosis FixedProductMarketMaker contract."""
 import logging
 from typing import Any, List
 
@@ -55,7 +55,7 @@ BATCH_TOTAL_SUPPLY_DATA = {
 
 
 class FPMMContract(Contract):
-    """The scaffold contract class for a smart contract."""
+    """The Gnosis FixedProductMarketMaker contract."""
 
     contract_id = PublicId.from_str("valory/fpmm:0.1.0")
 
