@@ -164,8 +164,8 @@ class FPMMContract(Contract):
         safe_address: str,
         **kwargs: Any,
     ) -> JSONLike:
+        """Get the markets with funds."""
         try:
-            """Get the markets with funds."""
             # BatchTotalSupply contract is a special contract used specifically for checking getting markets with funds
             # It is not deployed anywhere, nor it needs to be deployed
             batch_workable_contract = ledger_api.api.eth.contract(
