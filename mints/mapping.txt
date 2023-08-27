@@ -12,3 +12,5 @@ token_id-"agent_id"
 ---
 token_id-"service_id" (Gnosis)
 11-"service/valory/market_maker:0.1.0"
+token_id-"service_id" (Ethereum)
+9-"service/valory/market_maker:0.1.0"
