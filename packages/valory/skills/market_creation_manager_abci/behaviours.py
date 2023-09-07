@@ -127,20 +127,26 @@ ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 FPMM_QUERY = Template(
     """  {
-    fixedProductMarketMakers(where:{creator: "$creator"}) {
-      id,
-      openingTimestamp,
-      creator,
-      conditions {
-        id,
-        question {
-          id,
-        },
-        outcomeSlotCount,
-      },
-      liquidityMeasure,
-      outcomeTokenAmounts
-    },
+    fpmmPoolMemberships(
+      where: {funder: "$creator", amount_gt: "0"}
+    ) {
+      amount
+      id
+      pool {
+        id
+        openingTimestamp
+        creator
+        conditions {
+          id
+          question {
+            id
+          }
+          outcomeSlotCount
+        }
+        liquidityMeasure
+        outcomeTokenAmounts
+      }
+    }
   }"""
 )
 
@@ -436,9 +442,9 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         if response is None:
             return [], 0
         markets = []
-        for data in response["data"]["fixedProductMarketMakers"]:
+        for entry in response["data"]["fpmmPoolMemberships"]:
             market = {}
-            liquidity_measure = data.get("liquidityMeasure")
+            liquidity_measure = entry["pool"].get("liquidityMeasure")
             if liquidity_measure is None:
                 continue
 
@@ -446,16 +452,16 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             if liquidity_measure == 0:
                 continue
 
-            if data["openingTimestamp"] is None:
+            if entry["pool"]["openingTimestamp"] is None:
                 continue
 
-            market["address"] = data["id"]
-            market["amount"] = sum(map(int, data["outcomeTokenAmounts"]))
-            market["opening_timestamp"] = int(data["openingTimestamp"])
+            market["address"] = entry["pool"]["id"]
+            market["amount"] = sum(map(int, entry["pool"]["outcomeTokenAmounts"]))
+            market["opening_timestamp"] = int(entry["pool"]["openingTimestamp"])
             market["removal_timestamp"] = market["opening_timestamp"] - _ONE_DAY
 
             # The markets created by the agent will only have one condition per market
-            condition, *_ = data["conditions"]
+            condition, *_ = entry["pool"]["conditions"]
             market["condition_id"] = condition["id"]
             market["outcome_slot_count"] = condition["outcomeSlotCount"]
             if condition["question"] is None:
