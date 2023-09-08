@@ -436,9 +436,16 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         """Collect FMPMM from subgraph."""
         response = yield from self._get_subgraph_result(
             query=FPMM_QUERY.substitute(
-                creator=self.synchronized_data.safe_contract_address,
+                creator=self.synchronized_data.safe_contract_address.lower(),
             )
         )
+
+        subgraph_query=FPMM_QUERY.substitute(
+            creator=self.synchronized_data.safe_contract_address.lower(),
+        )
+
+        self.context.logger.info(f"Subgraph query: {subgraph_query}")
+
         if response is None:
             return [], 0
         markets = []
@@ -470,6 +477,8 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             market["question_id"] = condition["question"]["id"]
             markets.append(market)
 
+        self.context.logger.info(f"Markets from subgraph query: {markets}")
+
         market_addresses = [market["address"] for market in markets]
         market_addresses_with_funds = yield from self._get_markets_with_funds(
             market_addresses, self.synchronized_data.safe_contract_address
@@ -477,6 +486,9 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         market_addresses_with_funds_str = [
             str(market).lower() for market in market_addresses_with_funds
         ]
+
+        self.context.logger.info(f"market_addresses_with_funds: {market_addresses_with_funds}")
+
         markets_with_funds = []
         for market in markets:
             if str(market["address"]).lower() not in market_addresses_with_funds_str:
@@ -651,6 +663,9 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             condition_id=market_to_close["condition_id"],
             outcome_slot_count=market_to_close["outcome_slot_count"],
         )
+
+        self.context.logger.info(f"Calculated amounts: {amounts}")
+
         if amounts is None:
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
