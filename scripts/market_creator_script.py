@@ -116,7 +116,7 @@ def run(  # pylint: disable=too-many-locals
         input_news += f"- ({date}) {title}\n  {content}\n\n"
 
     market_creation_prompt = MARKET_CREATION_PROMPT.format(
-        input_news=input_news, from_date=from_date, to_date=to_date, topics=TOPICS
+        input_news=input_news, topics=TOPICS
     )
 
     print(market_creation_prompt)

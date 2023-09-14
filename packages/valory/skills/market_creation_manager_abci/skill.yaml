@@ -88,16 +88,19 @@ models:
   params:
     args:
       market_identification_prompt: market_identification_prompt
-      num_markets: 1
+      num_proposed_markets_per_day: 80
+      days_ahead_to_propose_markets: 5
       market_approval_server_url: http://127.0.0.1:5000
       market_approval_server_api_key: api_key
       newsapi_endpoint: https://newsapi.org/v2/top-headlines
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
-      topics:
+      newsapi_categories:
       - business
-      - cryptocurrency
-      - politics
+      - entertainment
+      - general
+      - health
       - science
+      - sports
       - technology
       market_fee: 2.0
       initial_funds: 1.0

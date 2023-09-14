@@ -38,8 +38,8 @@ DEFAULT_MARKET_FEE = 2.0
 DEFAULT_INITIAL_FUNDS = 1.0
 DEFAULT_MARKET_TIMEOUT = 1  # days
 DEFAULT_MINIMUM_MARKET_TIME = 7  # days
-DEFAULT_MAX_ALLOWED_MARKETS = 1
-
+DEFAULT_NUM_PROPOSED_MARKETS_PER_DAY = 80
+DEFAULT_DAYS_AHEAD_TO_PROPOSE_MARKETS = 5
 
 class SharedState(BaseSharedState):
     """Keep the current shared state of the skill."""
@@ -70,8 +70,9 @@ class MarketCreationManagerParams(BaseParams):
         self.market_identification_prompt = self._ensure(
             key="market_identification_prompt", kwargs=kwargs, type_=str
         )
-        self.topics = self._ensure(key="topics", kwargs=kwargs, type_=List[str])
-        self.num_markets = kwargs.get("num_markets", DEFAULT_MAX_ALLOWED_MARKETS)
+        self.newsapi_categories = self._ensure(key="newsapi_categories", kwargs=kwargs, type_=List[str])
+        self.num_proposed_markets_per_day = kwargs.get("num_proposed_markets_per_day", DEFAULT_NUM_PROPOSED_MARKETS_PER_DAY)
+        self.days_ahead_to_propose_markets = kwargs.get("days_ahead_to_propose_markets", DEFAULT_DAYS_AHEAD_TO_PROPOSE_MARKETS)
         self.realitio_contract = self._ensure(
             key="realitio_contract",
             kwargs=kwargs,

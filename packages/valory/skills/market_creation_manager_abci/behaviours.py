@@ -797,7 +797,7 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             if self.synchronized_data.markets_created < cast(
-                int, self.params.num_markets
+                int, self.params.num_proposed_markets_per_day
             ):
                 gathered_data = yield from self._gather_data()
             else:
@@ -812,17 +812,10 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
     def _gather_data(self) -> Generator[None, None, str]:
         """Auxiliary method to collect data from endpoint."""
         headers = {"X-Api-Key": self.params.newsapi_api_key}
-        today = datetime.date.today()
-        from_date = today - datetime.timedelta(days=7)
-        to_date = today
-        topics_string = " OR ".join(self.params.topics)
 
         parameters = {
-            "q": topics_string,
-            "language": "en",
-            "sortBy": "popularity",
-            "from": from_date.strftime("%y-%m-%d"),
-            "to": to_date.strftime("%y-%m-%d"),
+           "sources": "bbc-news,bbc-sports,abc-news,cnn,the-guardian,reuters",
+           "pageSize": 100,
         }
         response = yield from self.get_http_response(
             method="GET",
@@ -894,6 +887,8 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             payload_data = yield from self._get_llm_response()
+
+            
             if payload_data is None:
                 return
 
@@ -925,7 +920,7 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
             input_news += f"- ({date}) {title}\n  {content}\n\n"
 
         event_day = self._get_event_day()
-        topics = ", ".join(self.params.topics)
+        topics = ", ".join(self.params.newsapi_categories)
         prompt_template = self.params.market_identification_prompt
         prompt_values = {
             "input_news": input_news,
@@ -955,6 +950,8 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         self.context.logger.info(f"Got LLM response: {result}")
         data = json.loads(result)
         valid_responses = []
+
+        # TODO - Clarify if needed.
         # Opening date for realitio oracle contract and closing date
         # for answering question on omen market
         minimum_opening_date = datetime.datetime.fromtimestamp(
@@ -970,6 +967,7 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
                         "Cannot parse datestring " + q["resolution_date"]
                     )
                     continue
+                # TODO - Clarify if needed.
                 if resolution_date < minimum_opening_date:
                     self.context.logger.error(
                         "Invalid resolution date " + q["resolution_date"]
@@ -989,9 +987,8 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
                     f"Error converting question object {q} with error {e}"
                 )
                 continue
-        if len(valid_responses) == 0:
-            return None
-        return valid_responses[0]
+
+        return valid_responses
 
     def _get_event_day(self) -> str:
         # Get the current date

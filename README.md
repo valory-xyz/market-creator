@@ -89,13 +89,14 @@ export SAFE_CONTRACT_ADDRESS="YOUR_SAFE_ADDRESS"
 
 export NEWSAPI_ENDPOINT=https://newsapi.org/v2/top-headlines
 export NEWSAPI_API_KEY=YOUR_NEWSAPI_API_KEY
+export NEWSAPI_CATEGORIES='["business","entertainment","general","health","science","sports","technology"]'
 export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 export ENGINE="gpt-4"
 export MARKET_APPROVAL_SERVER_URL=YOUR_MARKET_APPROVAL_SERVER_URL
 export MARKET_APPROVAL_SERVER_API_KEY=YOUR_MARKET_APPROVAL_SERVER_API_KEY
 
-export NUM_MARKETS=10
-export TOPICS='["business","science","technology","politics","arts","weather"]'
+export NUM_PROPOSED_MARKETS_PER_DAY=80
+export DAYS_AHEAD_TO_PROPOSE_MARKETS=5
 export MARKET_FEE=2
 export INITIAL_FUNDS=1
 export MINIMUM_MARKET_TIME=1

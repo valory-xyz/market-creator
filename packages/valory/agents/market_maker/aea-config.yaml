@@ -146,12 +146,13 @@ models:
         outcome of the market to be verified.\n - topic; One word description of the
         topic of the news and it should be one of; {topics}.\n* Output only the JSON
         object. Do not include any other contents in your response.}
-      num_markets: ${int:1}
+      num_proposed_markets_per_day: ${int:80}
+      days_ahead_to_propose_markets: ${int:5}
       market_approval_server_url: ${str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${str:api_key}
-      newsapi_endpoint: ${str:https://newsapi.org/v2/everything}
+      newsapi_endpoint: ${str:https://newsapi.org/v2/top-headlines}
       newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
-      topics: ${list:["business","cryptocurrency","politics","science","technology"]}
+      newsapi_categories: ${list:["business","entertainment","general","health","science","sports","technology"]}
       market_fee: ${float:2.0}
       initial_funds: ${float:1.0}
       market_timeout: ${int:1}
