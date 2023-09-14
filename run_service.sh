@@ -7,7 +7,7 @@ export ETHEREUM_LEDGER_CHAIN_ID=100
 export ALL_PARTICIPANTS='["YOUR_AGENT_ADDRESS"]'
 export SAFE_CONTRACT_ADDRESS="YOUR_SAFE_ADDRESS"
 
-export NEWSAPI_ENDPOINT=https://newsapi.org/v2/everything
+export NEWSAPI_ENDPOINT=https://newsapi.org/v2/top-headlines
 export NEWSAPI_API_KEY=YOUR_NEWSAPI_API_KEY
 export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 export ENGINE="gpt-4"

@@ -82,7 +82,7 @@ def run(  # pylint: disable=too-many-locals
 
     engine = TOOL_TO_ENGINE[tool]
 
-    newsapi_url = "https://newsapi.org/v2/everything"
+    newsapi_url = "https://newsapi.org/v2/top-headlines"
 
     newsapi_headers = {"X-Api-Key": newsapi_api_key}
 

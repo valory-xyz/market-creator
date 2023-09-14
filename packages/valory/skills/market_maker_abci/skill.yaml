@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeigxjcci53vwytymzlhr37436yvenh7jup4astrn7dgyixo24aq2pq
 - valory/registration_abci:0.1.0:bafybeibc4kczqbh23sc6tufrzn3axmhp3vjav7fa3u6cnpvolrbbc2fd7i
 - valory/reset_pause_abci:0.1.0:bafybeid445uy6wwvugf3byzl7r73c7teu6xr5ezxb4h7cxbenghg3copvy
-- valory/market_creation_manager_abci:0.1.0:bafybeibg2gilszzwrmldqhfajcxma6zjxtg2dhtuzcrxe2jgmgklllrioa
+- valory/market_creation_manager_abci:0.1.0:bafybeiaxen4breemg4zzlvinducgk4dsy5lm74dqptqvtnx3xepbwh7pqa
 - valory/termination_abci:0.1.0:bafybeiguy7pkrcptg6c754ioig4mlkr7truccym3fpv6jwpjx2tmpdbzhi
 - valory/transaction_settlement_abci:0.1.0:bafybeidpsnguxizkpihtkqzojr3em7yy7c6qc7gxpbh5vglmwws5wke7bi
 behaviours:
@@ -85,7 +85,7 @@ models:
       num_markets: 1
       market_approval_server_url: http://127.0.0.1:5000
       market_approval_server_api_key: api_key
-      newsapi_endpoint: https://newsapi.org/v2/everything
+      newsapi_endpoint: https://newsapi.org/v2/top-headlines
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       topics:
       - business
