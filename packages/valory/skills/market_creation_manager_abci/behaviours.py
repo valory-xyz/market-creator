@@ -439,11 +439,6 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 creator=self.synchronized_data.safe_contract_address.lower(),
             )
         )
-
-        subgraph_query=FPMM_QUERY.substitute(
-            creator=self.synchronized_data.safe_contract_address.lower(),
-        )
-
         if response is None:
             return [], 0
         markets = []
@@ -482,7 +477,6 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         market_addresses_with_funds_str = [
             str(market).lower() for market in market_addresses_with_funds
         ]
-
         markets_with_funds = []
         for market in markets:
             if str(market["address"]).lower() not in market_addresses_with_funds_str:
@@ -657,9 +651,6 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             condition_id=market_to_close["condition_id"],
             outcome_slot_count=market_to_close["outcome_slot_count"],
         )
-
-        self.context.logger.info(f"Calculated amounts: {amounts}")
-
         if amounts is None:
             return RemoveFundingRound.NO_UPDATE_PAYLOAD
 
