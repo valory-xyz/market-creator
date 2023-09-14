@@ -444,8 +444,6 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             creator=self.synchronized_data.safe_contract_address.lower(),
         )
 
-        self.context.logger.info(f"Subgraph query: {subgraph_query}")
-
         if response is None:
             return [], 0
         markets = []
@@ -477,8 +475,6 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             market["question_id"] = condition["question"]["id"]
             markets.append(market)
 
-        self.context.logger.info(f"Markets from subgraph query: {markets}")
-
         market_addresses = [market["address"] for market in markets]
         market_addresses_with_funds = yield from self._get_markets_with_funds(
             market_addresses, self.synchronized_data.safe_contract_address
@@ -486,8 +482,6 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         market_addresses_with_funds_str = [
             str(market).lower() for market in market_addresses_with_funds
         ]
-
-        self.context.logger.info(f"market_addresses_with_funds: {market_addresses_with_funds}")
 
         markets_with_funds = []
         for market in markets:
