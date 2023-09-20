@@ -56,9 +56,11 @@ from logging.handlers import RotatingFileHandler
 from typing import Any, Dict, Tuple
 
 from flask import Flask, Response, json, jsonify, render_template, request
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
 
 CONFIG_FILE = "server_config.json"
 LOG_FILE = "market_approval_server.log"
