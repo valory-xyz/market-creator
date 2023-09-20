@@ -52,13 +52,16 @@ import logging
 import os
 import random
 import uuid
+from enum import Enum
 from logging.handlers import RotatingFileHandler
 from typing import Any, Dict, Tuple
 
 from flask import Flask, Response, json, jsonify, render_template, request
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
 
 CONFIG_FILE = "server_config.json"
 LOG_FILE = "market_approval_server.log"
@@ -68,7 +71,17 @@ DEFAULT_API_KEYS = {
     "454d31ff03590ff36836e991d3287b23146a7a84c79d082732b56268fe472823": "default_user"
 }
 
-# Global variable to store the markets
+
+class MarketState(str, Enum):
+    """Market state"""
+
+    PROPOSED = "PROPOSED"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    PROCESSED = "PROCESSED"
+
+
+# Global variables to store the markets
 proposed_markets: Dict[str, Any] = {}
 approved_markets: Dict[str, Any] = {}
 rejected_markets: Dict[str, Any] = {}
@@ -114,20 +127,21 @@ def save_config() -> None:
         json.dump(data, f, indent=4)
 
 
-def hash(m: str) -> str:
+def hash_api_key(m: str) -> str:
     """Generate the SHA-256 hash of the API key."""
     return hashlib.sha256(m.encode(encoding="utf-8")).hexdigest()
 
 
 def check_api_key(api_key: str) -> bool:
     """Checks the API key."""
-    return hash(api_key) in api_keys
+    return hash_api_key(api_key) in api_keys
 
 
 @app.route("/proposed_markets", methods=["GET"])
 @app.route("/approved_markets", methods=["GET"])
 @app.route("/rejected_markets", methods=["GET"])
 @app.route("/processed_markets", methods=["GET"])
+@app.route("/all_markets", methods=["GET"])
 def get_markets() -> Tuple[Response, int]:
     """Gets the markets from the corresponding database."""
     try:
@@ -140,6 +154,13 @@ def get_markets() -> Tuple[Response, int]:
             markets = rejected_markets
         elif endpoint == "processed_markets":
             markets = processed_markets
+        elif endpoint == "all_markets":
+            all_markets = {}
+            all_markets.update(proposed_markets)
+            all_markets.update(approved_markets)
+            all_markets.update(rejected_markets)
+            all_markets.update(processed_markets)
+            markets = all_markets
         else:
             return jsonify({"error": "Invalid endpoint."}), 404
 
@@ -226,6 +247,7 @@ def propose_market() -> Tuple[Response, int]:
                 400,
             )
 
+        market["state"] = MarketState.PROPOSED
         proposed_markets[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} added successfully."}), 200
@@ -248,14 +270,17 @@ def move_market() -> Tuple[Response, int]:
         if endpoint == "approve_market":
             move_from = proposed_markets
             move_to = approved_markets
+            new_state = MarketState.APPROVED
             action_msg = "approved"
         elif endpoint == "reject_market":
             move_from = proposed_markets
             move_to = rejected_markets
+            new_state = MarketState.REJECTED
             action_msg = "rejected"
         elif endpoint == "process_market":
             move_from = approved_markets
             move_to = processed_markets
+            new_state = MarketState.PROCESSED
             action_msg = "processed"
         else:
             return jsonify({"error": "Invalid endpoint."}), 404
@@ -272,6 +297,7 @@ def move_market() -> Tuple[Response, int]:
 
         market = move_from[market_id]
         del move_from[market_id]
+        market["state"] = new_state
         move_to[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} {action_msg}."}), 200
@@ -297,6 +323,7 @@ def get_random_approved_market() -> Tuple[Response, int]:
         market_id = random.choice(list(approved_markets.keys()))
         market = approved_markets[market_id]
         del approved_markets[market_id]
+        market["state"] = MarketState.PROCESSED
         processed_markets[market_id] = market
         save_config()
         return jsonify(market), 200
