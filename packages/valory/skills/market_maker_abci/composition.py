@@ -25,6 +25,7 @@ from packages.valory.skills.abstract_round_abci.abci_app_chain import (
     AbciAppTransitionMapping,
     chain,
 )
+from packages.valory.skills.abstract_round_abci.base import BackgroundAppConfig
 from packages.valory.skills.registration_abci.rounds import (
     AgentRegistrationAbciApp,
     FinishedRegistrationRound,
@@ -36,9 +37,11 @@ from packages.valory.skills.reset_pause_abci.rounds import (
     ResetAndPauseRound,
     ResetPauseAbciApp,
 )
-from packages.valory.skills.termination_abci.rounds import BackgroundRound
-from packages.valory.skills.termination_abci.rounds import Event as TerminationEvent
-from packages.valory.skills.termination_abci.rounds import TerminationAbciApp
+from packages.valory.skills.termination_abci.rounds import (
+    BackgroundRound,
+    Event,
+    TerminationAbciApp,
+)
 
 
 abci_app_transition_mapping: AbciAppTransitionMapping = {
@@ -53,6 +56,12 @@ abci_app_transition_mapping: AbciAppTransitionMapping = {
     FinishedResetAndPauseErrorRound: RegistrationRound,
 }
 
+termination_config = BackgroundAppConfig(
+    round_cls=BackgroundRound,
+    start_event=Event.TERMINATE,
+    abci_app=TerminationAbciApp,
+)
+
 MarketCreatorAbciApp = chain(
     (
         AgentRegistrationAbciApp,
@@ -61,8 +70,4 @@ MarketCreatorAbciApp = chain(
         ResetPauseAbciApp,
     ),
     abci_app_transition_mapping,
-).add_termination(
-    background_round_cls=BackgroundRound,
-    termination_event=TerminationEvent.TERMINATE,
-    termination_abci_app=TerminationAbciApp,
-)
+).add_background_app(termination_config)
