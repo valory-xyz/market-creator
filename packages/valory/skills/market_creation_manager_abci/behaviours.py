@@ -436,7 +436,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         """Collect FMPMM from subgraph."""
         response = yield from self._get_subgraph_result(
             query=FPMM_QUERY.substitute(
-                creator=self.synchronized_data.safe_contract_address,
+                creator=self.synchronized_data.safe_contract_address.lower(),
             )
         )
         if response is None:
