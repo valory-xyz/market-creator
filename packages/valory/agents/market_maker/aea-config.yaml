@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeigafjci7m7ezwzasav5xqo7v2mbxxn7qb4y7vnuc2wr2irzvn7wsy
 - valory/abstract_round_abci:0.1.0:bafybeih2fyfb6kkf7r45pvdk7pyyebr5xloia4xiqxtb3qsrasnstqmepq
-- valory/market_maker_abci:0.1.0:bafybeih5mz4vwxyk4giljnhv4zr43tta55wiwif4fpsd5zq224zrlavwpi
+- valory/market_maker_abci:0.1.0:bafybeiavxqrdnd4qebkhzlaf53vqfg6tazwojtkx3ahtxvyxvtojnt5rpa
 - valory/registration_abci:0.1.0:bafybeibndt6vxiwc2edgtaxpjbhwto3eyu33ujz3zmvtygvo2qz7xme5li
-- valory/market_creation_manager_abci:0.1.0:bafybeih2kdh2tdkifdxb47i7e6yv7ipiycvlwnqfbwvfu53gujogpgtphy
+- valory/market_creation_manager_abci:0.1.0:bafybeigfm5eqmof5srcfnvbt7bje7fsmudiiawedcadqr7dkvqwqhevmfu
 - valory/reset_pause_abci:0.1.0:bafybeigeoc363gv3wp2rrmk6p2fdxney33nxd3owtpfugzapgruwe4klyu
 - valory/termination_abci:0.1.0:bafybeigqpij2sgrpnilqjljfciixop4fldq5qceixc7534q6af4potdmdm
 - valory/transaction_settlement_abci:0.1.0:bafybeia7rzsbea3ch4gcafyp3z6uvqh4npws2xpdwbkkdbrqqpjops7nui
