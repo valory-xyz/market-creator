@@ -19,10 +19,10 @@
 
 """This package contains round behaviours of MarketCreationManagerAbciApp."""
 
-import datetime
 import json
 import random
 from abc import ABC
+from datetime import datetime, timedelta, timezone
 from string import Template
 from typing import (
     Any,
@@ -82,6 +82,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     DepositDaiPayload,
     RemoveFundingPayload,
     SyncMarketsPayload,
+    StartMarketProposalPayload,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectRandomnessPayload,
@@ -101,6 +102,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     SelectKeeperRound,
     SyncMarketsRound,
     SynchronizedData,
+    StartMarketProposalRound,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -160,11 +162,11 @@ def to_content(query: str) -> bytes:
     return encoded_query
 
 
-def parse_date_timestring(string: str) -> Optional[datetime.datetime]:
+def parse_date_timestring(string: str) -> Optional[datetime]:
     """Parse and return a datetime string."""
     for format in AVAILABLE_FORMATS:
         try:
-            return datetime.datetime.strptime(string, format)
+            return datetime.strptime(string, format)
         except ValueError:
             continue
     return None
@@ -303,6 +305,37 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         return payload_data
 
 
+class StartMarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
+    """StartMarketProposalBehaviour"""
+
+    matching_round: Type[AbstractRound] = StartMarketProposalRound
+
+    def async_act(self) -> Generator:
+        """Do the act, supporting asynchronous execution."""
+
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            sender = self.context.agent_address
+            last_timestamp = self.synchronized_data.last_start_market_proposal_timestamp
+            current_timestamp = self.last_synced_timestamp
+
+            self.context.logger.info(
+                f"StartMarketProposalBehaviour last_timestamp={last_timestamp} current_timestamp={current_timestamp}"
+            )
+
+            if current_timestamp - last_timestamp < self.params.min_seconds_between_market_proposals:
+                self.context.logger.info("Timeout to propose new markets not reached.")
+                payload = StartMarketProposalPayload(sender=sender, last_start_market_proposal_timestamp=last_timestamp)
+            else:
+                self.context.logger.info("Timeout to propose new markets reached.")
+                payload = StartMarketProposalPayload(sender=sender, last_start_market_proposal_timestamp=current_timestamp)
+
+        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+            yield from self.send_a2a_transaction(payload)
+            yield from self.wait_until_round_end()
+
+        self.set_done()
+
+
 class CollectRandomnessBehaviour(RandomnessBehaviour):
     """CollectRandomnessBehaviour"""
 
@@ -327,13 +360,8 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            if self.synchronized_data.markets_created < cast(
-                int, self.params.num_markets
-            ):
-                gathered_data = yield from self._gather_data()
-            else:
-                gathered_data = DataGatheringRound.MAX_MARKETS_REACHED
-            payload = DataGatheringPayload(sender=sender, gathered_data=gathered_data)
+            gathered_data = yield from self._gather_data()
+            payload = DataGatheringPayload(sender=sender, gathered_data=gathered_data, last_data_gathering_behaviour_timestamp=self.last_synced_timestamp)
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -342,14 +370,14 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
 
     def _gather_data(self) -> Generator[None, None, str]:
         """Auxiliary method to collect data from endpoint."""
-        # TODO make params
-        self_params_news_sources = ["bbc-news", "bbc-sport", "abc-news", "cnn", "google-news", "reuters", "usa-today", "breitbart-news", "the-verge", "techradar"]
-
+        news_sources = self.params.news_sources
         headers = {"X-Api-Key": self.params.newsapi_api_key}
 
-        random.seed("DataGatheringBehaviour" + self.synchronized_data.most_voted_randomness, 2)  # nosec
-        k = min(10, len(self_params_news_sources))
-        sources = random.sample(self_params_news_sources, k)
+        random.seed(
+            "DataGatheringBehaviour" + self.synchronized_data.most_voted_randomness, 2
+        )  # nosec
+        k = min(10, len(news_sources))
+        sources = random.sample(news_sources, k)
 
         parameters = {
             "sources": ",".join(sources),
@@ -366,8 +394,8 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Could not retrieve response from {self.params.newsapi_endpoint}."
                 f"Received status code {response.status_code}.\n{response}"
             )
-            self_params_newsapi_retries = 3  # TODO: Make params
-            if self_params_newsapi_retries >= MAX_RETRIES:
+            retries = 3  # TODO: Make params
+            if retries >= MAX_RETRIES:
                 return DataGatheringRound.MAX_RETRIES_PAYLOAD
             return DataGatheringRound.ERROR_PAYLOAD
 
@@ -417,15 +445,38 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            payload_data = yield from self._get_llm_response()
-            if payload_data is None:
-                return
 
-            yield from self._propose_market(payload_data)
+            random.seed(
+                "MarketProposalBehaviour"
+                + self.synchronized_data.most_voted_randomness,
+                2,
+            )  # nosec
+
+            events_datetime = self._generate_events_datetime(
+                self.last_synced_timestamp,
+                self.params.event_offset_start_days,
+                self.params.event_offset_end_days,
+            )
+
+            all_proposed_questions = []
+            for dt in events_datetime:
+                self.context.logger.info(f"Proposing markets for {dt}")
+                data = json.loads(self.synchronized_data.gathered_data)
+                k = min(40, len(data["articles"]))
+                selected_news_articles = random.sample(data["articles"], k)
+                proposed_questions = yield from self._get_llm_response(
+                    dt, selected_news_articles
+                )
+
+                all_proposed_questions.extend(proposed_questions)
+                print(proposed_questions)
+
+                for q in proposed_questions:
+                    yield from self._propose_market(q)
 
             sender = self.context.agent_address
             payload = MarketProposalPayload(
-                sender=sender, content=json.dumps(payload_data, sort_keys=True)
+                sender=sender, content=json.dumps(all_proposed_questions, sort_keys=True)
             )
 
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
@@ -434,27 +485,44 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.set_done()
 
-    def _get_llm_response(self) -> Generator[None, None, Optional[dict]]:
+    def _generate_events_datetime(
+        self,
+        reference_day_timestamp: float,
+        offset_start_days: int,
+        offset_end_days: int,
+    ) -> list[datetime]:
+        """Generate 02:00 UTC datetimes between date(timestamp) + offset_start_days and date(timestamp) + offset_end_days"""
+        datetimes = []
+        reference_day = datetime.utcfromtimestamp(reference_day_timestamp).date()
+        reference_day_at_midnight = datetime(
+            reference_day.year, reference_day.month, reference_day.day
+        ).replace(hour=2, minute=0, second=0)
+        reference_day_at_midnight.replace(tzinfo=timezone.utc)
+
+        for i in range(offset_start_days, offset_end_days + 1):
+            new_day_timestamp = reference_day_at_midnight + timedelta(days=i)
+            datetimes.append(new_day_timestamp)
+
+        return datetimes
+
+    def _get_llm_response(
+        self, event_day: datetime, news_articles: list[dict[str, Any]]
+    ) -> Generator[None, None, list[Any]]:
         """Get the LLM response"""
-        data = json.loads(self.synchronized_data.gathered_data)
-        articles = data["articles"]
-        random.seed(self.synchronized_data.most_voted_randomness, 2)  # nosec
-        random.shuffle(articles)
 
         input_news = ""
-        for article in articles[0:5]:
+        for article in news_articles:
             title = article["title"]
             content = article["content"]
             date = article["publishedAt"]
             input_news += f"- ({date}) {title}\n  {content}\n\n"
 
-        event_day = self._get_event_day()
         topics = ", ".join(self.params.topics)
         prompt_template = self.params.market_identification_prompt
         prompt_values = {
             "input_news": input_news,
             "topics": topics,
-            "event_day": event_day,
+            "event_day": event_day.strftime("%-d %B %Y"),
         }
 
         self.context.logger.info(
@@ -477,14 +545,9 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         )
         result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
         self.context.logger.info(f"Got LLM response: {result}")
+
         data = json.loads(result)
         valid_responses = []
-        # Opening date for realitio oracle contract and closing date
-        # for answering question on omen market
-        minimum_opening_date = datetime.datetime.fromtimestamp(
-            self.context.state.round_sequence.last_round_transition_timestamp.timestamp()
-            + (_ONE_DAY * self.params.minimum_market_time)
-        )
         for q in data:
             try:
                 # Date of the outcome
@@ -492,11 +555,6 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
                 if resolution_date is None:
                     self.context.logger.error(
                         "Cannot parse datestring " + q["resolution_date"]
-                    )
-                    continue
-                if resolution_date < minimum_opening_date:
-                    self.context.logger.error(
-                        "Invalid resolution date " + q["resolution_date"]
                     )
                     continue
                 valid_responses.append(
@@ -513,30 +571,7 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
                     f"Error converting question object {q} with error {e}"
                 )
                 continue
-        if len(valid_responses) == 0:
-            return None
-        return valid_responses[0]
-
-    def _get_event_day(self) -> str:
-        # Get the current date
-        n = self.synchronized_data.markets_created
-        today = datetime.datetime.now().date()
-
-        # Set the target year and month
-        target_year = 2023
-        target_month = 8
-        minimum_days_until_event = self.params.minimum_market_time + 1
-
-        # Calculate the start_date in August (at least today + 2 days)
-        start_date = max(
-            datetime.date(target_year, target_month, 1),
-            today + datetime.timedelta(days=minimum_days_until_event),
-        )
-        end_date = datetime.date(target_year, target_month, 31)
-        days_difference = abs((end_date - start_date).days)
-        event_day = start_date + datetime.timedelta(n % (days_difference + 1))
-
-        return event_day.strftime("%-d %B %Y")
+        return valid_responses
 
     def _do_llm_request(
         self,
@@ -566,6 +601,7 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         self, proposed_question_data: Dict[str, str]
     ) -> Generator[None, None, str]:
         """Auxiliary method to propose a market to the endpoint."""
+        self.context.logger.info(f"Proposing market {proposed_question_data}")
 
         url = self.params.market_approval_server_url + "/propose_market"
         headers = {
@@ -586,8 +622,8 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
             )
             retries = 3  # TODO: Make params
             if retries >= MAX_RETRIES:
-                return DataGatheringRound.MAX_RETRIES_PAYLOAD
-            return DataGatheringRound.ERROR_PAYLOAD
+                return MarketProposalRound.MAX_RETRIES_PAYLOAD
+            return MarketProposalRound.ERROR_PAYLOAD
 
         response_data = json.loads(response.body.decode())
         self.context.logger.info(f"Response received from {url}:\n {response_data}")
@@ -773,9 +809,9 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     "Address: " + market["address"],
                     "Liquidity: " + str(market["amount"]),
                     "Opening time: "
-                    + str(datetime.datetime.fromtimestamp(market["opening_timestamp"])),
+                    + str(datetime.fromtimestamp(market["opening_timestamp"])),
                     "Liquidity removal time: "
-                    + str(datetime.datetime.fromtimestamp(market["removal_timestamp"])),
+                    + str(datetime.fromtimestamp(market["removal_timestamp"])),
                 ]
             )
             self.context.logger.info(log_msg)
@@ -1168,7 +1204,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         timeout: int,
     ) -> Tuple[int, int]:
         """Calculate time params."""
-        days_to_opening = datetime.datetime.fromtimestamp(resolution_time + _ONE_DAY)
+        days_to_opening = datetime.fromtimestamp(resolution_time + _ONE_DAY)
         opening_time = int(days_to_opening.timestamp())
         return opening_time, timeout * _ONE_DAY
 
@@ -1322,10 +1358,10 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 timeout=self.params.market_timeout,
             )
             self.context.logger.info(
-                f"Opening time = {datetime.datetime.fromtimestamp(opening_timestamp)}"
+                f"Opening time = {datetime.fromtimestamp(opening_timestamp)}"
             )
             self.context.logger.info(
-                f"Closing time = {datetime.datetime.fromtimestamp(opening_timestamp + timeout)}"
+                f"Closing time = {datetime.fromtimestamp(opening_timestamp + timeout)}"
             )
 
             question_id = yield from self._calculate_question_id(
@@ -1395,6 +1431,7 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     initial_behaviour_cls = CollectRandomnessBehaviour
     abci_app_cls = MarketCreationManagerAbciApp  # type: ignore
     behaviours: Set[Type[BaseBehaviour]] = {
+        StartMarketProposalBehaviour,
         CollectRandomnessBehaviour,
         DataGatheringBehaviour,
         SelectKeeperMarketProposalBehaviour,

@@ -10,13 +10,13 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeibb5s54fnvnqte2mi2gyxr4265fftabvfcm445jpxw75k4pbtalga
+  behaviours.py: bafybeibsf7ky6tfr6dr5xinugokuoobevjdblcometqq2o636lowyqodx4
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiay4aepnfdkcsriajxqige65bsszrujin57riubflm7dyw2keapoi
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeia226bfyqfnzkkp24wmabaof4umi7lqnjtmhb63goszboqk2krqsm
-  payloads.py: bafybeib57gmbwstx646qxvxxl62n6of4vo2ei2nl32ogo5vhi3ukz6ldqe
-  rounds.py: bafybeigzwpzkytp5dh2kvpuitvbaltoq3qbnjbmr7e6hsdgsxacvtcwpsi
+  models.py: bafybeidof6xfyfr3mvug6k2jtrs2alrvxudzwfq4iwzaxqwwj6eo2gfaly
+  payloads.py: bafybeidqomnfonezx35ow5lb4umyzuzlc56u4wjpxlvcofgljnpghf5iee
+  rounds.py: bafybeihfhtqzqmjoy7ekeragfyauvm5xfzaid73goszf6a3qgq4czzzti4
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -99,10 +99,43 @@ models:
       - politics
       - science
       - technology
+      - trending
+      - fashion
+      - social
+      - health
+      - sustainability
+      - internet
+      - travel
+      - food
+      - pets
+      - animals
+      - curiosities
+      - music
+      - economy
+      - arts
+      - entertainment
+      - weather
+      - sports
+      - finance
+      - international
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 1
       minimum_market_time: 7
+      min_seconds_between_market_proposals: 7200
+      news_sources:
+      - bbc-news
+      - bbc-sport
+      - abc-news
+      - cnn
+      - google-news
+      - reuters
+      - usa-today
+      - breitbart-news
+      - the-verge
+      - techradar
+      event_offset_start_days: 4
+      event_offset_end_days: 7
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'

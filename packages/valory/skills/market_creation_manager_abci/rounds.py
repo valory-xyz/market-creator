@@ -44,11 +44,11 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
     SyncMarketsPayload,
+    StartMarketProposalPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
 )
-
 
 class Event(Enum):
     """MarketCreationManagerAbciApp Events"""
@@ -62,6 +62,7 @@ class Event(Enum):
     MAX_MARKETS_REACHED = "max_markets_reached"
     MAX_RETRIES_REACHED = "max_retries_reached"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
+    SKIP_MARKET_PROPOSAL = "skip_market_proposal"
 
 
 class SynchronizedData(TxSynchronizedData):
@@ -122,6 +123,47 @@ class SynchronizedData(TxSynchronizedData):
     def market_from_block(self) -> int:
         """Get the market_from_block."""
         return cast(int, self.db.get("market_from_block", 0))
+
+    @property
+    def last_start_market_proposal_timestamp(self) -> int:
+        """Get the market_from_block."""
+        return cast(int, self.db.get("last_start_market_proposal_timestamp", 0))
+
+
+class StartMarketProposalRound(CollectSameUntilThresholdRound):
+    """A round for generating collecting randomness"""
+
+    payload_class = StartMarketProposalPayload
+    synchronized_data_class = SynchronizedData
+
+    collection_key = get_name(SynchronizedData.participant_to_randomness)
+    selection_key = ("ignored", get_name(SynchronizedData.last_start_market_proposal_timestamp))
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+
+            last_timestamp = cast(SynchronizedData, self.synchronized_data).last_start_market_proposal_timestamp
+            current_timestamp = int(cast(StartMarketProposalPayload, self.most_voted_payload))
+
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(SynchronizedData.last_start_market_proposal_timestamp): self.most_voted_payload,
+                },
+            )
+
+            if current_timestamp == last_timestamp:
+                return synchronized_data, Event.SKIP_MARKET_PROPOSAL
+            else:
+                return synchronized_data, Event.DONE
+
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+        return None
+
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -198,13 +240,14 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
 class MarketProposalRound(OnlyKeeperSendsRound):
     """MarketProposalRound"""
 
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
+
     payload_class = MarketProposalPayload
     payload_attribute = "content"
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
-
-    ERROR_PAYLOAD = "error"
 
     def end_block(
         self,
@@ -481,46 +524,52 @@ class FinishedWithoutTxRound(DegenerateRound):
 class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
 
-    initial_round_cls: AppState = CollectRandomnessRound
-    initial_states: Set[AppState] = {CollectRandomnessRound}
+    initial_round_cls: AppState = StartMarketProposalRound
+    initial_states: Set[AppState] = {StartMarketProposalRound}
     transition_function: AbciAppTransitionFunction = {
+        StartMarketProposalRound: {
+            Event.DONE: CollectRandomnessRound,
+            Event.NO_MAJORITY: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
+            Event.SKIP_MARKET_PROPOSAL: RetrieveApprovedMarketRound
+        },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_MAJORITY: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
         },
         SelectKeeperRound: {
             Event.DONE: DataGatheringRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_MAJORITY: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
         },
         DataGatheringRound: {
             Event.DONE: MarketProposalRound,
             Event.MAX_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
-            Event.ERROR: CollectRandomnessRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.ERROR: StartMarketProposalRound,
+            Event.NO_MAJORITY: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
         },
         MarketProposalRound: {
-            Event.DONE: CollectRandomnessRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
-            Event.DID_NOT_SEND: CollectRandomnessRound,
-            Event.ERROR: CollectRandomnessRound,
+            Event.DONE: StartMarketProposalRound,
+            Event.NO_MAJORITY: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
+            Event.DID_NOT_SEND: StartMarketProposalRound,
+            Event.ERROR: StartMarketProposalRound,
         },
         RetrieveApprovedMarketRound: {
             Event.DONE: PrepareTransactionRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
-            Event.DID_NOT_SEND: CollectRandomnessRound,
-            Event.ERROR: CollectRandomnessRound,
+            Event.NO_MAJORITY: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
+            Event.DID_NOT_SEND: StartMarketProposalRound,
+            Event.ERROR: StartMarketProposalRound,
             Event.NO_MARKETS_RETRIEVED: DepositDaiRound,
         },
         PrepareTransactionRound: {
             Event.DONE: FinishedMarketCreationManagerRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_MAJORITY: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
         },
         DepositDaiRound: {
             Event.DONE: FinishedWithDepositDaiRound,
@@ -530,16 +579,16 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         SyncMarketsRound: {
             Event.DONE: RemoveFundingRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ERROR: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_MAJORITY: StartMarketProposalRound,
+            Event.ERROR: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
         },
         RemoveFundingRound: {
             Event.DONE: FinishedWithRemoveFundingRound,
             Event.NO_TX: FinishedWithoutTxRound,
             Event.NO_MAJORITY: RemoveFundingRound,
-            Event.ERROR: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.ERROR: StartMarketProposalRound,
+            Event.ROUND_TIMEOUT: StartMarketProposalRound,
         },
         FinishedMarketCreationManagerRound: {},
         FinishedWithRemoveFundingRound: {},
@@ -555,9 +604,11 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     event_to_timeout: EventToTimeout = {}
     cross_period_persisted_keys: Set[str] = {
         get_name(SynchronizedData.markets_created),
+        get_name(SynchronizedData.last_start_market_proposal_timestamp),
+        get_name(SynchronizedData.most_voted_keeper_address),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
-        CollectRandomnessRound: set(),
+        StartMarketProposalRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
         FinishedWithDepositDaiRound: {
