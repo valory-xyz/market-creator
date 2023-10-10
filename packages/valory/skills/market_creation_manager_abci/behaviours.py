@@ -343,17 +343,10 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
     def _gather_data(self) -> Generator[None, None, str]:
         """Auxiliary method to collect data from endpoint."""
         headers = {"X-Api-Key": self.params.newsapi_api_key}
-        today = datetime.date.today()
-        from_date = today - datetime.timedelta(days=7)
-        to_date = today
-        topics_string = " OR ".join(self.params.topics)
 
         parameters = {
-            "q": topics_string,
-            "language": "en",
-            "sortBy": "popularity",
-            "from": from_date.strftime("%y-%m-%d"),
-            "to": to_date.strftime("%y-%m-%d"),
+            "sources": "bbc-news,bbc-sport,abc-news,cnn,google-news,reuters,usa-today,breitbart-news,the-verge,techradar",
+            "pageSize": 100,
         }
         response = yield from self.get_http_response(
             method="GET",

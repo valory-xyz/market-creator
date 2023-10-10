@@ -60,6 +60,7 @@ class Event(Enum):
     ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
     MAX_MARKETS_REACHED = "max_markets_reached"
+    MAX_RETRIES_REACHED = "max_retries_reached"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
 
 
@@ -132,6 +133,118 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     no_majority_event = Event.NO_MAJORITY
     collection_key = get_name(SynchronizedData.participant_to_randomness)
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
+
+
+class SelectKeeperRound(CollectSameUntilThresholdRound):
+    """A round in a which keeper is selected"""
+
+    payload_class = SelectKeeperPayload
+    synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+    collection_key = get_name(SynchronizedData.participant_to_selection)
+    selection_key = get_name(SynchronizedData.most_voted_keeper_address)
+
+
+class DataGatheringRound(CollectSameUntilThresholdRound):
+    """DataGatheringRound"""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
+    MAX_MARKETS_REACHED = "MAX_MARKETS_REACHED"
+
+    payload_class = DataGatheringPayload
+    synchronized_data_class = SynchronizedData
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                newsapi_api_retries = cast(
+                    SynchronizedData, self.synchronized_data
+                ).newsapi_api_retries
+                synchronized_data = self.synchronized_data.update(
+                    synchronized_data_class=SynchronizedData,
+                    **{
+                        get_name(
+                            SynchronizedData.newsapi_api_retries
+                        ): newsapi_api_retries
+                        + 1,
+                    },
+                )
+                return synchronized_data, Event.ERROR
+
+            if self.most_voted_payload == DataGatheringRound.MAX_RETRIES_PAYLOAD:
+                return self.synchronized_data, Event.MAX_RETRIES_REACHED
+
+            if self.most_voted_payload == DataGatheringRound.MAX_MARKETS_REACHED:
+                return self.synchronized_data, Event.MAX_MARKETS_REACHED
+
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(SynchronizedData.gathered_data): self.most_voted_payload,
+                },
+            )
+            return synchronized_data, Event.DONE
+
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+        return None
+
+
+class MarketProposalRound(OnlyKeeperSendsRound):
+    """MarketProposalRound"""
+
+    payload_class = MarketProposalPayload
+    payload_attribute = "content"
+    synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+
+    ERROR_PAYLOAD = "error"
+
+    def end_block(
+        self,
+    ) -> Optional[
+        Tuple[BaseSynchronizedData, Enum]
+    ]:  # pylint: disable=too-many-return-statements
+        """Process the end of the block."""
+        if self.keeper_payload is None:
+            return None
+
+        # Keeper did not send
+        if self.keeper_payload is None:  # pragma: no cover
+            return self.synchronized_data, Event.DID_NOT_SEND
+
+        # API error
+        if (
+            cast(MarketProposalPayload, self.keeper_payload).content
+            == self.ERROR_PAYLOAD
+        ):
+            return self.synchronized_data, Event.ERROR
+
+        # Happy path
+        proposed_question_data = json.loads(
+            cast(MarketProposalPayload, self.keeper_payload).content
+        )  # there could be problems loading this from the LLM response
+
+        synchronized_data = self.synchronized_data.update(
+            synchronized_data_class=SynchronizedData,
+            **{
+                get_name(
+                    SynchronizedData.proposed_question_data
+                ): proposed_question_data,
+                get_name(SynchronizedData.markets_created): cast(
+                    SynchronizedData, self.synchronized_data
+                ).markets_created
+                + 1,
+            },
+        )
+
+        return synchronized_data, Event.DONE
 
 
 class DepositDaiRound(CollectSameUntilThresholdRound):
@@ -251,118 +364,6 @@ class SyncMarketsRound(CollectSameUntilThresholdRound):
         ):
             return self.synchronized_data, Event.NO_MAJORITY
         return None
-
-
-class DataGatheringRound(CollectSameUntilThresholdRound):
-    """DataGatheringRound"""
-
-    ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
-    MAX_MARKETS_REACHED = "MAX_MARKETS_REACHED"
-
-    payload_class = DataGatheringPayload
-    synchronized_data_class = SynchronizedData
-
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
-        """Process the end of the block."""
-        if self.threshold_reached:
-            if self.most_voted_payload == self.ERROR_PAYLOAD:
-                newsapi_api_retries = cast(
-                    SynchronizedData, self.synchronized_data
-                ).newsapi_api_retries
-                synchronized_data = self.synchronized_data.update(
-                    synchronized_data_class=SynchronizedData,
-                    **{
-                        get_name(
-                            SynchronizedData.newsapi_api_retries
-                        ): newsapi_api_retries
-                        + 1,
-                    },
-                )
-                return synchronized_data, Event.ERROR
-
-            if self.most_voted_payload == DataGatheringRound.MAX_RETRIES_PAYLOAD:
-                return self.synchronized_data, Event.DONE
-
-            if self.most_voted_payload == DataGatheringRound.MAX_MARKETS_REACHED:
-                return self.synchronized_data, Event.MAX_MARKETS_REACHED
-
-            synchronized_data = self.synchronized_data.update(
-                synchronized_data_class=SynchronizedData,
-                **{
-                    get_name(SynchronizedData.gathered_data): self.most_voted_payload,
-                },
-            )
-            return synchronized_data, Event.DONE
-
-        if not self.is_majority_possible(
-            self.collection, self.synchronized_data.nb_participants
-        ):
-            return self.synchronized_data, Event.NO_MAJORITY
-        return None
-
-
-class SelectKeeperRound(CollectSameUntilThresholdRound):
-    """A round in a which keeper is selected"""
-
-    payload_class = SelectKeeperPayload
-    synchronized_data_class = SynchronizedData
-    done_event = Event.DONE
-    no_majority_event = Event.NO_MAJORITY
-    collection_key = get_name(SynchronizedData.participant_to_selection)
-    selection_key = get_name(SynchronizedData.most_voted_keeper_address)
-
-
-class MarketProposalRound(OnlyKeeperSendsRound):
-    """MarketProposalRound"""
-
-    payload_class = MarketProposalPayload
-    payload_attribute = "content"
-    synchronized_data_class = SynchronizedData
-    done_event = Event.DONE
-    no_majority_event = Event.NO_MAJORITY
-
-    ERROR_PAYLOAD = "error"
-
-    def end_block(
-        self,
-    ) -> Optional[
-        Tuple[BaseSynchronizedData, Enum]
-    ]:  # pylint: disable=too-many-return-statements
-        """Process the end of the block."""
-        if self.keeper_payload is None:
-            return None
-
-        # Keeper did not send
-        if self.keeper_payload is None:  # pragma: no cover
-            return self.synchronized_data, Event.DID_NOT_SEND
-
-        # API error
-        if (
-            cast(MarketProposalPayload, self.keeper_payload).content
-            == self.ERROR_PAYLOAD
-        ):
-            return self.synchronized_data, Event.ERROR
-
-        # Happy path
-        proposed_question_data = json.loads(
-            cast(MarketProposalPayload, self.keeper_payload).content
-        )  # there could be problems loading this from the LLM response
-
-        synchronized_data = self.synchronized_data.update(
-            synchronized_data_class=SynchronizedData,
-            **{
-                get_name(
-                    SynchronizedData.proposed_question_data
-                ): proposed_question_data,
-                get_name(SynchronizedData.markets_created): cast(
-                    SynchronizedData, self.synchronized_data
-                ).markets_created
-                + 1,
-            },
-        )
-
-        return synchronized_data, Event.DONE
 
 
 class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
@@ -496,6 +497,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         DataGatheringRound: {
             Event.DONE: MarketProposalRound,
             Event.MAX_MARKETS_REACHED: RetrieveApprovedMarketRound,
+            Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
             Event.ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
