@@ -342,10 +342,17 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
 
     def _gather_data(self) -> Generator[None, None, str]:
         """Auxiliary method to collect data from endpoint."""
+        # TODO make params
+        self_params_news_sources = ["bbc-news", "bbc-sport", "abc-news", "cnn", "google-news", "reuters", "usa-today", "breitbart-news", "the-verge", "techradar"]
+
         headers = {"X-Api-Key": self.params.newsapi_api_key}
 
+        random.seed("DataGatheringBehaviour" + self.synchronized_data.most_voted_randomness, 2)  # nosec
+        k = min(10, len(self_params_news_sources))
+        sources = random.sample(self_params_news_sources, k)
+
         parameters = {
-            "sources": "bbc-news,bbc-sport,abc-news,cnn,google-news,reuters,usa-today,breitbart-news,the-verge,techradar",
+            "sources": ",".join(sources),
             "pageSize": 100,
         }
         response = yield from self.get_http_response(
@@ -359,8 +366,8 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Could not retrieve response from {self.params.newsapi_endpoint}."
                 f"Received status code {response.status_code}.\n{response}"
             )
-            retries = 3  # TODO: Make params
-            if retries >= MAX_RETRIES:
+            self_params_newsapi_retries = 3  # TODO: Make params
+            if self_params_newsapi_retries >= MAX_RETRIES:
                 return DataGatheringRound.MAX_RETRIES_PAYLOAD
             return DataGatheringRound.ERROR_PAYLOAD
 
