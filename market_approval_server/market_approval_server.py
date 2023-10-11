@@ -47,15 +47,15 @@ CLI Usage:
 """
 
 
-from datetime import datetime
 import hashlib
 import logging
 import os
 import random
 import uuid
+from datetime import datetime
 from enum import Enum
 from logging.handlers import RotatingFileHandler
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from flask import Flask, Response, json, jsonify, render_template, request
 from flask_cors import CORS
@@ -133,8 +133,10 @@ def hash_api_key(m: str) -> str:
     return hashlib.sha256(m.encode(encoding="utf-8")).hexdigest()
 
 
-def check_api_key(api_key: str) -> bool:
+def check_api_key(api_key: Optional[str]) -> bool:
     """Checks the API key."""
+    if api_key is None:
+        return False
     return hash_api_key(api_key) in api_keys
 
 
@@ -238,7 +240,15 @@ def propose_market() -> Tuple[Response, int]:
 
         market_id = str(market["id"])
 
-        if any(market_id in db for db in [proposed_markets, approved_markets, rejected_markets, processed_markets]):
+        if any(
+            market_id in db
+            for db in [
+                proposed_markets,
+                approved_markets,
+                rejected_markets,
+                processed_markets,
+            ]
+        ):
             return (
                 jsonify(
                     {
@@ -351,7 +361,12 @@ def update_market() -> Tuple[Response, int]:
         market_id = market["id"]
 
         # Check if the market exists in any of the databases
-        databases = [proposed_markets, approved_markets, rejected_markets, processed_markets]
+        databases = [
+            proposed_markets,
+            approved_markets,
+            rejected_markets,
+            processed_markets,
+        ]
         found = False
         for db in databases:
             if market_id in db:
@@ -362,9 +377,15 @@ def update_market() -> Tuple[Response, int]:
 
         if found:
             save_config()
-            return jsonify({"info": f"Market ID {market_id} updated successfully."}), 200
+            return (
+                jsonify({"info": f"Market ID {market_id} updated successfully."}),
+                200,
+            )
         else:
-            return jsonify({"error": f"Market ID {market_id} not found in any database."}), 404
+            return (
+                jsonify({"error": f"Market ID {market_id} not found in any database."}),
+                404,
+            )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
