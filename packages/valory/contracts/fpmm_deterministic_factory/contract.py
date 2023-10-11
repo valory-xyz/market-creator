@@ -38,6 +38,7 @@ _logger = logging.getLogger(
     f"aea.packages.{PUBLIC_ID.author}.contracts.{PUBLIC_ID.name}.contract"
 )
 
+
 class FPMMDeterministicFactory(Contract):
     """The Gnosis FPMMDeterministicFactory contract."""
 
@@ -217,7 +218,9 @@ class FPMMDeterministicFactory(Contract):
             ledger_api=ledger_api, contract_address=contract_address
         )
         receipt = ledger_api.api.eth.get_transaction_receipt(tx_hash)
-        logs = contract.events.FixedProductMarketMakerCreation().process_receipt(receipt)
+        logs = contract.events.FixedProductMarketMakerCreation().process_receipt(
+            receipt
+        )
         if len(logs) != 1:
             _logger.error(
                 f"Expected exactly one FixedProductMarketMakerCreation event in the receipt. "

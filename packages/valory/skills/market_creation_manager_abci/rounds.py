@@ -39,11 +39,12 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     DataGatheringPayload,
     DepositDaiPayload,
     MarketProposalPayload,
+    PostTxPayload,
     PrepareTransactionPayload,
     RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
-    SyncMarketsPayload, PostTxPayload,
+    SyncMarketsPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -163,7 +164,7 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
             return self.synchronized_data, Event.DONE
 
         if not self.is_majority_possible(
-                self.collection, self.synchronized_data.nb_participants
+            self.collection, self.synchronized_data.nb_participants
         ):
             return self.synchronized_data, Event.NO_MAJORITY
         return None
@@ -193,9 +194,7 @@ class DepositDaiRound(CollectSameUntilThresholdRound):
                     get_name(
                         SynchronizedData.most_voted_tx_hash
                     ): self.most_voted_payload,
-                    get_name(
-                        SynchronizedData.tx_sender
-                    ): self.round_id,
+                    get_name(SynchronizedData.tx_sender): self.round_id,
                 },
             )
             return synchronized_data, Event.DONE
@@ -246,9 +245,7 @@ class RemoveFundingRound(CollectSameUntilThresholdRound):
                         SynchronizedData.markets_to_remove_liquidity
                     ): markets_to_remove_liquidity,
                     get_name(SynchronizedData.most_voted_tx_hash): tx_data,
-                    get_name(
-                        SynchronizedData.tx_sender
-                    ): self.round_id,
+                    get_name(SynchronizedData.tx_sender): self.round_id,
                 },
             )
             return synchronized_data, Event.DONE
@@ -495,9 +492,7 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
                         get_name(
                             SynchronizedData.most_voted_tx_hash
                         ): self.most_voted_payload,
-                        get_name(
-                            SynchronizedData.tx_sender
-                        ): self.round_id,
+                        get_name(SynchronizedData.tx_sender): self.round_id,
                     },
                 ),
                 Event.DONE,
@@ -605,6 +600,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),
+        PostTransactionRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
         FinishedWithDepositDaiRound: {

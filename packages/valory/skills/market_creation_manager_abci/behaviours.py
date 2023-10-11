@@ -80,8 +80,9 @@ from packages.valory.skills.market_creation_manager_abci.models import (
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     DepositDaiPayload,
+    PostTxPayload,
     RemoveFundingPayload,
-    SyncMarketsPayload, PostTxPayload,
+    SyncMarketsPayload,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectRandomnessPayload,
@@ -92,6 +93,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     MarketCreationManagerAbciApp,
     MarketProposalPayload,
     MarketProposalRound,
+    PostTransactionRound,
     PrepareTransactionPayload,
     PrepareTransactionRound,
     RemoveFundingRound,
@@ -100,7 +102,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     SelectKeeperPayload,
     SelectKeeperRound,
     SyncMarketsRound,
-    SynchronizedData, PostTransactionRound,
+    SynchronizedData,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -1419,14 +1421,19 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.context.logger.info(f"Handling settled tx hash {settled_tx_hash}.")
 
-        if self.synchronized_data.tx_sender != PrepareTransactionBehaviour.matching_round.round_id:
+        if (
+            self.synchronized_data.tx_sender
+            != PrepareTransactionBehaviour.matching_round.round_id
+        ):
             # we only handle market creation txs atm, any other tx, we don't need to take action
             return PostTransactionRound.DONE_PAYLOAD
 
-        payload = self._handle_market_creation(market_id, settled_tx_hash)
+        payload = yield from self._handle_market_creation(market_id, settled_tx_hash)
         return payload
 
-    def _handle_market_creation(self, market_id: str, tx_hash: str) -> Generator[None, None, str]:
+    def _handle_market_creation(
+        self, market_id: str, tx_hash: str
+    ) -> Generator[None, None, str]:
         """Handle market creation tx settlement."""
         # get fpmm id from the events
         fpmm_id = yield from self._get_fpmm_id(tx_hash)
@@ -1449,7 +1456,9 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             contract_address=self.params.fpmm_deterministic_factory_contract,
             tx_hash=tx_hash,
             contract_id=str(FPMMDeterministicFactory.contract_id),
-            contract_callable=get_callable_name(FPMMDeterministicFactory.parse_market_creation_event),
+            contract_callable=get_callable_name(
+                FPMMDeterministicFactory.parse_market_creation_event
+            ),
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -1457,20 +1466,19 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
 
-        fpmm_id = response.state.body["fixed_product_market_maker"]
+        fpmm_id = cast(str, response.state.body["fixed_product_market_maker"])
         return fpmm_id
 
-    def _mark_market_as_done(self, id_: str, fpmm_id: str) -> Generator[None, None, Optional[str]]:
+    def _mark_market_as_done(
+        self, id_: str, fpmm_id: str
+    ) -> Generator[None, None, Optional[str]]:
         """Call the market approval server to signal that the provided market is created."""
         url = f"{self.params.market_approval_server_url}/update_market"
         headers = {
             "Authorization": self.params.market_approval_server_api_key,
             "Content-Type": "application/json",
         }
-        body = {
-            "id": id_,
-            "fpmm_id": fpmm_id
-        }
+        body = {"id": id_, "fpmm_id": fpmm_id}
         http_response = yield from self.get_http_response(
             headers=headers,
             method="PUT",
@@ -1479,9 +1487,11 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if http_response.status_code != HTTP_OK:
             self.context.logger.warning(
-                f"Failed to mark market as done: {http_response.status_code} {http_response.text}"
+                f"Failed to mark market as done: {http_response.status_code} {http_response}"
             )
-            return http_response.text
+            return str(http_response.body)
+
+        return None
 
 
 class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
@@ -1499,4 +1509,5 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
         SyncMarketsBehaviour,
         RemoveFundingBehaviour,
         DepositDaiBehaviour,
+        PostTransactionBehaviour,
     }
