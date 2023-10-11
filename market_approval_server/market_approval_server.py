@@ -332,40 +332,6 @@ def get_random_approved_market() -> Tuple[Response, int]:
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/update_market", methods=["PUT"])
-def update_market() -> Tuple[Response, int]:
-    """Updates an existing market in the specified database."""
-    try:
-        api_key = request.headers.get("Authorization")
-        if not check_api_key(api_key):
-            return jsonify({"error": "Unauthorized access. Invalid API key."}), 401
-
-        market = request.get_json()
-        if "id" not in market:
-            return jsonify({"error": "Invalid JSON format. Missing id."}), 400
-
-        market_id = market["id"]
-
-        # Check if the market exists in any of the databases
-        databases = [proposed_markets, approved_markets, rejected_markets, processed_markets]
-        found = False
-        for db in databases:
-            if market_id in db:
-                found = True
-                existing_market = db[market_id]
-                for key, value in market.items():
-                    existing_market[key] = value
-
-        if found:
-            save_config()
-            return jsonify({"info": f"Market ID {market_id} updated successfully."}), 200
-        else:
-            return jsonify({"error": f"Market ID {market_id} not found in any database."}), 404
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 @app.route("/", methods=["GET"])
 def main_page() -> Tuple[Response, int]:
     """Render the main page with links to the GET endpoints."""
