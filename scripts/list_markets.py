@@ -55,9 +55,7 @@ if __name__ == "__main__":
 
     target_date = args.date
     data = requests.get(args.url).json()
-    filtered_markets = _filter_markets_by_date(
-        data["proposed_markets"], target_date
-    )
+    filtered_markets = _filter_markets_by_date(data["proposed_markets"], target_date)
 
     csv_filename = f"output-{target_date}.csv"
     with open(csv_filename, "w", newline="", encoding="utf-8") as csvfile:
