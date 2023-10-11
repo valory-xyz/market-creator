@@ -43,12 +43,13 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
-    SyncMarketsPayload,
     StartMarketProposalPayload,
+    SyncMarketsPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
 )
+
 
 class Event(Enum):
     """MarketCreationManagerAbciApp Events"""
@@ -137,19 +138,28 @@ class StartMarketProposalRound(CollectSameUntilThresholdRound):
     synchronized_data_class = SynchronizedData
 
     collection_key = get_name(SynchronizedData.participant_to_randomness)
-    selection_key = ("ignored", get_name(SynchronizedData.last_start_market_proposal_timestamp))
+    selection_key = (
+        "ignored",
+        get_name(SynchronizedData.last_start_market_proposal_timestamp),
+    )
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """Process the end of the block."""
         if self.threshold_reached:
 
-            last_timestamp = cast(SynchronizedData, self.synchronized_data).last_start_market_proposal_timestamp
-            current_timestamp = int(cast(StartMarketProposalPayload, self.most_voted_payload))
+            last_timestamp = cast(
+                SynchronizedData, self.synchronized_data
+            ).last_start_market_proposal_timestamp
+            current_timestamp = int(
+                cast(StartMarketProposalPayload, self.most_voted_payload)
+            )
 
             synchronized_data = self.synchronized_data.update(
                 synchronized_data_class=SynchronizedData,
                 **{
-                    get_name(SynchronizedData.last_start_market_proposal_timestamp): self.most_voted_payload,
+                    get_name(
+                        SynchronizedData.last_start_market_proposal_timestamp
+                    ): self.most_voted_payload,
                 },
             )
 
@@ -163,7 +173,6 @@ class StartMarketProposalRound(CollectSameUntilThresholdRound):
         ):
             return self.synchronized_data, Event.NO_MAJORITY
         return None
-
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -531,7 +540,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.DONE: CollectRandomnessRound,
             Event.NO_MAJORITY: StartMarketProposalRound,
             Event.ROUND_TIMEOUT: StartMarketProposalRound,
-            Event.SKIP_MARKET_PROPOSAL: RetrieveApprovedMarketRound
+            Event.SKIP_MARKET_PROPOSAL: RetrieveApprovedMarketRound,
         },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,

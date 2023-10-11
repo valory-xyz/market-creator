@@ -43,6 +43,7 @@ DEFAULT_EVENT_OFFSET_START_DAYS = 4
 DEFAULT_EVENT_OFFSET_END_DAYS = 7
 DEFAULT_MIN_SECONDS_BETWEEN_MARKET_PROPOSALS = 7200
 
+
 class SharedState(BaseSharedState):
     """Keep the current shared state of the skill."""
 
@@ -73,7 +74,9 @@ class MarketCreationManagerParams(BaseParams):
             key="market_identification_prompt", kwargs=kwargs, type_=str
         )
         self.topics = self._ensure(key="topics", kwargs=kwargs, type_=List[str])
-        self.news_sources = self._ensure(key="news_sources", kwargs=kwargs, type_=List[str])
+        self.news_sources = self._ensure(
+            key="news_sources", kwargs=kwargs, type_=List[str]
+        )
         self.num_markets = kwargs.get("num_markets", DEFAULT_MAX_ALLOWED_MARKETS)
         self.realitio_contract = self._ensure(
             key="realitio_contract",
@@ -110,9 +113,16 @@ class MarketCreationManagerParams(BaseParams):
         self.minimum_market_time = kwargs.get(
             "minimum_market_time", DEFAULT_MINIMUM_MARKET_TIME
         )
-        self.event_offset_start_days = kwargs.get("event_offset_start_days", DEFAULT_EVENT_OFFSET_START_DAYS)
-        self.event_offset_end_days = kwargs.get("event_offset_end_days", DEFAULT_EVENT_OFFSET_END_DAYS)
-        self.min_seconds_between_market_proposals = kwargs.get("min_seconds_between_market_proposals", DEFAULT_MIN_SECONDS_BETWEEN_MARKET_PROPOSALS)
+        self.event_offset_start_days = kwargs.get(
+            "event_offset_start_days", DEFAULT_EVENT_OFFSET_START_DAYS
+        )
+        self.event_offset_end_days = kwargs.get(
+            "event_offset_end_days", DEFAULT_EVENT_OFFSET_END_DAYS
+        )
+        self.min_seconds_between_market_proposals = kwargs.get(
+            "min_seconds_between_market_proposals",
+            DEFAULT_MIN_SECONDS_BETWEEN_MARKET_PROPOSALS,
+        )
 
         self.initial_funds = kwargs.get("initial_funds", DEFAULT_INITIAL_FUNDS)
         super().__init__(*args, **kwargs)

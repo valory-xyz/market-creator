@@ -81,8 +81,8 @@ from packages.valory.skills.market_creation_manager_abci.models import (
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     DepositDaiPayload,
     RemoveFundingPayload,
-    SyncMarketsPayload,
     StartMarketProposalPayload,
+    SyncMarketsPayload,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectRandomnessPayload,
@@ -100,9 +100,9 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     RetrieveApprovedMarketRound,
     SelectKeeperPayload,
     SelectKeeperRound,
+    StartMarketProposalRound,
     SyncMarketsRound,
     SynchronizedData,
-    StartMarketProposalRound,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -322,12 +322,20 @@ class StartMarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
                 f"StartMarketProposalBehaviour last_timestamp={last_timestamp} current_timestamp={current_timestamp}"
             )
 
-            if current_timestamp - last_timestamp < self.params.min_seconds_between_market_proposals:
+            if (
+                current_timestamp - last_timestamp
+                < self.params.min_seconds_between_market_proposals
+            ):
                 self.context.logger.info("Timeout to propose new markets not reached.")
-                payload = StartMarketProposalPayload(sender=sender, last_start_market_proposal_timestamp=last_timestamp)
+                payload = StartMarketProposalPayload(
+                    sender=sender, last_start_market_proposal_timestamp=last_timestamp
+                )
             else:
                 self.context.logger.info("Timeout to propose new markets reached.")
-                payload = StartMarketProposalPayload(sender=sender, last_start_market_proposal_timestamp=current_timestamp)
+                payload = StartMarketProposalPayload(
+                    sender=sender,
+                    last_start_market_proposal_timestamp=current_timestamp,
+                )
 
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
@@ -361,7 +369,11 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             gathered_data = yield from self._gather_data()
-            payload = DataGatheringPayload(sender=sender, gathered_data=gathered_data, last_data_gathering_behaviour_timestamp=self.last_synced_timestamp)
+            payload = DataGatheringPayload(
+                sender=sender,
+                gathered_data=gathered_data,
+                last_data_gathering_behaviour_timestamp=self.last_synced_timestamp,
+            )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -381,7 +393,7 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
 
         parameters = {
             "sources": ",".join(sources),
-            "pageSize": 100,
+            "pageSize": "100",
         }
         response = yield from self.get_http_response(
             method="GET",
@@ -476,7 +488,8 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
 
             sender = self.context.agent_address
             payload = MarketProposalPayload(
-                sender=sender, content=json.dumps(all_proposed_questions, sort_keys=True)
+                sender=sender,
+                content=json.dumps(all_proposed_questions, sort_keys=True),
             )
 
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
