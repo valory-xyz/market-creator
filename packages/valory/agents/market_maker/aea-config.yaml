@@ -20,7 +20,7 @@ contracts:
 - valory/multisend:0.1.0:bafybeieg4tywd5lww2vygvpkilg3hcepa4rmhehjuamyvdf6vazt554v6u
 - valory/realtio:0.1.0:bafybeifxmrmv3zjrqrrr7yuzud2luka7e5muopwxeef5of7iahjpaziwsi
 - valory/conditional_tokens:0.1.0:bafybeibvmzokt7njh7xjwm3s6l2keumjx6z2ni7tosrw5fk2lpumvw444q
-- valory/fpmm_deterministic_factory:0.1.0:bafybeibk2v5op7xkd7htivvbbonoicrqrdgo2iylu6jlbcn6xx22anzlzq
+- valory/fpmm_deterministic_factory:0.1.0:bafybeigrbge7iew2dfjy25wt2m5e5jctmxa4auzlmkszzimt7e3rehtali
 - valory/service_registry:0.1.0:bafybeige6pubafkiqmaiyuql6pcojm6fvh5thvhrsapi53au2rhuumqymu
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
 - valory/fpmm:0.1.0:bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4
@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeigafjci7m7ezwzasav5xqo7v2mbxxn7qb4y7vnuc2wr2irzvn7wsy
 - valory/abstract_round_abci:0.1.0:bafybeih2fyfb6kkf7r45pvdk7pyyebr5xloia4xiqxtb3qsrasnstqmepq
-- valory/market_maker_abci:0.1.0:bafybeiavxqrdnd4qebkhzlaf53vqfg6tazwojtkx3ahtxvyxvtojnt5rpa
+- valory/market_maker_abci:0.1.0:bafybeidcnxe3txzjygkmm5oj65q4k6j2dwxearzrsv6ewtgdbfxovtm52e
 - valory/registration_abci:0.1.0:bafybeibndt6vxiwc2edgtaxpjbhwto3eyu33ujz3zmvtygvo2qz7xme5li
-- valory/market_creation_manager_abci:0.1.0:bafybeigfm5eqmof5srcfnvbt7bje7fsmudiiawedcadqr7dkvqwqhevmfu
+- valory/market_creation_manager_abci:0.1.0:bafybeice6oqsq7zfzzscvcmp7madco6e6lscgkyk55oyie6mpqresfdwdq
 - valory/reset_pause_abci:0.1.0:bafybeigeoc363gv3wp2rrmk6p2fdxney33nxd3owtpfugzapgruwe4klyu
 - valory/termination_abci:0.1.0:bafybeigqpij2sgrpnilqjljfciixop4fldq5qceixc7534q6af4potdmdm
 - valory/transaction_settlement_abci:0.1.0:bafybeia7rzsbea3ch4gcafyp3z6uvqh4npws2xpdwbkkdbrqqpjops7nui
@@ -187,4 +187,5 @@ models:
       slash_threshold_amount: ${int:10000000000000000}
       light_slash_unit_amount: ${int:5000000000000000}
       serious_slash_unit_amount: ${int:8000000000000000}
+      market_approval_api_key: ${str:api_key}
 is_abstract: false

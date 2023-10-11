@@ -81,7 +81,7 @@ from packages.valory.skills.market_creation_manager_abci.models import (
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     DepositDaiPayload,
     RemoveFundingPayload,
-    SyncMarketsPayload,
+    SyncMarketsPayload, PostTxPayload,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectRandomnessPayload,
@@ -100,7 +100,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     SelectKeeperPayload,
     SelectKeeperRound,
     SyncMarketsRound,
-    SynchronizedData,
+    SynchronizedData, PostTransactionRound,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -1386,6 +1386,102 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             yield from self.wait_until_round_end()
 
         self.set_done()
+
+
+class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
+    """A behaviour that is called after a transaction has been settled."""
+
+    matching_round: Type[AbstractRound] = PostTransactionRound
+
+    def async_act(self) -> Generator:
+        """Do the act, supporting asynchronous execution."""
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            sender = self.context.agent_address
+            content = yield from self.get_payload()
+            payload = PostTxPayload(sender=sender, content=content)
+        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+            yield from self.send_a2a_transaction(payload)
+            yield from self.wait_until_round_end()
+        self.set_done()
+
+    def get_payload(self) -> Generator[None, None, str]:
+        """Get the transaction payload"""
+        settled_tx_hash = self.synchronized_data.settled_tx_hash
+        if settled_tx_hash is None:
+            self.context.logger.info("No settled tx hash.")
+            return PostTransactionRound.DONE_PAYLOAD
+
+        data = self.synchronized_data.approved_question_data
+        market_id = data.get("id", None)
+        if market_id is None:
+            self.context.logger.info("No market id.")
+            return PostTransactionRound.DONE_PAYLOAD
+
+        self.context.logger.info(f"Handling settled tx hash {settled_tx_hash}.")
+
+        if self.synchronized_data.tx_sender != PrepareTransactionBehaviour.matching_round.round_id:
+            # we only handle market creation txs atm, any other tx, we don't need to take action
+            return PostTransactionRound.DONE_PAYLOAD
+
+        payload = self._handle_market_creation(market_id, settled_tx_hash)
+        return payload
+
+    def _handle_market_creation(self, market_id: str, tx_hash: str) -> Generator[None, None, str]:
+        """Handle market creation tx settlement."""
+        # get fpmm id from the events
+        fpmm_id = yield from self._get_fpmm_id(tx_hash)
+        if fpmm_id is None:
+            # something went wrong
+            return PostTransactionRound.ERROR_PAYLOAD
+
+        # mark as done on the market approval server
+        err = yield from self._mark_market_as_done(market_id, fpmm_id)
+        if err is not None:
+            # something went wrong
+            return PostTransactionRound.ERROR_PAYLOAD
+
+        return PostTransactionRound.DONE_PAYLOAD
+
+    def _get_fpmm_id(self, tx_hash: str) -> Generator[None, None, Optional[str]]:
+        """Get the fpmm id from the events"""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=self.params.fpmm_deterministic_factory_contract,
+            tx_hash=tx_hash,
+            contract_id=str(FPMMDeterministicFactory.contract_id),
+            contract_callable=get_callable_name(FPMMDeterministicFactory.parse_market_creation_event),
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"{get_callable_name(FPMMDeterministicFactory.parse_market_creation_event)} unsuccessful!: {response}"
+            )
+            return None
+
+        fpmm_id = response.state.body["fixed_product_market_maker"]
+        return fpmm_id
+
+    def _mark_market_as_done(self, id_: str, fpmm_id: str) -> Generator[None, None, Optional[str]]:
+        """Call the market approval server to signal that the provided market is created."""
+        url = f"{self.params.market_approval_server_url}/update_market"
+        headers = {
+            "Authorization": self.params.market_approval_server_api_key,
+            "Content-Type": "application/json",
+        }
+        body = {
+            "id": id_,
+            "fpmm_id": fpmm_id
+        }
+        http_response = yield from self.get_http_response(
+            headers=headers,
+            method="PUT",
+            url=url,
+            content=json.dumps(body).encode("utf-8"),
+        )
+        if http_response.status_code != HTTP_OK:
+            self.context.logger.warning(
+                f"Failed to mark market as done: {http_response.status_code} {http_response.text}"
+            )
+            return http_response.text
 
 
 class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
