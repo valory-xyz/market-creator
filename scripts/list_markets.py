@@ -18,6 +18,8 @@
 #
 # ------------------------------------------------------------------------------
 
+"""Script for listing markets."""
+
 import argparse
 import csv
 from datetime import datetime
@@ -26,14 +28,14 @@ import requests
 
 
 # Function to filter markets based on resolution_time within the specified day
-def filter_markets_by_date(markets, target_date):
-    filtered_markets = []
+def _filter_markets_by_date(markets, date):
+    output = []
     for market_id, market_data in markets.items():
         resolution_time = datetime.utcfromtimestamp(
             market_data.get("resolution_time", 0)
         ).strftime("%Y-%m-%d")
-        if resolution_time == target_date:
-            filtered_markets.append(
+        if resolution_time == date:
+            output.append(
                 [
                     market_id,
                     market_data["language"],
@@ -42,20 +44,19 @@ def filter_markets_by_date(markets, target_date):
                     market_data["topic"],
                 ]
             )
-    return filtered_markets
+    return output
 
 
-# Main function
-def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch and filter market data.")
     parser.add_argument("url", help="Endpoint URL to fetch market data")
     parser.add_argument("date", help="Target date in the format YYYY-MM-DD")
     args = parser.parse_args()
 
     target_date = args.date
-    market_data = requests.get(args.url).json()
-    filtered_markets = filter_markets_by_date(
-        market_data["proposed_markets"], target_date
+    data = requests.get(args.url).json()
+    filtered_markets = _filter_markets_by_date(
+        data["proposed_markets"], target_date
     )
 
     csv_filename = f"output-{target_date}.csv"
@@ -64,7 +65,3 @@ def main():
         csv_writer.writerows(filtered_markets)
 
     print(f"CSV file {csv_filename} generated successfully.")
-
-
-if __name__ == "__main__":
-    main()

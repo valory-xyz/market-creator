@@ -337,7 +337,7 @@ def get_random_approved_market() -> Tuple[Response, int]:
         market = approved_markets[market_id]
         del approved_markets[market_id]
         market["state"] = MarketState.PROCESSED
-        market[f"utc_timestamp_processed"] = int(datetime.utcnow().timestamp())
+        market["utc_timestamp_processed"] = int(datetime.utcnow().timestamp())
         processed_markets[market_id] = market
         save_config()
         return jsonify(market), 200
@@ -381,13 +381,13 @@ def update_market() -> Tuple[Response, int]:
                 jsonify({"info": f"Market ID {market_id} updated successfully."}),
                 200,
             )
-        else:
-            return (
-                jsonify({"error": f"Market ID {market_id} not found in any database."}),
-                404,
-            )
 
-    except Exception as e:
+        return (
+            jsonify({"error": f"Market ID {market_id} not found in any database."}),
+            404,
+        )
+
+    except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
 
 
