@@ -47,6 +47,7 @@ CLI Usage:
 """
 
 
+from datetime import datetime
 import hashlib
 import logging
 import os
@@ -237,17 +238,18 @@ def propose_market() -> Tuple[Response, int]:
 
         market_id = str(market["id"])
 
-        if market_id in proposed_markets:
+        if any(market_id in db for db in [proposed_markets, approved_markets, rejected_markets, processed_markets]):
             return (
                 jsonify(
                     {
-                        "error": f"Market ID {market_id} already exists in proposed_markets."
+                        "error": f"Market ID {market_id} already exists in database. Try using a different ID."
                     }
                 ),
                 400,
             )
 
         market["state"] = MarketState.PROPOSED
+        market["utc_timestamp_proposed"] = int(datetime.utcnow().timestamp())
         proposed_markets[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} added successfully."}), 200
@@ -298,6 +300,7 @@ def move_market() -> Tuple[Response, int]:
         market = move_from[market_id]
         del move_from[market_id]
         market["state"] = new_state
+        market[f"utc_timestamp_{action_msg}"] = int(datetime.utcnow().timestamp())
         move_to[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} {action_msg}."}), 200
@@ -324,6 +327,7 @@ def get_random_approved_market() -> Tuple[Response, int]:
         market = approved_markets[market_id]
         del approved_markets[market_id]
         market["state"] = MarketState.PROCESSED
+        market[f"utc_timestamp_processed"] = int(datetime.utcnow().timestamp())
         processed_markets[market_id] = market
         save_config()
         return jsonify(market), 200
