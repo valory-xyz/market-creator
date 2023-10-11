@@ -373,6 +373,9 @@ def update_market() -> Tuple[Response, int]:
             if market_id in db:
                 found = True
                 existing_market = db[market_id]
+                existing_market["utc_timestamp_updated"] = int(
+                    datetime.utcnow().timestamp()
+                )
                 for key, value in market.items():
                     existing_market[key] = value
 
