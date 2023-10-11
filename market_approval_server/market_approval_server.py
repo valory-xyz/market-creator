@@ -34,6 +34,7 @@ CLI Usage:
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k http://127.0.0.1:5000/propose_market
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/process_market
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -k http://127.0.0.1:5000/get_process_random_approved_market
+        curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k http://127.0.0.1:5000/update_market
 
     - User API
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/approve_market
@@ -52,9 +53,10 @@ import logging
 import os
 import random
 import uuid
+from datetime import datetime
 from enum import Enum
 from logging.handlers import RotatingFileHandler
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from flask import Flask, Response, json, jsonify, render_template, request
 from flask_cors import CORS
@@ -132,8 +134,10 @@ def hash_api_key(m: str) -> str:
     return hashlib.sha256(m.encode(encoding="utf-8")).hexdigest()
 
 
-def check_api_key(api_key: str) -> bool:
+def check_api_key(api_key: Optional[str]) -> bool:
     """Checks the API key."""
+    if api_key is None:
+        return False
     return hash_api_key(api_key) in api_keys
 
 
@@ -237,17 +241,26 @@ def propose_market() -> Tuple[Response, int]:
 
         market_id = str(market["id"])
 
-        if market_id in proposed_markets:
+        if any(
+            market_id in db
+            for db in [
+                proposed_markets,
+                approved_markets,
+                rejected_markets,
+                processed_markets,
+            ]
+        ):
             return (
                 jsonify(
                     {
-                        "error": f"Market ID {market_id} already exists in proposed_markets."
+                        "error": f"Market ID {market_id} already exists in database. Try using a different ID."
                     }
                 ),
                 400,
             )
 
         market["state"] = MarketState.PROPOSED
+        market["utc_timestamp_proposed"] = int(datetime.utcnow().timestamp())
         proposed_markets[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} added successfully."}), 200
@@ -298,6 +311,7 @@ def move_market() -> Tuple[Response, int]:
         market = move_from[market_id]
         del move_from[market_id]
         market["state"] = new_state
+        market[f"utc_timestamp_{action_msg}"] = int(datetime.utcnow().timestamp())
         move_to[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} {action_msg}."}), 200
@@ -324,9 +338,58 @@ def get_random_approved_market() -> Tuple[Response, int]:
         market = approved_markets[market_id]
         del approved_markets[market_id]
         market["state"] = MarketState.PROCESSED
+        market["utc_timestamp_processed"] = int(datetime.utcnow().timestamp())
         processed_markets[market_id] = market
         save_config()
         return jsonify(market), 200
+
+    except Exception as e:  # pylint: disable=broad-except
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/update_market", methods=["PUT"])
+def update_market() -> Tuple[Response, int]:
+    """Updates an existing market in the specified database."""
+    try:
+        api_key = request.headers.get("Authorization")
+        if not check_api_key(api_key):
+            return jsonify({"error": "Unauthorized access. Invalid API key."}), 401
+
+        market = request.get_json()
+        if "id" not in market:
+            return jsonify({"error": "Invalid JSON format. Missing id."}), 400
+
+        market_id = market["id"]
+
+        # Check if the market exists in any of the databases
+        databases = [
+            proposed_markets,
+            approved_markets,
+            rejected_markets,
+            processed_markets,
+        ]
+        found = False
+        for db in databases:
+            if market_id in db:
+                found = True
+                existing_market = db[market_id]
+                existing_market["utc_timestamp_updated"] = int(
+                    datetime.utcnow().timestamp()
+                )
+                for key, value in market.items():
+                    existing_market[key] = value
+
+        if found:
+            save_config()
+            return (
+                jsonify({"info": f"Market ID {market_id} updated successfully."}),
+                200,
+            )
+
+        return (
+            jsonify({"error": f"Market ID {market_id} not found in any database."}),
+            404,
+        )
 
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
