@@ -1413,6 +1413,13 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No settled tx hash.")
             return PostTransactionRound.DONE_PAYLOAD
 
+        is_approved_question_data_set = (
+            self.synchronized_data.is_approved_question_data_set
+        )
+        if not is_approved_question_data_set:
+            self.context.logger.info("No approved question data.")
+            return PostTransactionRound.DONE_PAYLOAD
+
         data = self.synchronized_data.approved_question_data
         market_id = data.get("id", None)
         if market_id is None:
