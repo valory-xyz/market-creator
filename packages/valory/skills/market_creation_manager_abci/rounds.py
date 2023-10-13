@@ -97,6 +97,12 @@ class SynchronizedData(TxSynchronizedData):
         return cast(dict, self.db.get_strict("approved_question_data"))
 
     @property
+    def is_approved_question_data_set(self) -> bool:
+        """Get the is_approved."""
+        approved_question_data = self.db.get("approved_question_data", None)
+        return approved_question_data is not None
+
+    @property
     def all_approved_question_data(self) -> dict:
         """Get the approved_question_data."""
         return cast(dict, self.db.get_strict("all_approved_question_data"))
