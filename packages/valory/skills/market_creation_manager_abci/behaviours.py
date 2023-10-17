@@ -946,16 +946,12 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
 
             if self.params.max_proposed_markets == -1:
                 n_markets_to_propose = len(all_proposed_markets)
-                print("1!!!")
             else:
                 remaining_markets = (
                     self.params.max_proposed_markets
                     - self.synchronized_data.proposed_markets_count
                 )
                 n_markets_to_propose = min(remaining_markets, len(all_proposed_markets))
-                print("2!!!")
-
-            print(f"{n_markets_to_propose}")
 
             for q in all_proposed_markets[:n_markets_to_propose]:
                 yield from self._propose_market(q)

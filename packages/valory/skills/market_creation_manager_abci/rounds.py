@@ -406,7 +406,7 @@ class MarketProposalRound(OnlyKeeperSendsRound):
             cast(MarketProposalPayload, self.keeper_payload).content
         )  # there could be problems loading this from the LLM response
 
-        proposed_markets_count = len(payload_content.get("proposed_markets_count", []))
+        proposed_markets_count = len(payload_content.get("proposed_markets", []))
 
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
