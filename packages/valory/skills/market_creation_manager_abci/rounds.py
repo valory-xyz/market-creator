@@ -65,6 +65,11 @@ class Event(Enum):
     SKIP_MARKET_PROPOSAL = "skip_market_proposal"
 
 
+DEFAULT_PROPOSED_MARKETS_DATA = {
+    'proposed_markets': [],
+    'timestamp': 0
+}
+
 class SynchronizedData(TxSynchronizedData):
     """
     Class to represent the synchronized data.
@@ -90,7 +95,7 @@ class SynchronizedData(TxSynchronizedData):
     @property
     def proposed_markets_data(self) -> dict:
         """Get the proposed_markets_data."""
-        return cast(dict, self.db.get_strict("proposed_markets_data"))
+        return cast(dict, self.db.get("proposed_markets_data", DEFAULT_PROPOSED_MARKETS_DATA))
 
     @property
     def approved_market_data(self) -> dict:
@@ -118,11 +123,6 @@ class SynchronizedData(TxSynchronizedData):
     def market_from_block(self) -> int:
         """Get the market_from_block."""
         return cast(int, self.db.get("market_from_block", 0))
-
-    @property
-    def last_market_proposal_timestamp(self) -> int:
-        """Get the market_from_block."""
-        return cast(int, self.db.get("last_market_proposal_timestamp", 0))
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -564,7 +564,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     event_to_timeout: EventToTimeout = {}
     cross_period_persisted_keys: Set[str] = {
         get_name(SynchronizedData.markets_proposed),
-        get_name(SynchronizedData.last_market_proposal_timestamp),
         get_name(SynchronizedData.proposed_markets_data),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {

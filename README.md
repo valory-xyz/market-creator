@@ -4,7 +4,7 @@ Market Creator (or Market Maker) is an autonomous service that interacts with ne
 
 1. Gather headlines and summaries of recent news through a third-party provider.
 2. Interact with an LLM (using the gathered information in the previous step) to obtain a collection of suitable questions to open prediction markets associated to future events.
-3. Propose the generated markets to a market approval server (a maximum of `NUM_MARKETS` are proposed). Users interact with this server, review and approve/reject the proposed markets.
+3. Propose the generated markets to a market approval server. Users interact with this server, review and approve/reject the proposed markets.
 4. Collect an user-approved market from the server.
 5. Send the necessary transactions to the Gnosis chain to open and fund the market on [Omen](https://aiomen.eth.limo/).
 6. Remove liquidity of markets whose closing date is <= 1 day.
@@ -94,7 +94,7 @@ export ENGINE="gpt-4"
 export MARKET_APPROVAL_SERVER_URL=YOUR_MARKET_APPROVAL_SERVER_URL
 export MARKET_APPROVAL_SERVER_API_KEY=YOUR_MARKET_APPROVAL_SERVER_API_KEY
 
-export NUM_MARKETS=10
+export MIN_MARKET_PROPOSAL_INTERVAL_SECONDS=1800
 export TOPICS='["business","science","technology","politics","arts","weather"]'
 export MARKET_FEE=2
 export INITIAL_FUNDS=1
@@ -119,7 +119,7 @@ These are the descriptions of the variables used by the Market Creator service. 
 - `ENGINE`: [OpenAI](https://openai.com/) engine. Default (and recommended) is `gpt-4`.
 - `MARKET_APPROVAL_SERVER_URL`: Your market approval server URL. It must be publicly accessible. [See below](#launch-the-market-approval-server).
 - `MARKET_APPROVAL_SERVER_API_KEY`: Your market approval server API key. [See below](#launch-the-market-approval-server)
-- `NUM_MARKETS`: Number of markets that the service will propose to the market approval server. Default is 1.
+- `MIN_MARKET_PROPOSAL_INTERVAL_SECONDS`: Number of seconds between market proposals (markets are proposed 5 at a time).
 - `TOPICS`: Topics to create the markets.
 - `MARKET_FEE`: % liquidity provider fees on the market. Default is 2%.
 - `INITIAL_FUNDS`: Initial liquidity funds for the market, in cents. Default is 1 cent (0.01 Eth, xDAI, WxDAI, etc...).

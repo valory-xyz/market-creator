@@ -797,7 +797,23 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            gathered_data = yield from self._gather_data()
+            current_timestamp = self.last_synced_timestamp
+            proposed_markets_data_timestamp = self.synchronized_data.proposed_markets_data["timestamp"]
+
+            self.context.logger.info(
+                f"proposed_markets_data_timestamp={proposed_markets_data_timestamp} current_timestamp={current_timestamp} min_market_proposal_interval_seconds={self.params.min_market_proposal_interval_seconds}"
+            )
+
+            if (
+                current_timestamp - proposed_markets_data_timestamp
+                < self.params.min_market_proposal_interval_seconds
+            ):
+                self.context.logger.info("Timeout to propose new markets not reached.")
+                gathered_data = DataGatheringRound.SKIP_MARKET_PROPOSAL_PAYLOAD
+            else:
+                self.context.logger.info("Timeout to propose new markets reached.")
+                gathered_data = yield from self._gather_data()
+
             payload = DataGatheringPayload(
                 sender=sender,
                 gathered_data=gathered_data,
@@ -923,7 +939,7 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
             sender = self.context.agent_address
             payload_content = {
                 'proposed_markets': all_proposed_markets,
-                'proposed_timestamp':  self.last_synced_timestamp
+                'timestamp':  self.last_synced_timestamp
             }
             payload = MarketProposalPayload(
                 sender=sender,
