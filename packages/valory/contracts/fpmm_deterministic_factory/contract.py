@@ -221,21 +221,14 @@ class FPMMDeterministicFactory(Contract):
         logs = contract.events.FixedProductMarketMakerCreation().process_receipt(
             receipt
         )
-        if len(logs) != 1:
-            _logger.error(
-                f"Expected exactly one FixedProductMarketMakerCreation event in the receipt. "
-                f"Fetched {len(logs)} events."
-            )
-            return dict(data=None)
-
         event = logs[0]
         data = dict(
             tx_hash=tx_hash,
-            block_number=event[0].blockNumber,
-            condition_ids=event[0]["args"]["conditionIds"],
-            collateral_token=event[0]["args"]["collateralToken"],
-            conditional_tokens=event[0]["args"]["conditionalTokens"],
-            fixed_product_market_maker=event[0]["args"]["fixedProductMarketMaker"],
-            fee=event[0]["args"]["fee"],
+            block_number=event.blockNumber,
+            condition_ids=event["args"]["conditionIds"],
+            collateral_token=event["args"]["collateralToken"],
+            conditional_tokens=event["args"]["conditionalTokens"],
+            fixed_product_market_maker=event["args"]["fixedProductMarketMaker"],
+            fee=event["args"]["fee"],
         )
         return dict(data=data)

@@ -1426,13 +1426,17 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No market id.")
             return PostTransactionRound.DONE_PAYLOAD
 
-        self.context.logger.info(f"Handling settled tx hash {settled_tx_hash}.")
+        self.context.logger.info(
+            f"Handling settled tx hash {settled_tx_hash}. "
+            f"For market with id {market_id}. "
+        )
 
-        if (
-            self.synchronized_data.tx_sender
-            != PrepareTransactionBehaviour.matching_round.round_id
-        ):
+        if self.synchronized_data.tx_sender != PrepareTransactionRound.auto_round_id():
             # we only handle market creation txs atm, any other tx, we don't need to take action
+            self.context.logger.info(
+                f"No handling required for tx sender with round id {self.synchronized_data.tx_sender}. "
+                f"Handling only required for {PrepareTransactionRound.auto_round_id()}."
+            )
             return PostTransactionRound.DONE_PAYLOAD
 
         payload = yield from self._handle_market_creation(market_id, settled_tx_hash)
@@ -1447,6 +1451,8 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         if fpmm_id is None:
             # something went wrong
             return PostTransactionRound.ERROR_PAYLOAD
+
+        self.context.logger.info(f"Got fpmm_id {fpmm_id} for market {market_id}")
 
         # mark as done on the market approval server
         err = yield from self._mark_market_as_done(market_id, fpmm_id)
@@ -1473,7 +1479,8 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
 
-        fpmm_id = cast(str, response.state.body["fixed_product_market_maker"])
+        data = cast(Dict[str, Any], response.state.body["data"])
+        fpmm_id = cast(str, data["fixed_product_market_maker"])
         return fpmm_id
 
     def _mark_market_as_done(
@@ -1498,6 +1505,10 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return str(http_response.body)
 
+        body = json.loads(http_response.body.decode())
+        self.context.logger.info(
+            f"Successfully marked market as done, received body {body}"
+        )
         return None
 
 
