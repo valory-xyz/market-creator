@@ -265,7 +265,8 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
-    MAX_MARKETS_REACHED = "MAX_MARKETS_REACHED"
+    MAX_MARKETS_REACHED_PAYLOAD = "MAX_MARKETS_REACHED_PAYLOAD"
+    SKIP_MARKET_PROPOSAL_PAYLOAD = "SKIP_MARKET_PROPOSAL_PAYLOAD"
 
     payload_class = DataGatheringPayload
     synchronized_data_class = SynchronizedData
@@ -291,8 +292,11 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
             if self.most_voted_payload == DataGatheringRound.MAX_RETRIES_PAYLOAD:
                 return self.synchronized_data, Event.MAX_RETRIES_REACHED
 
-            if self.most_voted_payload == DataGatheringRound.MAX_MARKETS_REACHED:
+            if self.most_voted_payload == DataGatheringRound.MAX_MARKETS_REACHED_PAYLOAD:
                 return self.synchronized_data, Event.MAX_MARKETS_REACHED
+
+            if self.most_voted_payload == DataGatheringRound.SKIP_MARKET_PROPOSAL_PAYLOAD:
+                return self.synchronized_data, Event.SKIP_MARKET_PROPOSAL
 
             synchronized_data = self.synchronized_data.update(
                 synchronized_data_class=SynchronizedData,
@@ -505,6 +509,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.DONE: MarketProposalRound,
             Event.MAX_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
+            Event.SKIP_MARKET_PROPOSAL: RetrieveApprovedMarketRound,
             Event.ERROR: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
@@ -562,7 +567,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     event_to_timeout: EventToTimeout = {}
     cross_period_persisted_keys: Set[str] = {
         get_name(SynchronizedData.markets_created),
-        get_name(SynchronizedData.last_start_market_proposal_timestamp),
+        #get_name(SynchronizedData.last_start_market_proposal_timestamp),
         get_name(SynchronizedData.most_voted_keeper_address),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {

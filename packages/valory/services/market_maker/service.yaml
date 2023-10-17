@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeigmkyb6h2dgebfr5sehsueihblxlsaulxfmaqpkzmb7anj7uvzvya
+agent: valory/market_maker:0.1.0:bafybeih6qgddfmkdas5gt66kfjkmldunrhhwjhxzlfcqjnnmig2wzipa7i
 number_of_agents: 1
 deployment:
   agent:
@@ -50,8 +50,7 @@ models:
       market_fee: ${MARKET_FEE:float:2.0}
       initial_funds: ${INITIAL_FUNDS:float:1.0}
       market_timeout: ${MARKET_TIMEOUT:int:1}
-      minimum_market_time: ${MINIMUM_MARKET_TIME:int:7}
-      min_seconds_between_market_proposals: ${MIN_SECONDS_BETWEEN_MARKET_PROPOSALS:int:7200}
+      min_market_proposal_interval_seconds: ${MIN_MARKET_PROPOSAL_INTERVAL_SECONDS:int:7200}
       news_sources: ${NEWS_SOURCES:list:["bbc-news","bbc-sport","abc-news","cnn","google-news","reuters","usa-today","breitbart-news","the-verge","techradar"]}
       event_offset_start_days: ${EVENT_OFFSET_START_DAYS:int:4}
       event_offset_end_days: ${EVENT_OFFSET_END_DAYS:int:7}

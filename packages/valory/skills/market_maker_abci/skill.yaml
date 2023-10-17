@@ -10,7 +10,7 @@ fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeie36nhohbz4t6hngy42nw7coe2hwrprywo4n6xmwqjkfz7ni3n6sq
   behaviours.py: bafybeibzkj5b7zymcz4c2befwyodkyyisvuni742rjtozqxlezktelk6fi
-  composition.py: bafybeiebbtgay46elgqv22mofesklpa4o2ufmrxwtsjbrudlsqns6o5nha
+  composition.py: bafybeibiiw6ctl57bc6isgzvvpp4dbbfhrb4igbnfhlwbogad5cnps7374
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeicvtoez7ahmyl25h66edgjywx5ymxtqnyexzq73ouyu2p6smi3uoa
   handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeih2fyfb6kkf7r45pvdk7pyyebr5xloia4xiqxtb3qsrasnstqmepq
 - valory/registration_abci:0.1.0:bafybeibndt6vxiwc2edgtaxpjbhwto3eyu33ujz3zmvtygvo2qz7xme5li
 - valory/reset_pause_abci:0.1.0:bafybeigeoc363gv3wp2rrmk6p2fdxney33nxd3owtpfugzapgruwe4klyu
-- valory/market_creation_manager_abci:0.1.0:bafybeig4smql6dhgoqm7w4uf7mkprzt6zkunqiw7bn7tr32c4a5utwfsae
+- valory/market_creation_manager_abci:0.1.0:bafybeibkc7swbv463epc6xjhf46vy72fmrrastzurprc3vdagodfqbgdc4
 - valory/termination_abci:0.1.0:bafybeigqpij2sgrpnilqjljfciixop4fldq5qceixc7534q6af4potdmdm
 - valory/transaction_settlement_abci:0.1.0:bafybeia7rzsbea3ch4gcafyp3z6uvqh4npws2xpdwbkkdbrqqpjops7nui
 behaviours:
@@ -115,8 +115,7 @@ models:
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 1
-      minimum_market_time: 7
-      min_seconds_between_market_proposals: 7200
+      min_market_proposal_interval_seconds: 7200
       news_sources:
       - bbc-news
       - bbc-sport

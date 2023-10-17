@@ -98,7 +98,6 @@ export NUM_MARKETS=10
 export TOPICS='["business","science","technology","politics","arts","weather"]'
 export MARKET_FEE=2
 export INITIAL_FUNDS=1
-export MINIMUM_MARKET_TIME=1
 export MARKET_TIMEOUT=1
 export MARKET_IDENTIFICATION_PROMPT=$(sed -e ':a' -e 'N' -e '$!ba' \
   -e 's/"/\\"/g' \
@@ -124,7 +123,6 @@ These are the descriptions of the variables used by the Market Creator service. 
 - `TOPICS`: Topics to create the markets.
 - `MARKET_FEE`: % liquidity provider fees on the market. Default is 2%.
 - `INITIAL_FUNDS`: Initial liquidity funds for the market, in cents. Default is 1 cent (0.01 Eth, xDAI, WxDAI, etc...).
-- `MINIMUM_MARKET_TIME`: Minimum time for which the proposed markets should be active after opening. Default is 7 days.
 - `MARKET_TIMEOUT`: How long people will have to correct incorrect responses after they are posted on [reality.eth](https://realityeth.github.io/). Default is 1 day.
 - `MARKET_IDENTIFICATION_PROMPT`: Prompt to create the market proposals on the market approval server. As defined above, it reads the contents of the file `market_identification_prompt.txt`, which you can modify and experiment with different prompts You must include the placeholders `{event_date}`, `{input_news}` and `{topics}` in the prompt.
 

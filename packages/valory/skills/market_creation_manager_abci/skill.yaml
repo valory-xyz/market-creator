@@ -10,13 +10,13 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeibsf7ky6tfr6dr5xinugokuoobevjdblcometqq2o636lowyqodx4
+  behaviours.py: bafybeieskf6bnfghm3h3k3u3ihol56pxi3vzp6o3bpsaul7hedm7xr7xva
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiay4aepnfdkcsriajxqige65bsszrujin57riubflm7dyw2keapoi
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeidof6xfyfr3mvug6k2jtrs2alrvxudzwfq4iwzaxqwwj6eo2gfaly
-  payloads.py: bafybeidqomnfonezx35ow5lb4umyzuzlc56u4wjpxlvcofgljnpghf5iee
-  rounds.py: bafybeiclqqhiwznqemza5czasbt3273xo75f66qxe42swai3vj5skesava
+  models.py: bafybeigag2xajlkedwdefabjmsis6w2cvcpclapyn7cawrqdcm4nsfjn6e
+  payloads.py: bafybeib57gmbwstx646qxvxxl62n6of4vo2ei2nl32ogo5vhi3ukz6ldqe
+  rounds.py: bafybeihnr35dekhp7u7lnur7wcsgqgx57arrs3q4jnuohuqsx7cty5rkly
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -121,8 +121,7 @@ models:
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 1
-      minimum_market_time: 7
-      min_seconds_between_market_proposals: 7200
+      min_market_proposal_interval_seconds: 7200
       news_sources:
       - bbc-news
       - bbc-sport

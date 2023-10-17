@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeigafjci7m7ezwzasav5xqo7v2mbxxn7qb4y7vnuc2wr2irzvn7wsy
 - valory/abstract_round_abci:0.1.0:bafybeih2fyfb6kkf7r45pvdk7pyyebr5xloia4xiqxtb3qsrasnstqmepq
-- valory/market_maker_abci:0.1.0:bafybeiefr2ptuu5ezls4w5r57so6z7fkdoygmuntrbzslnqubsez5wt5re
+- valory/market_maker_abci:0.1.0:bafybeickmiyfsazvttufl4gmqtojj5glf5fju272xmldmpgdl2ktikzrcy
 - valory/registration_abci:0.1.0:bafybeibndt6vxiwc2edgtaxpjbhwto3eyu33ujz3zmvtygvo2qz7xme5li
-- valory/market_creation_manager_abci:0.1.0:bafybeig4smql6dhgoqm7w4uf7mkprzt6zkunqiw7bn7tr32c4a5utwfsae
+- valory/market_creation_manager_abci:0.1.0:bafybeibkc7swbv463epc6xjhf46vy72fmrrastzurprc3vdagodfqbgdc4
 - valory/reset_pause_abci:0.1.0:bafybeigeoc363gv3wp2rrmk6p2fdxney33nxd3owtpfugzapgruwe4klyu
 - valory/termination_abci:0.1.0:bafybeigqpij2sgrpnilqjljfciixop4fldq5qceixc7534q6af4potdmdm
 - valory/transaction_settlement_abci:0.1.0:bafybeia7rzsbea3ch4gcafyp3z6uvqh4npws2xpdwbkkdbrqqpjops7nui
@@ -155,8 +155,7 @@ models:
       market_fee: ${float:2.0}
       initial_funds: ${float:1.0}
       market_timeout: ${int:1}
-      minimum_market_time: ${int:7}
-      min_seconds_between_market_proposals: ${int:7200}
+      min_market_proposal_interval_seconds: ${int:7200}
       news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","google-news","reuters","usa-today","breitbart-news","the-verge","techradar"]}
       event_offset_start_days: ${int:4}
       event_offset_end_days: ${int:7}

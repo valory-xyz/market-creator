@@ -801,7 +801,6 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
             payload = DataGatheringPayload(
                 sender=sender,
                 gathered_data=gathered_data,
-                last_data_gathering_behaviour_timestamp=self.last_synced_timestamp,
             )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)

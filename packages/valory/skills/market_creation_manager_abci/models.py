@@ -37,11 +37,10 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 DEFAULT_MARKET_FEE = 2.0
 DEFAULT_INITIAL_FUNDS = 1.0
 DEFAULT_MARKET_TIMEOUT = 1  # days
-DEFAULT_MINIMUM_MARKET_TIME = 7  # days
 DEFAULT_MAX_ALLOWED_MARKETS = 1
 DEFAULT_EVENT_OFFSET_START_DAYS = 4
 DEFAULT_EVENT_OFFSET_END_DAYS = 7
-DEFAULT_MIN_SECONDS_BETWEEN_MARKET_PROPOSALS = 7200
+DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS = 7200
 
 
 class SharedState(BaseSharedState):
@@ -110,18 +109,15 @@ class MarketCreationManagerParams(BaseParams):
         )
         self.market_fee = kwargs.get("market_fee", DEFAULT_MARKET_FEE)
         self.market_timeout = kwargs.get("market_timeout", DEFAULT_MARKET_TIMEOUT)
-        self.minimum_market_time = kwargs.get(
-            "minimum_market_time", DEFAULT_MINIMUM_MARKET_TIME
-        )
         self.event_offset_start_days = kwargs.get(
             "event_offset_start_days", DEFAULT_EVENT_OFFSET_START_DAYS
         )
         self.event_offset_end_days = kwargs.get(
             "event_offset_end_days", DEFAULT_EVENT_OFFSET_END_DAYS
         )
-        self.min_seconds_between_market_proposals = kwargs.get(
-            "min_seconds_between_market_proposals",
-            DEFAULT_MIN_SECONDS_BETWEEN_MARKET_PROPOSALS,
+        self.min_market_proposal_interval_seconds = kwargs.get(
+            "min_market_proposal_interval_seconds",
+            DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS,
         )
 
         self.initial_funds = kwargs.get("initial_funds", DEFAULT_INITIAL_FUNDS)
