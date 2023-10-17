@@ -175,7 +175,7 @@ For convenience, we provide a template script [run_service.sh](https://github.co
 
 The market maker agent is configured to work with the Gnosis chain by default, if you want to use the agent with other chains you can figure out what contracts to use from [here](https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md)
 
-You can explore the [`service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml)) file, which contains all the possible configuration variables for the service.
+You can explore the [`service.yaml`](https://github.com/valory-xyz/market-creator/blob/main/packages/valory/services/market_maker/service.yaml) file, which contains all the possible configuration variables for the service.
 
 The Safe of the service holds the collateral token used to provide the initial liquidity to the markets created. By default the service uses `WxDAI` as collateral. This is configured through the environment variable `COLLATERAL_TOKEN_CONTRACT`, which points to the address of the collateral token to be used for market. The default is [WxDAI](https://gnosisscan.io/address/0xe91d153e0b41518a2ce8dd3d7944fa863463a97d).
 
