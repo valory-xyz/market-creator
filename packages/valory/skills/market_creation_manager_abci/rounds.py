@@ -83,24 +83,19 @@ class SynchronizedData(TxSynchronizedData):
         return cast(int, self.db.get("newsapi_api_retries", 0))
 
     @property
-    def markets_created(self) -> int:
-        """Get the amount of API call retries."""
-        return cast(int, self.db.get("markets_created", 0))
+    def markets_proposed(self) -> int:
+        """Get the markets_proposed."""
+        return cast(int, self.db.get("markets_proposed", 0))
 
     @property
-    def proposed_question_data(self) -> dict:
-        """Get the proposed_question_data."""
-        return cast(dict, self.db.get_strict("proposed_question_data"))
+    def proposed_markets_data(self) -> dict:
+        """Get the proposed_markets_data."""
+        return cast(dict, self.db.get_strict("proposed_markets_data"))
 
     @property
-    def approved_question_data(self) -> dict:
-        """Get the approved_question_data."""
-        return cast(dict, self.db.get_strict("approved_question_data"))
-
-    @property
-    def all_approved_question_data(self) -> dict:
-        """Get the approved_question_data."""
-        return cast(dict, self.db.get_strict("all_approved_question_data"))
+    def approved_market_data(self) -> dict:
+        """Get the approved_market_data."""
+        return cast(dict, self.db.get_strict("approved_market_data"))
 
     @property
     def most_voted_tx_hash(self) -> str:
@@ -125,9 +120,9 @@ class SynchronizedData(TxSynchronizedData):
         return cast(int, self.db.get("market_from_block", 0))
 
     @property
-    def last_start_market_proposal_timestamp(self) -> int:
+    def last_market_proposal_timestamp(self) -> int:
         """Get the market_from_block."""
-        return cast(int, self.db.get("last_start_market_proposal_timestamp", 0))
+        return cast(int, self.db.get("last_market_proposal_timestamp", 0))
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -357,20 +352,22 @@ class MarketProposalRound(OnlyKeeperSendsRound):
             return self.synchronized_data, Event.ERROR
 
         # Happy path
-        proposed_question_data = json.loads(
+        payload_content = json.loads(
             cast(MarketProposalPayload, self.keeper_payload).content
         )  # there could be problems loading this from the LLM response
+
+        proposed_markets_count = len(payload_content.get('proposed_markets', []))
 
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
             **{
                 get_name(
-                    SynchronizedData.proposed_question_data
-                ): proposed_question_data,
-                get_name(SynchronizedData.markets_created): cast(
+                    SynchronizedData.proposed_markets_data
+                ): payload_content,
+                get_name(SynchronizedData.markets_proposed): cast(
                     SynchronizedData, self.synchronized_data
-                ).markets_created
-                + 1,
+                ).markets_proposed
+                + proposed_markets_count,
             },
         )
 
@@ -419,16 +416,16 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
                 self.synchronized_data.update(
                     synchronized_data_class=self.synchronized_data_class,
                     **{
-                        get_name(SynchronizedData.markets_created): cast(
+                        get_name(SynchronizedData.markets_proposed): cast(
                             SynchronizedData, self.synchronized_data
-                        ).markets_created,
+                        ).markets_proposed,
                     },
                 ),
                 Event.NO_MARKETS_RETRIEVED,
             )
 
         # Happy path
-        approved_question_data = json.loads(
+        approved_market_data = json.loads(
             cast(MarketProposalPayload, self.keeper_payload).content
         )
 
@@ -436,8 +433,8 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
             synchronized_data_class=SynchronizedData,
             **{
                 get_name(
-                    SynchronizedData.approved_question_data
-                ): approved_question_data,
+                    SynchronizedData.approved_market_data
+                ): approved_market_data,
             },
         )
 
@@ -566,9 +563,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     }
     event_to_timeout: EventToTimeout = {}
     cross_period_persisted_keys: Set[str] = {
-        get_name(SynchronizedData.markets_created),
-        #get_name(SynchronizedData.last_start_market_proposal_timestamp),
-        get_name(SynchronizedData.most_voted_keeper_address),
+        get_name(SynchronizedData.markets_proposed),
+        get_name(SynchronizedData.last_market_proposal_timestamp),
+        get_name(SynchronizedData.proposed_markets_data),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),

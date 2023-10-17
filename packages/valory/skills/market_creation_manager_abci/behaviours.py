@@ -905,26 +905,29 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
                 self.params.event_offset_end_days,
             )
 
-            all_proposed_questions = []
+            all_proposed_markets = []
             for dt in events_datetime:
                 self.context.logger.info(f"Proposing markets for {dt}")
                 data = json.loads(self.synchronized_data.gathered_data)
                 k = min(40, len(data["articles"]))
                 selected_news_articles = random.sample(data["articles"], k)
-                proposed_questions = yield from self._get_llm_response(
+                proposed_markets = yield from self._get_llm_response(
                     dt, selected_news_articles
                 )
 
-                all_proposed_questions.extend(proposed_questions)
-                print(proposed_questions)
+                all_proposed_markets.extend(proposed_markets)
 
-                for q in proposed_questions:
+                for q in proposed_markets:
                     yield from self._propose_market(q)
 
             sender = self.context.agent_address
+            payload_content = {
+                'proposed_markets': all_proposed_markets,
+                'proposed_timestamp':  self.last_synced_timestamp
+            }
             payload = MarketProposalPayload(
                 sender=sender,
-                content=json.dumps(all_proposed_questions, sort_keys=True),
+                content=json.dumps(payload_content, sort_keys=True),
             )
 
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
@@ -1046,10 +1049,10 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         return response
 
     def _propose_market(
-        self, proposed_question_data: Dict[str, str]
+        self, proposed_market_data: Dict[str, str]
     ) -> Generator[None, None, str]:
         """Auxiliary method to propose a market to the endpoint."""
-        self.context.logger.info(f"Proposing market {proposed_question_data}")
+        self.context.logger.info(f"Proposing market {proposed_market_data}")
 
         url = self.params.market_approval_server_url + "/propose_market"
         headers = {
@@ -1061,7 +1064,7 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
             method="POST",
             url=url,
             headers=headers,
-            content=json.dumps(proposed_question_data).encode("utf-8"),
+            content=json.dumps(proposed_market_data).encode("utf-8"),
         )
         if response.status_code != HTTP_OK:
             self.context.logger.error(
