@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the class to connect to a Gnosis FPMMDeterministicFactory contract."""
-
+import logging
 import math
 import random
 from typing import Any
@@ -32,11 +32,17 @@ from web3.types import BlockIdentifier
 
 DEFAULT_MARKET_FEE = 2.0
 
+PUBLIC_ID = PublicId.from_str("valory/fpmm_deterministic_factory:0.1.0")
+
+_logger = logging.getLogger(
+    f"aea.packages.{PUBLIC_ID.author}.contracts.{PUBLIC_ID.name}.contract"
+)
+
 
 class FPMMDeterministicFactory(Contract):
     """The Gnosis FPMMDeterministicFactory contract."""
 
-    contract_id = PublicId.from_str("valory/fpmm_deterministic_factory:0.1.0")
+    contract_id = PUBLIC_ID
 
     @classmethod
     def get_raw_transaction(
@@ -199,3 +205,30 @@ class FPMMDeterministicFactory(Contract):
             for entry in entries
         )
         return dict(data=events)
+
+    @classmethod
+    def parse_market_creation_event(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        tx_hash: str,
+    ) -> JSONLike:
+        """Parse market creation"""
+        contract = cls.get_instance(
+            ledger_api=ledger_api, contract_address=contract_address
+        )
+        receipt = ledger_api.api.eth.get_transaction_receipt(tx_hash)
+        logs = contract.events.FixedProductMarketMakerCreation().process_receipt(
+            receipt
+        )
+        event = logs[0]
+        data = dict(
+            tx_hash=tx_hash,
+            block_number=event.blockNumber,
+            condition_ids=event["args"]["conditionIds"],
+            collateral_token=event["args"]["collateralToken"],
+            conditional_tokens=event["args"]["conditionalTokens"],
+            fixed_product_market_maker=event["args"]["fixedProductMarketMaker"],
+            fee=event["args"]["fee"],
+        )
+        return dict(data=data)

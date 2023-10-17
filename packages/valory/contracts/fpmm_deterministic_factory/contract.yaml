@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
   build/FPMMDeterministicFactory.json: bafybeic3vlqb4m4lk4nps5alt4a6ewvq2dcyotoj6qdvte3pzdcq3g4xdi
-  contract.py: bafybeihopo5lymdm4grb552zrpqt45ldtn3vzevif4jpi5ms72jadh6iqi
+  contract.py: bafybeidzvg2qhdgrgsuqyi56rhu2yvaqljcfylxiomfc7fotalbopoy6xa
 fingerprint_ignore_patterns: []
 class_name: FPMMDeterministicFactory
 contract_interface_paths:

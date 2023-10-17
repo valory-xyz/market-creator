@@ -39,6 +39,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     DataGatheringPayload,
     DepositDaiPayload,
     MarketProposalPayload,
+    PostTxPayload,
     PrepareTransactionPayload,
     RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
@@ -103,6 +104,12 @@ class SynchronizedData(TxSynchronizedData):
         return cast(dict, self.db.get_strict("approved_market_data"))
 
     @property
+    def is_approved_question_data_set(self) -> bool:
+        """Get the is_approved."""
+        approved_question_data = self.db.get("approved_question_data", None)
+        return approved_question_data is not None
+
+    @property
     def most_voted_tx_hash(self) -> str:
         """Get the most_voted_tx_hash."""
         return cast(str, self.db.get_strict("most_voted_tx_hash"))
@@ -124,6 +131,16 @@ class SynchronizedData(TxSynchronizedData):
         """Get the market_from_block."""
         return cast(int, self.db.get("market_from_block", 0))
 
+    @property
+    def settled_tx_hash(self) -> Optional[str]:
+        """Get the settled_tx_hash."""
+        return cast(str, self.db.get("final_tx_hash", None))
+
+    @property
+    def tx_sender(self) -> str:
+        """Get the round that send the transaction through transaction settlement."""
+        return cast(str, self.db.get_strict("tx_sender"))
+
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
     """A round for generating collecting randomness"""
@@ -134,6 +151,31 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     no_majority_event = Event.NO_MAJORITY
     collection_key = get_name(SynchronizedData.participant_to_randomness)
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
+
+
+class PostTransactionRound(CollectSameUntilThresholdRound):
+    """A round to be run after a transaction has been settled."""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    DONE_PAYLOAD = "DONE_PAYLOAD"
+
+    payload_class = PostTxPayload
+    synchronized_data_class = SynchronizedData
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                return self.synchronized_data, Event.ERROR
+
+            # no database update is required
+            return self.synchronized_data, Event.DONE
+
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+        return None
 
 
 class DepositDaiRound(CollectSameUntilThresholdRound):
@@ -160,6 +202,7 @@ class DepositDaiRound(CollectSameUntilThresholdRound):
                     get_name(
                         SynchronizedData.most_voted_tx_hash
                     ): self.most_voted_payload,
+                    get_name(SynchronizedData.tx_sender): self.round_id,
                 },
             )
             return synchronized_data, Event.DONE
@@ -210,6 +253,7 @@ class RemoveFundingRound(CollectSameUntilThresholdRound):
                         SynchronizedData.markets_to_remove_liquidity
                     ): markets_to_remove_liquidity,
                     get_name(SynchronizedData.most_voted_tx_hash): tx_data,
+                    get_name(SynchronizedData.tx_sender): self.round_id,
                 },
             )
             return synchronized_data, Event.DONE
@@ -462,7 +506,8 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
                     **{
                         get_name(
                             SynchronizedData.most_voted_tx_hash
-                        ): self.most_voted_payload
+                        ): self.most_voted_payload,
+                        get_name(SynchronizedData.tx_sender): self.round_id,
                     },
                 ),
                 Event.DONE,
@@ -490,8 +535,13 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
 
     initial_round_cls: AppState = CollectRandomnessRound
-    initial_states: Set[AppState] = {CollectRandomnessRound}
+    initial_states: Set[AppState] = {CollectRandomnessRound, PostTransactionRound}
     transition_function: AbciAppTransitionFunction = {
+        PostTransactionRound: {
+            Event.DONE: CollectRandomnessRound,
+            Event.ERROR: PostTransactionRound,
+            Event.NO_MAJORITY: PostTransactionRound,
+        },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
@@ -568,6 +618,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),
+        PostTransactionRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
         FinishedWithDepositDaiRound: {

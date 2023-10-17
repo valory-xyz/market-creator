@@ -1,7 +1,7 @@
 {
     "dev": {
         "contract/valory/conditional_tokens/0.1.0": "bafybeibvmzokt7njh7xjwm3s6l2keumjx6z2ni7tosrw5fk2lpumvw444q",
-        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeibk2v5op7xkd7htivvbbonoicrqrdgo2iylu6jlbcn6xx22anzlzq",
+        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeiebgqrrcisvmylliqpjl3baeg7napgrmfmlywedhk5akxbuzkiisi",
         "contract/valory/realtio/0.1.0": "bafybeifxmrmv3zjrqrrr7yuzud2luka7e5muopwxeef5of7iahjpaziwsi",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeicwonelre4dqqoikhyo4qn5cjve7evc6f2bjdkodlfyqifkw6jtva",
         "skill/valory/market_maker_abci/0.1.0": "bafybeicbbnkddz72s6ehux5l4sl3lugjozeq2lmqriadx6wd7crpem2ade",
