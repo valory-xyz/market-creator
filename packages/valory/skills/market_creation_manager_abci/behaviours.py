@@ -800,14 +800,23 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             current_timestamp = self.last_synced_timestamp
-            proposed_markets_data_timestamp = self.synchronized_data.proposed_markets_data["timestamp"]
+            last_proposed_markets_timestamp = (
+                self.synchronized_data.proposed_markets_data["timestamp"]
+            )
+            proposed_markets_count = self.synchronized_data.proposed_markets_count
 
             self.context.logger.info(
-                f"proposed_markets_data_timestamp={proposed_markets_data_timestamp} current_timestamp={current_timestamp} min_market_proposal_interval_seconds={self.params.min_market_proposal_interval_seconds}"
+                f"proposed_markets_count={proposed_markets_count} max_proposed_markets={self.params.max_proposed_markets} proposed_markets_data_timestamp={last_proposed_markets_timestamp} current_timestamp={current_timestamp} min_market_proposal_interval_seconds={self.params.min_market_proposal_interval_seconds}"
             )
 
             if (
-                current_timestamp - proposed_markets_data_timestamp
+                self.params.max_proposed_markets >= 0
+                and proposed_markets_count >= self.params.max_proposed_markets
+            ):
+                self.context.logger.info("Max markets proposed reached.")
+                gathered_data = DataGatheringRound.MAX_PROPOSED_MARKETS_REACHED_PAYLOAD
+            elif (
+                current_timestamp - last_proposed_markets_timestamp
                 < self.params.min_market_proposal_interval_seconds
             ):
                 self.context.logger.info("Timeout to propose new markets not reached.")
@@ -935,13 +944,26 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
 
                 all_proposed_markets.extend(proposed_markets)
 
-                for q in proposed_markets:
-                    yield from self._propose_market(q)
+            if self.params.max_proposed_markets == -1:
+                n_markets_to_propose = len(all_proposed_markets)
+                print("1!!!")
+            else:
+                remaining_markets = (
+                    self.params.max_proposed_markets
+                    - self.synchronized_data.proposed_markets_count
+                )
+                n_markets_to_propose = min(remaining_markets, len(all_proposed_markets))
+                print("2!!!")
+
+            print(f"{n_markets_to_propose}")
+
+            for q in all_proposed_markets[:n_markets_to_propose]:
+                yield from self._propose_market(q)
 
             sender = self.context.agent_address
             payload_content = {
-                'proposed_markets': all_proposed_markets,
-                'timestamp':  self.last_synced_timestamp
+                "proposed_markets": all_proposed_markets,
+                "timestamp": self.last_synced_timestamp,
             }
             payload = MarketProposalPayload(
                 sender=sender,
@@ -1336,7 +1358,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            data = self.synchronized_data.approved_question_data
+            data = self.synchronized_data.approved_market_data
             question_data = {
                 "question": data["question"],
                 "answers": data["answers"],
@@ -1447,7 +1469,7 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No approved question data.")
             return PostTransactionRound.DONE_PAYLOAD
 
-        data = self.synchronized_data.approved_question_data
+        data = self.synchronized_data.approved_market_data
         market_id = data.get("id", None)
         if market_id is None:
             self.context.logger.info("No market id.")

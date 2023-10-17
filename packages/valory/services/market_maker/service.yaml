@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeifmrnzonigf76n5z4rhf2uuuuse6zd7yhybvhrvlbxinyoctzgcvq
+agent: valory/market_maker:0.1.0:bafybeiet2445p2uhg4m55juktx5y3xdblnbe5u2rpd4pyal7ro3gawkngi
 number_of_agents: 1
 deployment:
   agent:
@@ -41,7 +41,7 @@ models:
         outcome of the market to be verified.\n - topic; One word description of the
         topic of the news and it should be one of; {topics}.\n* Output only the JSON
         object. Do not include any other contents in your response.}
-      num_markets: ${NUM_MARKETS:int:1}
+      max_proposed_markets: ${MAX_PROPOSED_MARKETS:int:-1}
       market_approval_server_url: ${MARKET_APPROVAL_SERVER_URL:str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/top-headlines}

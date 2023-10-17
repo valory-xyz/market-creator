@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeih2fyfb6kkf7r45pvdk7pyyebr5xloia4xiqxtb3qsrasnstqmepq
 - valory/registration_abci:0.1.0:bafybeibndt6vxiwc2edgtaxpjbhwto3eyu33ujz3zmvtygvo2qz7xme5li
 - valory/reset_pause_abci:0.1.0:bafybeigeoc363gv3wp2rrmk6p2fdxney33nxd3owtpfugzapgruwe4klyu
-- valory/market_creation_manager_abci:0.1.0:bafybeidtc3qhrsic5y2jrii2n3lxuff5vw5vzbm2zujwhljybo5dgfyqmm
+- valory/market_creation_manager_abci:0.1.0:bafybeibkdmquyojahywl74kgzkawl75mchc3gs4v2vq7joehdasu7sm3k4
 - valory/termination_abci:0.1.0:bafybeigqpij2sgrpnilqjljfciixop4fldq5qceixc7534q6af4potdmdm
 - valory/transaction_settlement_abci:0.1.0:bafybeia7rzsbea3ch4gcafyp3z6uvqh4npws2xpdwbkkdbrqqpjops7nui
 behaviours:
@@ -82,7 +82,7 @@ models:
   params:
     args:
       market_identification_prompt: market_identification_prompt
-      num_markets: 1
+      max_proposed_markets: -1
       market_approval_server_url: http://127.0.0.1:5000
       market_approval_server_api_key: api_key
       newsapi_endpoint: https://newsapi.org/v2/top-headlines

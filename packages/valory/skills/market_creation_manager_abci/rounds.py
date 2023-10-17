@@ -60,16 +60,14 @@ class Event(Enum):
     ROUND_TIMEOUT = "round_timeout"
     ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
-    MAX_MARKETS_REACHED = "max_markets_reached"
+    MAX_PROPOSED_MARKETS_REACHED = "max_markets_reached"
     MAX_RETRIES_REACHED = "max_retries_reached"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
     SKIP_MARKET_PROPOSAL = "skip_market_proposal"
 
 
-DEFAULT_PROPOSED_MARKETS_DATA = {
-    'proposed_markets': [],
-    'timestamp': 0
-}
+DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
+
 
 class SynchronizedData(TxSynchronizedData):
     """
@@ -89,14 +87,16 @@ class SynchronizedData(TxSynchronizedData):
         return cast(int, self.db.get("newsapi_api_retries", 0))
 
     @property
-    def markets_proposed(self) -> int:
-        """Get the markets_proposed."""
-        return cast(int, self.db.get("markets_proposed", 0))
+    def proposed_markets_count(self) -> int:
+        """Get the proposed_markets_count."""
+        return cast(int, self.db.get("proposed_markets_count", 0))
 
     @property
     def proposed_markets_data(self) -> dict:
         """Get the proposed_markets_data."""
-        return cast(dict, self.db.get("proposed_markets_data", DEFAULT_PROPOSED_MARKETS_DATA))
+        return cast(
+            dict, self.db.get("proposed_markets_data", DEFAULT_PROPOSED_MARKETS_DATA)
+        )
 
     @property
     def approved_market_data(self) -> dict:
@@ -304,7 +304,7 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
-    MAX_MARKETS_REACHED_PAYLOAD = "MAX_MARKETS_REACHED_PAYLOAD"
+    MAX_PROPOSED_MARKETS_REACHED_PAYLOAD = "MAX_PROPOSED_MARKETS_REACHED_PAYLOAD"
     SKIP_MARKET_PROPOSAL_PAYLOAD = "SKIP_MARKET_PROPOSAL_PAYLOAD"
 
     payload_class = DataGatheringPayload
@@ -331,10 +331,16 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
             if self.most_voted_payload == DataGatheringRound.MAX_RETRIES_PAYLOAD:
                 return self.synchronized_data, Event.MAX_RETRIES_REACHED
 
-            if self.most_voted_payload == DataGatheringRound.MAX_MARKETS_REACHED_PAYLOAD:
-                return self.synchronized_data, Event.MAX_MARKETS_REACHED
+            if (
+                self.most_voted_payload
+                == DataGatheringRound.MAX_PROPOSED_MARKETS_REACHED_PAYLOAD
+            ):
+                return self.synchronized_data, Event.MAX_PROPOSED_MARKETS_REACHED
 
-            if self.most_voted_payload == DataGatheringRound.SKIP_MARKET_PROPOSAL_PAYLOAD:
+            if (
+                self.most_voted_payload
+                == DataGatheringRound.SKIP_MARKET_PROPOSAL_PAYLOAD
+            ):
                 return self.synchronized_data, Event.SKIP_MARKET_PROPOSAL
 
             synchronized_data = self.synchronized_data.update(
@@ -400,17 +406,15 @@ class MarketProposalRound(OnlyKeeperSendsRound):
             cast(MarketProposalPayload, self.keeper_payload).content
         )  # there could be problems loading this from the LLM response
 
-        proposed_markets_count = len(payload_content.get('proposed_markets', []))
+        proposed_markets_count = len(payload_content.get("proposed_markets_count", []))
 
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
             **{
-                get_name(
-                    SynchronizedData.proposed_markets_data
-                ): payload_content,
-                get_name(SynchronizedData.markets_proposed): cast(
+                get_name(SynchronizedData.proposed_markets_data): payload_content,
+                get_name(SynchronizedData.proposed_markets_count): cast(
                     SynchronizedData, self.synchronized_data
-                ).markets_proposed
+                ).proposed_markets_count
                 + proposed_markets_count,
             },
         )
@@ -460,9 +464,9 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
                 self.synchronized_data.update(
                     synchronized_data_class=self.synchronized_data_class,
                     **{
-                        get_name(SynchronizedData.markets_proposed): cast(
+                        get_name(SynchronizedData.proposed_markets_count): cast(
                             SynchronizedData, self.synchronized_data
-                        ).markets_proposed,
+                        ).proposed_markets_count,
                     },
                 ),
                 Event.NO_MARKETS_RETRIEVED,
@@ -476,9 +480,7 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
             **{
-                get_name(
-                    SynchronizedData.approved_market_data
-                ): approved_market_data,
+                get_name(SynchronizedData.approved_market_data): approved_market_data,
             },
         )
 
@@ -554,7 +556,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         DataGatheringRound: {
             Event.DONE: MarketProposalRound,
-            Event.MAX_MARKETS_REACHED: RetrieveApprovedMarketRound,
+            Event.MAX_PROPOSED_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
             Event.SKIP_MARKET_PROPOSAL: RetrieveApprovedMarketRound,
             Event.ERROR: CollectRandomnessRound,
@@ -613,7 +615,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     }
     event_to_timeout: EventToTimeout = {}
     cross_period_persisted_keys: Set[str] = {
-        get_name(SynchronizedData.markets_proposed),
+        get_name(SynchronizedData.proposed_markets_count),
         get_name(SynchronizedData.proposed_markets_data),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {

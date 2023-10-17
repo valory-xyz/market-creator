@@ -37,7 +37,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 DEFAULT_MARKET_FEE = 2.0
 DEFAULT_INITIAL_FUNDS = 1.0
 DEFAULT_MARKET_TIMEOUT = 1  # days
-DEFAULT_MAX_ALLOWED_MARKETS = 1
+DEFAULT_MAX_PROPOSED_MARKETS = -1
 DEFAULT_EVENT_OFFSET_START_DAYS = 4
 DEFAULT_EVENT_OFFSET_END_DAYS = 7
 DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS = 7200
@@ -76,7 +76,9 @@ class MarketCreationManagerParams(BaseParams):
         self.news_sources = self._ensure(
             key="news_sources", kwargs=kwargs, type_=List[str]
         )
-        self.num_markets = kwargs.get("num_markets", DEFAULT_MAX_ALLOWED_MARKETS)
+        self.max_proposed_markets = kwargs.get(
+            "max_proposed_markets", DEFAULT_MAX_PROPOSED_MARKETS
+        )
         self.realitio_contract = self._ensure(
             key="realitio_contract",
             kwargs=kwargs,
