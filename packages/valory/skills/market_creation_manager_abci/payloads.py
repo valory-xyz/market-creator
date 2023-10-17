@@ -25,13 +25,6 @@ from packages.valory.skills.abstract_round_abci.base import BaseTxPayload
 
 
 @dataclass(frozen=True)
-class StartMarketProposalPayload(BaseTxPayload):
-    """Represent a transaction payload for the CollectRandomnessRound."""
-
-    last_start_market_proposal_timestamp: int
-
-
-@dataclass(frozen=True)
 class CollectRandomnessPayload(BaseTxPayload):
     """Represent a transaction payload for the CollectRandomnessRound."""
 
@@ -44,7 +37,6 @@ class DataGatheringPayload(BaseTxPayload):
     """Represent a transaction payload for the DataGatheringRound."""
 
     gathered_data: str
-    last_data_gathering_behaviour_timestamp: int
 
 
 @dataclass(frozen=True)
