@@ -37,8 +37,11 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 DEFAULT_MARKET_FEE = 2.0
 DEFAULT_INITIAL_FUNDS = 1.0
 DEFAULT_MARKET_TIMEOUT = 1  # days
-DEFAULT_MINIMUM_MARKET_TIME = 7  # days
-DEFAULT_MAX_ALLOWED_MARKETS = 1
+DEFAULT_MAX_PROPOSED_MARKETS = -1
+DEFAULT_EVENT_OFFSET_START_DAYS = 4
+DEFAULT_EVENT_OFFSET_END_DAYS = 7
+DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS = 7200
+DEFAULT_MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY = 45
 
 
 class SharedState(BaseSharedState):
@@ -71,7 +74,12 @@ class MarketCreationManagerParams(BaseParams):
             key="market_identification_prompt", kwargs=kwargs, type_=str
         )
         self.topics = self._ensure(key="topics", kwargs=kwargs, type_=List[str])
-        self.num_markets = kwargs.get("num_markets", DEFAULT_MAX_ALLOWED_MARKETS)
+        self.news_sources = self._ensure(
+            key="news_sources", kwargs=kwargs, type_=List[str]
+        )
+        self.max_proposed_markets = kwargs.get(
+            "max_proposed_markets", DEFAULT_MAX_PROPOSED_MARKETS
+        )
         self.realitio_contract = self._ensure(
             key="realitio_contract",
             kwargs=kwargs,
@@ -104,9 +112,21 @@ class MarketCreationManagerParams(BaseParams):
         )
         self.market_fee = kwargs.get("market_fee", DEFAULT_MARKET_FEE)
         self.market_timeout = kwargs.get("market_timeout", DEFAULT_MARKET_TIMEOUT)
-        self.minimum_market_time = kwargs.get(
-            "minimum_market_time", DEFAULT_MINIMUM_MARKET_TIME
+        self.event_offset_start_days = kwargs.get(
+            "event_offset_start_days", DEFAULT_EVENT_OFFSET_START_DAYS
         )
+        self.event_offset_end_days = kwargs.get(
+            "event_offset_end_days", DEFAULT_EVENT_OFFSET_END_DAYS
+        )
+        self.min_market_proposal_interval_seconds = kwargs.get(
+            "min_market_proposal_interval_seconds",
+            DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS,
+        )
+        self.market_proposal_round_timeout_seconds_per_day = kwargs.get(
+            "market_proposal_round_timeout_seconds_per_day",
+            DEFAULT_MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY,
+        )
+
         self.initial_funds = kwargs.get("initial_funds", DEFAULT_INITIAL_FUNDS)
         super().__init__(*args, **kwargs)
 

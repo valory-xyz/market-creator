@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeihpfyl3niob73c5kr4ruvenfdlxkmbcspe4ajanpxmhvnnovgfl6y
+agent: valory/market_maker:0.1.0:bafybeihospe3ntk2jdubsijc3cypfn6pban63hdl7lvklivokz6uxgmioq
 number_of_agents: 1
 deployment:
   agent:
@@ -41,16 +41,20 @@ models:
         outcome of the market to be verified.\n - topic; One word description of the
         topic of the news and it should be one of; {topics}.\n* Output only the JSON
         object. Do not include any other contents in your response.}
-      num_markets: ${NUM_MARKETS:int:1}
+      max_proposed_markets: ${MAX_PROPOSED_MARKETS:int:-1}
       market_approval_server_url: ${MARKET_APPROVAL_SERVER_URL:str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
-      newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/everything}
+      newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/top-headlines}
       newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
-      topics: ${TOPICS:list:["business","cryptocurrency","politics","science","technology"]}
+      topics: ${TOPICS:list:["business","cryptocurrency","politics","science","technology","trending","fashion","social","health","sustainability","internet","travel","food","pets","animals","curiosities","music","economy","arts","entertainment","weather","sports","finance","international"]}
       market_fee: ${MARKET_FEE:float:2.0}
       initial_funds: ${INITIAL_FUNDS:float:1.0}
       market_timeout: ${MARKET_TIMEOUT:int:1}
-      minimum_market_time: ${MINIMUM_MARKET_TIME:int:7}
+      min_market_proposal_interval_seconds: ${MIN_MARKET_PROPOSAL_INTERVAL_SECONDS:int:7200}
+      news_sources: ${NEWS_SOURCES:list:["bbc-news","bbc-sport","abc-news","cnn","google-news","reuters","usa-today","breitbart-news","the-verge","techradar"]}
+      event_offset_start_days: ${EVENT_OFFSET_START_DAYS:int:4}
+      event_offset_end_days: ${EVENT_OFFSET_END_DAYS:int:7}
+      market_proposal_round_timeout_seconds_per_day: ${MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY:int:45}
       realitio_contract: ${REALITIO_CONTRACT:str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
       realitio_oracle_proxy_contract: ${REALITIO_ORACLE_PROXY_CONTRACT:str:0xab16d643ba051c11962da645f74632d3130c81e2}
       conditional_tokens_contract: ${CONDITIONAL_TOKENS_CONTRACT:str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
@@ -97,7 +101,7 @@ public_id: valory/openai:0.1.0
 type: connection
 config:
   engine: ${ENGINE:str:gpt-4}
-  max_tokens: ${MAX_TOKENS:int:500}
+  max_tokens: ${MAX_TOKENS:int:700}
   openai_api_key: ${OPENAI_API_KEY:str:null}
   temperature: ${TEMPERATURE:float:0.7}
 ---

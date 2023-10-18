@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeigafjci7m7ezwzasav5xqo7v2mbxxn7qb4y7vnuc2wr2irzvn7wsy
 - valory/abstract_round_abci:0.1.0:bafybeih2fyfb6kkf7r45pvdk7pyyebr5xloia4xiqxtb3qsrasnstqmepq
-- valory/market_maker_abci:0.1.0:bafybeibtsghf6ffuuq5owxytgfgkmoto44y73dx4wlevzeag5go3s4ecqy
+- valory/market_maker_abci:0.1.0:bafybeia5o3xvssnecurtlwm62qqwd3lcev2eqhoicbudke7uoq3a66lzjq
 - valory/registration_abci:0.1.0:bafybeibndt6vxiwc2edgtaxpjbhwto3eyu33ujz3zmvtygvo2qz7xme5li
-- valory/market_creation_manager_abci:0.1.0:bafybeigphkszvqba76rwk7f6mgqudrhxvdzgpxrfogghtg5k2gucjwmli4
+- valory/market_creation_manager_abci:0.1.0:bafybeiborlyrptdlpnq2fzxh66evm2mw7ddcst45qlrab7jnex5x4xb7i4
 - valory/reset_pause_abci:0.1.0:bafybeigeoc363gv3wp2rrmk6p2fdxney33nxd3owtpfugzapgruwe4klyu
 - valory/termination_abci:0.1.0:bafybeigqpij2sgrpnilqjljfciixop4fldq5qceixc7534q6af4potdmdm
 - valory/transaction_settlement_abci:0.1.0:bafybeia7rzsbea3ch4gcafyp3z6uvqh4npws2xpdwbkkdbrqqpjops7nui
@@ -100,7 +100,7 @@ public_id: valory/openai:0.1.0
 type: connection
 config:
   engine: ${str:gpt-4}
-  max_tokens: ${int:500}
+  max_tokens: ${int:700}
   openai_api_key: ${str:null}
   temperature: ${float:0.7}
 ---
@@ -146,16 +146,20 @@ models:
         outcome of the market to be verified.\n - topic; One word description of the
         topic of the news and it should be one of; {topics}.\n* Output only the JSON
         object. Do not include any other contents in your response.}
-      num_markets: ${int:1}
+      max_proposed_markets: ${int:-1}
       market_approval_server_url: ${str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${str:api_key}
-      newsapi_endpoint: ${str:https://newsapi.org/v2/everything}
+      newsapi_endpoint: ${str:https://newsapi.org/v2/top-headlines}
       newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
-      topics: ${list:["business","cryptocurrency","politics","science","technology"]}
+      topics: ${list:["business","cryptocurrency","politics","science","technology","trending","fashion","social","health","sustainability","internet","travel","food","pets","animals","curiosities","music","economy","arts","entertainment","weather","sports","finance","international"]}
       market_fee: ${float:2.0}
       initial_funds: ${float:1.0}
       market_timeout: ${int:1}
-      minimum_market_time: ${int:7}
+      min_market_proposal_interval_seconds: ${int:7200}
+      news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","google-news","reuters","usa-today","breitbart-news","the-verge","techradar"]}
+      event_offset_start_days: ${int:4}
+      event_offset_end_days: ${int:7}
+      market_proposal_round_timeout_seconds_per_day: ${int:45}
       realitio_contract: ${str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
       realitio_oracle_proxy_contract: ${str:0xab16d643ba051c11962da645f74632d3130c81e2}
       conditional_tokens_contract: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}

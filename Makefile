@@ -75,7 +75,7 @@ generators:
 .PHONY: common-checks-1
 common-checks-1:
 	tomte check-copyright --author author_name
-	tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git --url-skips https://newsapi.org/v2/everything --url-skips http://host.docker.internal:8545
+	tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git --url-skips https://newsapi.org/v2/everything --url-skips https://newsapi.org/v2/top-headlines --url-skips http://host.docker.internal:8545
 	tox -p -e check-hash -e check-packages -e check-doc-hashes
 
 v := $(shell pip -V | grep virtualenvs)
