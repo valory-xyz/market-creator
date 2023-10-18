@@ -100,15 +100,20 @@ class SynchronizedData(TxSynchronizedData):
         )
 
     @property
-    def approved_market_data(self) -> dict:
-        """Get the approved_market_data."""
-        return cast(dict, self.db.get_strict("approved_market_data"))
+    def approved_question_data(self) -> dict:
+        """Get the approved_question_data."""
+        return cast(dict, self.db.get_strict("approved_question_data"))
 
     @property
     def is_approved_question_data_set(self) -> bool:
         """Get the is_approved."""
         approved_question_data = self.db.get("approved_question_data", None)
         return approved_question_data is not None
+
+    @property
+    def all_approved_question_data(self) -> dict:
+        """Get the approved_question_data."""
+        return cast(dict, self.db.get_strict("all_approved_question_data"))
 
     @property
     def most_voted_tx_hash(self) -> str:
@@ -403,7 +408,7 @@ class MarketProposalRound(OnlyKeeperSendsRound):
             return self.synchronized_data, Event.ERROR
 
         # Happy path
-        payload_content = json.loads(
+        proposed_markets_data = json.loads(
             cast(MarketProposalPayload, self.keeper_payload).content
         )  # there could be problems loading this from the LLM response
 
@@ -412,7 +417,7 @@ class MarketProposalRound(OnlyKeeperSendsRound):
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
             **{
-                get_name(SynchronizedData.proposed_markets_data): payload_content,
+                get_name(SynchronizedData.proposed_markets_data): proposed_markets_data,
                 get_name(SynchronizedData.proposed_markets_count): cast(
                     SynchronizedData, self.synchronized_data
                 ).proposed_markets_count
@@ -474,14 +479,16 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
             )
 
         # Happy path
-        approved_market_data = json.loads(
+        approved_question_data = json.loads(
             cast(MarketProposalPayload, self.keeper_payload).content
         )
 
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
             **{
-                get_name(SynchronizedData.approved_market_data): approved_market_data,
+                get_name(
+                    SynchronizedData.approved_question_data
+                ): approved_question_data,
             },
         )
 

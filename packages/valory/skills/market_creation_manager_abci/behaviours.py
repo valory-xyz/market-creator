@@ -1354,7 +1354,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            data = self.synchronized_data.approved_market_data
+            data = self.synchronized_data.approved_question_data
             question_data = {
                 "question": data["question"],
                 "answers": data["answers"],
@@ -1465,7 +1465,7 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No approved question data.")
             return PostTransactionRound.DONE_PAYLOAD
 
-        data = self.synchronized_data.approved_market_data
+        data = self.synchronized_data.approved_question_data
         market_id = data.get("id", None)
         if market_id is None:
             self.context.logger.info("No market id.")
