@@ -14,9 +14,9 @@ fingerprint:
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiay4aepnfdkcsriajxqige65bsszrujin57riubflm7dyw2keapoi
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeia7uwa4yyhefgxplbiagracryyml5muyvcheyi256noa7tee3n6zi
+  models.py: bafybeib6hmr37xquamjlgbrsokjoxhmb7udtwfnswgglfaxcwl5bfqw7ra
   payloads.py: bafybeigq26azirudcy5zpkr7zk4enfuj5q45ej6nklcc7s3ewtavixwlge
-  rounds.py: bafybeifgtdnewgjow4bymcunvf4hl5jl5kspodat6skow6q44ng34rzedi
+  rounds.py: bafybeicfygqoa2ox2bcz5qh3yzpqjzln2jnpwhir7s6ueka3betqkh2re4
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -135,6 +135,7 @@ models:
       - techradar
       event_offset_start_days: 4
       event_offset_end_days: 7
+      market_proposal_round_timeout_seconds_per_day: 45
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'

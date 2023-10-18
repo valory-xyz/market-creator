@@ -41,6 +41,7 @@ DEFAULT_MAX_PROPOSED_MARKETS = -1
 DEFAULT_EVENT_OFFSET_START_DAYS = 4
 DEFAULT_EVENT_OFFSET_END_DAYS = 7
 DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS = 7200
+DEFAULT_MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY = 45
 
 
 class SharedState(BaseSharedState):
@@ -120,6 +121,10 @@ class MarketCreationManagerParams(BaseParams):
         self.min_market_proposal_interval_seconds = kwargs.get(
             "min_market_proposal_interval_seconds",
             DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS,
+        )
+        self.market_proposal_round_timeout_seconds_per_day = kwargs.get(
+            "market_proposal_round_timeout_seconds_per_day",
+            DEFAULT_MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY,
         )
 
         self.initial_funds = kwargs.get("initial_funds", DEFAULT_INITIAL_FUNDS)

@@ -67,6 +67,25 @@ class SharedState(BaseSharedState):
         MarketCreatorAbciApp.event_to_timeout[
             TSEvent.ROUND_TIMEOUT
         ] = self.context.params.round_timeout_seconds
+
+        # The MARKET_PROPOSAL_ROUND_TIMEOUT must be computed based on the "market_proposal_round_timeout_seconds_per_day" parameter.
+        # This parameter represents the maximum timeout it takes to execute the LLM query + proposing the received questions to the
+        # market proposal server for a single day. It should be typically set about 30-45 seconds.
+        MarketCreatorAbciApp.event_to_timeout[
+            MarketCreationManagerEvent.MARKET_PROPOSAL_ROUND_TIMEOUT
+        ] = (
+            max(
+                self.context.params.round_timeout_seconds,
+                self.context.params.market_proposal_round_timeout_seconds_per_day
+                * (
+                    self.context.params.event_offset_end_days
+                    - self.context.params.event_offset_start_days
+                    + 1
+                ),
+            )
+            + MARGIN
+        )
+
         MarketCreatorAbciApp.event_to_timeout[
             ResetPauseEvent.ROUND_TIMEOUT
         ] = self.context.params.round_timeout_seconds

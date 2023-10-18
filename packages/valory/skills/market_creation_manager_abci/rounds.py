@@ -58,6 +58,7 @@ class Event(Enum):
     DONE = "done"
     NO_TX = "no_tx"
     ROUND_TIMEOUT = "round_timeout"
+    MARKET_PROPOSAL_ROUND_TIMEOUT = "market_proposal_round_timeout"
     ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
     MAX_PROPOSED_MARKETS_REACHED = "max_markets_reached"
@@ -565,10 +566,10 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         MarketProposalRound: {
             Event.DONE: RetrieveApprovedMarketRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
-            Event.DID_NOT_SEND: CollectRandomnessRound,
-            Event.ERROR: CollectRandomnessRound,
+            Event.NO_MAJORITY: RetrieveApprovedMarketRound,
+            Event.MARKET_PROPOSAL_ROUND_TIMEOUT: RetrieveApprovedMarketRound,
+            Event.DID_NOT_SEND: RetrieveApprovedMarketRound,
+            Event.ERROR: RetrieveApprovedMarketRound,
         },
         RetrieveApprovedMarketRound: {
             Event.DONE: PrepareTransactionRound,
@@ -613,7 +614,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithDepositDaiRound,
         FinishedWithoutTxRound,
     }
-    event_to_timeout: EventToTimeout = {}
+    event_to_timeout: EventToTimeout = {
+        # MARKET_PROPOSAL_ROUND_TIMEOUT must be computed on the chained app.
+    }
     cross_period_persisted_keys: Set[str] = {
         get_name(SynchronizedData.proposed_markets_count),
         get_name(SynchronizedData.proposed_markets_data),

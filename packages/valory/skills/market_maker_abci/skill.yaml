@@ -14,7 +14,7 @@ fingerprint:
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeicvtoez7ahmyl25h66edgjywx5ymxtqnyexzq73ouyu2p6smi3uoa
   handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
-  models.py: bafybeie5hchh34fbyoshkujhdonvv4ye2knivw2xlqboqyr6ooa5egqjri
+  models.py: bafybeie4rqji6a2hmlvk7jamfatwhkc2dd7oj5qd43fk524defc3lowxe4
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
 fingerprint_ignore_patterns: []
 connections: []
@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeih2fyfb6kkf7r45pvdk7pyyebr5xloia4xiqxtb3qsrasnstqmepq
 - valory/registration_abci:0.1.0:bafybeibndt6vxiwc2edgtaxpjbhwto3eyu33ujz3zmvtygvo2qz7xme5li
 - valory/reset_pause_abci:0.1.0:bafybeigeoc363gv3wp2rrmk6p2fdxney33nxd3owtpfugzapgruwe4klyu
-- valory/market_creation_manager_abci:0.1.0:bafybeicdskvba5eqkxezhycdhlfjxsan5rnkwe5hqfn5jwhkuivxppg7j4
+- valory/market_creation_manager_abci:0.1.0:bafybeiai7xjj33grb6uohblgl7nn76ldduijq75rr2gx7dkce2i6tvahle
 - valory/termination_abci:0.1.0:bafybeigqpij2sgrpnilqjljfciixop4fldq5qceixc7534q6af4potdmdm
 - valory/transaction_settlement_abci:0.1.0:bafybeia7rzsbea3ch4gcafyp3z6uvqh4npws2xpdwbkkdbrqqpjops7nui
 behaviours:
@@ -129,6 +129,7 @@ models:
       - techradar
       event_offset_start_days: 4
       event_offset_end_days: 7
+      market_proposal_round_timeout_seconds_per_day: 45
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
