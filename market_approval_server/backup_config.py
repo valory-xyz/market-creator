@@ -59,7 +59,7 @@ def _process_endpoints(url: str) -> Optional[Dict[str, Any]]:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create a backup of server data.")
+    parser = argparse.ArgumentParser(description="Create a backup of market approval server configuration.")
     parser.add_argument("server_url", help="URL of the server to back up")
     args = parser.parse_args()
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     backup_data: Optional[Dict[str, Any]] = _process_endpoints(server_url)
 
     if backup_data:
-        current_time = time.strftime("%Y%m%d%H%M%S")
+        current_time = time.strftime("%Y-%m-%d_%H-%M-%S")
         backup_filename = f"backup_{current_time}.json"
         with open(backup_filename, "w", encoding="UTF-8") as backup_file:
             json.dump(backup_data, backup_file, indent=4)
