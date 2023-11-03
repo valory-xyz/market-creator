@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     if backup_data:
         current_time = time.strftime("%Y-%m-%d_%H-%M-%S")
-        backup_filename = f"backup_{current_time}.json"
+        backup_filename = f"server_config.backup_{current_time}.json"
         with open(backup_filename, "w", encoding="UTF-8") as backup_file:
             json.dump(backup_data, backup_file, indent=4)
         print(f"Backup created successfully: {backup_filename}")
