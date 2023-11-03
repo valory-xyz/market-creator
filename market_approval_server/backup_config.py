@@ -29,6 +29,8 @@ import requests
 
 MAX_RETRIES = 3
 RETRY_DELAY_SECONDS = 10
+ENDPOINTS = ["approved_markets", "processed_markets", "proposed_markets", "rejected_markets"]
+
 
 def _fetch_data(endpoint_url: str) -> Optional[Dict[str, Any]]:
     for retry_count in range(MAX_RETRIES):
@@ -45,24 +47,19 @@ def _fetch_data(endpoint_url: str) -> Optional[Dict[str, Any]]:
 
 
 def _process_endpoints(url: str) -> Optional[Dict[str, Any]]:
-    approved_markets = _fetch_data(f"{url}/approved_markets")
-    rejected_markets = _fetch_data(f"{url}/rejected_markets")
-    proposed_markets = _fetch_data(f"{url}/proposed_markets")
-    processed_markets = _fetch_data(f"{url}/processed_markets")
-
-    if approved_markets and rejected_markets and proposed_markets and processed_markets:
-        _backup_data: Dict[str, Any] = {
-            "api_keys": {
-                "454d31ff03590ff36836e991d3287b23146a7a84c79d082732b56268fe472823": "default_user"
-            },
-            "approved_markets": approved_markets.get("approved_markets", {}),
-            "processed_markets": processed_markets.get("processed_markets", {}),
-            "proposed_markets": proposed_markets.get("proposed_markets", {}),
-            "rejected_markets": rejected_markets.get("rejected_markets", {}),
+    _backup_data: Dict[str, Any] = {
+        "api_keys": {
+            "454d31ff03590ff36836e991d3287b23146a7a84c79d082732b56268fe472823": "default_user"
         }
-        return _backup_data
+    }
+    
+    for endpoint in ENDPOINTS:
+        data = _fetch_data(f"{url}/{endpoint}")
+        if data is None:
+            return None
+        _backup_data[endpoint] = data.get(endpoint, {})
 
-    return None
+    return _backup_data
 
 
 if __name__ == "__main__":
