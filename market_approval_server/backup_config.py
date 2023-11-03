@@ -27,13 +27,20 @@ from typing import Any, Dict, Optional
 import requests
 
 
+MAX_RETRIES = 3
+RETRY_DELAY_SECONDS = 10
+
 def _fetch_data(endpoint_url: str) -> Optional[Dict[str, Any]]:
-    response = requests.get(endpoint_url)
-    if response.status_code == 200:
-        return response.json()
-    print(
-        f"Failed to fetch data from {endpoint_url}. Status code: {response.status_code}"
-    )
+    for retry_count in range(MAX_RETRIES):
+        response = requests.get(endpoint_url)
+        if response.status_code == 200:
+            return response.json()
+        print(
+            f"Failed to fetch data from {endpoint_url}. Status code: {response.status_code}"
+        )
+        if retry_count < MAX_RETRIES - 1:
+            print(f"Retrying in {RETRY_DELAY_SECONDS} seconds...")
+            time.sleep(RETRY_DELAY_SECONDS)
     return None
 
 
