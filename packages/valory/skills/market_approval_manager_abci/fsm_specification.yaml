@@ -1,0 +1,81 @@
+alphabet_in:
+- DID_NOT_SEND
+- DONE
+- ERROR
+- MARKET_PROPOSAL_ROUND_TIMEOUT
+- MAX_PROPOSED_MARKETS_REACHED
+- MAX_RETRIES_REACHED
+- NO_MAJORITY
+- NO_MARKETS_RETRIEVED
+- NO_TX
+- ROUND_TIMEOUT
+- SKIP_MARKET_PROPOSAL
+default_start_state: CollectRandomnessRound
+final_states:
+- FinishedMarketCreationManagerRound
+- FinishedWithDepositDaiRound
+- FinishedWithRemoveFundingRound
+- FinishedWithoutTxRound
+label: MarketCreationManagerAbciApp
+start_states:
+- CollectRandomnessRound
+- PostTransactionRound
+states:
+- CollectRandomnessRound
+- DataGatheringRound
+- DepositDaiRound
+- FinishedMarketCreationManagerRound
+- FinishedWithDepositDaiRound
+- FinishedWithRemoveFundingRound
+- FinishedWithoutTxRound
+- MarketProposalRound
+- PostTransactionRound
+- PrepareTransactionRound
+- RemoveFundingRound
+- RetrieveApprovedMarketRound
+- SelectKeeperRound
+- SyncMarketsRound
+transition_func:
+    (CollectRandomnessRound, DONE): SelectKeeperRound
+    (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
+    (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (DataGatheringRound, DONE): MarketProposalRound
+    (DataGatheringRound, ERROR): CollectRandomnessRound
+    (DataGatheringRound, MAX_PROPOSED_MARKETS_REACHED): RetrieveApprovedMarketRound
+    (DataGatheringRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
+    (DataGatheringRound, NO_MAJORITY): CollectRandomnessRound
+    (DataGatheringRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (DataGatheringRound, SKIP_MARKET_PROPOSAL): RetrieveApprovedMarketRound
+    (DepositDaiRound, DONE): FinishedWithDepositDaiRound
+    (DepositDaiRound, ERROR): DepositDaiRound
+    (DepositDaiRound, NO_MAJORITY): DepositDaiRound
+    (DepositDaiRound, NO_TX): SyncMarketsRound
+    (MarketProposalRound, DID_NOT_SEND): RetrieveApprovedMarketRound
+    (MarketProposalRound, DONE): RetrieveApprovedMarketRound
+    (MarketProposalRound, ERROR): RetrieveApprovedMarketRound
+    (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
+    (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
+    (PostTransactionRound, DONE): CollectRandomnessRound
+    (PostTransactionRound, ERROR): PostTransactionRound
+    (PostTransactionRound, NO_MAJORITY): PostTransactionRound
+    (PrepareTransactionRound, DONE): FinishedMarketCreationManagerRound
+    (PrepareTransactionRound, NO_MAJORITY): CollectRandomnessRound
+    (PrepareTransactionRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (RemoveFundingRound, DONE): FinishedWithRemoveFundingRound
+    (RemoveFundingRound, ERROR): CollectRandomnessRound
+    (RemoveFundingRound, NO_MAJORITY): RemoveFundingRound
+    (RemoveFundingRound, NO_TX): FinishedWithoutTxRound
+    (RemoveFundingRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, DID_NOT_SEND): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, DONE): PrepareTransactionRound
+    (RetrieveApprovedMarketRound, ERROR): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, NO_MAJORITY): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): DepositDaiRound
+    (RetrieveApprovedMarketRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (SelectKeeperRound, DONE): DataGatheringRound
+    (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
+    (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (SyncMarketsRound, DONE): RemoveFundingRound
+    (SyncMarketsRound, ERROR): CollectRandomnessRound
+    (SyncMarketsRound, NO_MAJORITY): CollectRandomnessRound
+    (SyncMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
