@@ -35,6 +35,8 @@ from packages.valory.skills.abstract_round_abci.base import (
     get_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
+    ApproveMarketsPayload,
+    CollectProposedMarketsPayload,
     CollectRandomnessPayload,
     DataGatheringPayload,
     DepositDaiPayload,
@@ -62,12 +64,18 @@ class Event(Enum):
     ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
     MAX_PROPOSED_MARKETS_REACHED = "max_markets_reached"
+    MAX_APPROVED_MARKETS_REACHED = "max_approved_markets_reached"
     MAX_RETRIES_REACHED = "max_retries_reached"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
     SKIP_MARKET_PROPOSAL = "skip_market_proposal"
+    SKIP_MARKET_APPROVAL = "skip_market_approval"
 
 
 DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
+DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA = {
+    "collected_proposed_markets": [],
+    "timestamp": 0,
+}
 
 
 class SynchronizedData(TxSynchronizedData):
@@ -88,9 +96,19 @@ class SynchronizedData(TxSynchronizedData):
         return cast(int, self.db.get("newsapi_api_retries", 0))
 
     @property
+    def proposed_markets_api_retries(self) -> int:
+        """Get the amount of API call retries."""
+        return cast(int, self.db.get("proposed_markets_api_retries", 0))
+
+    @property
     def proposed_markets_count(self) -> int:
         """Get the proposed_markets_count."""
         return cast(int, self.db.get("proposed_markets_count", 0))
+
+    @property
+    def approved_markets_count(self) -> int:
+        """Get the approved_markets_count."""
+        return cast(int, self.db.get("approved_markets_count", 0))
 
     @property
     def proposed_markets_data(self) -> dict:
@@ -98,6 +116,22 @@ class SynchronizedData(TxSynchronizedData):
         return cast(
             dict, self.db.get("proposed_markets_data", DEFAULT_PROPOSED_MARKETS_DATA)
         )
+
+    @property
+    def collected_proposed_markets_data(self) -> dict:
+        """Get the collected_proposed_markets_data."""
+        return cast(
+            dict,
+            self.db.get(
+                "collected_proposed_markets_data",
+                DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA,
+            ),
+        )
+
+    @property
+    def approved_markets_data(self) -> dict:
+        """Get the approved_markets_data."""
+        return cast(dict, self.db.get_strict("approved_markets_data"))
 
     @property
     def approved_question_data(self) -> dict:
@@ -303,6 +337,114 @@ class SyncMarketsRound(CollectSameUntilThresholdRound):
         ):
             return self.synchronized_data, Event.NO_MAJORITY
         return None
+
+
+class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
+    """CollectProposedMarketsRound"""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
+    MAX_APPROVED_MARKETS_REACHED_PAYLOAD = "MAX_APPROVED_MARKETS_REACHED_PAYLOAD"
+    SKIP_MARKET_APPROVAL_PAYLOAD = "SKIP_MARKET_APPROVAL_PAYLOAD"
+
+    payload_class = CollectProposedMarketsPayload
+    synchronized_data_class = SynchronizedData
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                proposed_markets_api_retries = cast(
+                    SynchronizedData, self.synchronized_data
+                ).proposed_markets_api_retries
+                synchronized_data = self.synchronized_data.update(
+                    synchronized_data_class=SynchronizedData,
+                    **{
+                        get_name(
+                            SynchronizedData.proposed_markets_api_retries
+                        ): proposed_markets_api_retries
+                        + 1,
+                    },
+                )
+                return synchronized_data, Event.ERROR
+
+            if self.most_voted_payload == self.MAX_RETRIES_PAYLOAD:
+                return self.synchronized_data, Event.MAX_RETRIES_REACHED
+
+            if self.most_voted_payload == self.MAX_APPROVED_MARKETS_REACHED_PAYLOAD:
+                return self.synchronized_data, Event.MAX_APPROVED_MARKETS_REACHED
+
+            if self.most_voted_payload == self.SKIP_MARKET_APPROVAL_PAYLOAD:
+                return self.synchronized_data, Event.SKIP_MARKET_APPROVAL
+
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(
+                        SynchronizedData.collected_proposed_markets_data
+                    ): self.most_voted_payload,
+                },
+            )
+            return synchronized_data, Event.DONE
+
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+        return None
+
+
+class ApproveMarketsRound(OnlyKeeperSendsRound):
+    """ApproveMarketsRound"""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
+
+    payload_class = ApproveMarketsPayload
+    payload_attribute = "content"
+    synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+
+    def end_block(
+        self,
+    ) -> Optional[
+        Tuple[BaseSynchronizedData, Enum]
+    ]:  # pylint: disable=too-many-return-statements
+        """Process the end of the block."""
+        if self.keeper_payload is None:
+            return None
+
+        # Keeper did not send
+        if self.keeper_payload is None:  # pragma: no cover
+            return self.synchronized_data, Event.DID_NOT_SEND
+
+        # API error
+        if (
+            cast(ApproveMarketsPayload, self.keeper_payload).content
+            == self.ERROR_PAYLOAD
+        ):
+            return self.synchronized_data, Event.ERROR
+
+        # Happy path
+        approved_markets_data = json.loads(
+            cast(ApproveMarketsPayload, self.keeper_payload).content
+        )
+
+        approved_markets_count = len(approved_markets_data.get("proposed_markets", []))
+
+        synchronized_data = self.synchronized_data.update(
+            synchronized_data_class=SynchronizedData,
+            **{
+                get_name(SynchronizedData.approved_markets_data): approved_markets_data,
+                get_name(SynchronizedData.approved_markets_count): cast(
+                    SynchronizedData, self.synchronized_data
+                ).approved_markets_count
+                + approved_markets_count,
+            },
+        )
+
+        return synchronized_data, Event.DONE
 
 
 class DataGatheringRound(CollectSameUntilThresholdRound):
@@ -558,9 +700,24 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         SelectKeeperRound: {
+            Event.DONE: CollectProposedMarketsRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        },
+        CollectProposedMarketsRound: {
+            Event.DONE: ApproveMarketsRound,
+            Event.MAX_APPROVED_MARKETS_REACHED: DataGatheringRound,
+            Event.MAX_RETRIES_REACHED: DataGatheringRound,
+            Event.SKIP_MARKET_APPROVAL: DataGatheringRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.ERROR: DataGatheringRound,
+        },
+        ApproveMarketsRound: {
             Event.DONE: DataGatheringRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.ERROR: DataGatheringRound,
         },
         DataGatheringRound: {
             Event.DONE: MarketProposalRound,
