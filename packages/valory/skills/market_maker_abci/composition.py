@@ -20,6 +20,7 @@
 """This module contains the price estimation ABCI application."""
 
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
+import packages.valory.skills.market_approval_manager_abci.rounds as MarketApprovalManagerAbci
 import packages.valory.skills.transaction_settlement_abci.rounds as TransactionSettlementAbci
 from packages.valory.skills.abstract_round_abci.abci_app_chain import (
     AbciAppTransitionMapping,
@@ -45,7 +46,9 @@ from packages.valory.skills.termination_abci.rounds import (
 
 
 abci_app_transition_mapping: AbciAppTransitionMapping = {
-    FinishedRegistrationRound: MarketCreationManagerAbci.CollectRandomnessRound,
+    FinishedRegistrationRound: MarketApprovalManagerAbci.CollectRandomnessMarketApprovalRound,
+    MarketApprovalManagerAbci.FinishedWithErrorRound: MarketCreationManagerAbci.CollectRandomness,
+    MarketApprovalManagerAbci.FinishedRound: MarketCreationManagerAbci.CollectRandomness,
     MarketCreationManagerAbci.FinishedWithoutTxRound: ResetAndPauseRound,
     MarketCreationManagerAbci.FinishedWithDepositDaiRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,

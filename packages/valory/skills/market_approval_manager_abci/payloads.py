@@ -25,29 +25,29 @@ from packages.valory.skills.abstract_round_abci.base import BaseTxPayload
 
 
 @dataclass(frozen=True)
-class CollectRandomnessPayload(BaseTxPayload):
-    """Represent a transaction payload for the CollectRandomnessRound."""
+class CollectRandomnessMarketApprovalPayload(BaseTxPayload):
+    """Represent a transaction payload for the CollectRandomnessMarketApprovalRound."""
 
     round_id: int
     randomness: str
 
 
 @dataclass(frozen=True)
-class CollectMarketsDataPayload(BaseTxPayload):
-    """Represent a transaction payload for the DataGatheringRound."""
+class CollectMarketsDataMarketApprovalPayload(BaseTxPayload):
+    """Represent a transaction payload for the CollectMarketsDataMarketApprovalRound."""
 
     content: str
 
 
 @dataclass(frozen=True)
-class SelectKeeperPayload(BaseTxPayload):
-    """Represent a transaction payload of type 'select_keeper'."""
+class SelectKeeperMarketApprovalPayload(BaseTxPayload):
+    """Represent a transaction payload for the SelectKeeperMarketApprovalRound."""
 
     keeper: str
 
 
 @dataclass(frozen=True)
-class MarketApprovalPayload(BaseTxPayload):
-    """Represent a transaction payload for the MarketProposalRound."""
+class ExecuteApprovalMarketApprovalPayload(BaseTxPayload):
+    """Represent a transaction payload for the ExecuteApprovalMarketApprovalRound."""
 
     content: str

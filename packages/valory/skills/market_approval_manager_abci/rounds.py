@@ -35,10 +35,10 @@ from packages.valory.skills.abstract_round_abci.base import (
     get_name,
 )
 from packages.valory.skills.market_approval_manager_abci.payloads import (
-    CollectRandomnessPayload,
-    CollectMarketsDataPayload,
-    SelectKeeperPayload,
-    MarketApprovalPayload,
+    CollectRandomnessMarketApprovalPayload,
+    CollectMarketsDataMarketApprovalPayload,
+    SelectKeeperMarketApprovalPayload,
+    ExecuteApprovalMarketApprovalPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -55,9 +55,11 @@ class Event(Enum):
     ERROR = "api_error"
     DID_NOT_SEND = "did_not_send"
     MAX_RETRIES_REACHED = "max_retries_reached"
+    MAX_APPROVED_MARKETS_REACHED = "max_approved_markets_reached"
+    SKIP_MARKET_APPROVAL = "skip_market_approval"
 
-
-DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
+DEFAULT_COLLECTED_MARKETS_DATA = {"collected_markets": [], "timestamp": 0}
+DEFAULT_APPROVED_MARKETS_DATA = {"approved_markets": [], "timestamp": 0}
 
 
 class SynchronizedData(TxSynchronizedData):
@@ -68,6 +70,11 @@ class SynchronizedData(TxSynchronizedData):
     """
 
     @property
+    def collected_markets_retries(self) -> int:
+        """Get the approved_markets_count."""
+        return cast(int, self.db.get("collected_markets_retries", 0))
+
+    @property
     def approved_markets_count(self) -> int:
         """Get the approved_markets_count."""
         return cast(int, self.db.get("approved_markets_count", 0))
@@ -76,14 +83,20 @@ class SynchronizedData(TxSynchronizedData):
     def collected_markets_data(self) -> dict:
         """Get the collected_markets_data."""
         return cast(
-            dict, self.db.get("collected_markets_data", DEFAULT_PROPOSED_MARKETS_DATA)
+            dict, self.db.get("collected_markets_data", DEFAULT_COLLECTED_MARKETS_DATA)
         )
 
+    @property
+    def approved_markets_data(self) -> dict:
+        """Get the approved_markets_data."""
+        return cast(
+            dict, self.db.get("approved_markets_data", DEFAULT_APPROVED_MARKETS_DATA)
+        )
 
-class CollectRandomnessRound(CollectSameUntilThresholdRound):
+class CollectRandomnessMarketApprovalRound(CollectSameUntilThresholdRound):
     """A round for generating collecting randomness"""
 
-    payload_class = CollectRandomnessPayload
+    payload_class = CollectRandomnessMarketApprovalPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
@@ -91,54 +104,54 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
 
 
-class CollectMarketsDataRound(CollectSameUntilThresholdRound):
-    """CollectMarketsDataRound"""
+class CollectMarketsDataMarketApprovalRound(CollectSameUntilThresholdRound):
+    """CollectMarketsDataMarketApprovalRound"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
-    MAX_PROPOSED_MARKETS_REACHED_PAYLOAD = "MAX_PROPOSED_MARKETS_REACHED_PAYLOAD"
-    SKIP_MARKET_PROPOSAL_PAYLOAD = "SKIP_MARKET_PROPOSAL_PAYLOAD"
+    MAX_APPROVED_MARKETS_REACHED_PAYLOAD = "MAX_APPROVED_MARKETS_REACHED_PAYLOAD"
+    SKIP_MARKET_APPROVAL_PAYLOAD = "SKIP_MARKET_APPROVAL_PAYLOAD"
 
-    payload_class = DataGatheringPayload
+    payload_class = CollectMarketsDataMarketApprovalPayload
     synchronized_data_class = SynchronizedData
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """Process the end of the block."""
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
-                newsapi_api_retries = cast(
+                collected_markets_retries = cast(
                     SynchronizedData, self.synchronized_data
-                ).newsapi_api_retries
+                ).collected_markets_retries
                 synchronized_data = self.synchronized_data.update(
                     synchronized_data_class=SynchronizedData,
                     **{
                         get_name(
-                            SynchronizedData.newsapi_api_retries
-                        ): newsapi_api_retries
+                            SynchronizedData.collected_markets_retries
+                        ): collected_markets_retries
                         + 1,
                     },
                 )
                 return synchronized_data, Event.ERROR
 
-            if self.most_voted_payload == DataGatheringRound.MAX_RETRIES_PAYLOAD:
+            if self.most_voted_payload == self.MAX_RETRIES_PAYLOAD:
                 return self.synchronized_data, Event.MAX_RETRIES_REACHED
 
             if (
                 self.most_voted_payload
-                == DataGatheringRound.MAX_PROPOSED_MARKETS_REACHED_PAYLOAD
+                == self.MAX_APPROVED_MARKETS_REACHED_PAYLOAD
             ):
-                return self.synchronized_data, Event.MAX_PROPOSED_MARKETS_REACHED
+                return self.synchronized_data, Event.MAX_APPROVED_MARKETS_REACHED
 
             if (
                 self.most_voted_payload
-                == DataGatheringRound.SKIP_MARKET_PROPOSAL_PAYLOAD
+                == self.SKIP_MARKET_APPROVAL_PAYLOAD
             ):
-                return self.synchronized_data, Event.SKIP_MARKET_PROPOSAL
+                return self.synchronized_data, Event.SKIP_MARKET_APPROVAL
 
             synchronized_data = self.synchronized_data.update(
                 synchronized_data_class=SynchronizedData,
                 **{
-                    get_name(SynchronizedData.gathered_data): self.most_voted_payload,
+                    get_name(SynchronizedData.collected_markets_data): self.most_voted_payload,
                 },
             )
             return synchronized_data, Event.DONE
@@ -150,10 +163,10 @@ class CollectMarketsDataRound(CollectSameUntilThresholdRound):
         return None
 
 
-class SelectKeeperRound(CollectSameUntilThresholdRound):
+class SelectKeeperMarketApprovalRound(CollectSameUntilThresholdRound):
     """A round in a which keeper is selected"""
 
-    payload_class = SelectKeeperPayload
+    payload_class = SelectKeeperMarketApprovalPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
@@ -161,13 +174,13 @@ class SelectKeeperRound(CollectSameUntilThresholdRound):
     selection_key = get_name(SynchronizedData.most_voted_keeper_address)
 
 
-class MarketApprovalRound(OnlyKeeperSendsRound):
-    """MarketApprovalRound"""
+class ExecuteApprovalMarketApprovalRound(OnlyKeeperSendsRound):
+    """ExecuteApprovalMarketApprovalRound"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
 
-    payload_class = MarketProposalPayload
+    payload_class = ExecuteApprovalMarketApprovalPayload
     payload_attribute = "content"
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
@@ -188,26 +201,26 @@ class MarketApprovalRound(OnlyKeeperSendsRound):
 
         # API error
         if (
-            cast(MarketProposalPayload, self.keeper_payload).content
+            cast(ExecuteApprovalMarketApprovalPayload, self.keeper_payload).content
             == self.ERROR_PAYLOAD
         ):
             return self.synchronized_data, Event.ERROR
 
         # Happy path
-        proposed_markets_data = json.loads(
-            cast(MarketProposalPayload, self.keeper_payload).content
-        )  # there could be problems loading this from the LLM response
+        approved_markets_data = json.loads(
+            cast(ExecuteApprovalMarketApprovalPayload, self.keeper_payload).content
+        )
 
-        proposed_markets_count = len(proposed_markets_data.get("proposed_markets", []))
+        approved_markets_count = len(approved_markets_data.get("proposed_markets", []))
 
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
             **{
-                get_name(SynchronizedData.proposed_markets_data): proposed_markets_data,
-                get_name(SynchronizedData.proposed_markets_count): cast(
+                get_name(SynchronizedData.approved_markets_data): approved_markets_data,
+                get_name(SynchronizedData.approved_markets_count): cast(
                     SynchronizedData, self.synchronized_data
-                ).proposed_markets_count
-                + proposed_markets_count,
+                ).approved_markets_count
+                + approved_markets_count,
             },
         )
 
@@ -225,29 +238,29 @@ class FinishedRound(DegenerateRound):
 class MarketApprovalManagerAbciApp(AbciApp[Event]):
     """MarketApprovalManagerAbciApp"""
 
-    initial_round_cls: AppState = CollectRandomnessRound
-    initial_states: Set[AppState] = {CollectRandomnessRound}
+    initial_round_cls: AppState = CollectRandomnessMarketApprovalRound
+    initial_states: Set[AppState] = {CollectRandomnessMarketApprovalRound}
     transition_function: AbciAppTransitionFunction = {
-        CollectRandomnessRound: {
-            Event.DONE: SelectKeeperRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        CollectRandomnessMarketApprovalRound: {
+            Event.DONE: SelectKeeperMarketApprovalRound,
+            Event.NO_MAJORITY: CollectRandomnessMarketApprovalRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessMarketApprovalRound,
         },
-        CollectMarketsDataRound: {
-            Event.DONE: SelectKeeperRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        CollectMarketsDataMarketApprovalRound: {
+            Event.DONE: SelectKeeperMarketApprovalRound,
+            Event.NO_MAJORITY: CollectRandomnessMarketApprovalRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessMarketApprovalRound,
             Event.ERROR: FinishedWithErrorRound
         },
-        SelectKeeperRound: {
-            Event.DONE: MarketApprovalRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        SelectKeeperMarketApprovalRound: {
+            Event.DONE: ExecuteApprovalMarketApprovalRound,
+            Event.NO_MAJORITY: CollectRandomnessMarketApprovalRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessMarketApprovalRound,
         },
-        MarketApprovalRound: {
+        ExecuteApprovalMarketApprovalRound: {
             Event.DONE: FinishedRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_MAJORITY: CollectRandomnessMarketApprovalRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessMarketApprovalRound,
             Event.ERROR: FinishedWithErrorRound
         },
         FinishedWithErrorRound: {},
@@ -263,13 +276,9 @@ class MarketApprovalManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.approved_markets_count),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
-        CollectRandomnessRound: set(),
+        CollectRandomnessMarketApprovalRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
-        FinishedWithErrorRound: {
-            get_name(SynchronizedData.randomness),
-        },
-        FinishedRound: {
-            get_name(SynchronizedData.randomness),
-        },
+        FinishedWithErrorRound: set(),
+        FinishedRound: set(),
     }

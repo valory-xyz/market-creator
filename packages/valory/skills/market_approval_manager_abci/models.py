@@ -41,7 +41,7 @@ class SharedState(BaseSharedState):
     abci_app_cls = MarketCreationManagerAbciApp
 
 
-class MarketCreationManagerParams(BaseParams):
+class MarketApprovalManagerParams(BaseParams):
     """Parameters."""
 
     multisend_address: str
