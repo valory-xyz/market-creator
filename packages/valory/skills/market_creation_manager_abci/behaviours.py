@@ -350,11 +350,13 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             #     gathered_data = DataGatheringRound.SKIP_MARKET_PROPOSAL_PAYLOAD
             # else:
             #     self.context.logger.info("Timeout to propose new markets reached.")
-            #     gathered_data = yield from self._gather_data()
+            #     gathered_data =
 
+            content = yield from self._collect_proposed_markets()
+            self.context.logger.info(f"Collected proposed markets: {content}")
             payload = CollectProposedMarketsPayload(
                 sender=sender,
-                content="gathered_data",
+                content=content,
             )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
@@ -362,42 +364,34 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.set_done()
 
-    # def _gather_data(self) -> Generator[None, None, str]:
-    #     """Auxiliary method to collect data from endpoint."""
-    #     news_sources = self.params.news_sources
-    #     headers = {"X-Api-Key": self.params.newsapi_api_key}
+    def _collect_proposed_markets(self) -> Generator[None, None, str]:
+        """Auxiliary method to collect data from the endpoint."""
+        self.context.logger.info("Collecting proposed markets.")
 
-    #     random.seed(
-    #         "DataGatheringBehaviour" + self.synchronized_data.most_voted_randomness, 2
-    #     )  # nosec
-    #     k = min(10, len(news_sources))
-    #     sources = random.sample(news_sources, k)
+        url = self.params.market_approval_server_url + "/proposed_markets"
+        headers = {
+            "Authorization": self.params.market_approval_server_api_key,
+            "Content-Type": "application/json",
+        }
 
-    #     parameters = {
-    #         "sources": ",".join(sources),
-    #         "pageSize": "100",
-    #     }
-    #     response = yield from self.get_http_response(
-    #         method="GET",
-    #         url=self.params.newsapi_endpoint,
-    #         headers=headers,
-    #         parameters=parameters,
-    #     )
-    #     if response.status_code != HTTP_OK:
-    #         self.context.logger.error(
-    #             f"Could not retrieve response from {self.params.newsapi_endpoint}."
-    #             f"Received status code {response.status_code}.\n{response}"
-    #         )
-    #         retries = 3  # TODO: Make params
-    #         if retries >= MAX_RETRIES:
-    #             return DataGatheringRound.MAX_RETRIES_PAYLOAD
-    #         return DataGatheringRound.ERROR_PAYLOAD
+        response = yield from self.get_http_response(
+            method="GET",
+            url=url,
+            headers=headers,
+        )
+        if response.status_code != HTTP_OK:
+            self.context.logger.error(
+                f"Could not retrieve response from {url}."
+                f"Received status code {response.status_code}.\n{response}"
+            )
+            retries = 3  # TODO: Make params
+            if retries >= MAX_RETRIES:
+                return CollectProposedMarketsRound.MAX_RETRIES_PAYLOAD
+            return CollectProposedMarketsRound.ERROR_PAYLOAD
 
-    #     response_data = json.loads(response.body.decode())
-    #     self.context.logger.info(
-    #         f"Response received from {self.params.newsapi_endpoint}:\n {response_data}"
-    #     )
-    #     return json.dumps(response_data, sort_keys=True)
+        response_data = json.loads(response.body.decode())
+        self.context.logger.info(f"Response received from {url}:\n {response_data}")
+        return json.dumps(response_data, sort_keys=True)
 
 
 class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
@@ -439,27 +433,20 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             random.seed(
                 "ApproveMarketsBehaviour"
                 + self.synchronized_data.most_voted_randomness,
                 2,
             )  # nosec
 
-            # events_datetime = self._generate_events_datetime(
-            #     self.last_synced_timestamp,
-            #     self.params.event_offset_start_days,
-            #     self.params.event_offset_end_days,
-            # )
-
             # all_proposed_markets = []
             # for dt in events_datetime:
             #     self.context.logger.info(f"Proposing markets for {dt}")
-            #     data = json.loads(self.synchronized_data.gathered_data)
             #     k = min(40, len(data["articles"]))
             #     selected_news_articles = random.sample(data["articles"], k)
-            #     proposed_markets = yield from self._get_llm_response(
+            markets_to_approve = yield from self._get_llm_response(
+                self.synchronized_data.collected_proposed_markets_data
+            )
             #         dt, selected_news_articles
             #     )
 
@@ -484,7 +471,10 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             # }
             payload = ApproveMarketsPayload(
                 sender=sender,
-                content="content2",  # json.dumps(payload_content, sort_keys=True),
+                content=json.dumps(
+                    {"approved_markets": markets_to_approve},
+                    sort_keys=True,
+                ),
             )
 
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
@@ -493,97 +483,77 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.set_done()
 
-    # def _get_llm_response(
-    #     self, event_day: datetime, news_articles: list[dict[str, Any]]
-    # ) -> Generator[None, None, list[Any]]:
-    #     """Get the LLM response"""
+    def _get_llm_response(
+        self, proposed_markets: dict[str, Any]
+    ) -> Generator[None, None, list[Any]]:
+        """Get the LLM response"""
 
-    #     input_news = ""
-    #     for article in news_articles:
-    #         title = article["title"]
-    #         content = article["content"]
-    #         date = article["publishedAt"]
-    #         input_news += f"- ({date}) {title}\n  {content}\n\n"
+        prompt_template = """Based on the following list of questions under QUESTIONS, choose the 5 best questions
+            to open a prediction market. The chosen questions must not be repeated, and their
+            answer must be easily verifiable through public sources like newspapers or search engines.
+            Each question has an ID associated. Your output must be a a single JSON array to be parsed
+            by Python \"json.loads()\" containing the IDs of the chosen questions.
 
-    #     topics = ", ".join(self.params.topics)
-    #     prompt_template = self.params.market_identification_prompt
-    #     prompt_values = {
-    #         "input_news": input_news,
-    #         "topics": topics,
-    #         "event_day": event_day.strftime("%-d %B %Y"),
-    #     }
+            QUESTIONS
+            {questions}
 
-    #     self.context.logger.info(
-    #         f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
-    #     )
+            Output the JSON array as specified. Do not produce any other outpupt."""
 
-    #     llm_dialogues = cast(LlmDialogues, self.context.llm_dialogues)
+        question_lines = []
+        for key, value in proposed_markets["proposed_markets"].items():
+            question_id = value["id"]
+            question_text = value["question"]
+            question_lines.append(f"{question_id} - {question_text}")
 
-    #     # llm request message
-    #     request_llm_message, llm_dialogue = llm_dialogues.create(
-    #         counterparty=str(LLM_CONNECTION_PUBLIC_ID),
-    #         performative=LlmMessage.Performative.REQUEST,
-    #         prompt_template=prompt_template,
-    #         prompt_values=prompt_values,
-    #     )
-    #     request_llm_message = cast(LlmMessage, request_llm_message)
-    #     llm_dialogue = cast(LlmDialogue, llm_dialogue)
-    #     llm_response_message = yield from self._do_llm_request(
-    #         request_llm_message, llm_dialogue
-    #     )
-    #     result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
-    #     self.context.logger.info(f"Got LLM response: {result}")
+        prompt_values = {"questions": "n".join(question_lines)}
 
-    #     data = json.loads(result)
-    #     valid_responses = []
-    #     for q in data:
-    #         try:
-    #             # Date of the outcome
-    #             resolution_date = parse_date_timestring(q["resolution_date"])
-    #             if resolution_date is None:
-    #                 self.context.logger.error(
-    #                     "Cannot parse datestring " + q["resolution_date"]
-    #                 )
-    #                 continue
-    #             valid_responses.append(
-    #                 {
-    #                     "question": q["question"],
-    #                     "answers": q["answers"],
-    #                     "topic": q["topic"],
-    #                     "language": "en_US",
-    #                     "resolution_time": int(resolution_date.timestamp()),
-    #                 }
-    #             )
-    #         except (ValueError, TypeError, KeyError) as e:
-    #             self.context.logger.error(
-    #                 f"Error converting question object {q} with error {e}"
-    #             )
-    #             continue
-    #     return valid_responses
+        self.context.logger.info(
+            f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
+        )
 
-    # def _do_llm_request(
-    #     self,
-    #     llm_message: LlmMessage,
-    #     llm_dialogue: LlmDialogue,
-    #     timeout: Optional[float] = None,
-    # ) -> Generator[None, None, LlmMessage]:
-    #     """
-    #     Do a request and wait the response, asynchronously.
+        llm_dialogues = cast(LlmDialogues, self.context.llm_dialogues)
 
-    #     :param llm_message: The request message
-    #     :param llm_dialogue: the HTTP dialogue associated to the request
-    #     :param timeout: seconds to wait for the reply.
-    #     :yield: LLMMessage object
-    #     :return: the response message
-    #     """
-    #     self.context.outbox.put_message(message=llm_message)
-    #     request_nonce = self._get_request_nonce_from_dialogue(llm_dialogue)
-    #     cast(Requests, self.context.requests).request_id_to_callback[
-    #         request_nonce
-    #     ] = self.get_callback_request()
-    #     # notify caller by propagating potential timeout exception.
-    #     response = yield from self.wait_for_message(timeout=timeout)
-    #     return response
+        # llm request message
+        request_llm_message, llm_dialogue = llm_dialogues.create(
+            counterparty=str(LLM_CONNECTION_PUBLIC_ID),
+            performative=LlmMessage.Performative.REQUEST,
+            prompt_template=prompt_template,
+            prompt_values=prompt_values,
+        )
+        request_llm_message = cast(LlmMessage, request_llm_message)
+        llm_dialogue = cast(LlmDialogue, llm_dialogue)
+        llm_response_message = yield from self._do_llm_request(
+            request_llm_message, llm_dialogue
+        )
+        result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
+        self.context.logger.info(f"Got LLM response: {result}")
+
+        data = json.loads(result)
+        return data
+
+    def _do_llm_request(
+        self,
+        llm_message: LlmMessage,
+        llm_dialogue: LlmDialogue,
+        timeout: Optional[float] = None,
+    ) -> Generator[None, None, LlmMessage]:
+        """
+        Do a request and wait the response, asynchronously.
+
+        :param llm_message: The request message
+        :param llm_dialogue: the HTTP dialogue associated to the request
+        :param timeout: seconds to wait for the reply.
+        :yield: LLMMessage object
+        :return: the response message
+        """
+        self.context.outbox.put_message(message=llm_message)
+        request_nonce = self._get_request_nonce_from_dialogue(llm_dialogue)
+        cast(Requests, self.context.requests).request_id_to_callback[
+            request_nonce
+        ] = self.get_callback_request()
+        # notify caller by propagating potential timeout exception.
+        response = yield from self.wait_for_message(timeout=timeout)
+        return response
 
     # def _propose_market(
     #     self, proposed_market_data: Dict[str, str]

@@ -382,7 +382,7 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
                 **{
                     get_name(
                         SynchronizedData.collected_proposed_markets_data
-                    ): self.most_voted_payload,
+                    ): json.loads(self.most_voted_payload),
                 },
             )
             return synchronized_data, Event.DONE
@@ -431,7 +431,7 @@ class ApproveMarketsRound(OnlyKeeperSendsRound):
             cast(ApproveMarketsPayload, self.keeper_payload).content
         )
 
-        approved_markets_count = len(approved_markets_data.get("proposed_markets", []))
+        approved_markets_count = len(approved_markets_data.get("approved_markets", []))
 
         synchronized_data = self.synchronized_data.update(
             synchronized_data_class=SynchronizedData,
