@@ -400,30 +400,34 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             ]
             largest_opening_timestamp = max(opening_timestamps)
 
-            max_approved_markets = -1  # TODO make params
-            open_markets_timeout = (
-                12 * 60 * 60
-            )  # TODO make params - will be launched each 12 hours
+            min_approve_markets_epoch_seconds = (
+                self.params.min_approve_markets_epoch_seconds
+            )
             approved_markets_count = self.synchronized_data.approved_markets_count
 
             if (
-                max_approved_markets >= 0
-                and approved_markets_count >= max_approved_markets
+                self.params.max_approved_markets >= 0
+                and approved_markets_count >= self.params.max_approved_markets
             ):
                 self.context.logger.info("Max markets approved reached.")
                 content = (
                     CollectProposedMarketsRound.MAX_APPROVED_MARKETS_REACHED_PAYLOAD
                 )
-            elif largest_opening_timestamp - current_timestamp < open_markets_timeout:
+            elif (
+                largest_opening_timestamp - current_timestamp
+                < min_approve_markets_epoch_seconds
+            ):
                 self.context.logger.info("Timeout to approve markets not reached.")
                 content = CollectProposedMarketsRound.SKIP_MARKET_APPROVAL_PAYLOAD
             else:
                 self.context.logger.info("Timeout to approve markets reached.")
-                approve_market_event_days_advance = 5  # TODO Make params
+                approve_market_event_days_offset = (
+                    self.params.approve_market_event_days_offset
+                )
                 proposed_markets = yield from self._collect_latest_proposed_markets(
-                    current_timestamp + approve_market_event_days_advance * _ONE_DAY,
+                    current_timestamp + approve_market_event_days_offset * _ONE_DAY,
                     current_timestamp
-                    + (approve_market_event_days_advance + 1) * _ONE_DAY,
+                    + (approve_market_event_days_offset + 1) * _ONE_DAY,
                 )
                 self.context.logger.info(
                     f"Collected proposed markets: {proposed_markets}"
@@ -466,9 +470,6 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Received status code {response.status_code}.\n{response}"
             )
             # TODO Handle retries
-            # retries = 3  # TODO: Make params
-            # if retries >= MAX_RETRIES:
-            #     return CollectProposedMarketsRound.MAX_RETRIES_PAYLOAD
             return {"proposed_markets": {}}
 
         response_data = json.loads(response.body.decode())
@@ -488,9 +489,9 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         self,
     ) -> Generator[None, None, Dict[str, Any]]:
         """Collect FMPM from subgraph."""
-        creator = "0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec"  # TODO make params
+        approve_market_creator = self.params.approve_market_creator
         response = yield from self.get_subgraph_result(
-            query=FPMM_QUERY.substitute(creator=creator)
+            query=FPMM_QUERY.substitute(creator=approve_market_creator)
         )
 
         if response is None:
@@ -569,11 +570,9 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, dict[str, Any]]:
         """Get the LLM response"""
 
-        questions_to_approve_per_period = (
-            2  # TODO make params (approve 2 markets each 12 hours)
-        )
+        markets_to_approve_per_epoch = self.params.markets_to_approve_per_epoch
         # TODO make params
-        prompt_template = """Choose the best {questions_to_approve_per_period} questions under PROPOSED_QUESTIONS
+        prompt_template = """Choose the best {markets_to_approve_per_epoch} questions under PROPOSED_QUESTIONS
             suitable to open prediction markets. The chosen questions must satisfy the following:
             - The topic must interesting.
             - Not be repeated.
@@ -593,7 +592,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             Output the JSON array as specified. Do not produce any other outpupt."""
 
         proposed_question_lines = []
-        for key, value in json_data["proposed_markets"].items():
+        for _, value in json_data["proposed_markets"].items():
             question_id = value["id"]
             question_text = value["question"]
             proposed_question_lines.append(f"- {question_id} - {question_text}")
@@ -613,7 +612,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         )
 
         prompt_values = {
-            "questions_to_approve_per_period": str(questions_to_approve_per_period),
+            "markets_to_approve_per_epoch": str(markets_to_approve_per_epoch),
             "proposed_questions": proposed_questions,
             "existing_questions": existing_questions,
         }
@@ -685,7 +684,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         sender = self.context.agent_address
         payload = {
             "id": market_id,
-            "approved_by": f"{MARKET_CREATION_MANAGER_PUBLIC_ID} {sender}",
+            "approved_by": f"{MARKET_CREATION_MANAGER_PUBLIC_ID}@{sender}",
         }
 
         response = yield from self.get_http_response(

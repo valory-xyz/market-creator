@@ -38,6 +38,10 @@ DEFAULT_MARKET_FEE = 2.0
 DEFAULT_INITIAL_FUNDS = 1.0
 DEFAULT_MARKET_TIMEOUT = 1  # days
 DEFAULT_MAX_PROPOSED_MARKETS = -1
+DEFAULT_MAX_APPROVED_MARKETS = -1
+DEFAULT_MARKETS_TO_APPROVE_PER_EPOCH = 2
+DEFAULT_MIN_APPROVE_MARKETS_EPOCH_SECONDS = 43200  # 12 hours
+DEFAULT_APPROVE_MARKET_EVENT_DAYS_OFFSET = 5
 DEFAULT_EVENT_OFFSET_START_DAYS = 4
 DEFAULT_EVENT_OFFSET_END_DAYS = 7
 DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS = 7200
@@ -79,6 +83,24 @@ class MarketCreationManagerParams(BaseParams):
         )
         self.max_proposed_markets = kwargs.get(
             "max_proposed_markets", DEFAULT_MAX_PROPOSED_MARKETS
+        )
+        self.max_approved_markets = kwargs.get(
+            "max_approved_markets", DEFAULT_MAX_APPROVED_MARKETS
+        )
+        self.markets_to_approve_per_epoch = kwargs.get(
+            "markets_to_approve_per_epoch", DEFAULT_MARKETS_TO_APPROVE_PER_EPOCH
+        )
+        self.min_approve_markets_epoch_seconds = kwargs.get(
+            "min_approve_markets_epoch_seconds",
+            DEFAULT_MIN_APPROVE_MARKETS_EPOCH_SECONDS,
+        )
+        self.approve_market_event_days_offset = kwargs.get(
+            "approve_market_event_days_offset", DEFAULT_APPROVE_MARKET_EVENT_DAYS_OFFSET
+        )
+        self.approve_market_creator = self._ensure(
+            key="approve_market_creator",
+            kwargs=kwargs,
+            type_=str,
         )
         self.realitio_contract = self._ensure(
             key="realitio_contract",
