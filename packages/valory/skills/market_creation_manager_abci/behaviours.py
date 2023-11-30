@@ -405,6 +405,15 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             approved_markets_count = self.synchronized_data.approved_markets_count
 
+            self.context.logger.info(f"approved_markets_count={approved_markets_count}")
+            self.context.logger.info(f"current_timestamp={current_timestamp}")
+            self.context.logger.info(
+                f"largest_opening_timestamp={largest_opening_timestamp}"
+            )
+            self.context.logger.info(
+                f"min_approve_markets_epoch_seconds={min_approve_markets_epoch_seconds}"
+            )
+
             if (
                 self.params.max_approved_markets >= 0
                 and approved_markets_count >= self.params.max_approved_markets
