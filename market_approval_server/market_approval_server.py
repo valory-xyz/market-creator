@@ -95,7 +95,7 @@ api_keys: Dict[str, str] = {}
 
 def load_config() -> None:
     """Loads the configuration from a JSON file."""
-    global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys
+    global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys  # pylint: disable=global-statement
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
