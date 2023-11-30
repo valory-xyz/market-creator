@@ -784,6 +784,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     cross_period_persisted_keys: Set[str] = {
         get_name(SynchronizedData.proposed_markets_count),
         get_name(SynchronizedData.proposed_markets_data),
+        get_name(SynchronizedData.approved_markets_count),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),
