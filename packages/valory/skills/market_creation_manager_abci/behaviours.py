@@ -414,7 +414,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     CollectProposedMarketsRound.MAX_APPROVED_MARKETS_REACHED_PAYLOAD
                 )
             elif (
-                largest_opening_timestamp - current_timestamp
+                current_timestamp - largest_opening_timestamp
                 < min_approve_markets_epoch_seconds
             ):
                 self.context.logger.info("Timeout to approve markets not reached.")
