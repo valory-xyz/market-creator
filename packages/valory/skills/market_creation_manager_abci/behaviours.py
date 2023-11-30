@@ -613,8 +613,20 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
             Output the JSON array as specified. Do not produce any other outpupt."""
 
+        # Extracting N random questions
+        N = 40  # Replace with the desired number of recent questions
+        all_proposed_questions = list(json_data["proposed_markets"].values())
+
+        random.seed(
+            "ApproveMarketsBehaviour._get_llm_response"
+            + self.synchronized_data.most_voted_randomness,
+            2,
+        )  # nosec
+        random_questions = random.sample(
+            all_proposed_questions, min(N, len(all_proposed_questions))
+        )
         proposed_question_lines = []
-        for _, value in json_data["proposed_markets"].items():
+        for value in random_questions:
             question_id = value["id"]
             question_text = value["question"]
             proposed_question_lines.append(f"- {question_id} - {question_text}")
@@ -622,7 +634,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         proposed_questions = "\n".join(proposed_question_lines)
 
         # Extract "N" most recent questions
-        N = 30  # Replace with the desired number of recent questions
+        N = 40  # Replace with the desired number of recent questions
         most_recent_questions = sorted(
             json_data["fixedProductMarketMakers"],
             key=lambda x: int(x["creationTimestamp"]),
