@@ -10,6 +10,7 @@ alphabet_in:
 - INCORRECT_SERIALIZATION
 - INSUFFICIENT_FUNDS
 - MARKET_PROPOSAL_ROUND_TIMEOUT
+- MAX_APPROVED_MARKETS_REACHED
 - MAX_PROPOSED_MARKETS_REACHED
 - MAX_RETRIES_REACHED
 - NEGATIVE
@@ -20,6 +21,7 @@ alphabet_in:
 - RESET_AND_PAUSE_TIMEOUT
 - RESET_TIMEOUT
 - ROUND_TIMEOUT
+- SKIP_MARKET_APPROVAL
 - SKIP_MARKET_PROPOSAL
 - SUSPICIOUS_ACTIVITY
 - VALIDATE_TIMEOUT
@@ -30,8 +32,10 @@ start_states:
 - RegistrationRound
 - RegistrationStartupRound
 states:
+- ApproveMarketsRound
 - CheckLateTxHashesRound
 - CheckTransactionHistoryRound
+- CollectProposedMarketsRound
 - CollectRandomnessRound
 - CollectSignatureRound
 - DataGatheringRound
@@ -55,6 +59,10 @@ states:
 - SynchronizeLateMessagesRound
 - ValidateTransactionRound
 transition_func:
+    (ApproveMarketsRound, DONE): DataGatheringRound
+    (ApproveMarketsRound, ERROR): DataGatheringRound
+    (ApproveMarketsRound, NO_MAJORITY): CollectRandomnessRound
+    (ApproveMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
     (CheckLateTxHashesRound, CHECK_LATE_ARRIVING_MESSAGE): SynchronizeLateMessagesRound
     (CheckLateTxHashesRound, CHECK_TIMEOUT): CheckLateTxHashesRound
     (CheckLateTxHashesRound, DONE): PostTransactionRound
@@ -67,6 +75,13 @@ transition_func:
     (CheckTransactionHistoryRound, NEGATIVE): SelectKeeperTransactionSubmissionBRound
     (CheckTransactionHistoryRound, NONE): ResetAndPauseRound
     (CheckTransactionHistoryRound, NO_MAJORITY): CheckTransactionHistoryRound
+    (CollectProposedMarketsRound, DONE): ApproveMarketsRound
+    (CollectProposedMarketsRound, ERROR): DataGatheringRound
+    (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
+    (CollectProposedMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
+    (CollectProposedMarketsRound, NO_MAJORITY): CollectRandomnessRound
+    (CollectProposedMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): DataGatheringRound
     (CollectRandomnessRound, DONE): SelectKeeperRound
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
     (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
@@ -124,7 +139,7 @@ transition_func:
     (RetrieveApprovedMarketRound, NO_MAJORITY): CollectRandomnessRound
     (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): DepositDaiRound
     (RetrieveApprovedMarketRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (SelectKeeperRound, DONE): DataGatheringRound
+    (SelectKeeperRound, DONE): CollectProposedMarketsRound
     (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
     (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
     (SelectKeeperTransactionSubmissionARound, DONE): CollectSignatureRound

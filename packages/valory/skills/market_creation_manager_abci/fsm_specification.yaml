@@ -3,12 +3,14 @@ alphabet_in:
 - DONE
 - ERROR
 - MARKET_PROPOSAL_ROUND_TIMEOUT
+- MAX_APPROVED_MARKETS_REACHED
 - MAX_PROPOSED_MARKETS_REACHED
 - MAX_RETRIES_REACHED
 - NO_MAJORITY
 - NO_MARKETS_RETRIEVED
 - NO_TX
 - ROUND_TIMEOUT
+- SKIP_MARKET_APPROVAL
 - SKIP_MARKET_PROPOSAL
 default_start_state: CollectRandomnessRound
 final_states:
@@ -21,6 +23,8 @@ start_states:
 - CollectRandomnessRound
 - PostTransactionRound
 states:
+- ApproveMarketsRound
+- CollectProposedMarketsRound
 - CollectRandomnessRound
 - DataGatheringRound
 - DepositDaiRound
@@ -36,6 +40,17 @@ states:
 - SelectKeeperRound
 - SyncMarketsRound
 transition_func:
+    (ApproveMarketsRound, DONE): DataGatheringRound
+    (ApproveMarketsRound, ERROR): DataGatheringRound
+    (ApproveMarketsRound, NO_MAJORITY): CollectRandomnessRound
+    (ApproveMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (CollectProposedMarketsRound, DONE): ApproveMarketsRound
+    (CollectProposedMarketsRound, ERROR): DataGatheringRound
+    (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
+    (CollectProposedMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
+    (CollectProposedMarketsRound, NO_MAJORITY): CollectRandomnessRound
+    (CollectProposedMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): DataGatheringRound
     (CollectRandomnessRound, DONE): SelectKeeperRound
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
     (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
@@ -72,7 +87,7 @@ transition_func:
     (RetrieveApprovedMarketRound, NO_MAJORITY): CollectRandomnessRound
     (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): DepositDaiRound
     (RetrieveApprovedMarketRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (SelectKeeperRound, DONE): DataGatheringRound
+    (SelectKeeperRound, DONE): CollectProposedMarketsRound
     (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
     (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
     (SyncMarketsRound, DONE): RemoveFundingRound
