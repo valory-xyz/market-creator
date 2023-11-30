@@ -485,10 +485,8 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return {"proposed_markets": {}}
 
         response_data = json.loads(response.body.decode())
-        self.context.logger.info(f"Response received from {url}:\n {response_data}")
-
         self.context.logger.info(
-            f"len(response_data)={len(response_data['proposed_markets'])}"
+            f"Response received from {url} (length {len(response_data['proposed_markets'])})"
         )
 
         filtered_markets_data = {
@@ -508,7 +506,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
     def _collect_latest_open_markets(
         self,
     ) -> Generator[None, None, Dict[str, Any]]:
-        """Collect FMPM from subgraph."""
+        """Collect FPMM from subgraph."""
         approve_market_creator = self.params.approve_market_creator
         response = yield from self.get_subgraph_result(
             query=FPMM_QUERY.substitute(creator=approve_market_creator)
