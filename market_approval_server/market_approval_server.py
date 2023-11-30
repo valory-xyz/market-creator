@@ -51,7 +51,7 @@ CLI Usage:
 import hashlib
 import logging
 import os
-import random
+import secrets
 import uuid
 from datetime import datetime
 from enum import Enum
@@ -332,9 +332,9 @@ def get_random_approved_market() -> Tuple[Response, int]:
             return (
                 jsonify({"info": "No approved markets available."}),
                 204,
-            )  # No content
+            )  # No content, json will be ignored by the server
 
-        market_id = random.choice(list(approved_markets.keys()))
+        market_id = secrets.choice(list(approved_markets.keys()))
         market = approved_markets[market_id]
         del approved_markets[market_id]
         market["state"] = MarketState.PROCESSED
@@ -424,8 +424,8 @@ load_config()
 if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
     # Run with SSL/TLS (HTTPS)
     logger.info("Running server in HTTPS mode")
-    app.run(host="0.0.0.0", debug=False, ssl_context=(CERT_FILE, KEY_FILE))
+    app.run(host="0.0.0.0", debug=False, ssl_context=(CERT_FILE, KEY_FILE))  # nosec
 else:
     # Run without SSL/TLS (HTTP)
     logger.info("Running server in HTTP mode")
-    app.run(host="0.0.0.0", debug=False)
+    app.run(host="0.0.0.0", debug=False)  # nosec
