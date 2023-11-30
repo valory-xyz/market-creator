@@ -29,7 +29,12 @@ import requests
 
 MAX_RETRIES = 3
 RETRY_DELAY_SECONDS = 10
-ENDPOINTS = ["approved_markets", "processed_markets", "proposed_markets", "rejected_markets"]
+ENDPOINTS = [
+    "approved_markets",
+    "processed_markets",
+    "proposed_markets",
+    "rejected_markets",
+]
 
 
 def _fetch_data(endpoint_url: str) -> Optional[Dict[str, Any]]:
@@ -52,7 +57,7 @@ def _process_endpoints(url: str) -> Optional[Dict[str, Any]]:
             "454d31ff03590ff36836e991d3287b23146a7a84c79d082732b56268fe472823": "default_user"
         }
     }
-    
+
     for endpoint in ENDPOINTS:
         data = _fetch_data(f"{url}/{endpoint}")
         if data is None:
@@ -63,7 +68,9 @@ def _process_endpoints(url: str) -> Optional[Dict[str, Any]]:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create a backup of market approval server configuration.")
+    parser = argparse.ArgumentParser(
+        description="Create a backup of market approval server configuration."
+    )
     parser.add_argument("server_url", help="URL of the server to back up")
     args = parser.parse_args()
 

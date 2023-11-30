@@ -919,7 +919,6 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-
             random.seed(
                 "MarketProposalBehaviour"
                 + self.synchronized_data.most_voted_randomness,
