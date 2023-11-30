@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeihcm5xxk4gh5hgciozib7ruet2isl2gak5ob6boyvfxsc25n6alfi
+agent: valory/market_maker:0.1.0:bafybeifmo7jw2gtzjwmumv2cd5khh7gwcknet4k4leil2u4cx3swenoeny
 number_of_agents: 1
 deployment:
   agent:
@@ -43,7 +43,7 @@ models:
         object. Do not include any other contents in your response.}
       max_proposed_markets: ${MAX_PROPOSED_MARKETS:int:-1}
       max_approved_markets: ${MAX_APPROVED_MARKETS:int:-1}
-      markets_to_approve_per_epoch: ${MARKETS_TO_APPROVE_PER_EPOCH:int:2}
+      markets_to_approve_per_epoch: ${MARKETS_TO_APPROVE_PER_EPOCH:int:1}
       min_approve_markets_epoch_seconds: ${MIN_APPROVE_MARKETS_EPOCH_SECONDS:int:43200}
       approve_market_event_days_offset: ${APPROVE_MARKET_EVENT_DAYS_OFFSET:int:5}
       approve_market_creator: ${APPROVE_MARKET_CREATOR:str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}

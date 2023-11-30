@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiazmtcljyffmxzbiiq7aw6dhsgcbahpwixbtjeqoqfrcqw3ypzrf4
 - valory/abstract_round_abci:0.1.0:bafybeidau7loztcfy3mxvoqrv7otbpciemd2wf3lsxyjraq4dcvuvib25e
-- valory/market_maker_abci:0.1.0:bafybeife2zxlzefhol6eqidqx625l4vnubxwzuifdx4tfsaey5juxftzky
+- valory/market_maker_abci:0.1.0:bafybeiao5hnls76olely6b4ycm3fkphancxgnzug6nsqkjzrpure4qdfxu
 - valory/registration_abci:0.1.0:bafybeif4tgr7zqzguknrjzxr4h766fxp7vr4tod25xii4jzzwsbvyzdzkq
-- valory/market_creation_manager_abci:0.1.0:bafybeie3iqvutlsmiwawzhzdmfblletah3grsy4iouc5brty326g66svxy
+- valory/market_creation_manager_abci:0.1.0:bafybeifnxote53aqtiep5hwo2d5p6qsrjswthctbcrqledmn3ifkqpv73a
 - valory/reset_pause_abci:0.1.0:bafybeiencz2uytz6fqj5wg7mcunevxjh4xg5gd6pqcgkshgqywhcimweyi
 - valory/termination_abci:0.1.0:bafybeigainmpy37gb33ogbrpggjbkuasodhthh5oz4vbzjdfjozerpf224
 - valory/transaction_settlement_abci:0.1.0:bafybeigk3debp6dswutqsuls2lqfvyj4ghe6kwjc2zfinnsvj6hujynxtq
@@ -152,7 +152,7 @@ models:
         object. Do not include any other contents in your response.}
       max_proposed_markets: ${int:-1}
       max_approved_markets: ${int:-1}
-      markets_to_approve_per_epoch: ${int:2}
+      markets_to_approve_per_epoch: ${int:1}
       min_approve_markets_epoch_seconds: ${int:43200}
       approve_market_event_days_offset: ${int:5}
       approve_market_creator: ${str:0x0000000000000000000000000000000000000000}

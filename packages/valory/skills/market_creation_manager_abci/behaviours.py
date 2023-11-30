@@ -395,10 +395,10 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
             current_timestamp = self.last_synced_timestamp
             opening_timestamps = [
-                int(entry["openingTimestamp"])
+                int(entry["creationTimestamp"])
                 for entry in latest_open_markets.get("fixedProductMarketMakers", {})
             ]
-            largest_opening_timestamp = max(opening_timestamps)
+            largest_creation_timestamp = max(opening_timestamps)
 
             min_approve_markets_epoch_seconds = (
                 self.params.min_approve_markets_epoch_seconds
@@ -408,7 +408,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info(f"approved_markets_count={approved_markets_count}")
             self.context.logger.info(f"current_timestamp={current_timestamp}")
             self.context.logger.info(
-                f"largest_opening_timestamp={largest_opening_timestamp}"
+                f"largest_creation_timestamp={largest_creation_timestamp}"
             )
             self.context.logger.info(
                 f"min_approve_markets_epoch_seconds={min_approve_markets_epoch_seconds}"
@@ -423,7 +423,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     CollectProposedMarketsRound.MAX_APPROVED_MARKETS_REACHED_PAYLOAD
                 )
             elif (
-                current_timestamp - largest_opening_timestamp
+                current_timestamp - largest_creation_timestamp
                 < min_approve_markets_epoch_seconds
             ):
                 self.context.logger.info("Timeout to approve markets not reached.")
@@ -462,6 +462,9 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         """Auxiliary method to collect data from the endpoint."""
         self.context.logger.info("Collecting proposed markets.")
 
+        self.context.logger.info(f"from_timestamp={from_timestamp}")
+        self.context.logger.info(f"to_timestamp={to_timestamp}")
+
         url = self.params.market_approval_server_url + "/proposed_markets"
         headers = {
             "Authorization": self.params.market_approval_server_api_key,
@@ -484,6 +487,10 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         response_data = json.loads(response.body.decode())
         self.context.logger.info(f"Response received from {url}:\n {response_data}")
 
+        self.context.logger.info(
+            f"len(response_data)={len(response_data['proposed_markets'])}"
+        )
+
         filtered_markets_data = {
             "proposed_markets": {
                 market_id: market_info
@@ -491,6 +498,10 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 if from_timestamp <= market_info["resolution_time"] <= to_timestamp
             }
         }
+
+        self.context.logger.info(
+            f"len(filtered_markets_data)={len(filtered_markets_data['proposed_markets'])}"
+        )
 
         return filtered_markets_data
 
@@ -580,6 +591,10 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         """Get the LLM response"""
 
         markets_to_approve_per_epoch = self.params.markets_to_approve_per_epoch
+        self.context.logger.info(
+            f"markets_to_approve_per_epoch={markets_to_approve_per_epoch}"
+        )
+
         # TODO make params
         prompt_template = """Choose the best {markets_to_approve_per_epoch} questions under PROPOSED_QUESTIONS
             suitable to open prediction markets. The chosen questions must satisfy the following:
@@ -647,8 +662,23 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
         self.context.logger.info(f"Got LLM response: {result}")
 
-        json_data = json.loads(result)
-        return json_data
+        # Sanitize LLM response
+        sanitized_result: dict[str, Any] = {"markets_to_approve": []}
+        try:
+            json_data = json.loads(result)
+            if isinstance(json_data, dict) and "markets_to_approve" in json_data:
+                if isinstance(json_data["markets_to_approve"], list):
+                    sanitized_result = {
+                        "markets_to_approve": json_data["markets_to_approve"][
+                            :markets_to_approve_per_epoch
+                        ]
+                    }
+        except json.JSONDecodeError:
+            self.context.logger.error("Error decoding JSON response.")
+
+        self.context.logger.info(f"sanitized_result: {sanitized_result}")
+
+        return sanitized_result
 
     def _approve_market(self, market_id: Dict[str, str]) -> Generator[None, None, str]:
         """Auxiliary method to approve markets on the endpoint."""
