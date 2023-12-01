@@ -36,7 +36,7 @@ agent/
 
 ethereum_private_key.txt
 keys.json
-market_maker/
+./market_maker/
 fetched_service/
 keys_json/
 market_approval_server/market_approval_server.log
