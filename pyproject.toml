@@ -43,7 +43,4 @@ pytz = "==2022.2.1"
 typing_extensions = ">=3.10.0.2"
 hexbytes = "*"
 packaging = "*"
-
-[tool.poetry.group.dev.dependencies.tomte]
-version = "==0.2.14"
-extras = [ "cli", "tests",]
+tomte = {version = "==0.2.15", extras = ["cli", "tests"]}
