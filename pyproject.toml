@@ -16,7 +16,7 @@ include = "packages"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-open-autonomy = "==0.13.6"
+open-autonomy = "==0.13.8"
 toml = "==0.10.2"
 hypothesis = "==6.21.6"
 grpcio = "==1.53.0"
@@ -27,7 +27,7 @@ asn1crypto = "<1.5.0,>=1.4.0"
 open-aea-ledger-ethereum = "==1.42.0"
 openai = "==0.27.2"
 protobuf = "<4.25.0,>=4.21.6"
-open-aea-test-autonomy = "==0.13.6"
+open-aea-test-autonomy = "==0.13.8"
 ipfshttpclient = "==0.8.0a2"
 open-aea-cli-ipfs = "==1.42.0"
 requests = "==2.28.1"
@@ -43,7 +43,4 @@ pytz = "==2022.2.1"
 typing_extensions = ">=3.10.0.2"
 hexbytes = "*"
 packaging = "*"
-
-[tool.poetry.group.dev.dependencies.tomte]
-version = "==0.2.14"
-extras = [ "cli", "tests",]
+tomte = {version = "==0.2.15", extras = ["cli", "tests"]}
