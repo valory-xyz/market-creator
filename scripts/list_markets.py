@@ -53,11 +53,16 @@ if __name__ == "__main__":
     parser.add_argument("date", help="Target date in the format YYYY-MM-DD")
     args = parser.parse_args()
 
+    url = args.url.rstrip("/")
     target_date = args.date
-    data = requests.get(args.url).json()
-    filtered_markets = _filter_markets_by_date(data["proposed_markets"], target_date)
 
-    csv_filename = f"output-{target_date}.csv"
+    data = requests.get(url).json()
+
+    url_parts = url.split("/")
+    key_from_url = url_parts[-1]
+    filtered_markets = _filter_markets_by_date(data[key_from_url], target_date)
+
+    csv_filename = f"output-{key_from_url}-{target_date}.csv"
     with open(csv_filename, "w", newline="", encoding="utf-8") as csvfile:
         csv_writer = csv.writer(csvfile)
         csv_writer.writerows(filtered_markets)
