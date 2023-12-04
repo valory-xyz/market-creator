@@ -28,10 +28,12 @@ from packages.valory.skills.abstract_round_abci.base import (
     AbciAppTransitionFunction,
     AppState,
     BaseSynchronizedData,
+    CollectionRound,
     CollectSameUntilThresholdRound,
     DegenerateRound,
     EventToTimeout,
     OnlyKeeperSendsRound,
+    DeserializedCollection,
     get_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
@@ -58,6 +60,7 @@ class Event(Enum):
 
     NO_MAJORITY = "no_majority"
     DONE = "done"
+    NONE = "none"
     NO_TX = "no_tx"
     ROUND_TIMEOUT = "round_timeout"
     MARKET_PROPOSAL_ROUND_TIMEOUT = "market_proposal_round_timeout"
@@ -84,6 +87,11 @@ class SynchronizedData(TxSynchronizedData):
 
     This data is replicated by the tendermint application.
     """
+
+    def _get_deserialized(self, key: str) -> DeserializedCollection:
+        """Strictly get a collection and return it deserialized."""
+        serialized = self.db.get_strict(key)
+        return CollectionRound.deserialize_collection(serialized)
 
     @property
     def gathered_data(self) -> str:
@@ -116,6 +124,11 @@ class SynchronizedData(TxSynchronizedData):
         return cast(
             dict, self.db.get("proposed_markets_data", DEFAULT_PROPOSED_MARKETS_DATA)
         )
+
+    @property
+    def participant_to_collected_proposed_markets(self) -> DeserializedCollection:
+        """Get the participants to decision-making."""
+        return self._get_deserialized("participant_to_collected_proposed_markets")
 
     @property
     def collected_proposed_markets_data(self) -> dict:
@@ -349,9 +362,39 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
 
     payload_class = CollectProposedMarketsPayload
     synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    none_event = Event.NONE
+    no_majority_event = Event.NO_MAJORITY
+    selection_key = (
+        get_name(SynchronizedData.collected_proposed_markets_data),
+    )
+    collection_key = get_name(SynchronizedData.participant_to_collected_proposed_markets)
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+
+    def end_block(self) -> Optional[Tuple[SynchronizedData, Event]]:
         """Process the end of the block."""
+        res = super().end_block()
+        if res is None:
+            return None
+        
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
+
+        if event == Event.DONE and self.most_voted_payload == self.ERROR_PAYLOAD:
+            return synced_data, Event.ERROR
+
+        if event == Event.DONE and self.most_voted_payload == self.MAX_RETRIES_PAYLOAD:
+            return synced_data, Event.MAX_RETRIES_REACHED
+
+        if event == Event.DONE and self.most_voted_payload == self.MAX_APPROVED_MARKETS_REACHED_PAYLOAD:
+            return synced_data, Event.MAX_APPROVED_MARKETS_REACHED
+
+        if event == Event.DONE and self.most_voted_payload == self.SKIP_MARKET_APPROVAL_PAYLOAD:
+            return synced_data, Event.SKIP_MARKET_APPROVAL
+
+        return synced_data, event
+    
+
+
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 proposed_markets_api_retries = cast(

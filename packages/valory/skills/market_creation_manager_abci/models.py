@@ -34,20 +34,6 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 )
 
 
-DEFAULT_MARKET_FEE = 2.0
-DEFAULT_INITIAL_FUNDS = 1.0
-DEFAULT_MARKET_TIMEOUT = 1  # days
-DEFAULT_MAX_PROPOSED_MARKETS = -1
-DEFAULT_MAX_APPROVED_MARKETS = -1
-DEFAULT_MARKETS_TO_APPROVE_PER_EPOCH = 1
-DEFAULT_MIN_APPROVE_MARKETS_EPOCH_SECONDS = 43200  # 12 hours
-DEFAULT_APPROVE_MARKET_EVENT_DAYS_OFFSET = 5
-DEFAULT_EVENT_OFFSET_START_DAYS = 4
-DEFAULT_EVENT_OFFSET_END_DAYS = 7
-DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS = 7200
-DEFAULT_MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY = 45
-
-
 class SharedState(BaseSharedState):
     """Keep the current shared state of the skill."""
 
@@ -81,21 +67,20 @@ class MarketCreationManagerParams(BaseParams):
         self.news_sources = self._ensure(
             key="news_sources", kwargs=kwargs, type_=List[str]
         )
-        self.max_proposed_markets = kwargs.get(
-            "max_proposed_markets", DEFAULT_MAX_PROPOSED_MARKETS
+        self.max_proposed_markets = self._ensure(
+            "max_proposed_markets", kwargs, type_=int
         )
-        self.max_approved_markets = kwargs.get(
-            "max_approved_markets", DEFAULT_MAX_APPROVED_MARKETS
+        self.max_approved_markets = self._ensure(
+            "max_approved_markets", kwargs, type_=int
         )
-        self.markets_to_approve_per_epoch = kwargs.get(
-            "markets_to_approve_per_epoch", DEFAULT_MARKETS_TO_APPROVE_PER_EPOCH
+        self.markets_to_approve_per_epoch = self._ensure(
+            "markets_to_approve_per_epoch", kwargs, type_=int
         )
-        self.min_approve_markets_epoch_seconds = kwargs.get(
-            "min_approve_markets_epoch_seconds",
-            DEFAULT_MIN_APPROVE_MARKETS_EPOCH_SECONDS,
+        self.min_approve_markets_epoch_seconds = self._ensure(
+            "min_approve_markets_epoch_seconds", kwargs, type_=int
         )
-        self.approve_market_event_days_offset = kwargs.get(
-            "approve_market_event_days_offset", DEFAULT_APPROVE_MARKET_EVENT_DAYS_OFFSET
+        self.approve_market_event_days_offset = self._ensure(
+            "approve_market_event_days_offset", kwargs, type_=int
         )
         self.approve_market_creator = self._ensure(
             key="approve_market_creator",
@@ -132,24 +117,21 @@ class MarketCreationManagerParams(BaseParams):
             kwargs=kwargs,
             type_=str,
         )
-        self.market_fee = kwargs.get("market_fee", DEFAULT_MARKET_FEE)
-        self.market_timeout = kwargs.get("market_timeout", DEFAULT_MARKET_TIMEOUT)
-        self.event_offset_start_days = kwargs.get(
-            "event_offset_start_days", DEFAULT_EVENT_OFFSET_START_DAYS
+        self.market_fee = self._ensure("market_fee", kwargs, type_=float)
+        self.market_timeout = self._ensure("market_timeout", kwargs, type_=int)
+        self.event_offset_start_days = self._ensure(
+            "event_offset_start_days", kwargs, type_=int
         )
-        self.event_offset_end_days = kwargs.get(
-            "event_offset_end_days", DEFAULT_EVENT_OFFSET_END_DAYS
+        self.event_offset_end_days = self._ensure(
+            "event_offset_end_days", kwargs, type_=int
         )
-        self.min_market_proposal_interval_seconds = kwargs.get(
-            "min_market_proposal_interval_seconds",
-            DEFAULT_MIN_MARKET_PROPOSAL_INTERVAL_SECONDS,
+        self.min_market_proposal_interval_seconds = self._ensure(
+            "min_market_proposal_interval_seconds", kwargs, type_=int
         )
-        self.market_proposal_round_timeout_seconds_per_day = kwargs.get(
-            "market_proposal_round_timeout_seconds_per_day",
-            DEFAULT_MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY,
+        self.market_proposal_round_timeout_seconds_per_day = self._ensure(
+            "market_proposal_round_timeout_seconds_per_day", kwargs, type_=int
         )
-
-        self.initial_funds = kwargs.get("initial_funds", DEFAULT_INITIAL_FUNDS)
+        self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         super().__init__(*args, **kwargs)
 
 
