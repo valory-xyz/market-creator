@@ -107,3 +107,4 @@ class ApproveMarketsPayload(BaseTxPayload):
     """Represent a transaction payload for the ApproveMarketsRound."""
 
     content: str
+    approved_markets_count: int

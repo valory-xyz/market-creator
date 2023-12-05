@@ -10,13 +10,13 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeiccdhhqdjfim6yjuizqrthdbrxd6j4ofispeziod73k2hb6peqfm4
+  behaviours.py: bafybeibi53ecb4u6vq4uv2nad5eu4yrt3st7vuw6fdmmxy6535jibdhnha
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
-  fsm_specification.yaml: bafybeigmh3jcyr5ztvdpi6kaxnlmaazmpprgw3gfgja6jqdrcfrf53gbnu
+  fsm_specification.yaml: bafybeihbesgz2dosveibkqxryyimdrxipbfjgoohg2xefipgkwb5uftq24
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeihhpil3zvysuf7psrpk3i4d4tkk7k26ygpkapuyt5cvzdzhecvloa
-  payloads.py: bafybeibhh2x5gdgyhfisvrcvkovhqrgd6foqknjypnegqyoh4zmgop5zqu
-  rounds.py: bafybeidtdlgc5vb2kkanvqc3cgufdvfviaoc6rjtvby7lyiqzhtumzkxr4
+  models.py: bafybeiafms2a2lgjftxktxp2lqgbwq3pjzzixsxtgjw7eyfbvpsap2mo7e
+  payloads.py: bafybeicwue4g7q55q2kkbyujggnzkr7xef3hg5veimnmsdgbvylenjgxlu
+  rounds.py: bafybeicaygre3efljb2qwv2ywbeqyodkczmvpdlmdnmt5bwat4l2w6ld3a
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -91,6 +91,7 @@ models:
       max_proposed_markets: -1
       max_approved_markets: -1
       markets_to_approve_per_epoch: 1
+      markets_to_approve_per_day: 10
       min_approve_markets_epoch_seconds: 43200
       approve_market_event_days_offset: 5
       approve_market_creator: '0x0000000000000000000000000000000000000000'

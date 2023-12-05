@@ -73,6 +73,9 @@ class MarketCreationManagerParams(BaseParams):
         self.max_approved_markets = self._ensure(
             "max_approved_markets", kwargs, type_=int
         )
+        self.markets_to_approve_per_day = self._ensure(
+            "markets_to_approve_per_day", kwargs, type_=int
+        )
         self.markets_to_approve_per_epoch = self._ensure(
             "markets_to_approve_per_epoch", kwargs, type_=int
         )

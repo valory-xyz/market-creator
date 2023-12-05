@@ -42,14 +42,14 @@ states:
 transition_func:
     (ApproveMarketsRound, DONE): DataGatheringRound
     (ApproveMarketsRound, ERROR): DataGatheringRound
-    (ApproveMarketsRound, NO_MAJORITY): CollectRandomnessRound
-    (ApproveMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (ApproveMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
+    (ApproveMarketsRound, ROUND_TIMEOUT): DataGatheringRound
     (CollectProposedMarketsRound, DONE): ApproveMarketsRound
     (CollectProposedMarketsRound, ERROR): DataGatheringRound
     (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
     (CollectProposedMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
     (CollectProposedMarketsRound, NO_MAJORITY): CollectRandomnessRound
-    (CollectProposedMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (CollectProposedMarketsRound, ROUND_TIMEOUT): DataGatheringRound
     (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): DataGatheringRound
     (CollectRandomnessRound, DONE): SelectKeeperRound
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
