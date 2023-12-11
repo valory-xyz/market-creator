@@ -93,3 +93,18 @@ class PostTxPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 
     content: str
+
+
+@dataclass(frozen=True)
+class CollectProposedMarketsPayload(BaseTxPayload):
+    """Represent a transaction payload for the CollectProposedMarketsRound."""
+
+    content: str
+
+
+@dataclass(frozen=True)
+class ApproveMarketsPayload(BaseTxPayload):
+    """Represent a transaction payload for the ApproveMarketsRound."""
+
+    content: str
+    approved_markets_count: int

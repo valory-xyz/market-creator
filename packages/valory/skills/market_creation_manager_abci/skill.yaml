@@ -10,13 +10,13 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeih2pbeeixtg4blt2fhqffqra76v4derkwemuhpi5cvtgmsy4baggu
+  behaviours.py: bafybeibi53ecb4u6vq4uv2nad5eu4yrt3st7vuw6fdmmxy6535jibdhnha
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
-  fsm_specification.yaml: bafybeibpi74yvaw4zqnccjqrzfxr5fv32657sqswv7eetmxfe7ag3n57ei
+  fsm_specification.yaml: bafybeihbesgz2dosveibkqxryyimdrxipbfjgoohg2xefipgkwb5uftq24
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeib6hmr37xquamjlgbrsokjoxhmb7udtwfnswgglfaxcwl5bfqw7ra
-  payloads.py: bafybeigq26azirudcy5zpkr7zk4enfuj5q45ej6nklcc7s3ewtavixwlge
-  rounds.py: bafybeiawz4f3y26nb77hithhfijmpwopwzrcaqpfks26nxjmf5wpma25iq
+  models.py: bafybeiafms2a2lgjftxktxp2lqgbwq3pjzzixsxtgjw7eyfbvpsap2mo7e
+  payloads.py: bafybeicwue4g7q55q2kkbyujggnzkr7xef3hg5veimnmsdgbvylenjgxlu
+  rounds.py: bafybeicaygre3efljb2qwv2ywbeqyodkczmvpdlmdnmt5bwat4l2w6ld3a
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -89,6 +89,12 @@ models:
     args:
       market_identification_prompt: market_identification_prompt
       max_proposed_markets: -1
+      max_approved_markets: -1
+      markets_to_approve_per_epoch: 1
+      markets_to_approve_per_day: 10
+      min_approve_markets_epoch_seconds: 43200
+      approve_market_event_days_offset: 5
+      approve_market_creator: '0x0000000000000000000000000000000000000000'
       market_approval_server_url: http://127.0.0.1:5000
       market_approval_server_api_key: api_key
       newsapi_endpoint: https://newsapi.org/v2/top-headlines

@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
-- valory/market_maker_abci:0.1.0:bafybeihz2qyzcmumtkr6z5zsd5yxkkhuqylhyg4hjmu36zfye26aklloui
+- valory/market_maker_abci:0.1.0:bafybeia5udk5xsqoqqjzosuxohsqpdpkhtwujai3a55qlzemrxll4a3fte
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
-- valory/market_creation_manager_abci:0.1.0:bafybeif2y6uu4oblmty7bjbnslou2mxd3dmbnd3t25mj7ywyttjtzrnxay
+- valory/market_creation_manager_abci:0.1.0:bafybeiavrnas7ulajfpfk6oqrnc3ajjkhuqpfbagnyzpxritceujr2m4tq
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
@@ -151,6 +151,12 @@ models:
         topic of the news and it should be one of; {topics}.\n* Output only the JSON
         object. Do not include any other contents in your response.}
       max_proposed_markets: ${int:-1}
+      max_approved_markets: ${int:-1}
+      markets_to_approve_per_epoch: ${int:1}
+      markets_to_approve_per_day: ${int:10}
+      min_approve_markets_epoch_seconds: ${int:43200}
+      approve_market_event_days_offset: ${int:5}
+      approve_market_creator: ${str:0x0000000000000000000000000000000000000000}
       market_approval_server_url: ${str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${str:api_key}
       newsapi_endpoint: ${str:https://newsapi.org/v2/top-headlines}

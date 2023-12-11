@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeifihpw4beu5c7btzcucxojhi2h27iedcdo2ldda6zsqj4tlwb2hgi
+agent: valory/market_maker:0.1.0:bafybeigrbwonw2kru3waihszlsy6gmf4adnihva4zwffj5x5qwpk6cpvhe
 number_of_agents: 1
 deployment:
   agent:
@@ -42,6 +42,12 @@ models:
         topic of the news and it should be one of; {topics}.\n* Output only the JSON
         object. Do not include any other contents in your response.}
       max_proposed_markets: ${MAX_PROPOSED_MARKETS:int:-1}
+      max_approved_markets: ${MAX_APPROVED_MARKETS:int:-1}
+      markets_to_approve_per_epoch: ${MARKETS_TO_APPROVE_PER_EPOCH:int:1}
+      markets_to_approve_per_day: ${MARKETS_TO_APPROVE_PER_DAY:int:10}
+      min_approve_markets_epoch_seconds: ${MIN_APPROVE_MARKETS_EPOCH_SECONDS:int:43200}
+      approve_market_event_days_offset: ${APPROVE_MARKET_EVENT_DAYS_OFFSET:int:5}
+      approve_market_creator: ${APPROVE_MARKET_CREATOR:str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}
       market_approval_server_url: ${MARKET_APPROVAL_SERVER_URL:str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/top-headlines}
