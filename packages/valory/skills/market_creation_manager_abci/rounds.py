@@ -90,11 +90,6 @@ class SynchronizedData(TxSynchronizedData):
     This data is replicated by the tendermint application.
     """
 
-    def _get_deserialized(self, key: str) -> DeserializedCollection:
-        """Strictly get a collection and return it deserialized."""
-        serialized = self.db.get_strict(key)
-        return CollectionRound.deserialize_collection(serialized)
-
     @property
     def gathered_data(self) -> str:
         """Get the llm_values."""
@@ -190,6 +185,22 @@ class SynchronizedData(TxSynchronizedData):
     def tx_sender(self) -> str:
         """Get the round that send the transaction through transaction settlement."""
         return cast(str, self.db.get_strict("tx_sender"))
+
+    # This is a fix to ensure approved_markets_count is always set up on
+    # the SynchronizedData before ResetAndPause
+    def ensure_property_is_set(self, property_name: str) -> "SynchronizedData":
+        try:
+            value = self.db.get_strict(property_name)
+        except ValueError:
+            value = getattr(self, property_name)
+
+        return cast(
+            SynchronizedData,
+            self.update(
+                synchronized_data_class=SynchronizedData,
+                **{property_name: value},
+            ),
+        )
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -374,6 +385,18 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
         synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
         payload = self.most_voted_payload
 
+        # Fix to ensure properties are present on the SynchronizedData
+        # before ResetAndPause round.
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.approved_markets_count)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.proposed_markets_count)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.proposed_markets_data)
+        )
+
         if event == Event.DONE and payload == self.ERROR_PAYLOAD:
             return synced_data, Event.ERROR
 
@@ -438,6 +461,7 @@ class DataGatheringRound(CollectSameUntilThresholdRound):
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """Process the end of the block."""
+
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 newsapi_api_retries = cast(
