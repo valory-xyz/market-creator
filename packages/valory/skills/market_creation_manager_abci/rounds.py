@@ -29,9 +29,7 @@ from packages.valory.skills.abstract_round_abci.base import (
     AppState,
     BaseSynchronizedData,
     CollectSameUntilThresholdRound,
-    CollectionRound,
     DegenerateRound,
-    DeserializedCollection,
     EventToTimeout,
     OnlyKeeperSendsRound,
     get_name,
@@ -186,9 +184,10 @@ class SynchronizedData(TxSynchronizedData):
         """Get the round that send the transaction through transaction settlement."""
         return cast(str, self.db.get_strict("tx_sender"))
 
-    # This is a fix to ensure approved_markets_count is always set up on
+    # This is a fix to ensure a given property is always set up on
     # the SynchronizedData before ResetAndPause
     def ensure_property_is_set(self, property_name: str) -> "SynchronizedData":
+        """Ensure a property is set."""
         try:
             value = self.db.get_strict(property_name)
         except ValueError:
