@@ -413,10 +413,6 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             latest_approve_market_execution = json_data["timestamp"]
 
-            print("!!!!!!!!!!!!!!!!!!!!!!!")
-            print(json_data)
-            print("!!!!!!!!!!!!!!!!!!!!!!!")
-
             # Determine num_markets_to_approve so that each day there are N closing markets.
             opening_timestamps = [
                 int(entry["openingTimestamp"])
