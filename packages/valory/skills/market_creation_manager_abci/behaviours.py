@@ -408,10 +408,9 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             ]
             largest_creation_timestamp = max(creation_timestamps)
 
-            json_data = json.loads(
-                self.synchronized_data.collected_proposed_markets_data
+            latest_approve_market_timestamp = (
+                self.synchronized_data.approved_markets_timestamp
             )
-            latest_approve_market_execution = json_data["timestamp"]
 
             # Determine num_markets_to_approve so that each day there are N closing markets.
             opening_timestamps = [
@@ -450,7 +449,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 f"largest_creation_timestamp={largest_creation_timestamp}"
             )
             self.context.logger.info(
-                f"latest_approve_market_execution={latest_approve_market_execution}"
+                f"latest_approve_market_execution={latest_approve_market_timestamp}"
             )
             self.context.logger.info(
                 f"min_approve_markets_epoch_seconds={min_approve_markets_epoch_seconds}"
@@ -469,7 +468,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     CollectProposedMarketsRound.MAX_APPROVED_MARKETS_REACHED_PAYLOAD
                 )
             elif (
-                current_timestamp - latest_approve_market_execution
+                current_timestamp - latest_approve_market_timestamp
                 < min_approve_markets_epoch_seconds
             ):
                 self.context.logger.info("Timeout to approve markets not reached (1).")
@@ -637,6 +636,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 content=json.dumps(markets_to_approve, sort_keys=True),
                 approved_markets_count=len(markets_to_approve["markets_to_approve"])
                 + self.synchronized_data.approved_markets_count,
+                timestamp=self.last_synced_timestamp,
             )
 
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():

@@ -116,6 +116,11 @@ class SynchronizedData(TxSynchronizedData):
         return cast(int, self.db.get("approved_markets_count", 0))
 
     @property
+    def approved_markets_timestamp(self) -> int:
+        """Get the approved_markets_count."""
+        return cast(int, self.db.get("approved_markets_timestamp", 0))
+
+    @property
     def proposed_markets_data(self) -> dict:
         """Get the proposed_markets_data."""
         return cast(
@@ -234,7 +239,7 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
             get_name(SynchronizedData.proposed_markets_data)
         )
         synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.collected_proposed_markets_data)
+            get_name(SynchronizedData.approved_markets_timestamp)
         )
 
         return synced_data, event
@@ -439,6 +444,7 @@ class ApproveMarketsRound(OnlyKeeperSendsRound):
     payload_key = (
         get_name(SynchronizedData.approved_markets_data),
         get_name(SynchronizedData.approved_markets_count),
+        get_name(SynchronizedData.approved_markets_timestamp),
     )
     collection_key = get_name(SynchronizedData.participant_to_selection)
 
@@ -801,7 +807,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.proposed_markets_count),
         get_name(SynchronizedData.proposed_markets_data),
         get_name(SynchronizedData.approved_markets_count),
-        get_name(SynchronizedData.collected_proposed_markets_data),
+        get_name(SynchronizedData.approved_markets_timestamp),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),
