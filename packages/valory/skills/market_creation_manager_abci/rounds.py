@@ -214,6 +214,31 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     collection_key = get_name(SynchronizedData.participant_to_randomness)
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
 
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
+        """Process the end of the block."""
+        res = super().end_block()
+        if res is None:
+            return None
+
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
+
+        # Fix to ensure properties are present on the SynchronizedData
+        # before ResetAndPause round.
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.approved_markets_count)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.proposed_markets_count)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.proposed_markets_data)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.collected_proposed_markets_data)
+        )
+
+        return synced_data, event
+
 
 class PostTransactionRound(CollectSameUntilThresholdRound):
     """A round to be run after a transaction has been settled."""
@@ -385,18 +410,6 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
 
         synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
         payload = self.most_voted_payload
-
-        # Fix to ensure properties are present on the SynchronizedData
-        # before ResetAndPause round.
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.approved_markets_count)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.proposed_markets_count)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.proposed_markets_data)
-        )
 
         if event == Event.DONE and payload == self.ERROR_PAYLOAD:
             return synced_data, Event.ERROR
@@ -788,6 +801,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.proposed_markets_count),
         get_name(SynchronizedData.proposed_markets_data),
         get_name(SynchronizedData.approved_markets_count),
+        get_name(SynchronizedData.collected_proposed_markets_data),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),

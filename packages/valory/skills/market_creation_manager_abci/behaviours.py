@@ -165,7 +165,7 @@ FPMM_QUERY = Template(
     fixedProductMarketMakers(
         where: {creator: "$creator"}
         first: 100
-        orderBy: openingTimestamp
+        orderBy: creationTimestamp
         orderDirection: desc
     ) {
         currentAnswerTimestamp
@@ -412,6 +412,10 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 self.synchronized_data.collected_proposed_markets_data
             )
             latest_approve_market_execution = json_data["timestamp"]
+
+            print("!!!!!!!!!!!!!!!!!!!!!!!")
+            print(json_data)
+            print("!!!!!!!!!!!!!!!!!!!!!!!")
 
             # Determine num_markets_to_approve so that each day there are N closing markets.
             opening_timestamps = [
