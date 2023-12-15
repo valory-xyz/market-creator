@@ -75,7 +75,9 @@ class Event(Enum):
 DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
 DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA = json.dumps(
     {
-        "collected_proposed_markets": [],
+        "proposed_markets": [],
+        "fixedProductMarketMakers": [],
+        "num_markets_to_approve": 0,
         "timestamp": 0,
     }
 )

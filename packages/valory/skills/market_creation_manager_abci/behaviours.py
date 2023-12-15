@@ -165,7 +165,7 @@ FPMM_QUERY = Template(
     fixedProductMarketMakers(
         where: {creator: "$creator"}
         first: 100
-        orderBy: creationTimestamp
+        orderBy: openingTimestamp
         orderDirection: desc
     ) {
         currentAnswerTimestamp
@@ -408,6 +408,11 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             ]
             largest_creation_timestamp = max(creation_timestamps)
 
+            json_data = json.loads(
+                self.synchronized_data.collected_proposed_markets_data
+            )
+            latest_approve_market_execution = json_data["timestamp"]
+
             # Determine num_markets_to_approve so that each day there are N closing markets.
             opening_timestamps = [
                 int(entry["openingTimestamp"])
@@ -445,6 +450,9 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 f"largest_creation_timestamp={largest_creation_timestamp}"
             )
             self.context.logger.info(
+                f"latest_approve_market_execution={latest_approve_market_execution}"
+            )
+            self.context.logger.info(
                 f"min_approve_markets_epoch_seconds={min_approve_markets_epoch_seconds}"
             )
             self.context.logger.info(
@@ -461,10 +469,16 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     CollectProposedMarketsRound.MAX_APPROVED_MARKETS_REACHED_PAYLOAD
                 )
             elif (
+                current_timestamp - latest_approve_market_execution
+                < min_approve_markets_epoch_seconds
+            ):
+                self.context.logger.info("Timeout to approve markets not reached (1).")
+                content = CollectProposedMarketsRound.SKIP_MARKET_APPROVAL_PAYLOAD
+            elif (
                 current_timestamp - largest_creation_timestamp
                 < min_approve_markets_epoch_seconds
             ):
-                self.context.logger.info("Timeout to approve markets not reached.")
+                self.context.logger.info("Timeout to approve markets not reached (2).")
                 content = CollectProposedMarketsRound.SKIP_MARKET_APPROVAL_PAYLOAD
             elif num_markets_to_approve <= 0:
                 self.context.logger.info("No market approval required.")
@@ -485,6 +499,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 content_data.update(latest_open_markets)
                 content_data.update(proposed_markets)
                 content_data["num_markets_to_approve"] = num_markets_to_approve
+                content_data["timestamp"] = current_timestamp
                 content = json.dumps(content_data, sort_keys=True)
 
             payload = CollectProposedMarketsPayload(
