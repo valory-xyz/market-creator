@@ -46,7 +46,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
-    SyncMarketsPayload,
+    SyncMarketsPayload, CloseMarketsPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -665,6 +665,43 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
                 ),
                 Event.DONE,
             )
+        return None
+
+
+
+class CloseMarketsRound(CollectSameUntilThresholdRound):
+    """CloseMarketsRound"""
+
+    payload_class = CloseMarketsPayload
+    synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+    collection_key = "content"
+
+    NO_TX = "no_tx"
+    ERROR_PAYLOAD = "error"
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
+        """End block."""
+        if self.threshold_reached:
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                return self.synchronized_data, Event.ERROR
+            if self.most_voted_payload == self.NO_TX:
+                return self.synchronized_data, Event.NO_TX
+            state = self.synchronized_data.update(
+                synchronized_data_class=self.synchronized_data_class,
+                **{
+                    get_name(
+                        SynchronizedData.most_voted_tx_hash
+                    ): self.most_voted_payload,
+                }
+            )
+            return state, Event.DONE
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+
         return None
 
 

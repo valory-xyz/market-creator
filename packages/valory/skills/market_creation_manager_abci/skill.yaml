@@ -10,13 +10,14 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeibi53ecb4u6vq4uv2nad5eu4yrt3st7vuw6fdmmxy6535jibdhnha
+  behaviours.py: bafybeibj76ecmby3sz54ettgpuxd2rogr7oa4v3vztmgf4wbvi2zbvrle4
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeihbesgz2dosveibkqxryyimdrxipbfjgoohg2xefipgkwb5uftq24
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeiafms2a2lgjftxktxp2lqgbwq3pjzzixsxtgjw7eyfbvpsap2mo7e
-  payloads.py: bafybeicwue4g7q55q2kkbyujggnzkr7xef3hg5veimnmsdgbvylenjgxlu
-  rounds.py: bafybeihzj777plqs425smsgtczcob5ybbreexrdcg2gbtzw3nwm5lotn6m
+  models.py: bafybeic2aara424fcojfrwhzpwukyzvp5hi2wd3balgjunn3w5jcfg4gou
+  payloads.py: bafybeib5nbork6jlowjwovjhfooddcks63ylqziz2sp6u6frmztx5nxtai
+  prompts.py: bafybeifub6vvxemlhmjin44wcy2mybnltyeypuydntjq2ioihxq4uancdu
+  rounds.py: bafybeicwfimkq3lzuas5mumxmiydcwpmhrtum5uflnuqyh64bsed6ex3wu
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -24,7 +25,7 @@ connections:
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeidll7frtdsq2ckiluazkwk4zpkp7natt4kdejjehwvykqwzyuf6ei
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
-- valory/realtio:0.1.0:bafybeiaqs3onithjb76vecq5qkl5dkchm6vj76yqesdbpcpfmcjnzszhki
+- valory/realtio:0.1.0:bafybeib54zmyanceeqy4336xc5ttxyo5t3jnbdn4evfazjzded2wuwxqeq
 - valory/conditional_tokens:0.1.0:bafybeifbhritgoqecuilj35uzrrokm2ngfmwkoafbmzxgvpa4q3wpi6i64
 - valory/fpmm_deterministic_factory:0.1.0:bafybeih5yb4df6plwsxicp4jtywvpqmjnvfw55zw35yuycwxrx7mehoowy
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
@@ -199,6 +200,8 @@ models:
       tendermint_p2p_url: localhost:26656
       tendermint_url: http://localhost:26657
       tx_timeout: 10.0
+      close_question_bond: 1000000000000000
+      num_questions_to_close: 5
       validate_timeout: 1205
       use_termination: false
       use_slashing: false
