@@ -2056,6 +2056,8 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
 class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
     """Close market behaviour"""
 
+    matching_round = CloseMarketsRound
+
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
@@ -2296,6 +2298,7 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     behaviours: Set[Type[BaseBehaviour]] = {
         CollectRandomnessBehaviour,
         CollectProposedMarketsBehaviour,
+        CloseMarketBehaviour,
         ApproveMarketsBehaviour,
         DataGatheringBehaviour,
         SelectKeeperMarketProposalBehaviour,
