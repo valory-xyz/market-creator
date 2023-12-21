@@ -728,9 +728,16 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     initial_states: Set[AppState] = {CollectRandomnessRound, PostTransactionRound}
     transition_function: AbciAppTransitionFunction = {
         PostTransactionRound: {
-            Event.DONE: CollectRandomnessRound,
+            Event.DONE: CloseMarketsRound,
             Event.ERROR: PostTransactionRound,
             Event.NO_MAJORITY: PostTransactionRound,
+        },
+        CloseMarketsRound: {
+            Event.DONE: FinishedMarketCreationManagerRound,
+            Event.NO_TX: CollectRandomnessRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ERROR: CollectRandomnessRound,
+            Event.ROUND_TIMEOUT: CloseMarketsRound,
         },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
