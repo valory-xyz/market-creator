@@ -222,7 +222,11 @@ OPEN_FPMM_QUERY = Template(
     }"""
 )
 
+TOP_HEADLINES = 'top-headlines'
+EVERYTHING = 'everything'
 
+ARTICLE_LIMIT = 1_000
+ADDITIONAL_INFO_LIMIT = 5_000
 
 def to_content(query: str) -> bytes:
     """Convert the given query string to payload content, i.e., add it under a `queries` key and convert it to bytes."""
@@ -1373,9 +1377,11 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
             "sources": ",".join(sources),
             "pageSize": "100",
         }
+        # only get articles from top headlines
+        url = f'{self.params.newsapi_endpoint}/{TOP_HEADLINES}'
         response = yield from self.get_http_response(
             method="GET",
-            url=self.params.newsapi_endpoint,
+            url=url,
             headers=headers,
             parameters=parameters,
         )
@@ -2073,7 +2079,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         self,
     ) -> Generator[None, None, List[Dict[str, Any]]]:
         """Collect FPMM from subgraph."""
-        creator = self.params.approve_market_creator
+        creator = self.synchronized_data.safe_contract_address.lower()
         response = yield from self.get_subgraph_result(
             query=OPEN_FPMM_QUERY.substitute(
                 creator=creator,
@@ -2143,9 +2149,12 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 continue
             for article in news_articles:
                 title = article["title"]
-                content = article["content"]
+                content = article["content"][:ARTICLE_LIMIT]
                 date = article["publishedAt"]
-                input_news += f"- ({date}) {title}\n  {content}\n\n"
+                current_article = f"- ({date}) {title}\n  {content}\n\n"
+                if len(input_news) + len(current_article) > ADDITIONAL_INFO_LIMIT:
+                    break
+                input_news += current_article
 
         if len(input_news) == 0:
             self.context.logger.info(f"No news articles found for queries {queries}")
@@ -2181,17 +2190,17 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
 
     def _get_news(self, query: str) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
         """Auxiliary method to collect data from endpoint."""
-        news_sources = self.params.news_sources
         headers = {"X-Api-Key": self.params.newsapi_api_key}
 
         parameters = {
-            "sources": ",".join(news_sources),
             "q": query,
             "pageSize": "100",
         }
+        # search through all articles everything
+        url = f'{self.params.newsapi_endpoint}/{EVERYTHING}'
         response = yield from self.get_http_response(
             method="GET",
-            url=self.params.newsapi_endpoint,
+            url=url,
             headers=headers,
             parameters=parameters,
         )
@@ -2206,7 +2215,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         self.context.logger.info(
             f"Response received from {self.params.newsapi_endpoint}:\n {response_data}"
         )
-        return response_data
+        return response_data["articles"]
 
     def _get_answer_tx(self, question_id: str, answer: str) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Get an answer a tx."""
