@@ -40,8 +40,8 @@ USER_PROMPT:
 OUTPUT_FORMAT
 * Your output response must be only a single JSON object to be parsed by Python's "json.loads()".
 * The JSON must contain two fields: "queries", and "urls".
-   - "queries": An array of strings of size between 1 and 5. Each string must be a search engine query that can help 
-     obtain relevant information to check that the event in "USER_PROMPT" occurs. 
+   - "queries": An array of strings of size between 1 and 5. Each string must be a search engine query that can help
+     obtain relevant information to check that the event in "USER_PROMPT" occurs.
      You must provide original information in each query, and they should not overlap.
      or lead to obtain the same set of results.
 * Output only the JSON object. Do not include any other contents in your response.
@@ -55,7 +55,7 @@ under the label "INSTRUCTIONS". You must provide your response in the format spe
 INSTRUCTIONS
 * Read the input under the label "USER_PROMPT" delimited by three backticks.
 * The "USER_PROMPT" specifies an event.
-* The "USER_PROMPT" will contain a date which in the past. 
+* The "USER_PROMPT" will contain a date which in the past.
 * The event will only have two possible outcomes: either the event has happened or the event has not happened.
 * If the event has more than two possible outcomes, you must ignore the rest of the instructions and output the response "Error".
 * You must provide a decision whether the event in "USER_PROMPT" has occurred or not.
@@ -77,7 +77,7 @@ ADDITIONAL_INFORMATION:
 
 OUTPUT_FORMAT
 * Your output response must be only a single JSON object to be parsed by Python's "json.loads()".
-* The JSON must contain one field: "has_occurred". When the event in "USER_PROMPT" has occurred, the value of 
+* The JSON must contain one field: "has_occurred". When the event in "USER_PROMPT" has occurred, the value of
 "has_occurred" must be true if it has occurred, and false if it has not.
 * Output only the JSON object. Do not include any other contents in your response.
 """

@@ -36,6 +36,7 @@ from packages.valory.skills.abstract_round_abci.base import (
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     ApproveMarketsPayload,
+    CloseMarketsPayload,
     CollectProposedMarketsPayload,
     CollectRandomnessPayload,
     DataGatheringPayload,
@@ -46,7 +47,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
-    SyncMarketsPayload, CloseMarketsPayload,
+    SyncMarketsPayload,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -668,7 +669,6 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
         return None
 
 
-
 class CloseMarketsRound(CollectSameUntilThresholdRound):
     """CloseMarketsRound"""
 
@@ -694,7 +694,7 @@ class CloseMarketsRound(CollectSameUntilThresholdRound):
                     get_name(
                         SynchronizedData.most_voted_tx_hash
                     ): self.most_voted_payload,
-                }
+                },
             )
             return state, Event.DONE
         if not self.is_majority_possible(

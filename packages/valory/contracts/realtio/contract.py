@@ -251,6 +251,6 @@ class RealtioContract(Contract):
                 question_id,
                 answer,
                 max_previous,
-            ]
+            ],
         )
         return dict(data=data)

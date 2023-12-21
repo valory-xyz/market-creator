@@ -35,6 +35,7 @@ states:
 - ApproveMarketsRound
 - CheckLateTxHashesRound
 - CheckTransactionHistoryRound
+- CloseMarketsRound
 - CollectProposedMarketsRound
 - CollectRandomnessRound
 - CollectSignatureRound
@@ -75,6 +76,11 @@ transition_func:
     (CheckTransactionHistoryRound, NEGATIVE): SelectKeeperTransactionSubmissionBRound
     (CheckTransactionHistoryRound, NONE): ResetAndPauseRound
     (CheckTransactionHistoryRound, NO_MAJORITY): CheckTransactionHistoryRound
+    (CloseMarketsRound, DONE): RandomnessTransactionSubmissionRound
+    (CloseMarketsRound, ERROR): CollectRandomnessRound
+    (CloseMarketsRound, NO_MAJORITY): CollectRandomnessRound
+    (CloseMarketsRound, NO_TX): CollectRandomnessRound
+    (CloseMarketsRound, ROUND_TIMEOUT): CloseMarketsRound
     (CollectProposedMarketsRound, DONE): ApproveMarketsRound
     (CollectProposedMarketsRound, ERROR): DataGatheringRound
     (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
@@ -110,7 +116,7 @@ transition_func:
     (MarketProposalRound, ERROR): RetrieveApprovedMarketRound
     (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
-    (PostTransactionRound, DONE): CollectRandomnessRound
+    (PostTransactionRound, DONE): CloseMarketsRound
     (PostTransactionRound, ERROR): PostTransactionRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
     (PrepareTransactionRound, DONE): RandomnessTransactionSubmissionRound

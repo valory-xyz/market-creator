@@ -83,15 +83,20 @@ from packages.valory.skills.market_creation_manager_abci.models import (
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     ApproveMarketsPayload,
+    CloseMarketsPayload,
     CollectProposedMarketsPayload,
     DepositDaiPayload,
     PostTxPayload,
     RemoveFundingPayload,
-    SyncMarketsPayload, CloseMarketsPayload,
+    SyncMarketsPayload,
 )
-from packages.valory.skills.market_creation_manager_abci.prompts import URL_QUERY_PROMPT_TEMPLATE, OUTCOME_PROMPT_TEMPLATE
+from packages.valory.skills.market_creation_manager_abci.prompts import (
+    OUTCOME_PROMPT_TEMPLATE,
+    URL_QUERY_PROMPT_TEMPLATE,
+)
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     ApproveMarketsRound,
+    CloseMarketsRound,
     CollectProposedMarketsRound,
     CollectRandomnessPayload,
     CollectRandomnessRound,
@@ -110,7 +115,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     SelectKeeperPayload,
     SelectKeeperRound,
     SyncMarketsRound,
-    SynchronizedData, CloseMarketsRound,
+    SynchronizedData,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -129,16 +134,14 @@ AVAILABLE_FORMATS = (
     "%Y-%m-%d",
 )
 
-
 _ONE_DAY = 86400
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
 ANSWER_NO, ANSWER_YES = (
-    '0x0000000000000000000000000000000000000000000000000000000000000000',
-    '0x0000000000000000000000000000000000000000000000000000000000000001',
+    "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000000000000000000000000001",
 )
-
 
 FPMM_POOL_MEMBERSHIPS_QUERY = Template(
     """  {
@@ -196,7 +199,7 @@ OPEN_FPMM_QUERY = Template(
         where: {
             creator: "$creator"
             openingTimestamp_lt: $current_timestamp
-        	answerFinalizedTimestamp: null
+        answerFinalizedTimestamp: null
             currentAnswerBond: null
         }
         first: 100
@@ -209,7 +212,7 @@ OPEN_FPMM_QUERY = Template(
         creationTimestamp
         currentAnswer
         id
-        answerFinalizedTimestamp    
+        answerFinalizedTimestamp
         openingTimestamp
         question {
             id
@@ -222,11 +225,12 @@ OPEN_FPMM_QUERY = Template(
     }"""
 )
 
-TOP_HEADLINES = 'top-headlines'
-EVERYTHING = 'everything'
+TOP_HEADLINES = "top-headlines"
+EVERYTHING = "everything"
 
 ARTICLE_LIMIT = 1_000
 ADDITIONAL_INFO_LIMIT = 5_000
+
 
 def to_content(query: str) -> bytes:
     """Convert the given query string to payload content, i.e., add it under a `queries` key and convert it to bytes."""
@@ -1378,7 +1382,7 @@ class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
             "pageSize": "100",
         }
         # only get articles from top headlines
-        url = f'{self.params.newsapi_endpoint}/{TOP_HEADLINES}'
+        url = f"{self.params.newsapi_endpoint}/{TOP_HEADLINES}"
         response = yield from self.get_http_response(
             method="GET",
             url=url,
@@ -2090,14 +2094,18 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             return []
         return response.get("data", {}).get("fixedProductMarketMakers", [])
 
-    def _parse_llm_output(self, output: str, required_fields: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
+    def _parse_llm_output(
+        self, output: str, required_fields: Optional[List[str]] = None
+    ) -> Optional[Dict[str, Any]]:
         """Parse the llm output to json."""
         try:
             json_data = json.loads(output)
             if required_fields is not None:
                 for field in required_fields:
                     if field not in json_data:
-                        self.context.logger.error(f"Field {field} not in json_data {json_data}")
+                        self.context.logger.error(
+                            f"Field {field} not in json_data {json_data}"
+                        )
                         return None
             return json_data
         except json.JSONDecodeError as e:
@@ -2128,9 +2136,9 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         llm_response_message = yield from self.do_llm_request(
             request_llm_message, llm_dialogue
         )
-        result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
-        self.context.logger.info(f"Got LLM response: {result}")
-        result = self._parse_llm_output(result, required_fields=["queries"])
+        result_str = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
+        self.context.logger.info(f"Got LLM response: {result_str}")
+        result = self._parse_llm_output(result_str, required_fields=["queries"])
         if result is None:
             self.context.logger.info(f"Could not parse LLM response: {result}")
             return None
@@ -2145,7 +2153,9 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         for query in queries:
             news_articles = yield from self._get_news(query)
             if news_articles is None:
-                self.context.logger.info(f"Could not get news articles for query {query}")
+                self.context.logger.info(
+                    f"Could not get news articles for query {query}"
+                )
                 continue
             for article in news_articles:
                 title = article["title"]
@@ -2175,20 +2185,22 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         llm_response_message = yield from self.do_llm_request(
             request_llm_message, llm_dialogue
         )
-        result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
-        json_data = self._parse_llm_output(result, required_fields=["has_occurred"])
+        result_str = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
+        json_data = self._parse_llm_output(result_str, required_fields=["has_occurred"])
         if json_data is None:
             self.context.logger.info(f"Could not parse LLM response: {result}")
             return None
 
         has_occurred = bool(json_data["has_occurred"])
-        self.context.logger.info(f'Has "{question}" occurred?: {has_occurred}')
+        self.context.logger.info(f'Has "{question!r}" occurred?: {has_occurred}')
         if has_occurred:
             return ANSWER_YES
 
         return ANSWER_NO
 
-    def _get_news(self, query: str) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
+    def _get_news(
+        self, query: str
+    ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
         """Auxiliary method to collect data from endpoint."""
         headers = {"X-Api-Key": self.params.newsapi_api_key}
 
@@ -2197,7 +2209,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             "pageSize": "100",
         }
         # search through all articles everything
-        url = f'{self.params.newsapi_endpoint}/{EVERYTHING}'
+        url = f"{self.params.newsapi_endpoint}/{EVERYTHING}"
         response = yield from self.get_http_response(
             method="GET",
             url=url,
@@ -2217,22 +2229,24 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         )
         return response_data["articles"]
 
-    def _get_answer_tx(self, question_id: str, answer: str) -> Generator[None, None, Optional[Dict[str, Any]]]:
+    def _get_answer_tx(
+        self, question_id: str, answer: str
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Get an answer a tx."""
         response = yield from self.get_contract_api_response(
-                performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-                contract_address=self.params.realitio_contract,
-                contract_id=str(RealtioContract.contract_id),
-                contract_callable="get_submit_answer_tx",
-                question_id=bytes.fromhex(question_id[2:]),
-                answer=bytes.fromhex(answer[2:]),
-                max_previous=MAX_PREVIOUS,
-            )
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.realitio_contract,
+            contract_id=str(RealtioContract.contract_id),
+            contract_callable="get_submit_answer_tx",
+            question_id=bytes.fromhex(question_id[2:]),
+            answer=bytes.fromhex(answer[2:]),
+            max_previous=MAX_PREVIOUS,
+        )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
-                    f"Couldn't get submitAnswer transaction. "
-                    f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
-                    f"received {response.performative.value}."
+                f"Couldn't get submitAnswer transaction. "
+                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"received {response.performative.value}."
             )
             return None
 
@@ -2256,8 +2270,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             return CloseMarketsRound.NO_TX
 
         self.context.logger.info(
-            f"Got {len(questions)} questions to close. "
-            f"Questions: {questions}"
+            f"Got {len(questions)} questions to close. " f"Questions: {questions}"
         )
 
         # get the answers for those questions
@@ -2265,14 +2278,18 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         for question in questions:
             answer = yield from self._get_answer(question["title"])
             if answer is None:
-                self.context.logger.warning(f"Couldn't get answer for question {question}")
+                self.context.logger.warning(
+                    f"Couldn't get answer for question {question}"
+                )
                 continue
             question_to_answer[question["question"]["id"]] = answer
 
             if len(question_to_answer) == self.params.num_questions_to_close:
                 break
 
-        self.context.logger.info(f"Got answers for {len(question_to_answer)} questions. ")
+        self.context.logger.info(
+            f"Got answers for {len(question_to_answer)} questions. "
+        )
         if len(question_to_answer) == 0:
             # we couldn't get any answers, no tx to be made
             return CloseMarketsRound.NO_TX
@@ -2283,13 +2300,17 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             tx = yield from self._get_answer_tx(question_id, answer)
             if tx is None:
                 # something went wrong, skip the current tx
-                self.context.logger.warning(f"Couldn't get tx for question {question_id} with answer {answer}")
+                self.context.logger.warning(
+                    f"Couldn't get tx for question {question_id} with answer {answer}"
+                )
                 continue
             txs.append(tx)
 
         if len(txs) == 0:
             # something went wrong, respond with ERROR payload for now
-            self.context.logger.error("Couldn't get any txs for questions that we have answers for.")
+            self.context.logger.error(
+                "Couldn't get any txs for questions that we have answers for."
+            )
             return CloseMarketsRound.ERROR_PAYLOAD
 
         multisend_tx_str = yield from self._to_multisend(txs)

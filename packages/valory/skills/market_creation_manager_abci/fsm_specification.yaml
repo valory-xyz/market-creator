@@ -24,6 +24,7 @@ start_states:
 - PostTransactionRound
 states:
 - ApproveMarketsRound
+- CloseMarketsRound
 - CollectProposedMarketsRound
 - CollectRandomnessRound
 - DataGatheringRound
@@ -44,6 +45,11 @@ transition_func:
     (ApproveMarketsRound, ERROR): DataGatheringRound
     (ApproveMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
     (ApproveMarketsRound, ROUND_TIMEOUT): DataGatheringRound
+    (CloseMarketsRound, DONE): FinishedMarketCreationManagerRound
+    (CloseMarketsRound, ERROR): CollectRandomnessRound
+    (CloseMarketsRound, NO_MAJORITY): CollectRandomnessRound
+    (CloseMarketsRound, NO_TX): CollectRandomnessRound
+    (CloseMarketsRound, ROUND_TIMEOUT): CloseMarketsRound
     (CollectProposedMarketsRound, DONE): ApproveMarketsRound
     (CollectProposedMarketsRound, ERROR): DataGatheringRound
     (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
@@ -70,7 +76,7 @@ transition_func:
     (MarketProposalRound, ERROR): RetrieveApprovedMarketRound
     (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
-    (PostTransactionRound, DONE): CollectRandomnessRound
+    (PostTransactionRound, DONE): CloseMarketsRound
     (PostTransactionRound, ERROR): PostTransactionRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
     (PrepareTransactionRound, DONE): FinishedMarketCreationManagerRound
