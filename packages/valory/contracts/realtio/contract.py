@@ -246,7 +246,7 @@ class RealtioContract(Contract):
             ledger_api=ledger_api, contract_address=contract_address
         )
         data = contract.encodeABI(
-            fn_name="askQuestion",
+            fn_name="submitAnswer",
             args=[
                 question_id,
                 answer,

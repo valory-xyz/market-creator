@@ -18,7 +18,7 @@ contracts:
 - valory/gnosis_safe:0.1.0:bafybeidll7frtdsq2ckiluazkwk4zpkp7natt4kdejjehwvykqwzyuf6ei
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeidvcgnbbmjtha6tl7st2ysna2l3iiqfhnzjfasyvml5unecozeeka
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
-- valory/realtio:0.1.0:bafybeihtclasbb447mr4qospsmw6lmfzplomusxxjzrobakca4svusrpze
+- valory/realtio:0.1.0:bafybeihfdvkrjkhezqeaxj3eluv2v4syvnxni6jbuc3knqb4rawrcivcke
 - valory/conditional_tokens:0.1.0:bafybeifbhritgoqecuilj35uzrrokm2ngfmwkoafbmzxgvpa4q3wpi6i64
 - valory/fpmm_deterministic_factory:0.1.0:bafybeih5yb4df6plwsxicp4jtywvpqmjnvfw55zw35yuycwxrx7mehoowy
 - valory/service_registry:0.1.0:bafybeia2swgpmczn3iykmptigabklk2eqbqxzhmbnunq3givmjygvmgtbm
@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
-- valory/market_maker_abci:0.1.0:bafybeibtllbp7y7sa6xrhfgbwqv4ybuoxdnyxvkee7jrct7b67tt7fcwdi
+- valory/market_maker_abci:0.1.0:bafybeig35vosrsor7wp2fpuniabv7m5wvoplsmt2jrduy5wnogb5ftdpbu
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
-- valory/market_creation_manager_abci:0.1.0:bafybeie54sfgakac22snz4xeisz2i55hwdn5lmvvcmhayxdbkycgpfofcu
+- valory/market_creation_manager_abci:0.1.0:bafybeibh6kexvnrp2dhfdf3m65paybhvjqsh57p62smkwlpcydc6xexbya
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
@@ -199,7 +199,7 @@ models:
       use_slashing: ${bool:false}
       slash_cooldown_hours: ${int:3}
       close_question_bond: ${int:1000000000000000}
-      num_questions_to_close: ${int:5}
+      num_questions_to_close: ${int:1}
       slash_threshold_amount: ${int:10000000000000000}
       light_slash_unit_amount: ${int:5000000000000000}
       serious_slash_unit_amount: ${int:8000000000000000}
