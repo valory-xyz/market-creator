@@ -23,9 +23,6 @@ from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
 )
 from packages.valory.skills.abstract_round_abci.models import Requests as BaseRequests
-from packages.valory.skills.abstract_round_abci.models import (
-    SharedState as BaseSharedState,
-)
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
 )
@@ -34,6 +31,9 @@ from packages.valory.skills.market_creation_manager_abci.models import (
 )
 from packages.valory.skills.market_creation_manager_abci.models import (
     RandomnessApi as MarketCreationManagerRandomnessApi,
+)
+from packages.valory.skills.market_creation_manager_abci.models import (
+    SharedState as BaseSharedState,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     Event as MarketCreationManagerEvent,

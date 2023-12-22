@@ -282,6 +282,11 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         )
         return int(last_timestamp)
 
+    @property
+    def shared_state(self) -> SharedState:
+        """Get the shared state."""
+        return cast(SharedState, self.context.state)
+
     def _calculate_condition_id(
         self,
         oracle_contract: str,
@@ -2293,13 +2298,20 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         # get the answers for those questions
         question_to_answer = {}
         for question in questions:
+            question_id = question["question"]["id"]
+            if question_id.lower() in self.shared_state.processed_question_ids:
+                # we already processed this question, skip it
+                self.context.logger.info(
+                    f"Question {question_id} already processed, skipping it."
+                )
+                continue
             answer = yield from self._get_answer(question["title"])
             if answer is None:
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"
                 )
                 continue
-            question_to_answer[question["question"]["id"]] = answer
+            question_to_answer[question_id] = answer
 
             if len(question_to_answer) == self.params.questions_to_close_batch_size:
                 break
@@ -2322,6 +2334,10 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 )
                 continue
             txs.append(tx)
+            # mark this question as processed. This is to avoid the situation where we
+            # try to answer the same question multiple times due to a out-of-sync issue
+            # between the subgraph and the realitio contract.
+            self.shared_state.processed_question_ids.add(question_id.lower())
 
         if len(txs) == 0:
             # something went wrong, respond with ERROR payload for now
