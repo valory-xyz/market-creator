@@ -763,7 +763,11 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
 
     initial_round_cls: AppState = CollectRandomnessRound
-    initial_states: Set[AppState] = {CollectRandomnessRound, PostTransactionRound, CloseMarketsRound}
+    initial_states: Set[AppState] = {
+        CollectRandomnessRound,
+        PostTransactionRound,
+        CloseMarketsRound,
+    }
     transition_function: AbciAppTransitionFunction = {
         PostTransactionRound: {
             Event.DONE: CloseMarketsRound,
