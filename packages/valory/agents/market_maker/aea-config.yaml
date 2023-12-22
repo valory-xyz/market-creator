@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
-- valory/market_maker_abci:0.1.0:bafybeih6wsghvzlq5ohivng7agpb4pxgrsqggqgcls7oolmvnk6kglpppq
+- valory/market_maker_abci:0.1.0:bafybeiho32ca4b7wueh6na7bxra4oo2ctfiq2o7w2tu6nkuucqbmfcfnyi
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
-- valory/market_creation_manager_abci:0.1.0:bafybeifyzztqeraftjas6n2uvsmpalh4fp23oxwrseyrgre6bacsm2x3ze
+- valory/market_creation_manager_abci:0.1.0:bafybeicdnq5rioqb3f7yl6jbvdkv3bmzwdhtrs6rrq5zhuivb7yn2r7qle
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
@@ -199,7 +199,7 @@ models:
       use_slashing: ${bool:false}
       slash_cooldown_hours: ${int:3}
       close_question_bond: ${int:1000000000000000}
-      num_questions_to_close: ${int:1}
+      questions_to_close_batch_size: ${int:1}
       slash_threshold_amount: ${int:10000000000000000}
       light_slash_unit_amount: ${int:5000000000000000}
       serious_slash_unit_amount: ${int:8000000000000000}

@@ -2301,7 +2301,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 continue
             question_to_answer[question["question"]["id"]] = answer
 
-            if len(question_to_answer) == self.params.num_questions_to_close:
+            if len(question_to_answer) == self.params.questions_to_close_batch_size:
                 break
 
         self.context.logger.info(

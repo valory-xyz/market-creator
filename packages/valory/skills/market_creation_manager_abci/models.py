@@ -79,8 +79,8 @@ class MarketCreationManagerParams(BaseParams):
         self.markets_to_approve_per_epoch = self._ensure(
             "markets_to_approve_per_epoch", kwargs, type_=int
         )
-        self.num_questions_to_close = self._ensure(
-            "num_questions_to_close", kwargs, type_=int
+        self.questions_to_close_batch_size = self._ensure(
+            "questions_to_close_batch_size", kwargs, type_=int
         )
         self.close_question_bond = self._ensure(
             "close_question_bond", kwargs, type_=int
