@@ -10,13 +10,13 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeigisgjozud55vrbzv6rkzbg2iho6mpzgvhoi7eaucilpg67dp5d64
+  behaviours.py: bafybeigeglje6kcx23arnnqzexsade2rzuy2rtx4kzr4wflbijn7g3ub2u
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiglegr5e55k3kra4movl5klfoqc6c2lm4cbh3fzicilwq6lhmnmxa
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
   models.py: bafybeic2aara424fcojfrwhzpwukyzvp5hi2wd3balgjunn3w5jcfg4gou
   payloads.py: bafybeiadaz4jtimdq6ppgej55xezqkri5bjhjwvwbqipd2fwep2gkq2vvu
-  prompts.py: bafybeia6ifucknu7qf7culhuey46n572ca3dr636vlm72ha36oilejiyrq
+  prompts.py: bafybeigbvslbtm463rw77nt4jqwkzbhnwhmicaacxgcrq55m3tww5ytmfy
   rounds.py: bafybeif7bmei2l2tdhag32yb4shnltoecqssyae7h5lacsdq6gis2rjsdu
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []

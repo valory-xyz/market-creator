@@ -1551,9 +1551,11 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
             date = article["publishedAt"]
             input_news += f"- ({date}) {title}\n  {content}\n\n"
 
+        topics = ", ".join(self.params.topics)
         prompt_template = self.params.market_identification_prompt
         prompt_values = {
             "input_news": input_news,
+            "topics": topics,
             "event_day": event_day.strftime("%-d %B %Y"),
         }
 

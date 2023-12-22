@@ -17,7 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains round behaviours of MarketCreationManagerAbciApp."""
+"""This package contains prompts to be used for OpenAI interactions."""
+
 URL_QUERY_PROMPT_TEMPLATE = """
 You are an LLM inside a multi-agent system that takes in a prompt of a user requesting a binary outcome
 for a given event. You are provided with an input under the label "USER_PROMPT". You must follow the instructions
