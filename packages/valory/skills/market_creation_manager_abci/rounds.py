@@ -76,7 +76,9 @@ class Event(Enum):
 DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
 DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA = json.dumps(
     {
-        "collected_proposed_markets": [],
+        "proposed_markets": [],
+        "fixedProductMarketMakers": [],
+        "num_markets_to_approve": 0,
         "timestamp": 0,
     }
 )
@@ -113,6 +115,11 @@ class SynchronizedData(TxSynchronizedData):
     def approved_markets_count(self) -> int:
         """Get the approved_markets_count."""
         return cast(int, self.db.get("approved_markets_count", 0))
+
+    @property
+    def approved_markets_timestamp(self) -> int:
+        """Get the approved_markets_count."""
+        return cast(int, self.db.get("approved_markets_timestamp", 0))
 
     @property
     def proposed_markets_data(self) -> dict:
@@ -212,6 +219,31 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     no_majority_event = Event.NO_MAJORITY
     collection_key = get_name(SynchronizedData.participant_to_randomness)
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
+        """Process the end of the block."""
+        res = super().end_block()
+        if res is None:
+            return None
+
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
+
+        # Fix to ensure properties are present on the SynchronizedData
+        # before ResetAndPause round.
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.approved_markets_count)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.proposed_markets_count)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.proposed_markets_data)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.approved_markets_timestamp)
+        )
+
+        return synced_data, event
 
 
 class PostTransactionRound(CollectSameUntilThresholdRound):
@@ -385,18 +417,6 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
         synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
         payload = self.most_voted_payload
 
-        # Fix to ensure properties are present on the SynchronizedData
-        # before ResetAndPause round.
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.approved_markets_count)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.proposed_markets_count)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.proposed_markets_data)
-        )
-
         if event == Event.DONE and payload == self.ERROR_PAYLOAD:
             return synced_data, Event.ERROR
 
@@ -425,6 +445,7 @@ class ApproveMarketsRound(OnlyKeeperSendsRound):
     payload_key = (
         get_name(SynchronizedData.approved_markets_data),
         get_name(SynchronizedData.approved_markets_count),
+        get_name(SynchronizedData.approved_markets_timestamp),
     )
     collection_key = get_name(SynchronizedData.participant_to_selection)
 
@@ -830,6 +851,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.proposed_markets_count),
         get_name(SynchronizedData.proposed_markets_data),
         get_name(SynchronizedData.approved_markets_count),
+        get_name(SynchronizedData.approved_markets_timestamp),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         CollectRandomnessRound: set(),

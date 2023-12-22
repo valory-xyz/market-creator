@@ -108,6 +108,7 @@ class ApproveMarketsPayload(BaseTxPayload):
 
     content: str
     approved_markets_count: int
+    timestamp: int
 
 
 @dataclass(frozen=True)
