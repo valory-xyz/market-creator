@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeicvwqjsjxe4yujf5q6qfusovdq2xj7n6jpistpis3o2cb7apco3wu
+agent: valory/market_maker:0.1.0:bafybeighrxkgi3c2er55l5sweurslb4qk35bb4uzq4fru6lvperhkq3kni
 number_of_agents: 1
 deployment:
   agent:
@@ -50,7 +50,7 @@ models:
       approve_market_creator: ${APPROVE_MARKET_CREATOR:str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}
       market_approval_server_url: ${MARKET_APPROVAL_SERVER_URL:str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
-      newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2/top-headlines}
+      newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2}
       newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
       topics: ${TOPICS:list:["business","cryptocurrency","politics","science","technology","trending","fashion","social","health","sustainability","internet","travel","food","pets","animals","curiosities","music","economy","arts","entertainment","weather","sports","finance","international"]}
       market_fee: ${MARKET_FEE:float:2.0}
@@ -81,6 +81,8 @@ models:
       tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
       tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
       tendermint_max_retries: ${TENDERMINT_MAX_RETRIES:int:5}
+      close_question_bond: ${CLOSE_QUESTION_BOND:int:1000000000000000}
+      questions_to_close_batch_size: ${QUESTIONS_TO_CLOSE_BATCH_SIZE:int:1}
       tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
       tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
       termination_sleep: ${TERMINATION_SLEEP:int:900}

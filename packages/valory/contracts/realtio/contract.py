@@ -231,3 +231,26 @@ class RealtioContract(Contract):
             for entry in entries
         )
         return dict(data=events)
+
+    @classmethod
+    def get_submit_answer_tx(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        question_id: bytes,
+        answer: bytes,
+        max_previous: int,
+    ) -> JSONLike:
+        """Get submit answer transaction."""
+        contract = cls.get_instance(
+            ledger_api=ledger_api, contract_address=contract_address
+        )
+        data = contract.encodeABI(
+            fn_name="submitAnswer",
+            args=[
+                question_id,
+                answer,
+                max_previous,
+            ],
+        )
+        return dict(data=data)

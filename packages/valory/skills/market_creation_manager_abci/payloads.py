@@ -109,3 +109,10 @@ class ApproveMarketsPayload(BaseTxPayload):
     content: str
     approved_markets_count: int
     timestamp: int
+
+
+@dataclass(frozen=True)
+class CloseMarketsPayload(BaseTxPayload):
+    """Represent a transaction payload for the ApproveMarketsRound."""
+
+    content: str
