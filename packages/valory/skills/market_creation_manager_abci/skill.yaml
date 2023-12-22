@@ -10,11 +10,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeifwu7p2owtrjowhncyggeifuoztyvaad3jz5maern4z7usqqrrw54
+  behaviours.py: bafybeib6ef2ntjcokb7476unn2iza6fqgc2jqfuvtxvcffpucq5q7djtfe
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiglegr5e55k3kra4movl5klfoqc6c2lm4cbh3fzicilwq6lhmnmxa
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeicil32lctsz43qtggt23aoijed2dczrpho7wcfhja6ss466c5z3cm
+  models.py: bafybeif5wcgzqfkq55hzo3cq2fzwr74s5jeozknxpzizqabcsfr3sd6xry
   payloads.py: bafybeiadaz4jtimdq6ppgej55xezqkri5bjhjwvwbqipd2fwep2gkq2vvu
   prompts.py: bafybeigbvslbtm463rw77nt4jqwkzbhnwhmicaacxgcrq55m3tww5ytmfy
   rounds.py: bafybeia4onql3sl6zcf2blklnwjqcvob7qokdwsib26gfu33h6a4oalq3m
@@ -206,6 +206,7 @@ models:
       use_termination: false
       use_slashing: false
       slash_cooldown_hours: 3
+      xdai_threshold: 1000000000000000000
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000

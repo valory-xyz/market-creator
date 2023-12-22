@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
-- valory/market_creation_manager_abci:0.1.0:bafybeihykmmx3s3paqazvylst2hct2y267hg2tmf2ryficbx4aczmln3ea
+- valory/market_creation_manager_abci:0.1.0:bafybeibcaibxcnza7yovemtr2b24dr5fjjyowcj32vymu4ltnz7xut5xt4
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
 behaviours:
@@ -199,6 +199,7 @@ models:
       use_slashing: false
       slash_cooldown_hours: 3
       questions_to_close_batch_size: 1
+      xdai_threshold: 1000000000000000000
       close_question_bond: 1000000000000000
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000

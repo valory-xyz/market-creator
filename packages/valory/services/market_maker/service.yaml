@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeihif3ixp2klc5xid4hoa4eeg6qb4o2bqn5yxidqaxogzi6uyfvuxu
+agent: valory/market_maker:0.1.0:bafybeiglbnqnpryz5dsuc2c2qynja3ms2luemcywktflwjxbfazsq33hdy
 number_of_agents: 1
 deployment:
   agent:
@@ -86,6 +86,7 @@ models:
       tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
       tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
       termination_sleep: ${TERMINATION_SLEEP:int:900}
+      xdai_threshold: ${XDAI_THRESHOLD:int:1000000000000000000}
       tx_timeout: ${TX_TIMEOUT:float:10.0}
       use_termination: ${USE_TERMINATION:bool:false}
       round_timeout_seconds: ${ROUND_TIMEOUT_SECONDS:float:120}
