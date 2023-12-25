@@ -917,7 +917,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             return DepositDaiRound.ERROR_PAYLOAD
 
         # check if the balance is below the threshold
-        if balance < self.params.xdai_threshold:
+        if balance <= self.params.xdai_threshold:
             # not enough balance in the safe
             return DepositDaiRound.NO_TX_PAYLOAD
 
