@@ -10,11 +10,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeib6ef2ntjcokb7476unn2iza6fqgc2jqfuvtxvcffpucq5q7djtfe
+  behaviours.py: bafybeig3gcpiiq2mvuyugt2o4mtestmfod2ghbdnfpa5lklznkdr3cwiyi
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiglegr5e55k3kra4movl5klfoqc6c2lm4cbh3fzicilwq6lhmnmxa
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeif5wcgzqfkq55hzo3cq2fzwr74s5jeozknxpzizqabcsfr3sd6xry
+  models.py: bafybeigc4vhwylsqoioq5qy24dlflg63g63eirbeshkabsic7eeobj53mi
   payloads.py: bafybeiadaz4jtimdq6ppgej55xezqkri5bjhjwvwbqipd2fwep2gkq2vvu
   prompts.py: bafybeigbvslbtm463rw77nt4jqwkzbhnwhmicaacxgcrq55m3tww5ytmfy
   rounds.py: bafybeia4onql3sl6zcf2blklnwjqcvob7qokdwsib26gfu33h6a4oalq3m
@@ -100,6 +100,7 @@ models:
       market_approval_server_api_key: api_key
       newsapi_endpoint: https://newsapi.org/v2
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      market_closing_newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       topics:
       - business
       - cryptocurrency

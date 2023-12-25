@@ -148,6 +148,9 @@ class MarketCreationManagerParams(BaseParams):
         self.market_proposal_round_timeout_seconds_per_day = self._ensure(
             "market_proposal_round_timeout_seconds_per_day", kwargs, type_=int
         )
+        self.market_closing_newsapi_api_key = self._ensure(
+            "market_closing_newsapi_api_key", kwargs, type_=str
+        )
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
         super().__init__(*args, **kwargs)

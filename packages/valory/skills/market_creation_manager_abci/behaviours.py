@@ -932,7 +932,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             return DepositDaiRound.ERROR_PAYLOAD
 
         safe_tx_hash = yield from self._get_safe_tx_hash(
-            to_address=wxdai_address, value=balance, data=tx_data
+            to_address=wxdai_address, value=balance_to_deposit, data=tx_data
         )
         if safe_tx_hash is None:
             # something went wrong
@@ -2228,7 +2228,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         self, query: str
     ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
         """Auxiliary method to collect data from endpoint."""
-        headers = {"X-Api-Key": self.params.newsapi_api_key}
+        headers = {"X-Api-Key": self.params.market_closing_newsapi_api_key}
 
         parameters = {
             "q": query,
