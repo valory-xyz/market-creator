@@ -704,12 +704,29 @@ class CloseMarketsRound(CollectSameUntilThresholdRound):
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
         """End block."""
+
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 return self.synchronized_data, Event.ERROR
             if self.most_voted_payload == self.NO_TX:
                 return self.synchronized_data, Event.NO_TX
-            state = self.synchronized_data.update(
+            synced_data = cast(SynchronizedData, self.synchronized_data)
+
+            # Fix to ensure properties are present on the SynchronizedData
+            # before ResetAndPause round.
+            synced_data = synced_data.ensure_property_is_set(
+                get_name(SynchronizedData.approved_markets_count)
+            )
+            synced_data = synced_data.ensure_property_is_set(
+                get_name(SynchronizedData.proposed_markets_count)
+            )
+            synced_data = synced_data.ensure_property_is_set(
+                get_name(SynchronizedData.proposed_markets_data)
+            )
+            synced_data = synced_data.ensure_property_is_set(
+                get_name(SynchronizedData.approved_markets_timestamp)
+            )
+            state = synced_data.update(
                 synchronized_data_class=self.synchronized_data_class,
                 **{
                     get_name(
@@ -746,7 +763,11 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
 
     initial_round_cls: AppState = CollectRandomnessRound
-    initial_states: Set[AppState] = {CollectRandomnessRound, PostTransactionRound}
+    initial_states: Set[AppState] = {
+        CollectRandomnessRound,
+        PostTransactionRound,
+        CloseMarketsRound,
+    }
     transition_function: AbciAppTransitionFunction = {
         PostTransactionRound: {
             Event.DONE: CloseMarketsRound,
@@ -854,6 +875,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.approved_markets_timestamp),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
+        CloseMarketsRound: set(),
         CollectRandomnessRound: set(),
         PostTransactionRound: set(),
     }

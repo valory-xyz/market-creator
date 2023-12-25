@@ -19,8 +19,11 @@
 
 """This module contains the shared state for the abci skill of MarketCreationManagerAbciApp."""
 
-from typing import Any, List
+from typing import Any, List, Set, Type
 
+from aea.skills.base import SkillContext
+
+from packages.valory.skills.abstract_round_abci.base import AbciApp
 from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
@@ -37,7 +40,12 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 class SharedState(BaseSharedState):
     """Keep the current shared state of the skill."""
 
-    abci_app_cls = MarketCreationManagerAbciApp
+    abci_app_cls: Type[AbciApp] = MarketCreationManagerAbciApp
+
+    def __init__(self, *args: Any, skill_context: SkillContext, **kwargs: Any) -> None:
+        """Initialize the shared state object."""
+        self.processed_question_ids: Set[str] = set()
+        super().__init__(*args, skill_context=skill_context, **kwargs)
 
 
 class MarketCreationManagerParams(BaseParams):
@@ -141,6 +149,7 @@ class MarketCreationManagerParams(BaseParams):
             "market_proposal_round_timeout_seconds_per_day", kwargs, type_=int
         )
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
+        self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
         super().__init__(*args, **kwargs)
 
 

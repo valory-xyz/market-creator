@@ -282,6 +282,11 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         )
         return int(last_timestamp)
 
+    @property
+    def shared_state(self) -> SharedState:
+        """Get the shared state."""
+        return cast(SharedState, self.context.state)
+
     def _calculate_condition_id(
         self,
         oracle_contract: str,
@@ -911,9 +916,13 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             # something went wrong
             return DepositDaiRound.ERROR_PAYLOAD
 
-        if balance == 0:
-            # no balance in the safe
+        # check if the balance is below the threshold
+        if balance < self.params.xdai_threshold:
+            # not enough balance in the safe
             return DepositDaiRound.NO_TX_PAYLOAD
+
+        # leave xdai threshold in the safe for non-market creation purposes of the safe
+        balance_to_deposit = balance - self.params.xdai_threshold
 
         # in case there is balance in the safe, fully deposit it to the wxDAI contract
         wxdai_address = self.params.collateral_tokens_contract
@@ -931,7 +940,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
 
         tx_payload_data = hash_payload_to_hex(
             safe_tx_hash=safe_tx_hash,
-            ether_value=balance,
+            ether_value=balance_to_deposit,
             safe_tx_gas=SAFE_TX_GAS,
             to_address=wxdai_address,
             data=tx_data,
@@ -2274,6 +2283,24 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             "data": data,
         }
 
+    def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
+        """Get the balance of an account"""
+        ledger_api_response = yield from self.get_ledger_api_response(
+            performative=LedgerApiMessage.Performative.GET_STATE,
+            ledger_callable="get_balance",
+            account=account,
+        )
+        if ledger_api_response.performative != LedgerApiMessage.Performative.STATE:
+            # something went wrong
+            self.context.logger.error(
+                f"Couldn't get balance for account {account}. "
+                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"Received {ledger_api_response.performative.value}."  # type: ignore
+            )
+            return None
+        balance = cast(int, ledger_api_response.state.body.get("get_balance_result"))
+        return balance
+
     def get_payload(self) -> Generator[None, None, str]:
         """Get the transaction payload"""
         # get the questions to that need to be answered
@@ -2290,16 +2317,42 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             f"Got {len(questions)} questions to close. " f"Questions: {questions}"
         )
 
+        safe_address = self.synchronized_data.safe_contract_address
+        balance = yield from self._get_balance(safe_address)
+        if balance is None:
+            self.context.logger.info("Couldn't get balance")
+            return CloseMarketsRound.NO_TX
+
+        self.context.logger.info(f"Address {safe_address!r} has balance {balance}.")
+        max_num_questions = min(
+            len(questions), self.params.questions_to_close_batch_size
+        )
+        bond_required = self.params.close_question_bond * max_num_questions
+        if balance < bond_required:
+            # not enough balance to close the questions
+            self.context.logger.info(
+                f"Not enough balance to close {max_num_questions} questions. "
+                f"Balance {balance}, required {bond_required}"
+            )
+            return CloseMarketsRound.NO_TX
+
         # get the answers for those questions
         question_to_answer = {}
         for question in questions:
+            question_id = question["question"]["id"]
+            if question_id.lower() in self.shared_state.processed_question_ids:
+                # we already processed this question, skip it
+                self.context.logger.info(
+                    f"Question {question_id} already processed, skipping it."
+                )
+                continue
             answer = yield from self._get_answer(question["title"])
             if answer is None:
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"
                 )
                 continue
-            question_to_answer[question["question"]["id"]] = answer
+            question_to_answer[question_id] = answer
 
             if len(question_to_answer) == self.params.questions_to_close_batch_size:
                 break
@@ -2322,6 +2375,10 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 )
                 continue
             txs.append(tx)
+            # mark this question as processed. This is to avoid the situation where we
+            # try to answer the same question multiple times due to a out-of-sync issue
+            # between the subgraph and the realitio contract.
+            self.shared_state.processed_question_ids.add(question_id.lower())
 
         if len(txs) == 0:
             # something went wrong, respond with ERROR payload for now
