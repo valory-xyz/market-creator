@@ -932,7 +932,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             return DepositDaiRound.ERROR_PAYLOAD
 
         safe_tx_hash = yield from self._get_safe_tx_hash(
-            to_address=wxdai_address, value=balance, data=tx_data
+            to_address=wxdai_address, value=balance_to_deposit, data=tx_data
         )
         if safe_tx_hash is None:
             # something went wrong
