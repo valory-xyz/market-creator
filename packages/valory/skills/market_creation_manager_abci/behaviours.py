@@ -2228,7 +2228,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         self, query: str
     ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
         """Auxiliary method to collect data from endpoint."""
-        headers = {"X-Api-Key": self.params.newsapi_api_key}
+        headers = {"X-Api-Key": self.params.market_closing_newsapi_api_key}
 
         parameters = {
             "q": query,
