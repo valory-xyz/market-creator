@@ -22,6 +22,7 @@
 import json
 import random
 from abc import ABC
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from string import Template
 from typing import (
@@ -172,8 +173,12 @@ FPMM_POOL_MEMBERSHIPS_QUERY = Template(
 FPMM_QUERY = Template(
     """{
     fixedProductMarketMakers(
-        where: {creator: "$creator"}
-        first: 100
+        where: {
+            creator: "$creator"
+            openingTimestamp_gte:"$openingTimestamp_gte"
+            openingTimestamp_lte:"$openingTimestamp_lte"
+        }
+        first: 1000
         orderBy: creationTimestamp
         orderDirection: desc
     ) {
@@ -448,69 +453,84 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            latest_open_markets = yield from self._collect_latest_open_markets()
-            self.context.logger.info(
-                f"Collected latest open markets: {latest_open_markets}"
-            )
-
             current_timestamp = self.last_synced_timestamp
+            self.context.logger.info(f"current_timestamp={current_timestamp}")
+
+            openingTimestamp_gte = current_timestamp + _ONE_DAY
+            self.context.logger.info(f"openingTimestamp_gte={openingTimestamp_gte}")
+
+            openingTimestamp_lte = current_timestamp + (
+                self.params.approve_market_event_days_offset * _ONE_DAY
+            )
+            self.context.logger.info(f"openingTimestamp_lte={openingTimestamp_lte}")
+
+            # Compute required openingTimestamp (between now and now + approve_market_event_days_offset)
+            required_opening_ts = []
+            current_day_start_timestamp = (
+                openingTimestamp_gte - (openingTimestamp_gte % _ONE_DAY) + _ONE_DAY
+            )
+            while current_day_start_timestamp <= openingTimestamp_lte:
+                required_opening_ts.append(current_day_start_timestamp)
+                current_day_start_timestamp += _ONE_DAY
+
+            self.context.logger.info(f"required_opening_ts={required_opening_ts}")
+
+            # Get existing (open) markets count per openingTimestamp (between now and now + approve_market_event_days_offset)
+            latest_open_markets = yield from self._collect_latest_open_markets(
+                openingTimestamp_gte, openingTimestamp_lte
+            )
+            existing_market_count: Dict[int, int] = defaultdict(int)
+
+            for market in latest_open_markets["fixedProductMarketMakers"]:
+                ts = int(market.get("openingTimestamp"))
+                existing_market_count[ts] += 1
+
+            self.context.logger.info(f"existing_market_count={existing_market_count}")
+
+            # Determine number of markets required to be approved per openingTimestamp (between now and now + approve_market_event_days_offset)
+            required_markets_to_approve: Dict[int, int] = defaultdict(int)
+            N = self.params.markets_to_approve_per_day
+
+            for ts in required_opening_ts:
+                required_markets_to_approve[ts] = max(
+                    0, N - existing_market_count.get(ts, 0)
+                )
+
+            num_markets_to_approve = sum(required_markets_to_approve.values())
+
+            self.context.logger.info(
+                f"markets_to_approve={required_markets_to_approve}"
+            )
+            self.context.logger.info(f"num_markets_to_approve={num_markets_to_approve}")
+
+            # Determine largest creation timestamp in markets with openingTimestamp between now and now + approve_market_event_days_offset
             creation_timestamps = [
                 int(entry["creationTimestamp"])
                 for entry in latest_open_markets.get("fixedProductMarketMakers", {})
             ]
             largest_creation_timestamp = max(creation_timestamps)
-
-            latest_approve_market_timestamp = (
-                self.synchronized_data.approved_markets_timestamp
-            )
-
-            # Determine num_markets_to_approve so that each day there are N closing markets.
-            opening_timestamps = [
-                int(entry["openingTimestamp"])
-                for entry in latest_open_markets.get("fixedProductMarketMakers", {})
-            ]
-            sorted_opening_timestamps = sorted(opening_timestamps, reverse=True)
-            # TODO Make params
-            N = self.params.markets_to_approve_per_day
-            latest_opening_timestamps = sorted_opening_timestamps[:N]
-            approve_market_event_days_offset = (
-                self.params.approve_market_event_days_offset
-            )
-            start_timestamp = (
-                current_timestamp + approve_market_event_days_offset * _ONE_DAY
-            )
-            end_timestamp = (
-                current_timestamp + (approve_market_event_days_offset + 1) * _ONE_DAY
-            )
-            num_markets_to_approve = sum(
-                1
-                for timestamp in latest_opening_timestamps
-                if timestamp <= start_timestamp
-            )
-
-            min_approve_markets_epoch_seconds = (
-                self.params.min_approve_markets_epoch_seconds
-            )
-            approved_markets_count = self.synchronized_data.approved_markets_count
-
-            self.context.logger.info(f"approved_markets_count={approved_markets_count}")
-            self.context.logger.info(f"current_timestamp={current_timestamp}")
-            self.context.logger.info(f"start_timestamp={start_timestamp}")
-            self.context.logger.info(f"end_timestamp={end_timestamp}")
             self.context.logger.info(
                 f"largest_creation_timestamp={largest_creation_timestamp}"
             )
-            self.context.logger.info(
-                f"latest_approve_market_execution={latest_approve_market_timestamp}"
+
+            # Collect misc data related to market approval
+            min_approve_markets_epoch_seconds = (
+                self.params.min_approve_markets_epoch_seconds
             )
             self.context.logger.info(
                 f"min_approve_markets_epoch_seconds={min_approve_markets_epoch_seconds}"
             )
-            self.context.logger.info(
-                f"latest_opening_timestamps={latest_opening_timestamps}"
-            )
-            self.context.logger.info(f"num_markets_to_approve={num_markets_to_approve}")
+            approved_markets_count = self.synchronized_data.approved_markets_count
+            self.context.logger.info(f"approved_markets_count={approved_markets_count}")
 
+            latest_approve_market_timestamp = (
+                self.synchronized_data.approved_markets_timestamp
+            )
+            self.context.logger.info(
+                f"latest_approve_market_execution={latest_approve_market_timestamp}"
+            )
+
+            # Main logic of the behaviour
             if (
                 self.params.max_approved_markets >= 0
                 and approved_markets_count >= self.params.max_approved_markets
@@ -536,20 +556,36 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 content = CollectProposedMarketsRound.SKIP_MARKET_APPROVAL_PAYLOAD
             else:
                 self.context.logger.info("Timeout to approve markets reached.")
-                approve_market_event_days_offset = (
-                    self.params.approve_market_event_days_offset
+
+                min_timestamp_to_approve = min(
+                    (
+                        ts
+                        for ts, value in required_markets_to_approve.items()
+                        if value > 0
+                    ),
+                    default=0,
                 )
+
+                # On the market approval server, resolution_time is one day less than openingTimestamp
                 proposed_markets = yield from self._collect_latest_proposed_markets(
-                    start_timestamp,
-                    end_timestamp,
+                    min_timestamp_to_approve - _ONE_DAY,
+                    min_timestamp_to_approve,
                 )
+
+                proposed_markets_timestamps: Dict[int, int] = defaultdict(int)
+
+                for market_data in proposed_markets["proposed_markets"].values():
+                    proposed_markets_timestamps[market_data["resolution_time"]] += 1
+
                 self.context.logger.info(
-                    f"Collected proposed markets: {proposed_markets}"
+                    f"proposed_markets_timestamps={proposed_markets_timestamps}"
                 )
                 content_data = {}
                 content_data.update(latest_open_markets)
                 content_data.update(proposed_markets)
-                content_data["num_markets_to_approve"] = num_markets_to_approve
+                content_data["num_markets_to_approve"] = required_markets_to_approve[
+                    min_timestamp_to_approve
+                ]
                 content_data["timestamp"] = current_timestamp
                 content = json.dumps(content_data, sort_keys=True)
 
@@ -557,6 +593,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 sender=sender,
                 content=content,
             )
+
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -600,7 +637,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             "proposed_markets": {
                 market_id: market_info
                 for market_id, market_info in response_data["proposed_markets"].items()
-                if from_timestamp <= market_info["resolution_time"] <= to_timestamp
+                if from_timestamp <= market_info["resolution_time"] < to_timestamp
             }
         }
 
@@ -611,12 +648,16 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         return filtered_markets_data
 
     def _collect_latest_open_markets(
-        self,
+        self, openingTimestamp_gte: int, openingTimestamp_lte: int
     ) -> Generator[None, None, Dict[str, Any]]:
         """Collect FPMM from subgraph."""
         creator = self.params.approve_market_creator
         response = yield from self.get_subgraph_result(
-            query=FPMM_QUERY.substitute(creator=creator)
+            query=FPMM_QUERY.substitute(
+                creator=creator,
+                openingTimestamp_gte=openingTimestamp_gte,
+                openingTimestamp_lte=openingTimestamp_lte,
+            )
         )
 
         # TODO Handle retries
