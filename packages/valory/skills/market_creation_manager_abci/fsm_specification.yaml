@@ -77,7 +77,7 @@ transition_func:
     (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
     (PostTransactionRound, DONE): CloseMarketsRound
-    (PostTransactionRound, ERROR): PostTransactionRound
+    (PostTransactionRound, ERROR): CloseMarketsRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
     (PrepareTransactionRound, DONE): FinishedMarketCreationManagerRound
     (PrepareTransactionRound, NO_MAJORITY): CollectRandomnessRound
