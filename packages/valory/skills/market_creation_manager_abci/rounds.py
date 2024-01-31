@@ -779,7 +779,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_TX: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ERROR: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CloseMarketsRound,
+            Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,

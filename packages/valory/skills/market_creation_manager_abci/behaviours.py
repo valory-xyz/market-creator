@@ -207,7 +207,7 @@ OPEN_FPMM_QUERY = Template(
         answerFinalizedTimestamp: null
             currentAnswerBond: null
         }
-        first: 100
+        first: "$first"
         orderBy: openingTimestamp
         orderDirection: asc
     ) {
@@ -2154,6 +2154,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_subgraph_result(
             query=OPEN_FPMM_QUERY.substitute(
                 creator=creator,
+                first=self.params.questions_to_close_batch_size,
                 current_timestamp=self.last_synced_timestamp,
             )
         )
@@ -2392,6 +2393,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"
                 )
+                ############
                 continue
             question_to_answer[question_id] = answer
 
