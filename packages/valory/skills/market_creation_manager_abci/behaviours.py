@@ -207,7 +207,7 @@ OPEN_FPMM_QUERY = Template(
         answerFinalizedTimestamp: null
             currentAnswerBond: null
         }
-        first: "$first"
+        first: $first
         orderBy: openingTimestamp
         orderDirection: asc
     ) {
@@ -2180,12 +2180,34 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.error(f"Error decoding JSON response. {e}")
             return None
 
+    def _append_articles_to_input(
+        self, news_list: List[dict], input_string: str
+    ) -> str:
+        """Append articles to input."""
+        for article in news_list:
+            title = article["title"]
+            content = article["content"][:ARTICLE_LIMIT]
+            date = article["publishedAt"]
+            current_article = f"- ({date}) {title}\n  {content}\n\n"
+            if len(input_string) + len(current_article) > ADDITIONAL_INFO_LIMIT:
+                break
+            input_string += current_article
+        return input_string
+
     def _get_answer(self, question: str) -> Generator[None, None, Optional[str]]:
         """Get an answer for the provided questions"""
-        markets_to_approve_per_epoch = self.params.markets_to_approve_per_epoch
-        self.context.logger.info(
-            f"markets_to_approve_per_epoch={markets_to_approve_per_epoch}"
-        )
+
+        # An initial query is made to Newsapi to detect ratelimit issue
+        # This query is also included in the input_news passed to the LLM,
+        # if the call succeeds.
+        input_news = ""
+        initial_news_articles = yield from self._get_news(question)
+        if initial_news_articles is None:
+            self.context.logger.info(
+                f"Could not get news articles for query {question}"
+            )
+            return None
+        input_news = self._append_articles_to_input(initial_news_articles, input_news)
 
         prompt_values = {
             "user_prompt": question,
@@ -2217,22 +2239,14 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info(f"No queries found in LLM response: {result}")
             return None
 
-        input_news = ""
         for query in queries:
             news_articles = yield from self._get_news(query)
             if news_articles is None:
                 self.context.logger.info(
                     f"Could not get news articles for query {query}"
                 )
-                continue
-            for article in news_articles:
-                title = article["title"]
-                content = article["content"][:ARTICLE_LIMIT]
-                date = article["publishedAt"]
-                current_article = f"- ({date}) {title}\n  {content}\n\n"
-                if len(input_news) + len(current_article) > ADDITIONAL_INFO_LIMIT:
-                    break
-                input_news += current_article
+                return None
+            input_news = self._append_articles_to_input(news_articles, input_news)
 
         if len(input_news) == 0:
             self.context.logger.info(f"No news articles found for queries {queries}")
