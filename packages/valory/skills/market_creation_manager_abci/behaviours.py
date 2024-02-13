@@ -56,7 +56,7 @@ from packages.valory.contracts.multisend.contract import (
     MultiSendContract,
     MultiSendOperation,
 )
-from packages.valory.contracts.realtio.contract import RealtioContract
+from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
@@ -1803,7 +1803,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.realitio_contract,
-            contract_id=str(RealtioContract.contract_id),
+            contract_id=str(RealitioContract.contract_id),
             contract_callable="calculate_question_id",
             question_data=question_data,
             opening_timestamp=opening_timestamp,
@@ -1827,7 +1827,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.conditional_tokens_contract,
-            contract_id=str(RealtioContract.contract_id),
+            contract_id=str(RealitioContract.contract_id),
             contract_callable="get_ask_question_tx_data",
             question_data=question_data,
             opening_timestamp=opening_timestamp,
@@ -2318,7 +2318,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.realitio_contract,
-            contract_id=str(RealtioContract.contract_id),
+            contract_id=str(RealitioContract.contract_id),
             contract_callable="get_submit_answer_tx",
             question_id=bytes.fromhex(question_id[2:]),
             answer=bytes.fromhex(answer[2:]),

@@ -18,8 +18,8 @@ contracts:
 - valory/gnosis_safe:0.1.0:bafybeidll7frtdsq2ckiluazkwk4zpkp7natt4kdejjehwvykqwzyuf6ei
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeidvcgnbbmjtha6tl7st2ysna2l3iiqfhnzjfasyvml5unecozeeka
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
-- valory/realtio:0.1.0:bafybeihfdvkrjkhezqeaxj3eluv2v4syvnxni6jbuc3knqb4rawrcivcke
-- valory/conditional_tokens:0.1.0:bafybeifbhritgoqecuilj35uzrrokm2ngfmwkoafbmzxgvpa4q3wpi6i64
+- valory/realitio:0.1.0:bafybeibszl2k2n7ddvyjkxzdlzshcotgkoegqadkne3f2rzqxmoyefxp6u
+- valory/conditional_tokens:0.1.0:bafybeibnzmqmeph4cj5vfh3s622mo2o5627vjjwc6bptrhj4dk65mzgvhe
 - valory/fpmm_deterministic_factory:0.1.0:bafybeih5yb4df6plwsxicp4jtywvpqmjnvfw55zw35yuycwxrx7mehoowy
 - valory/service_registry:0.1.0:bafybeia2swgpmczn3iykmptigabklk2eqbqxzhmbnunq3givmjygvmgtbm
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
-- valory/market_maker_abci:0.1.0:bafybeibfn2qk7imt6q2k4f4yocnysq24f5c2velhnvlbpsbuhrafoqx6ji
+- valory/market_maker_abci:0.1.0:bafybeiazh5xhis53vleq3sbcd4fcfoibrpor436xsrg75hqo7ciaikb4hi
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
-- valory/market_creation_manager_abci:0.1.0:bafybeiblkat5shoou34baul5jndxhmf45pvw5vnosbxz7znbsy63qrkqwu
+- valory/market_creation_manager_abci:0.1.0:bafybeignr3orefp57l33h76ne53rkbfij73zv6vfbfp7rfuy4pfjf7xo7e
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
