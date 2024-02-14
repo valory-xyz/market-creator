@@ -1,10 +1,10 @@
 {
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeih5yb4df6plwsxicp4jtywvpqmjnvfw55zw35yuycwxrx7mehoowy",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeignr3orefp57l33h76ne53rkbfij73zv6vfbfp7rfuy4pfjf7xo7e",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeiazh5xhis53vleq3sbcd4fcfoibrpor436xsrg75hqo7ciaikb4hi",
-        "agent/valory/market_maker/0.1.0": "bafybeihoimv7jaxv64dtsck6trxvfcq3ejdyqlb2dk7wvkodava3cqv3xq",
-        "service/valory/market_maker/0.1.0": "bafybeibofb5uovwkvp47gee2yaswyqbphrcsdlbwbtlv5ym7r5qo2ivffq",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeie6iod2yjv3ql6d66dl53beed2wauvaxznwdem2tc4hi4adrv6iuy",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeihtsivlt643s4ggiew5632sfs4kumiypyjl22i74mfu7k72bzttdm",
+        "agent/valory/market_maker/0.1.0": "bafybeih3hivzxcxizkzrokre6tlcafk23bxgdijzqzsrv235bylck7u3fi",
+        "service/valory/market_maker/0.1.0": "bafybeih4xsrijxhma7tn52vtveeu2xdbxdfxx3qgbtzukzmfva3xkkjy3e",
         "contract/valory/wxdai/0.1.0": "bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie",
         "contract/valory/fpmm/0.1.0": "bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4"
     },
@@ -27,7 +27,7 @@
         "contract/valory/gnosis_safe/0.1.0": "bafybeidll7frtdsq2ckiluazkwk4zpkp7natt4kdejjehwvykqwzyuf6ei",
         "contract/valory/gnosis_safe_proxy_factory/0.1.0": "bafybeidvcgnbbmjtha6tl7st2ysna2l3iiqfhnzjfasyvml5unecozeeka",
         "contract/valory/multisend/0.1.0": "bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y",
-        "contract/valory/realitio/0.1.0": "bafybeibszl2k2n7ddvyjkxzdlzshcotgkoegqadkne3f2rzqxmoyefxp6u",
+        "contract/valory/realitio/0.1.0": "bafybeignaxfk7fjlfa4lioflwsfru2z5xln5cyvyew3if5oas2sgm5wuii",
         "contract/valory/realitio_proxy/0.1.0": "bafybeidx37xzjjmapwacedgzhum6grfzhp5vhouz4zu3pvpgdy5pgb2fr4",
         "contract/valory/conditional_tokens/0.1.0": "bafybeibnzmqmeph4cj5vfh3s622mo2o5627vjjwc6bptrhj4dk65mzgvhe",
         "skill/valory/abstract_abci/0.1.0": "bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi",

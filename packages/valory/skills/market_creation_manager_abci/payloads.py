@@ -20,6 +20,7 @@
 """This module contains the transaction payloads of the MarketCreationManagerAbciApp."""
 
 from dataclasses import dataclass
+from typing import Optional
 
 from packages.valory.skills.abstract_round_abci.base import BaseTxPayload
 
@@ -89,6 +90,13 @@ class DepositDaiPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
+class RedeemBondPayload(BaseTxPayload):
+    """Represent a transaction payload for the PrepareTransactionRound."""
+
+    content: str
+
+
+@dataclass(frozen=True)
 class PostTxPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 
@@ -116,3 +124,21 @@ class CloseMarketsPayload(BaseTxPayload):
     """Represent a transaction payload for the ApproveMarketsRound."""
 
     content: str
+
+
+@dataclass(frozen=True)
+class MultisigTxPayload(BaseTxPayload):
+    """Represents a transaction payload for preparing an on-chain transaction to be sent via the agents' multisig."""
+
+    tx_submitter: Optional[str] = None
+    tx_hash: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class RedeemPayload(MultisigTxPayload):
+    """Represents a transaction payload for preparing an on-chain transaction for redeeming."""
+
+    policy: Optional[str] = None
+    utilized_tools: Optional[str] = None
+    redeemed_condition_ids: Optional[str] = None
+    payout_so_far: Optional[int] = None
