@@ -96,6 +96,8 @@ models:
       light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
       serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
       market_closing_newsapi_api_key: ${MARKET_CLOSING_NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
+      google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
+      google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
 ---
 public_id: valory/ledger:0.19.0
 type: connection

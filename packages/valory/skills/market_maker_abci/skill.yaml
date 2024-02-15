@@ -200,6 +200,8 @@ models:
       slash_cooldown_hours: 3
       questions_to_close_batch_size: 1
       market_closing_newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      google_api_key: google_api_key
+      google_engine_id: google_engine_id
       xdai_threshold: 1000000000000000000
       close_question_bond: 1000000000000000
       slash_threshold_amount: 10000000000000000

@@ -205,4 +205,6 @@ models:
       serious_slash_unit_amount: ${int:8000000000000000}
       xdai_threshold: ${int:1000000000000000000}
       market_closing_newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
+      google_api_key: ${str:google_api_key}
+      google_engine_id: ${str:google_engine_id}
 is_abstract: false

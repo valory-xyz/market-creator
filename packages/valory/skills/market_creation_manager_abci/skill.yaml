@@ -101,6 +101,8 @@ models:
       newsapi_endpoint: https://newsapi.org/v2
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       market_closing_newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      google_api_key: google_api_key
+      google_engine_id: google_engine_id
       topics:
       - business
       - cryptocurrency
