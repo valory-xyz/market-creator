@@ -12,7 +12,7 @@ connections:
 - valory/abci:0.1.0:bafybeiejo5uyurbmafretedivyci2ktastxclbmgrkwcwc2yt36jftyqgm
 - valory/http_client:0.23.0:bafybeiddrfvomrmgvh5yuv2coq7ci72wcdf663stayi3m5aawnj4srggce
 - valory/ledger:0.19.0:bafybeia47rr37ianvwsh77tjjpv3nwif5sywhhy2fbdshnz4a2icwln76a
-- valory/openai:0.1.0:bafybeidnryrgq6jp3mqvjcpei4nesbey54fhyrcvginby7fer32z32kpai
+- valory/openai:0.1.0:bafybeicoaxmbikcf4llj4mhf7lfgb5oaj6piqalw7kplmostyhyp5rusge
 - valory/p2p_libp2p_client:0.1.0:bafybeihge56dn3xep2dzomu7rtvbgo4uc2qqh7ljl3fubqdi2lq44gs5lq
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeidll7frtdsq2ckiluazkwk4zpkp7natt4kdejjehwvykqwzyuf6ei
@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
-- valory/market_maker_abci:0.1.0:bafybeibsvodulwxr7g2r22cl3q5e5x3f2icroqm44p2pfsez63wrpgcvzq
+- valory/market_maker_abci:0.1.0:bafybeihu7j5z34lmid6p6rd6x32sbsbb5vdhnzvf5aw4ly7icxun56gqyu
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
-- valory/market_creation_manager_abci:0.1.0:bafybeihjz4a5kwltaanu76ce3pxteubw3pnw6ujfnilnqun2wp3btkxml4
+- valory/market_creation_manager_abci:0.1.0:bafybeibg4lmsq5gjieqchml6xfjftrmb6yfrtgmouzrpfma4hoqjmmkbxi
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
@@ -207,4 +207,5 @@ models:
       market_closing_newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
       google_api_key: ${str:google_api_key}
       google_engine_id: ${str:google_engine_id}
+      openai_api_key: ${str:openai_api_key}
 is_abstract: false

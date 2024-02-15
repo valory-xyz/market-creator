@@ -120,6 +120,9 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     SyncMarketsRound,
     SynchronizedData,
 )
+from packages.valory.skills.market_creation_manager_abci.tools.resolve_market_reasoning.resolve_market_reasoning import (
+    run as resolve_market_reasoning_run,
+)
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
 )
@@ -2277,6 +2280,41 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             input_string += current_article
         return input_string
 
+    def _get_answer_from_tool(
+        self, question: str
+    ) -> Generator[None, None, Optional[str]]:
+        newsapi_api_key = self.params.newsapi_api_key
+        openai_api_key = self.params.openai_api_key
+        google_api_key = self.params.google_api_key
+        google_engine_id = self.params.google_engine_id
+
+        my_kwargs = {
+            "tool": "resolve-market-reasoning",
+            "question": question,
+            "api_keys": {
+                "newsapi": newsapi_api_key,
+                "openai": openai_api_key,
+                "google_api_key": google_api_key,
+                "google_engine_id": google_engine_id,
+            },
+        }
+
+        tool_output = resolve_market_reasoning_run(**my_kwargs)
+        self.context.logger.info(f"run_resolve_market_reasoning output: {tool_output}")
+
+        has_occurred = None
+        if tool_output[0] is not None:
+            has_occurred = json.loads(tool_output[0]).get("has_occurred")
+
+        self.context.logger.info(f"has_occurred={has_occurred}")
+
+        if has_occurred is None:
+            return None
+        elif has_occurred:
+            return ANSWER_YES
+
+        return ANSWER_NO
+
     def _get_answer(self, question: str) -> Generator[None, None, Optional[str]]:
         """Get an answer for the provided questions"""
 
@@ -2485,7 +2523,8 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                     f"Question {question_id} already processed, skipping it."
                 )
                 continue
-            answer = yield from self._get_answer(question["title"])
+            # answer = yield from self._get_answer(question["title"])
+            answer = self._get_answer_from_tool(question["title"])
             if answer is None:
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"

@@ -10,18 +10,20 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeib3jexkczm25eiscaphqgvvlf7zkiuruxpzetjbzxz7pktlhhrgz4
+  behaviours.py: bafybeibuinbwchizveevuykw2b7jmuvlvg56dczu23iwhhj37tkpqet7g4
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeicg43ziivxys6dpj4l6chal7mam4mnjk5ws7sncjs5qmqnbsdekau
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeigc4vhwylsqoioq5qy24dlflg63g63eirbeshkabsic7eeobj53mi
+  models.py: bafybeiezforbicd5kumccjoooh44pde5wb25gamuejlrjc7dajo75vtuxe
   payloads.py: bafybeibmm6g6ryvqddsl4cdxuze3alloz6lcfocq54rftnyinkxcbeig6u
   prompts.py: bafybeigdrfhsufxatofbo5x56jcqjva2yccaoklrprdella52yuwuac6xi
   rounds.py: bafybeibsb3g3dcaelvrprst5v6ykx6p3bwsfcbeb3vc3ur4eoxqygebcxa
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
+  tools/resolve_market_reasoning/__init__.py: bafybeig7kxk7o3uulucvree3mllz6r5vmq7upvsz6dx775k5lclsq6muvi
+  tools/resolve_market_reasoning/resolve_market_reasoning.py: bafybeigzig2z2lay3hpadpicuqpkdcobgje7giwinmlv3urobuxx54yh3u
 fingerprint_ignore_patterns: []
 connections:
-- valory/openai:0.1.0:bafybeidnryrgq6jp3mqvjcpei4nesbey54fhyrcvginby7fer32z32kpai
+- valory/openai:0.1.0:bafybeicoaxmbikcf4llj4mhf7lfgb5oaj6piqalw7kplmostyhyp5rusge
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeidll7frtdsq2ckiluazkwk4zpkp7natt4kdejjehwvykqwzyuf6ei
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
@@ -103,6 +105,7 @@ models:
       market_closing_newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       google_api_key: google_api_key
       google_engine_id: google_engine_id
+      openai_api_key: openai_api_key
       topics:
       - business
       - cryptocurrency

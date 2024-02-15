@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
-- valory/market_creation_manager_abci:0.1.0:bafybeihjz4a5kwltaanu76ce3pxteubw3pnw6ujfnilnqun2wp3btkxml4
+- valory/market_creation_manager_abci:0.1.0:bafybeibg4lmsq5gjieqchml6xfjftrmb6yfrtgmouzrpfma4hoqjmmkbxi
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
 behaviours:
@@ -202,6 +202,7 @@ models:
       market_closing_newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       google_api_key: google_api_key
       google_engine_id: google_engine_id
+      openai_api_key: openai_api_key
       xdai_threshold: 1000000000000000000
       close_question_bond: 1000000000000000
       slash_threshold_amount: 10000000000000000
