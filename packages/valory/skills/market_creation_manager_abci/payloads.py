@@ -132,13 +132,3 @@ class MultisigTxPayload(BaseTxPayload):
 
     tx_submitter: Optional[str] = None
     tx_hash: Optional[str] = None
-
-
-@dataclass(frozen=True)
-class RedeemPayload(MultisigTxPayload):
-    """Represents a transaction payload for preparing an on-chain transaction for redeeming."""
-
-    policy: Optional[str] = None
-    utilized_tools: Optional[str] = None
-    redeemed_condition_ids: Optional[str] = None
-    payout_so_far: Optional[int] = None
