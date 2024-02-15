@@ -44,6 +44,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     MarketProposalPayload,
     PostTxPayload,
     PrepareTransactionPayload,
+    RedeemBondPayload,
     RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
@@ -244,6 +245,42 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
         )
 
         return synced_data, event
+
+
+class RedeemBondRound(CollectSameUntilThresholdRound):
+    """A round for redeeming Realitio"""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    NO_TX_PAYLOAD = "NO_TX"
+
+    payload_class = RedeemBondPayload
+    synchronized_data_class = SynchronizedData
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
+        if self.threshold_reached:
+            if self.most_voted_payload == self.ERROR_PAYLOAD:
+                return self.synchronized_data, Event.ERROR
+
+            if self.most_voted_payload == self.NO_TX_PAYLOAD:
+                return self.synchronized_data, Event.NO_TX
+
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(
+                        SynchronizedData.most_voted_tx_hash
+                    ): self.most_voted_payload,
+                    get_name(SynchronizedData.tx_sender): self.round_id,
+                },
+            )
+            return synchronized_data, Event.DONE
+
+        if not self.is_majority_possible(
+            self.collection, self.synchronized_data.nb_participants
+        ):
+            return self.synchronized_data, Event.NO_MAJORITY
+        return None
 
 
 class PostTransactionRound(CollectSameUntilThresholdRound):
@@ -755,6 +792,10 @@ class FinishedWithDepositDaiRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
 
+class FinishedWithRedeemBondRound(DegenerateRound):
+    """FinishedMarketCreationManagerRound"""
+
+
 class FinishedWithoutTxRound(DegenerateRound):
     """FinishedWithoutTxRound"""
 
@@ -787,9 +828,15 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         SelectKeeperRound: {
-            Event.DONE: CollectProposedMarketsRound,
+            Event.DONE: RedeemBondRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        },
+        RedeemBondRound: {
+            Event.DONE: FinishedWithRedeemBondRound,
+            Event.NO_TX: CollectProposedMarketsRound,
+            Event.NO_MAJORITY: RedeemBondRound,
+            Event.ERROR: RedeemBondRound,
         },
         CollectProposedMarketsRound: {
             Event.DONE: ApproveMarketsRound,
@@ -857,12 +904,14 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedMarketCreationManagerRound: {},
         FinishedWithRemoveFundingRound: {},
         FinishedWithDepositDaiRound: {},
+        FinishedWithRedeemBondRound: {},
         FinishedWithoutTxRound: {},
     }
     final_states: Set[AppState] = {
         FinishedMarketCreationManagerRound,
         FinishedWithRemoveFundingRound,
         FinishedWithDepositDaiRound,
+        FinishedWithRedeemBondRound,
         FinishedWithoutTxRound,
     }
     event_to_timeout: EventToTimeout = {
@@ -881,6 +930,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
         FinishedWithDepositDaiRound: {
+            get_name(SynchronizedData.most_voted_tx_hash),
+        },
+        FinishedWithRedeemBondRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
         FinishedMarketCreationManagerRound: {
