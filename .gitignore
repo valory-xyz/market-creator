@@ -19,6 +19,9 @@ packages/valory/contracts/gnosis_safe_proxy_factory
 packages/valory/contracts/multisend
 packages/valory/contracts/service_registry
 packages/valory/contracts/delegate
+packages/valory/contracts/conditional_tokens
+packages/valory/contracts/realitio
+packages/valory/contracts/realitio_proxy
 
 packages/valory/skills/abstract_abci
 packages/valory/skills/abstract_round_abci

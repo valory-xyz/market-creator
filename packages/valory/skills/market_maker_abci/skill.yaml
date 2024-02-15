@@ -10,7 +10,7 @@ fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeie36nhohbz4t6hngy42nw7coe2hwrprywo4n6xmwqjkfz7ni3n6sq
   behaviours.py: bafybeibzkj5b7zymcz4c2befwyodkyyisvuni742rjtozqxlezktelk6fi
-  composition.py: bafybeify7znoqv7lpd55dupbp55nlilyt2pwew6vynprp55mjj6nvbaqdm
+  composition.py: bafybeigk2u43smkxqqaexl4zpzkvblhohkehnhurodkjmbxq7szxhdvuxy
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeiafsjardaq6mudqjmvkm5f3raxt7t26gwpgxy4pseqcuvtzv4gdey
   handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
-- valory/market_creation_manager_abci:0.1.0:bafybeiblkat5shoou34baul5jndxhmf45pvw5vnosbxz7znbsy63qrkqwu
+- valory/market_creation_manager_abci:0.1.0:bafybeihjz4a5kwltaanu76ce3pxteubw3pnw6ujfnilnqun2wp3btkxml4
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
 behaviours:

@@ -56,7 +56,7 @@ from packages.valory.contracts.multisend.contract import (
     MultiSendContract,
     MultiSendOperation,
 )
-from packages.valory.contracts.realtio.contract import RealtioContract
+from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
@@ -88,6 +88,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectProposedMarketsPayload,
     DepositDaiPayload,
     PostTxPayload,
+    RedeemBondPayload,
     RemoveFundingPayload,
     SyncMarketsPayload,
 )
@@ -110,6 +111,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     PostTransactionRound,
     PrepareTransactionPayload,
     PrepareTransactionRound,
+    RedeemBondRound,
     RemoveFundingRound,
     RetrieveApprovedMarketPayload,
     RetrieveApprovedMarketRound,
@@ -129,6 +131,7 @@ MAX_RETRIES = 3
 SAFE_TX_GAS = 0
 ETHER_VALUE = 0
 MAX_PREVIOUS = 0
+MIN_BALANCE_WITHDRAW_REALITIO = 100000000000000000  # 0.1 DAI
 
 AVAILABLE_FORMATS = (
     "%Y-%m-%dT%H:%M:%SZ",
@@ -1013,6 +1016,86 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         return data
 
 
+class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
+    """RedeemBondBehaviour"""
+
+    matching_round = RedeemBondRound
+
+    def async_act(self) -> Generator:
+        """Implement the act."""
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            sender = self.context.agent_address
+            content = yield from self.get_payload()
+            payload = RedeemBondPayload(sender=sender, content=content)
+        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+            yield from self.send_a2a_transaction(payload)
+            yield from self.wait_until_round_end()
+        self.set_done()
+
+    def get_balance(self, address: str) -> Generator[None, None, Optional[int]]:
+        """Get the balance of the provided address"""
+        safe_address = self.synchronized_data.safe_contract_address
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.realitio_contract,
+            contract_id=str(RealitioContract.contract_id),
+            contract_callable="balance_of",
+            address=safe_address,
+        )
+
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(f"balance_of unsuccessful!: {response}")
+            return None
+
+        balance = cast(int, response.state.body["data"])
+        self.context.logger.info(f"balance: {balance / 10 ** 18} xDAI")
+        return balance
+
+    def get_payload(self) -> Generator[None, None, str]:
+        """Get the payload."""
+        safe_address = self.synchronized_data.safe_contract_address
+        balance = yield from self.get_balance(safe_address)
+        if balance is None:
+            return RedeemBondRound.ERROR_PAYLOAD
+
+        if balance <= MIN_BALANCE_WITHDRAW_REALITIO:
+            return RedeemBondRound.NO_TX_PAYLOAD
+
+        withdraw_tx = yield from self._get_withdraw_tx()
+        if withdraw_tx is None:
+            return RedeemBondRound.ERROR_PAYLOAD
+
+        tx_hash = yield from self._to_multisend(
+            transactions=[
+                withdraw_tx,
+            ]
+        )
+        if tx_hash is None:
+            return RedeemBondRound.ERROR_PAYLOAD
+
+        return tx_hash
+
+    def _get_withdraw_tx(self) -> Generator[None, None, Optional[Dict]]:
+        """Prepare a withdraw tx"""
+        self.context.logger.info("Starting RealitioContract.build_withdraw_tx")
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=self.params.realitio_contract,
+            contract_id=str(RealitioContract.contract_id),
+            contract_callable=get_callable_name(RealitioContract.build_withdraw_tx),
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"RealitioContract.build_withdraw_tx unsuccessful! : {response}"
+            )
+            return None
+        return {
+            "to": self.params.realitio_contract,
+            "data": response.state.body["data"],
+            "value": ETHER_VALUE,
+        }
+
+
 class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
     """SyncMarketsBehaviour"""
 
@@ -1803,7 +1886,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.realitio_contract,
-            contract_id=str(RealtioContract.contract_id),
+            contract_id=str(RealitioContract.contract_id),
             contract_callable="calculate_question_id",
             question_data=question_data,
             opening_timestamp=opening_timestamp,
@@ -1827,7 +1910,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.conditional_tokens_contract,
-            contract_id=str(RealtioContract.contract_id),
+            contract_id=str(RealitioContract.contract_id),
             contract_callable="get_ask_question_tx_data",
             question_data=question_data,
             opening_timestamp=opening_timestamp,
@@ -2318,7 +2401,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.realitio_contract,
-            contract_id=str(RealtioContract.contract_id),
+            contract_id=str(RealitioContract.contract_id),
             contract_callable="get_submit_answer_tx",
             question_id=bytes.fromhex(question_id[2:]),
             answer=bytes.fromhex(answer[2:]),
@@ -2407,7 +2490,6 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"
                 )
-                ############
                 continue
             question_to_answer[question_id] = answer
 
@@ -2469,5 +2551,6 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
         SyncMarketsBehaviour,
         RemoveFundingBehaviour,
         DepositDaiBehaviour,
+        RedeemBondBehaviour,
         PostTransactionBehaviour,
     }

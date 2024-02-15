@@ -1,12 +1,10 @@
 {
     "dev": {
-        "contract/valory/conditional_tokens/0.1.0": "bafybeifbhritgoqecuilj35uzrrokm2ngfmwkoafbmzxgvpa4q3wpi6i64",
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeih5yb4df6plwsxicp4jtywvpqmjnvfw55zw35yuycwxrx7mehoowy",
-        "contract/valory/realtio/0.1.0": "bafybeihfdvkrjkhezqeaxj3eluv2v4syvnxni6jbuc3knqb4rawrcivcke",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiblkat5shoou34baul5jndxhmf45pvw5vnosbxz7znbsy63qrkqwu",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeibfn2qk7imt6q2k4f4yocnysq24f5c2velhnvlbpsbuhrafoqx6ji",
-        "agent/valory/market_maker/0.1.0": "bafybeidwliq5tefn2fkmyf2ciksjkwpn2lnwxebbphws62maqgpmhdu6te",
-        "service/valory/market_maker/0.1.0": "bafybeif6um42w6lbrmaaebtiyq5lfmy2dljwhaxror7ldi5hvyb4qp2sau",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihjz4a5kwltaanu76ce3pxteubw3pnw6ujfnilnqun2wp3btkxml4",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeibsvodulwxr7g2r22cl3q5e5x3f2icroqm44p2pfsez63wrpgcvzq",
+        "agent/valory/market_maker/0.1.0": "bafybeigk5rhehron5sab5hi22dngsj7ssaisu5ma3osb3pnlmqxatkiose",
+        "service/valory/market_maker/0.1.0": "bafybeigzgp27tfs7w6qf7kwlh6cqfbh3yulh3nivp32ymuwdrd2oqywdb4",
         "contract/valory/wxdai/0.1.0": "bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie",
         "contract/valory/fpmm/0.1.0": "bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4"
     },
@@ -29,6 +27,9 @@
         "contract/valory/gnosis_safe/0.1.0": "bafybeidll7frtdsq2ckiluazkwk4zpkp7natt4kdejjehwvykqwzyuf6ei",
         "contract/valory/gnosis_safe_proxy_factory/0.1.0": "bafybeidvcgnbbmjtha6tl7st2ysna2l3iiqfhnzjfasyvml5unecozeeka",
         "contract/valory/multisend/0.1.0": "bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y",
+        "contract/valory/realitio/0.1.0": "bafybeignaxfk7fjlfa4lioflwsfru2z5xln5cyvyew3if5oas2sgm5wuii",
+        "contract/valory/realitio_proxy/0.1.0": "bafybeidx37xzjjmapwacedgzhum6grfzhp5vhouz4zu3pvpgdy5pgb2fr4",
+        "contract/valory/conditional_tokens/0.1.0": "bafybeibnzmqmeph4cj5vfh3s622mo2o5627vjjwc6bptrhj4dk65mzgvhe",
         "skill/valory/abstract_abci/0.1.0": "bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi",
         "skill/valory/abstract_round_abci/0.1.0": "bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq",
         "skill/valory/transaction_settlement_abci/0.1.0": "bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja",
