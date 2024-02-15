@@ -131,6 +131,7 @@ MAX_RETRIES = 3
 SAFE_TX_GAS = 0
 ETHER_VALUE = 0
 MAX_PREVIOUS = 0
+MIN_BALANCE_WITHDRAW_REALITIO = 100000000000000000  # 0.1 DAI
 
 AVAILABLE_FORMATS = (
     "%Y-%m-%dT%H:%M:%SZ",
@@ -1057,7 +1058,7 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
         if balance is None:
             return RedeemBondRound.ERROR_PAYLOAD
 
-        if balance <= 0:
+        if balance <= MIN_BALANCE_WITHDRAW_REALITIO:
             return RedeemBondRound.NO_TX_PAYLOAD
 
         withdraw_tx = yield from self._get_withdraw_tx()
@@ -2489,7 +2490,6 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"
                 )
-                ############
                 continue
             question_to_answer[question_id] = answer
 
