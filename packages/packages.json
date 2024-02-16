@@ -1,11 +1,10 @@
 {
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeih5yb4df6plwsxicp4jtywvpqmjnvfw55zw35yuycwxrx7mehoowy",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeibg4lmsq5gjieqchml6xfjftrmb6yfrtgmouzrpfma4hoqjmmkbxi",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeihu7j5z34lmid6p6rd6x32sbsbb5vdhnzvf5aw4ly7icxun56gqyu",
-        "agent/valory/market_maker/0.1.0": "bafybeidmgsg6xtb7aua7tjgicmbuqez4epwypx4b6dc5yqr4rk6ua4zvji",
-        "service/valory/market_maker/0.1.0": "bafybeiby3powcynxrcyt5zrow6wo5pvlrwkfnf7bkjbo6z537a35qjfkfi",
-        "connection/valory/openai/0.1.0": "bafybeicoaxmbikcf4llj4mhf7lfgb5oaj6piqalw7kplmostyhyp5rusge",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeia2kxrjnnp7fsaxvbz2llsp7quull25beryqze2a2z2bfuvil5fbi",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeibntc5ktmm7s723bnmnjazd4swoi4jowunucyjdqd2stylb4krizi",
+        "agent/valory/market_maker/0.1.0": "bafybeiehz2hxbctgldxz42aofjjf6ysnv3f5qj5sa5jbnpfzpvvslh4mpy",
+        "service/valory/market_maker/0.1.0": "bafybeifduwcai7k2yi66estf7s57u2udjnft5oevau5dbmfl4uirk23vs4",
         "contract/valory/wxdai/0.1.0": "bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie",
         "contract/valory/fpmm/0.1.0": "bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4"
     },
@@ -18,6 +17,7 @@
         "protocol/valory/abci/0.1.0": "bafybeihmzlmmb4pdo3zkhg6ehuyaa4lhw7bfpclln2o2z7v3o6fcep26iu",
         "connection/valory/ipfs/0.1.0": "bafybeihx7wb5hngjobw2salzqqryrhxvmxfuw7o2npjyqd2talmh2flqeq",
         "connection/valory/abci/0.1.0": "bafybeiejo5uyurbmafretedivyci2ktastxclbmgrkwcwc2yt36jftyqgm",
+        "connection/valory/openai/0.1.0": "bafybeigyehjbahya5mp7vyp5tjvn36rey4btvzskp3ql3mgxp3zu6gwq5a",
         "protocol/valory/acn/1.1.0": "bafybeic2pxzfc3voxl2ejhcqyf2ehm4wm5gxvgx7bliloiqi2uppmq6weu",
         "connection/valory/p2p_libp2p_client/0.1.0": "bafybeihge56dn3xep2dzomu7rtvbgo4uc2qqh7ljl3fubqdi2lq44gs5lq",
         "protocol/valory/tendermint/0.1.0": "bafybeig6g6twajlwssfbfp5rlnu5mwzuu5kgak5cs4fich7rlkx6whesnu",
@@ -37,6 +37,6 @@
         "skill/valory/reset_pause_abci/0.1.0": "bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba",
         "skill/valory/termination_abci/0.1.0": "bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa",
         "contract/valory/delegate/0.1.0": "bafybeiaslboosyvpzccaqgie56wta3aqrdkgfx5vs5ogxu7ebiez67wp6i",
-        "protocol/valory/llm/1.0.0": "bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy"
+        "protocol/valory/llm/1.0.0": "bafybeihj2orqapokafg7co3wlogwgf6cckaaj2bz3nuv4rm3opkoyhrlp4"
     }
 }

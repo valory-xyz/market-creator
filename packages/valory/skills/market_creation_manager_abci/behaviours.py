@@ -145,7 +145,7 @@ _ONE_DAY = 86400
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
-ANSWER_NO, ANSWER_YES = (
+ANSWER_YES, ANSWER_NO = (
     "0x0000000000000000000000000000000000000000000000000000000000000000",
     "0x0000000000000000000000000000000000000000000000000000000000000001",
 )
@@ -2289,7 +2289,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         google_engine_id = self.params.google_engine_id
 
         my_kwargs = {
-            "tool": "resolve-market-reasoning",
+            "tool": "resolve-market-reasoning-gpt-4",
             "question": question,
             "api_keys": {
                 "newsapi": newsapi_api_key,
@@ -2300,11 +2300,12 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         }
 
         tool_output = resolve_market_reasoning_run(**my_kwargs)
+
         self.context.logger.info(f"run_resolve_market_reasoning output: {tool_output}")
 
         has_occurred = None
         if tool_output[0] is not None:
-            has_occurred = json.loads(tool_output[0]).get("has_occurred")
+            has_occurred = tool_output[0].has_occurred
 
         self.context.logger.info(f"has_occurred={has_occurred}")
 
@@ -2525,6 +2526,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 continue
             # answer = yield from self._get_answer(question["title"])
             answer = self._get_answer_from_tool(question["title"])
+            self.context.logger.warning(f"Got answer {answer}")
             if answer is None:
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"

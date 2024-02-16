@@ -10,7 +10,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeibuinbwchizveevuykw2b7jmuvlvg56dczu23iwhhj37tkpqet7g4
+  behaviours.py: bafybeiekgszy3qke4onfhq5lvjgop57fgogxkikr3cfvaksb3aufne45mi
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeicg43ziivxys6dpj4l6chal7mam4mnjk5ws7sncjs5qmqnbsdekau
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
@@ -20,10 +20,10 @@ fingerprint:
   rounds.py: bafybeibsb3g3dcaelvrprst5v6ykx6p3bwsfcbeb3vc3ur4eoxqygebcxa
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
   tools/resolve_market_reasoning/__init__.py: bafybeig7kxk7o3uulucvree3mllz6r5vmq7upvsz6dx775k5lclsq6muvi
-  tools/resolve_market_reasoning/resolve_market_reasoning.py: bafybeigzig2z2lay3hpadpicuqpkdcobgje7giwinmlv3urobuxx54yh3u
+  tools/resolve_market_reasoning/resolve_market_reasoning.py: bafybeie3z6wyt2hqzsums6xlry6ha6l5mo6muiv22xquygeor6bf2hzg5i
 fingerprint_ignore_patterns: []
 connections:
-- valory/openai:0.1.0:bafybeicoaxmbikcf4llj4mhf7lfgb5oaj6piqalw7kplmostyhyp5rusge
+- valory/openai:0.1.0:bafybeigyehjbahya5mp7vyp5tjvn36rey4btvzskp3ql3mgxp3zu6gwq5a
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeidll7frtdsq2ckiluazkwk4zpkp7natt4kdejjehwvykqwzyuf6ei
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
@@ -33,7 +33,7 @@ contracts:
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
 - valory/fpmm:0.1.0:bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4
 protocols:
-- valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
+- valory/llm:1.0.0:bafybeihj2orqapokafg7co3wlogwgf6cckaaj2bz3nuv4rm3opkoyhrlp4
 - valory/contract_api:1.0.0:bafybeialhbjvwiwcnqq3ysxcyemobcbie7xza66gaofcvla5njezkvhcka
 - valory/ledger_api:1.0.0:bafybeige5agrztgzfevyglf7mb4o7pzfttmq4f6zi765y4g2zvftbyowru
 skills:
