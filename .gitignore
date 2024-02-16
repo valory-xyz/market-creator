@@ -11,11 +11,7 @@ packages/valory/contracts/__pycache__
 packages/valory/skills/__pycache__
 
 packages/valory/protocols
-packages/valory/connections/abci
-packages/valory/connections/http_client
-packages/valory/connections/ipfs
-packages/valory/connections/ledger
-packages/valory/connections/p2p_libp2p_client
+packages/valory/connections
 
 packages/valory/contracts/gnosis_safe
 packages/valory/contracts/service_registry
