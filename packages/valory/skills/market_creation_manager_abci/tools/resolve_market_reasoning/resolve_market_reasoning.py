@@ -551,6 +551,9 @@ def fetch_additional_information(
         urls=urls, client=client, counter_callback=counter_callback
     )
 
+    # Remove None values from the list
+    docs = [doc for doc in docs if doc]
+
     # Chunk the documents
     split_docs = []
     for doc in docs:
@@ -561,6 +564,9 @@ def fetch_additional_information(
             [Document(text=chunk, date=doc.date, url=doc.url) for chunk in t]
         )
     print(f"Split Docs: {len(split_docs)}")
+
+    # Remove None values from the list
+    split_docs = [doc for doc in split_docs if doc]
 
     # Embed the documents
     docs_with_embeddings = get_embeddings(split_docs)
@@ -717,35 +723,3 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any]:
 
         except Exception as e:
             return None, None, None, None, e
-
-
-if __name__ == "__main__":
-    import os
-
-    newsapi_api_key = os.getenv("NEWSAPI_API_KEY")
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    google_engine_id = os.getenv("GOOGLE_ENGINE_ID")
-
-    my_kwargs = {
-        "tool": "resolve-market-reasoning",
-        "question": "Will a cease-fire be implemented in the Gaza Strip by 5 February 2024?",
-        "api_keys": {
-            "newsapi": newsapi_api_key,
-            "openai": openai_api_key,
-            "google_api_key": google_api_key,
-            "google_engine_id": google_engine_id,
-        },
-    }
-
-    output = run(**my_kwargs)
-    print(output)
-    print(".....")
-
-    if output[0] == None:
-        print("None")
-        exit(0)
-    else:
-        json_output = json.loads(output[0])
-        print(json_output)
-        print(json_output.get("has_occurred", None))

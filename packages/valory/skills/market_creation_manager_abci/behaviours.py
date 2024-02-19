@@ -2240,13 +2240,16 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_subgraph_result(
             query=OPEN_FPMM_QUERY.substitute(
                 creator=creator,
-                first=self.params.questions_to_close_batch_size,
+                first=1000,
                 current_timestamp=self.last_synced_timestamp,
             )
         )
         if response is None:
             return []
-        return response.get("data", {}).get("fixedProductMarketMakers", [])
+        questions = response.get("data", {}).get("fixedProductMarketMakers", [])
+        random.seed(self.last_synced_timestamp)
+        random_question = random.choice(questions)
+        return [random_question]
 
     def _parse_llm_output(
         self, output: str, required_fields: Optional[List[str]] = None
