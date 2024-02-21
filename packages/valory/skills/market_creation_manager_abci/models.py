@@ -19,7 +19,7 @@
 
 """This module contains the shared state for the abci skill of MarketCreationManagerAbciApp."""
 
-from typing import Any, List, Set, Type
+from typing import Any, Dict, List, Set, Type
 
 from aea.skills.base import SkillContext
 
@@ -44,7 +44,8 @@ class SharedState(BaseSharedState):
 
     def __init__(self, *args: Any, skill_context: SkillContext, **kwargs: Any) -> None:
         """Initialize the shared state object."""
-        self.processed_question_ids: Set[str] = set()
+        self.questions_requested_mech: Dict[str, Any] = {}
+        self.questions_responded: Set[str] = set()
         super().__init__(*args, skill_context=skill_context, **kwargs)
 
 

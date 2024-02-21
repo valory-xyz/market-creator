@@ -120,8 +120,15 @@ class ApproveMarketsPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
-class CloseMarketsPayload(BaseTxPayload):
+class GetPendingQuestionsPayload(BaseTxPayload):
     """Represent a transaction payload for the ApproveMarketsRound."""
+
+    content: str
+
+
+@dataclass(frozen=True)
+class AnswerQuestionsPayload(BaseTxPayload):
+    """Represent a transaction payload for the AnswerQuestionsRound."""
 
     content: str
 

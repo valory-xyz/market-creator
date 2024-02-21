@@ -23,6 +23,7 @@ import json
 import random
 from abc import ABC
 from collections import defaultdict
+from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
 from string import Template
 from typing import (
@@ -84,9 +85,10 @@ from packages.valory.skills.market_creation_manager_abci.models import (
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     ApproveMarketsPayload,
-    CloseMarketsPayload,
+    AnswerQuestionPayload,
     CollectProposedMarketsPayload,
     DepositDaiPayload,
+    GetPendingQuestions,
     PostTxPayload,
     RedeemBondPayload,
     RemoveFundingPayload,
@@ -97,17 +99,21 @@ from packages.valory.skills.market_creation_manager_abci.prompts import (
     URL_QUERY_PROMPT_TEMPLATE,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
+    AnswerQuestionRound,
     ApproveMarketsRound,
-    CloseMarketsRound,
     CollectProposedMarketsRound,
     CollectRandomnessPayload,
     CollectRandomnessRound,
     DataGatheringPayload,
     DataGatheringRound,
     DepositDaiRound,
+    GetPendingQuestionsRound,
     MarketCreationManagerAbciApp,
     MarketProposalPayload,
     MarketProposalRound,
+    MechInteractionResponse,
+    MechMetadata,
+    MechRequest,
     PostTransactionRound,
     PrepareTransactionPayload,
     PrepareTransactionRound,
@@ -2135,6 +2141,10 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             f"For market with id {market_id}. "
         )
 
+        #TODO finish this if
+        if self.synchronized_data.tx_sender == Mech.auto_round_id():
+            return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
+ 
         if self.synchronized_data.tx_sender != PrepareTransactionRound.auto_round_id():
             # we only handle market creation txs atm, any other tx, we don't need to take action
             self.context.logger.info(
@@ -2216,17 +2226,17 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         return None
 
 
-class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
-    """Close market behaviour"""
+class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
+    """Gets Omen pending questions to close markets"""
 
-    matching_round = CloseMarketsRound
+    matching_round = GetPendingQuestionsRound
 
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             content = yield from self.get_payload()
-            payload = CloseMarketsPayload(sender=sender, content=content)
+            payload = GetPendingQuestions(sender=sender, content=content)
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -2237,6 +2247,7 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, List[Dict[str, Any]]]:
         """Collect FPMM from subgraph."""
         creator = self.synchronized_data.safe_contract_address.lower()
+        creator = "0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec".lower()
         response = yield from self.get_subgraph_result(
             query=OPEN_FPMM_QUERY.substitute(
                 creator=creator,
@@ -2251,190 +2262,175 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         random_question = random.choice(questions)
         return [random_question]
 
-    def _parse_llm_output(
-        self, output: str, required_fields: Optional[List[str]] = None
-    ) -> Optional[Dict[str, Any]]:
-        """Parse the llm output to json."""
-        try:
-            json_data = json.loads(output)
-            if required_fields is not None:
-                for field in required_fields:
-                    if field not in json_data:
-                        self.context.logger.error(
-                            f"Field {field} not in json_data {json_data}"
-                        )
-                        return None
-            return json_data
-        except json.JSONDecodeError as e:
-            self.context.logger.error(f"Error decoding JSON response. {e}")
-            return None
-
-    def _append_articles_to_input(
-        self, news_list: List[dict], input_string: str
-    ) -> str:
-        """Append articles to input."""
-        for article in news_list:
-            title = article["title"]
-            content = article["content"][:ARTICLE_LIMIT]
-            date = article["publishedAt"]
-            current_article = f"- ({date}) {title}\n  {content}\n\n"
-            if len(input_string) + len(current_article) > ADDITIONAL_INFO_LIMIT:
-                break
-            input_string += current_article
-        return input_string
-
-    def _get_answer_from_tool(
-        self, question: str
-    ) -> Generator[None, None, Optional[str]]:
-        newsapi_api_key = self.params.newsapi_api_key
-        openai_api_key = self.params.openai_api_key
-        google_api_key = self.params.google_api_key
-        google_engine_id = self.params.google_engine_id
-
-        my_kwargs = {
-            "tool": "resolve-market-reasoning-gpt-4",
-            "question": question,
-            "api_keys": {
-                "newsapi": newsapi_api_key,
-                "openai": openai_api_key,
-                "google_api_key": google_api_key,
-                "google_engine_id": google_engine_id,
-            },
-        }
-
-        tool_output = resolve_market_reasoning_run(**my_kwargs)
-
-        self.context.logger.info(f"run_resolve_market_reasoning output: {tool_output}")
-
-        has_occurred = None
-        if tool_output[0] is not None:
-            has_occurred = tool_output[0].has_occurred
-
-        self.context.logger.info(f"has_occurred={has_occurred}")
-
-        if has_occurred is None:
-            return None
-        elif has_occurred:
-            return ANSWER_YES
-
-        return ANSWER_NO
-
-    def _get_answer(self, question: str) -> Generator[None, None, Optional[str]]:
-        """Get an answer for the provided questions"""
-
-        # An initial query is made to Newsapi to detect ratelimit issue
-        # This query is also included in the input_news passed to the LLM,
-        # if the call succeeds.
-        input_news = ""
-        initial_news_articles = yield from self._get_news(question)
-        if initial_news_articles is None:
-            self.context.logger.info(
-                f"Could not get news articles for query {question}"
-            )
-            return None
-        input_news = self._append_articles_to_input(initial_news_articles, input_news)
-
-        prompt_values = {
-            "user_prompt": question,
-        }
-
-        # llm request message
-        llm_dialogues = cast(LlmDialogues, self.context.llm_dialogues)
-        request_llm_message, llm_dialogue = llm_dialogues.create(
-            counterparty=str(LLM_CONNECTION_PUBLIC_ID),
-            performative=LlmMessage.Performative.REQUEST,
-            prompt_template=URL_QUERY_PROMPT_TEMPLATE,
-            prompt_values=prompt_values,
+    def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
+        """Get the balance of an account"""
+        ledger_api_response = yield from self.get_ledger_api_response(
+            performative=LedgerApiMessage.Performative.GET_STATE,
+            ledger_callable="get_balance",
+            account=account,
         )
-        request_llm_message = cast(LlmMessage, request_llm_message)
-        llm_dialogue = cast(LlmDialogue, llm_dialogue)
-        llm_response_message = yield from self.do_llm_request(
-            request_llm_message, llm_dialogue
-        )
-        result_str = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
-        self.context.logger.info(f"Got LLM response: {result_str}")
-        result = self._parse_llm_output(result_str, required_fields=["queries"])
-        if result is None:
-            self.context.logger.info(f"Could not parse LLM response: {result}")
-            return None
-
-        queries = result["queries"]
-        self.context.logger.info(f"Got queries: {queries}")
-        if len(queries) == 0:
-            self.context.logger.info(f"No queries found in LLM response: {result}")
-            return None
-
-        for query in queries:
-            news_articles = yield from self._get_news(query)
-            if news_articles is None:
-                self.context.logger.info(
-                    f"Could not get news articles for query {query}"
-                )
-                return None
-            input_news = self._append_articles_to_input(news_articles, input_news)
-
-        if len(input_news) == 0:
-            self.context.logger.info(f"No news articles found for queries {queries}")
-            return None
-
-        prompt_values["additional_information"] = input_news
-
-        # llm request message
-        llm_dialogues = cast(LlmDialogues, self.context.llm_dialogues)
-        request_llm_message, llm_dialogue = llm_dialogues.create(
-            counterparty=str(LLM_CONNECTION_PUBLIC_ID),
-            performative=LlmMessage.Performative.REQUEST,
-            prompt_template=OUTCOME_PROMPT_TEMPLATE,
-            prompt_values=prompt_values,
-        )
-        request_llm_message = cast(LlmMessage, request_llm_message)
-        llm_dialogue = cast(LlmDialogue, llm_dialogue)
-        llm_response_message = yield from self.do_llm_request(
-            request_llm_message, llm_dialogue
-        )
-        result_str = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
-        json_data = self._parse_llm_output(result_str, required_fields=["has_occurred"])
-        if json_data is None:
-            self.context.logger.info(f"Could not parse LLM response: {result}")
-            return None
-
-        has_occurred = bool(json_data["has_occurred"])
-        self.context.logger.info(f'Has "{question!r}" occurred?: {has_occurred}')
-        if has_occurred:
-            return ANSWER_YES
-
-        return ANSWER_NO
-
-    def _get_news(
-        self, query: str
-    ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
-        """Auxiliary method to collect data from endpoint."""
-        headers = {"X-Api-Key": self.params.market_closing_newsapi_api_key}
-
-        parameters = {
-            "q": query,
-            "pageSize": "100",
-        }
-        # search through all articles everything
-        url = f"{self.params.newsapi_endpoint}/{EVERYTHING}"
-        response = yield from self.get_http_response(
-            method="GET",
-            url=url,
-            headers=headers,
-            parameters=parameters,
-        )
-        if response.status_code != HTTP_OK:
+        if ledger_api_response.performative != LedgerApiMessage.Performative.STATE:
+            # something went wrong
             self.context.logger.error(
-                f"Could not retrieve response from {self.params.newsapi_endpoint}."
-                f"Received status code {response.status_code}.\n{response}"
+                f"Couldn't get balance for account {account}. "
+                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"Received {ledger_api_response.performative.value}."  # type: ignore
             )
             return None
+        balance = cast(int, ledger_api_response.state.body.get("get_balance_result"))
+        return balance
 
-        response_data = json.loads(response.body.decode())
+    def get_payload(self) -> Generator[None, None, str]:
+        """Get the transaction payload"""
+        # get the questions to that need to be answered
+        questions = yield from self._get_unanswered_questions()
+        if questions is None:
+            self.context.logger.info("Couldn't get the questions")
+            return GetPendingQuestionsRound.ERROR_PAYLOAD
+
+        if len(questions) == 0:
+            self.context.logger.info("No questions to close")
+            return GetPendingQuestionsRound.NO_TX
+
         self.context.logger.info(
-            f"Response received from {self.params.newsapi_endpoint}:\n {response_data}"
+            f"Got {len(questions)} questions to close. " f"Questions: {questions}"
         )
-        return response_data["articles"]
+
+        safe_address = self.synchronized_data.safe_contract_address
+        balance = yield from self._get_balance(safe_address)
+        if balance is None:
+            self.context.logger.info("Couldn't get balance")
+            return GetPendingQuestionsRound.NO_TX
+
+        self.context.logger.info(f"Address {safe_address!r} has balance {balance}.")
+        max_num_questions = min(
+            len(questions), self.params.questions_to_close_batch_size
+        )
+        bond_required = self.params.close_question_bond * max_num_questions
+        if balance < bond_required:
+            # not enough balance to close the questions
+            self.context.logger.info(
+                f"Not enough balance to close {max_num_questions} questions. "
+                f"Balance {balance}, required {bond_required}"
+            )
+            return GetPendingQuestionsRound.NO_TX
+
+        # Prepare the Mech Requests for these questions
+        question_to_request_answer = {}
+        new_mech_requests = []
+        for question in questions:
+            question_id = question["question"]["id"].lower()
+            if question_id in self.shared_state.questions_requested_mech:
+                # we already processed this question, skip it
+                self.context.logger.info(
+                    f"Question {question_id} already processed, skipping it."
+                )
+                continue
+
+            new_mech_requests.append(
+                asdict(
+                    MechMetadata(
+                        nonce=question_id,
+                        tool="resolve-market-reasoning-gpt-4",
+                        question=question["title"],
+                    )
+                )
+            )
+            self.shared_state.questions_requested_mech[question_id] = question
+
+        self.context.logger.info(f"new_mech_requests: {new_mech_requests}")
+
+        return json.dumps(new_mech_requests, sort_keys=True)
+
+
+class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
+    """Answer questions to close markets"""
+
+    matching_round = AnswerQuestionsRound
+
+    def async_act(self) -> Generator:
+        """Do the act, supporting asynchronous execution."""
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            sender = self.context.agent_address
+            content = yield from self.get_payload()
+            payload = AnswerQuestionsPayload(sender=sender, content=content)
+        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+            yield from self.send_a2a_transaction(payload)
+            yield from self.wait_until_round_end()
+        self.set_done()
+
+
+    def get_payload(self) -> Generator[None, None, str]:
+
+        self.context.logger.info(
+            f"PostMech: mech_responses = {self.synchronized_data.mech_responses}"
+        )
+
+        question_to_answer = {}
+        for response in self.synchronized_data.mech_responses:
+
+            question_id = response.nonce
+            self.context.logger.info(
+                f"Received mech response: {response.nonce} {response.result}"
+            )
+
+            if question_id in self.shared_state.questions_responded:
+                continue
+
+            if question_id not in self.shared_state.questions_requested_mech:
+                continue
+
+            question = self.shared_state.questions_requested_mech[question_id]
+
+            # TODO Parse mech response
+            answer = ANSWER_NO
+            self.context.logger.warning(f"Got answer {answer} for question {question}")
+
+            if answer is None:
+                self.context.logger.warning(
+                    f"Couldn't get answer for question {question}"
+                )
+                continue
+            question_to_answer[question_id] = answer
+
+            if len(question_to_answer) == self.params.questions_to_close_batch_size:
+                break
+
+        self.context.logger.info(
+            f"Got answers for {len(question_to_answer)} questions. "
+        )
+        if len(question_to_answer) == 0:
+            # we couldn't get any answers, no tx to be made
+            return GetPendingQuestionsRound.NO_TX
+
+        # prepare tx for all the answers
+        txs = []
+        for question_id, answer in question_to_answer.items():
+            tx = yield from self._get_answer_tx(question_id, answer)
+            if tx is None:
+                # something went wrong, skip the current tx
+                self.context.logger.warning(
+                    f"Couldn't get tx for question {question_id} with answer {answer}"
+                )
+                continue
+            txs.append(tx)
+            # mark this question as processed. This is to avoid the situation where we
+            # try to answer the same question multiple times due to a out-of-sync issue
+            # between the subgraph and the realitio contract.
+            self.shared_state.questions_responded.add(question_id)
+
+        if len(txs) == 0:
+            # something went wrong, respond with ERROR payload for now
+            self.context.logger.error(
+                "Couldn't get any txs for questions that we have answers for."
+            )
+            return GetPendingQuestionsRound.ERROR_PAYLOAD
+
+        multisend_tx_str = yield from self._to_multisend(txs)
+        if multisend_tx_str is None:
+            # something went wrong, respond with ERROR payload for now
+            return GetPendingQuestionsRound.ERROR_PAYLOAD
+        return multisend_tx_str
 
     def _get_answer_tx(
         self, question_id: str, answer: str
@@ -2464,118 +2460,6 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
             "data": data,
         }
 
-    def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
-        """Get the balance of an account"""
-        ledger_api_response = yield from self.get_ledger_api_response(
-            performative=LedgerApiMessage.Performative.GET_STATE,
-            ledger_callable="get_balance",
-            account=account,
-        )
-        if ledger_api_response.performative != LedgerApiMessage.Performative.STATE:
-            # something went wrong
-            self.context.logger.error(
-                f"Couldn't get balance for account {account}. "
-                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "  # type: ignore
-                f"Received {ledger_api_response.performative.value}."  # type: ignore
-            )
-            return None
-        balance = cast(int, ledger_api_response.state.body.get("get_balance_result"))
-        return balance
-
-    def get_payload(self) -> Generator[None, None, str]:
-        """Get the transaction payload"""
-        # get the questions to that need to be answered
-        questions = yield from self._get_unanswered_questions()
-        if questions is None:
-            self.context.logger.info("Couldn't get the questions")
-            return CloseMarketsRound.ERROR_PAYLOAD
-
-        if len(questions) == 0:
-            self.context.logger.info("No questions to close")
-            return CloseMarketsRound.NO_TX
-
-        self.context.logger.info(
-            f"Got {len(questions)} questions to close. " f"Questions: {questions}"
-        )
-
-        safe_address = self.synchronized_data.safe_contract_address
-        balance = yield from self._get_balance(safe_address)
-        if balance is None:
-            self.context.logger.info("Couldn't get balance")
-            return CloseMarketsRound.NO_TX
-
-        self.context.logger.info(f"Address {safe_address!r} has balance {balance}.")
-        max_num_questions = min(
-            len(questions), self.params.questions_to_close_batch_size
-        )
-        bond_required = self.params.close_question_bond * max_num_questions
-        if balance < bond_required:
-            # not enough balance to close the questions
-            self.context.logger.info(
-                f"Not enough balance to close {max_num_questions} questions. "
-                f"Balance {balance}, required {bond_required}"
-            )
-            return CloseMarketsRound.NO_TX
-
-        # get the answers for those questions
-        question_to_answer = {}
-        for question in questions:
-            question_id = question["question"]["id"]
-            if question_id.lower() in self.shared_state.processed_question_ids:
-                # we already processed this question, skip it
-                self.context.logger.info(
-                    f"Question {question_id} already processed, skipping it."
-                )
-                continue
-            # answer = yield from self._get_answer(question["title"])
-            answer = self._get_answer_from_tool(question["title"])
-            self.context.logger.warning(f"Got answer {answer}")
-            if answer is None:
-                self.context.logger.warning(
-                    f"Couldn't get answer for question {question}"
-                )
-                continue
-            question_to_answer[question_id] = answer
-
-            if len(question_to_answer) == self.params.questions_to_close_batch_size:
-                break
-
-        self.context.logger.info(
-            f"Got answers for {len(question_to_answer)} questions. "
-        )
-        if len(question_to_answer) == 0:
-            # we couldn't get any answers, no tx to be made
-            return CloseMarketsRound.NO_TX
-
-        # prepare tx for all the answers
-        txs = []
-        for question_id, answer in question_to_answer.items():
-            tx = yield from self._get_answer_tx(question_id, answer)
-            if tx is None:
-                # something went wrong, skip the current tx
-                self.context.logger.warning(
-                    f"Couldn't get tx for question {question_id} with answer {answer}"
-                )
-                continue
-            txs.append(tx)
-            # mark this question as processed. This is to avoid the situation where we
-            # try to answer the same question multiple times due to a out-of-sync issue
-            # between the subgraph and the realitio contract.
-            self.shared_state.processed_question_ids.add(question_id.lower())
-
-        if len(txs) == 0:
-            # something went wrong, respond with ERROR payload for now
-            self.context.logger.error(
-                "Couldn't get any txs for questions that we have answers for."
-            )
-            return CloseMarketsRound.ERROR_PAYLOAD
-
-        multisend_tx_str = yield from self._to_multisend(txs)
-        if multisend_tx_str is None:
-            # something went wrong, respond with ERROR payload for now
-            return CloseMarketsRound.ERROR_PAYLOAD
-        return multisend_tx_str
-
 
 class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     """MarketCreationManagerRoundBehaviour"""
@@ -2585,7 +2469,7 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     behaviours: Set[Type[BaseBehaviour]] = {
         CollectRandomnessBehaviour,
         CollectProposedMarketsBehaviour,
-        CloseMarketBehaviour,
+        GetPendingQuestionsBehaviour,
         ApproveMarketsBehaviour,
         DataGatheringBehaviour,
         SelectKeeperMarketProposalBehaviour,

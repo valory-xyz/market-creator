@@ -1,10 +1,10 @@
 {
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeih5yb4df6plwsxicp4jtywvpqmjnvfw55zw35yuycwxrx7mehoowy",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihodk6ump2gbsokjvspec4zzweoyul7cml2dq43xsdau3njo6fbai",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeihvdbphz6gemk7dp52ghgau3cgemdvt6l6zn5qb2l756za2hbjg7i",
-        "agent/valory/market_maker/0.1.0": "bafybeidcsrl4h4e6lu3ixys7oucb3jsk2faewuwo7wfwbvezz2fl4xzsce",
-        "service/valory/market_maker/0.1.0": "bafybeif33dh56xhrn3nk62l7a5aqaqaae5fmbqado5bpdwjzcy7pgpbv7y",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeifs3xpzr6f4aztzgf5iv23p6j4imdvv5gkuq265kl7y42js62igka",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeidolp5toksqcgce6wqwbtvjd2abrvke6mw6xin2giqk3wvuspkqw4",
+        "agent/valory/market_maker/0.1.0": "bafybeibfpx6sudj4rdsf6rezdxxnrptkk2ycv2p744t7ysleeny67xizhq",
+        "service/valory/market_maker/0.1.0": "bafybeia3ckfcpvrfdioxgxdqwocd6plef3iive5ut5h5wtdugcy6j3qhqm",
         "contract/valory/wxdai/0.1.0": "bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie",
         "contract/valory/fpmm/0.1.0": "bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4"
     },
@@ -30,12 +30,14 @@
         "contract/valory/realitio/0.1.0": "bafybeignaxfk7fjlfa4lioflwsfru2z5xln5cyvyew3if5oas2sgm5wuii",
         "contract/valory/realitio_proxy/0.1.0": "bafybeidx37xzjjmapwacedgzhum6grfzhp5vhouz4zu3pvpgdy5pgb2fr4",
         "contract/valory/conditional_tokens/0.1.0": "bafybeibnzmqmeph4cj5vfh3s622mo2o5627vjjwc6bptrhj4dk65mzgvhe",
+        "contract/valory/mech/0.1.0": "bafybeibv6ydk326zkny4pphze64zgzzv2sc5qkt2iyymoi6pt3ci2gtxne",
         "skill/valory/abstract_abci/0.1.0": "bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi",
         "skill/valory/abstract_round_abci/0.1.0": "bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq",
         "skill/valory/transaction_settlement_abci/0.1.0": "bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja",
         "skill/valory/registration_abci/0.1.0": "bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am",
         "skill/valory/reset_pause_abci/0.1.0": "bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba",
         "skill/valory/termination_abci/0.1.0": "bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa",
+        "skill/valory/mech_interact_abci/0.1.0": "bafybeihwvjvxyv2ca2eskt3d5cvac4onr7m2hla2inydpqdipw4ze3yz6a",
         "contract/valory/delegate/0.1.0": "bafybeiaslboosyvpzccaqgie56wta3aqrdkgfx5vs5ogxu7ebiez67wp6i",
         "protocol/valory/llm/1.0.0": "bafybeihj2orqapokafg7co3wlogwgf6cckaaj2bz3nuv4rm3opkoyhrlp4"
     }
