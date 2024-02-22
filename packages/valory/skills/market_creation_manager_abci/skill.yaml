@@ -10,17 +10,15 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeia62eqglmxifr3cdk76hp6acmsxhbueo3cprrawel5b2if5fqasly
+  behaviours.py: bafybeidqp4wrsyv63j5ez3emaxhccy54t2xtvj3dma7eizzw2kpjw4zszq
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
-  fsm_specification.yaml: bafybeicg43ziivxys6dpj4l6chal7mam4mnjk5ws7sncjs5qmqnbsdekau
+  fsm_specification.yaml: bafybeibwlusq642hrdsej5zashw7oi44g2qpszmzmjqqvihzevag3uemhm
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeiezforbicd5kumccjoooh44pde5wb25gamuejlrjc7dajo75vtuxe
-  payloads.py: bafybeic5g4mzdgj6ijopbuwrdakkeilkk5p5s3tkhg4vjtrynlay5j625m
+  models.py: bafybeie4nanmiajuwgbd3hpmc7f3k4cgwauep5yl7s6n6yj26pc6etgvv4
+  payloads.py: bafybeibu7sptf43adazxpyzwtfpph7bgfhtwiotg5sdlcwjt6iw3idqn7a
   prompts.py: bafybeigdrfhsufxatofbo5x56jcqjva2yccaoklrprdella52yuwuac6xi
-  rounds.py: bafybeidr4h6a237gtdytgypac45m46e66nadtgkqa7w3ctvyq36bb4gobu
+  rounds.py: bafybeibqcl3zr3qr2pyjmoqvyvrb56dqw5ubqt6pbl4sxm3diflyb3q6ba
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
-  tools/resolve_market_reasoning/__init__.py: bafybeig7kxk7o3uulucvree3mllz6r5vmq7upvsz6dx775k5lclsq6muvi
-  tools/resolve_market_reasoning/resolve_market_reasoning.py: bafybeieojskylu4q2vauioq7vt2oryqhvg2gqrprinivhvzao43nxq5stm
 fingerprint_ignore_patterns: []
 connections:
 - valory/openai:0.1.0:bafybeigyehjbahya5mp7vyp5tjvn36rey4btvzskp3ql3mgxp3zu6gwq5a
@@ -39,6 +37,7 @@ protocols:
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
+- valory/mech_interact_abci:0.1.0:bafybeihwvjvxyv2ca2eskt3d5cvac4onr7m2hla2inydpqdipw4ze3yz6a
 behaviours:
   main:
     args: {}
@@ -216,6 +215,7 @@ models:
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
+      mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
     class_name: MarketCreationManagerParams
   randomness_api:
     args:
@@ -228,6 +228,18 @@ models:
       retries: 5
       url: https://drand.cloudflare.com/public/latest
     class_name: RandomnessApi
+  mech_response:
+    args:
+      api_id: mech_response
+      headers:
+        Content-Type: application/json
+      method: GET
+      parameters: {}
+      response_key: result
+      response_type: str
+      retries: 5
+      url: ''
+    class_name: MechResponseSpecs
   omen_subgraph:
     args:
       api_id: omen

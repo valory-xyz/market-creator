@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023 Valory AG
+#   Copyright 2023-2024 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ from typing import (
     cast,
 )
 
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.connections.openai.connection import (
     PUBLIC_ID as LLM_CONNECTION_PUBLIC_ID,
 )
@@ -84,11 +85,11 @@ from packages.valory.skills.market_creation_manager_abci.models import (
     SharedState,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
+    AnswerQuestionsPayload,
     ApproveMarketsPayload,
-    AnswerQuestionPayload,
     CollectProposedMarketsPayload,
     DepositDaiPayload,
-    GetPendingQuestions,
+    GetPendingQuestionsPayload,
     PostTxPayload,
     RedeemBondPayload,
     RemoveFundingPayload,
@@ -99,7 +100,7 @@ from packages.valory.skills.market_creation_manager_abci.prompts import (
     URL_QUERY_PROMPT_TEMPLATE,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
-    AnswerQuestionRound,
+    AnswerQuestionsRound,
     ApproveMarketsRound,
     CollectProposedMarketsRound,
     CollectRandomnessPayload,
@@ -111,9 +112,6 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     MarketCreationManagerAbciApp,
     MarketProposalPayload,
     MarketProposalRound,
-    MechInteractionResponse,
-    MechMetadata,
-    MechRequest,
     PostTransactionRound,
     PrepareTransactionPayload,
     PrepareTransactionRound,
@@ -126,8 +124,10 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     SyncMarketsRound,
     SynchronizedData,
 )
-from packages.valory.skills.market_creation_manager_abci.tools.resolve_market_reasoning.resolve_market_reasoning import (
-    run as resolve_market_reasoning_run,
+from packages.valory.skills.mech_interact_abci.states.base import (
+    MechInteractionResponse,
+    MechMetadata,
+    MechRequest,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -2141,10 +2141,12 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             f"For market with id {market_id}. "
         )
 
-        #TODO finish this if
-        if self.synchronized_data.tx_sender == Mech.auto_round_id():
+        if (
+            self.synchronized_data.tx_sender
+            == MechRequestStates.MechRequestRound.auto_round_id()
+        ):
             return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
- 
+
         if self.synchronized_data.tx_sender != PrepareTransactionRound.auto_round_id():
             # we only handle market creation txs atm, any other tx, we don't need to take action
             self.context.logger.info(
@@ -2307,13 +2309,13 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             len(questions), self.params.questions_to_close_batch_size
         )
         bond_required = self.params.close_question_bond * max_num_questions
-        if balance < bond_required:
-            # not enough balance to close the questions
-            self.context.logger.info(
-                f"Not enough balance to close {max_num_questions} questions. "
-                f"Balance {balance}, required {bond_required}"
-            )
-            return GetPendingQuestionsRound.NO_TX
+        # if balance < bond_required:
+        #     # not enough balance to close the questions
+        #     self.context.logger.info(
+        #         f"Not enough balance to close {max_num_questions} questions. "
+        #         f"Balance {balance}, required {bond_required}"
+        #     )
+        #     return GetPendingQuestionsRound.NO_TX
 
         # Prepare the Mech Requests for these questions
         question_to_request_answer = {}
@@ -2332,7 +2334,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
                     MechMetadata(
                         nonce=question_id,
                         tool="resolve-market-reasoning-gpt-4",
-                        question=question["title"],
+                        prompt=question["title"],
                     )
                 )
             )
@@ -2359,16 +2361,13 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             yield from self.wait_until_round_end()
         self.set_done()
 
-
     def get_payload(self) -> Generator[None, None, str]:
-
         self.context.logger.info(
             f"PostMech: mech_responses = {self.synchronized_data.mech_responses}"
         )
 
         question_to_answer = {}
         for response in self.synchronized_data.mech_responses:
-
             question_id = response.nonce
             self.context.logger.info(
                 f"Received mech response: {response.nonce} {response.result}"
@@ -2470,6 +2469,7 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
         CollectRandomnessBehaviour,
         CollectProposedMarketsBehaviour,
         GetPendingQuestionsBehaviour,
+        AnswerQuestionsBehaviour,
         ApproveMarketsBehaviour,
         DataGatheringBehaviour,
         SelectKeeperMarketProposalBehaviour,

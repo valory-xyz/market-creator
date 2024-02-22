@@ -37,12 +37,13 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
-- valory/market_maker_abci:0.1.0:bafybeidolp5toksqcgce6wqwbtvjd2abrvke6mw6xin2giqk3wvuspkqw4
+- valory/market_maker_abci:0.1.0:bafybeibvsug5sk7rye5enkejwgbplar37cid66twk6ve4qfbiqcisvu3mi
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
-- valory/market_creation_manager_abci:0.1.0:bafybeifs3xpzr6f4aztzgf5iv23p6j4imdvv5gkuq265kl7y42js62igka
+- valory/market_creation_manager_abci:0.1.0:bafybeibbjtv5cs5g7gopq35nbypyimy4b6xfh4zmucu6yuxsl5iozyqmye
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
+- valory/mech_interact_abci:0.1.0:bafybeihwvjvxyv2ca2eskt3d5cvac4onr7m2hla2inydpqdipw4ze3yz6a
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -208,4 +209,5 @@ models:
       google_api_key: ${str:google_api_key}
       google_engine_id: ${str:google_engine_id}
       openai_api_key: ${str:openai_api_key}
+      mech_contract_address: ${str:"0x77af31de935740567cf4ff1986d04b2c964a786a"}
 is_abstract: false

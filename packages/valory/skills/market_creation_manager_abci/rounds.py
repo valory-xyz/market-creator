@@ -24,6 +24,7 @@ from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
     AbciAppTransitionFunction,
@@ -42,7 +43,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectRandomnessPayload,
     DataGatheringPayload,
     DepositDaiPayload,
-    GetPendingQuestions,
+    GetPendingQuestionsPayload,
     MarketProposalPayload,
     PostTxPayload,
     PrepareTransactionPayload,
@@ -52,42 +53,14 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     SelectKeeperPayload,
     SyncMarketsPayload,
 )
+from packages.valory.skills.mech_interact_abci.states.base import (
+    MechInteractionResponse,
+    MechMetadata,
+    MechRequest,
+)
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
 )
-
-
-@dataclass
-class MechMetadata:
-    """A Mech's metadata."""
-
-    question: str
-    tool: str
-    nonce: str
-
-
-@dataclass
-class MechRequest:
-    """A Mech's request."""
-
-    data: str = ""
-    requestId: int = 0
-
-
-@dataclass
-class MechInteractionResponse(MechRequest):
-    """A structure for the response of a mech interaction task."""
-
-    nonce: str = ""
-    result: Optional[str] = None
-    error: str = "Unknown"
-
-    def retries_exceeded(self) -> None:
-        """Set an incorrect format response."""
-        self.error = "Retries were exceeded while trying to get the mech's response."
-
-    def incorrect_format(self, res: Any) -> None:
-        """Set an incorrect format response."""
 
 
 class Event(Enum):
@@ -820,6 +793,15 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
         if event == Event.DONE and payload == self.NO_TX:
             return synced_data, Event.NO_TX
 
+        synced_data = synced_data.update(
+            synchronized_data_class=SynchronizedData,
+            **{
+                get_name(
+                    SynchronizedData.tx_sender
+                ): MechRequestStates.MechRequestRound.auto_round_id(),
+            },
+        )
+
         return synced_data, event
 
 
@@ -887,11 +869,16 @@ class FinishedWithAnswerQuestionsRound(DegenerateRound):
     """FinishedWithAnswerQuestionsRound"""
 
 
+class FinishedWithMechRequest(DegenerateRound):
+    """FinishedWithMechRequest"""
+
+
 class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
 
     initial_round_cls: AppState = CollectRandomnessRound
     initial_states: Set[AppState] = {
+        AnswerQuestionsRound,
         CollectRandomnessRound,
         PostTransactionRound,
         GetPendingQuestionsRound,
@@ -901,7 +888,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.DONE: GetPendingQuestionsRound,
             Event.ERROR: GetPendingQuestionsRound,
             Event.NO_MAJORITY: PostTransactionRound,
-            Event.MECH_REQUEST_DONE: AnswerQuestionsRound
+            Event.MECH_REQUEST_DONE: FinishedWithMechRequest,
         },
         GetPendingQuestionsRound: {
             Event.DONE: FinishedWithGetPendingQuestionsRound,
@@ -996,13 +983,18 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         FinishedMarketCreationManagerRound: {},
+        FinishedWithAnswerQuestionsRound: {},
+        FinishedWithMechRequest: {},
         FinishedWithRemoveFundingRound: {},
         FinishedWithDepositDaiRound: {},
+        FinishedWithGetPendingQuestionsRound: {},
         FinishedWithRedeemBondRound: {},
         FinishedWithoutTxRound: {},
     }
     final_states: Set[AppState] = {
         FinishedMarketCreationManagerRound,
+        FinishedWithAnswerQuestionsRound,
+        FinishedWithMechRequest,
         FinishedWithRemoveFundingRound,
         FinishedWithDepositDaiRound,
         FinishedWithGetPendingQuestionsRound,
@@ -1019,11 +1011,15 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.approved_markets_timestamp),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
+        AnswerQuestionsRound: set(),
         GetPendingQuestionsRound: set(),
         CollectRandomnessRound: set(),
         PostTransactionRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
+        FinishedWithAnswerQuestionsRound: {
+            get_name(SynchronizedData.most_voted_tx_hash),
+        },
         FinishedWithDepositDaiRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
@@ -1036,6 +1032,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithRemoveFundingRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
+        FinishedWithMechRequest: set(),
         FinishedWithGetPendingQuestionsRound: set(),
         FinishedWithoutTxRound: set(),
     }

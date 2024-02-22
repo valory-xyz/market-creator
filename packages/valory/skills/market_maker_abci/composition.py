@@ -20,6 +20,10 @@
 """This module contains the price estimation ABCI application."""
 
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
+import packages.valory.skills.mech_interact_abci.rounds as MechInteractAbci
+import packages.valory.skills.mech_interact_abci.states.final_states as MechFinalStates
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
+import packages.valory.skills.mech_interact_abci.states.response as MechResponseStates
 import packages.valory.skills.transaction_settlement_abci.rounds as TransactionSettlementAbci
 from packages.valory.skills.abstract_round_abci.abci_app_chain import (
     AbciAppTransitionMapping,
@@ -42,10 +46,6 @@ from packages.valory.skills.termination_abci.rounds import (
     Event,
     TerminationAbciApp,
 )
-import packages.valory.skills.mech_interact_abci.rounds as MechInteractAbci
-import packages.valory.skills.mech_interact_abci.states.final_states as MechFinalStates
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
-import packages.valory.skills.mech_interact_abci.states.response as MechResponseStates
 
 
 abci_app_transition_mapping: AbciAppTransitionMapping = {
@@ -55,14 +55,12 @@ abci_app_transition_mapping: AbciAppTransitionMapping = {
     MarketCreationManagerAbci.FinishedWithRedeemBondRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithRemoveFundingRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-
     MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound: MechRequestStates.MechRequestRound,
     MechFinalStates.FinishedMechRequestRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MechFinalStates.FinishedMechResponseRound: MarketCreationManagerAbci.AnswerQuestionsRound,
     MechFinalStates.FinishedMechRequestSkipRound: MarketCreationManagerAbci.CollectRandomnessRound,
-
+    MarketCreationManagerAbci.FinishedWithMechRequest: MechResponseStates.MechResponseRound,
     MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-
     TransactionSettlementAbci.FinishedTransactionSubmissionRound: MarketCreationManagerAbci.PostTransactionRound,
     TransactionSettlementAbci.FailedRound: ResetAndPauseRound,
     FinishedResetAndPauseRound: MarketCreationManagerAbci.GetPendingQuestionsRound,
@@ -81,6 +79,7 @@ MarketCreatorAbciApp = chain(
         MarketCreationManagerAbci.MarketCreationManagerAbciApp,
         TransactionSettlementAbci.TransactionSubmissionAbciApp,
         ResetPauseAbciApp,
+        MechInteractAbci.MechInteractAbciApp,
     ),
     abci_app_transition_mapping,
 ).add_background_app(termination_config)
