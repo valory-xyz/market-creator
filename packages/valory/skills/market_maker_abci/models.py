@@ -39,6 +39,9 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     Event as MarketCreationManagerEvent,
 )
 from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
+from packages.valory.skills.mech_interact_abci.models import (
+    Params as MechInteractAbciParams,
+)
 from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEvent
 from packages.valory.skills.termination_abci.models import TerminationParams
 from packages.valory.skills.transaction_settlement_abci.rounds import Event as TSEvent
@@ -51,6 +54,7 @@ Requests = BaseRequests
 BenchmarkTool = BaseBenchmarkTool
 RandomnessApi = MarketCreationManagerRandomnessApi
 OmenSubgraph = BaseOmenSubgraph
+MechInteractParams = MechInteractAbciParams
 
 
 class SharedState(BaseSharedState):
@@ -108,6 +112,7 @@ class SharedState(BaseSharedState):
 
 class Params(
     MarketCreationManagerParams,
+    MechInteractParams,
     TerminationParams,
 ):
     """A model to represent params for multiple abci apps."""

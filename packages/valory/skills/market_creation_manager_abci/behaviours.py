@@ -2238,7 +2238,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             content = yield from self.get_payload()
-            payload = GetPendingQuestions(sender=sender, content=content)
+            payload = GetPendingQuestionsPayload(sender=sender, content=content)
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -2249,7 +2249,6 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, List[Dict[str, Any]]]:
         """Collect FPMM from subgraph."""
         creator = self.synchronized_data.safe_contract_address.lower()
-        creator = "0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec".lower()
         response = yield from self.get_subgraph_result(
             query=OPEN_FPMM_QUERY.substitute(
                 creator=creator,
@@ -2260,9 +2259,59 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         if response is None:
             return []
         questions = response.get("data", {}).get("fixedProductMarketMakers", [])
+        self.context.logger.info(f"Collected questions: {questions}")
+
+        # # TODO remove
+        # questions = json.loads(
+        #     """
+        #     [
+        #         {
+        #             "currentAnswerTimestamp": "1708682235",
+        #             "creator": "0x89c5cc945dd550bcffb72fe42bff002429f46fec",
+        #             "category": "politics",
+        #             "creationTimestamp": "1708265700",
+        #             "currentAnswer": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        #             "id": "0xf596e134293fa4e4a2323f07cda8e7ca0791e350",
+        #             "answerFinalizedTimestamp": "1708768635",
+        #             "openingTimestamp": "1708646400",
+        #             "question": {
+        #                 "id": "0xc828523ed7d33c285a401697be26877935228774ce69101e7141f7be23d7d32f",
+        #                 "data": "Will the 'serious national security threat' warned by the House Intelligence Committee Chairman be publicly revealed by 22 February 2024? \\\"Yes\\\",\\\"No\\\" politics en_US",
+        #                 "currentAnswerBond": "1000000000000000"
+        #             },
+        #             "title": "Will the 'serious national security threat' warned by the House Intelligence Committee Chairman be publicly revealed by 22 February 2024?",
+        #             "timeout": "86400"
+        #         },
+        #         {
+        #             "currentAnswerTimestamp": "1708682410",
+        #             "creator": "0x89c5cc945dd550bcffb72fe42bff002429f46fec",
+        #             "category": "education",
+        #             "creationTimestamp": "1708259160",
+        #             "currentAnswer": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        #             "id": "0xed96f303c2967743fb6ae662ed22d37342a45095",
+        #             "answerFinalizedTimestamp": "1708768810",
+        #             "openingTimestamp": "1708646400",
+        #             "question": {
+        #                 "id": "0xafa11b93932b890d63f8bd9e82cef5e1244c610075d3a8663b48cc6c8db47453",
+        #                 "data": "Will the Georgia Association of Educators win their lawsuit against Cobb County School officials by 22 February 2024? \\\"Yes\\\",\\\"No\\\" education en_US",
+        #                 "currentAnswerBond": "1000000000000000"
+        #             },
+        #             "title": "Will the Georgia Association of Educators win their lawsuit against Cobb County School officials by 22 February 2024?",
+        #             "timeout": "86400"
+        #         }
+        #     ]
+        # """
+        # )
+        # self.context.logger.info(f"Collected questions: {questions}")
+        # # TODO END-REMOVE
+
+        if not questions:
+            return []
+
         random.seed(self.last_synced_timestamp)
-        random_question = random.choice(questions)
-        return [random_question]
+        num_questions = min(len(questions), self.params.multisend_batch_size)
+        random_questions = random.sample(questions, num_questions)
+        return random_questions
 
     def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
         """Get the balance of an account"""
@@ -2309,13 +2358,15 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             len(questions), self.params.questions_to_close_batch_size
         )
         bond_required = self.params.close_question_bond * max_num_questions
-        # if balance < bond_required:
-        #     # not enough balance to close the questions
-        #     self.context.logger.info(
-        #         f"Not enough balance to close {max_num_questions} questions. "
-        #         f"Balance {balance}, required {bond_required}"
-        #     )
-        #     return GetPendingQuestionsRound.NO_TX
+
+        # TODO uncomment
+        if balance < bond_required:
+            # not enough balance to close the questions
+            self.context.logger.info(
+                f"Not enough balance to close {max_num_questions} questions. "
+                f"Balance {balance}, required {bond_required}"
+            )
+            return GetPendingQuestionsRound.NO_TX
 
         # Prepare the Mech Requests for these questions
         question_to_request_answer = {}
@@ -2361,6 +2412,16 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             yield from self.wait_until_round_end()
         self.set_done()
 
+    def _parse_mech_response(self, response: MechInteractionResponse) -> str:
+        has_occurred = json.loads(response.result).get("has_occurred", None)
+
+        if has_occurred == None:
+            return None
+        if has_occurred == True:
+            return ANSWER_YES
+
+        return ANSWER_NO
+
     def get_payload(self) -> Generator[None, None, str]:
         self.context.logger.info(
             f"PostMech: mech_responses = {self.synchronized_data.mech_responses}"
@@ -2381,10 +2442,11 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
             question = self.shared_state.questions_requested_mech[question_id]
 
-            # TODO Parse mech response
-            answer = ANSWER_NO
+            answer = self._parse_mech_response(response)
             self.context.logger.warning(f"Got answer {answer} for question {question}")
 
+            # TODO remove
+            # exit(1)
             if answer is None:
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"

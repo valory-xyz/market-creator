@@ -9,12 +9,12 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeie36nhohbz4t6hngy42nw7coe2hwrprywo4n6xmwqjkfz7ni3n6sq
-  behaviours.py: bafybeibzkj5b7zymcz4c2befwyodkyyisvuni742rjtozqxlezktelk6fi
-  composition.py: bafybeicgnm7opepuecdirwwy5mvqbr3l6qrpelntx5osbhym67iik3i7qi
+  behaviours.py: bafybeicx2lhsobq25vppcrfshwrowpbzmfil75y7rd7e3sqdo2gd6lesw4
+  composition.py: bafybeidxfy6fu4bi5bxrc655h462o3gilpmupi64af4kt5zyntlb2xv7hi
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeiauanixmrst5mc3n3n3mdnddrzv5sxbf2wauar4cd5rmasrspk6pq
   handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
-  models.py: bafybeiefhdhm5p6mugsucxxmzbxtuiakb7bp5dofvef7ixrq3cqwivimyu
+  models.py: bafybeifecto2p4ibczhpjx7nlwbwwf4xpmejus23xgizyizx4icxpdthxy
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
 fingerprint_ignore_patterns: []
 connections: []
@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
-- valory/market_creation_manager_abci:0.1.0:bafybeibbjtv5cs5g7gopq35nbypyimy4b6xfh4zmucu6yuxsl5iozyqmye
+- valory/market_creation_manager_abci:0.1.0:bafybeicnfylg5bxv3ixdssxadq2ni3reypoxboaymxzhliztgchw7lwgum
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
 - valory/mech_interact_abci:0.1.0:bafybeihwvjvxyv2ca2eskt3d5cvac4onr7m2hla2inydpqdipw4ze3yz6a
@@ -171,6 +171,8 @@ models:
       max_attempts: 10
       max_healthcheck: 120
       multisend_address: '0x0000000000000000000000000000000000000000'
+      multisend_batch_size: 5
+      ipfs_address: https://gateway.autonolas.tech/ipfs/
       on_chain_service_id: null
       request_retry_delay: 1.0
       request_timeout: 10.0

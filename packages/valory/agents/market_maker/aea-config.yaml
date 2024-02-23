@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeiflcfufixmsrhobf56bn5745m2iipcfqyulwk2qegtnagb3kvaaxi
 - valory/abstract_round_abci:0.1.0:bafybeiaqcl7h2famylusiffigwem7tevkcsyocdu5xd42jkmgq6kvowzgq
-- valory/market_maker_abci:0.1.0:bafybeibvsug5sk7rye5enkejwgbplar37cid66twk6ve4qfbiqcisvu3mi
+- valory/market_maker_abci:0.1.0:bafybeial7zdfod2hefzzysbnnbnrpgj3gsh4af6ivlrihzfkcfzy5vkcpm
 - valory/registration_abci:0.1.0:bafybeic2ynseiak7jpta7jfwuqwyp453b4p7lolr4wihxmpn633uekv5am
-- valory/market_creation_manager_abci:0.1.0:bafybeibbjtv5cs5g7gopq35nbypyimy4b6xfh4zmucu6yuxsl5iozyqmye
+- valory/market_creation_manager_abci:0.1.0:bafybeicnfylg5bxv3ixdssxadq2ni3reypoxboaymxzhliztgchw7lwgum
 - valory/reset_pause_abci:0.1.0:bafybeidzajbe3erygeh2xbd6lrjv7nsptznjuzrt24ykgvhgotdeyhfnba
 - valory/termination_abci:0.1.0:bafybeie4zvjfxvdu7qrulmur3chpjz3kpj5m4bjsxvpk4gvj5zbyyayfaa
 - valory/transaction_settlement_abci:0.1.0:bafybeiaefgqbs7zsn5xe5kdwrujj7ivygkn3ujpw6crnvi3knvxw75qmja
@@ -96,6 +96,11 @@ type: connection
 config:
   ledger_apis:
     ethereum:
+      address: ${str:https://rpc.gnosischain.com}
+      chain_id: ${int:100}
+      poa_chain: ${bool:false}
+      default_gas_price_strategy: ${str:eip1559}
+    gnosis:
       address: ${str:https://rpc.gnosischain.com}
       chain_id: ${int:100}
       poa_chain: ${bool:false}
@@ -178,6 +183,8 @@ models:
       collateral_tokens_contract: ${str:0xe91d153e0b41518a2ce8dd3d7944fa863463a97d}
       arbitrator_contract: ${str:0xe40dd83a262da3f56976038f1554fe541fa75ecd}
       multisend_address: ${str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
+      multisend_batch_size: ${int:5}
+      ipfs_address: ${str:https://gateway.autonolas.tech/ipfs/}
       on_chain_service_id: ${int:null}
       reset_tendermint_after: ${int:1}
       reset_pause_duration: ${int:1800}
@@ -209,5 +216,5 @@ models:
       google_api_key: ${str:google_api_key}
       google_engine_id: ${str:google_engine_id}
       openai_api_key: ${str:openai_api_key}
-      mech_contract_address: ${str:"0x77af31de935740567cf4ff1986d04b2c964a786a"}
+      mech_contract_address: ${str:0x77af31de935740567cf4ff1986d04b2c964a786a}
 is_abstract: false

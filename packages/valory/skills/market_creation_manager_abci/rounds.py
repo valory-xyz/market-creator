@@ -750,7 +750,7 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
 class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
     """GetPendingQuestionsRound"""
 
-    payload_class = AnswerQuestionsPayload
+    payload_class = GetPendingQuestionsPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
@@ -811,7 +811,7 @@ class AnswerQuestionsRound(CollectSameUntilThresholdRound):
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     NO_TX_PAYLOAD = "NO_TX"
 
-    payload_class = GetPendingQuestionsPayload
+    payload_class = AnswerQuestionsPayload
     synchronized_data_class = SynchronizedData
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
@@ -869,8 +869,8 @@ class FinishedWithAnswerQuestionsRound(DegenerateRound):
     """FinishedWithAnswerQuestionsRound"""
 
 
-class FinishedWithMechRequest(DegenerateRound):
-    """FinishedWithMechRequest"""
+class FinishedWithMechRequestRound(DegenerateRound):
+    """FinishedWithMechRequestRound"""
 
 
 class MarketCreationManagerAbciApp(AbciApp[Event]):
@@ -888,7 +888,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.DONE: GetPendingQuestionsRound,
             Event.ERROR: GetPendingQuestionsRound,
             Event.NO_MAJORITY: PostTransactionRound,
-            Event.MECH_REQUEST_DONE: FinishedWithMechRequest,
+            Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
         },
         GetPendingQuestionsRound: {
             Event.DONE: FinishedWithGetPendingQuestionsRound,
@@ -984,7 +984,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         FinishedMarketCreationManagerRound: {},
         FinishedWithAnswerQuestionsRound: {},
-        FinishedWithMechRequest: {},
+        FinishedWithMechRequestRound: {},
         FinishedWithRemoveFundingRound: {},
         FinishedWithDepositDaiRound: {},
         FinishedWithGetPendingQuestionsRound: {},
@@ -994,7 +994,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     final_states: Set[AppState] = {
         FinishedMarketCreationManagerRound,
         FinishedWithAnswerQuestionsRound,
-        FinishedWithMechRequest,
+        FinishedWithMechRequestRound,
         FinishedWithRemoveFundingRound,
         FinishedWithDepositDaiRound,
         FinishedWithGetPendingQuestionsRound,
@@ -1032,7 +1032,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithRemoveFundingRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
-        FinishedWithMechRequest: set(),
+        FinishedWithMechRequestRound: set(),
         FinishedWithGetPendingQuestionsRound: set(),
         FinishedWithoutTxRound: set(),
     }

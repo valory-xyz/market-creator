@@ -16,13 +16,16 @@ alphabet_in:
 default_start_state: CollectRandomnessRound
 final_states:
 - FinishedMarketCreationManagerRound
+- FinishedWithAnswerQuestionsRound
 - FinishedWithDepositDaiRound
 - FinishedWithGetPendingQuestionsRound
+- FinishedWithMechRequestRound
 - FinishedWithRedeemBondRound
 - FinishedWithRemoveFundingRound
 - FinishedWithoutTxRound
 label: MarketCreationManagerAbciApp
 start_states:
+- AnswerQuestionsRound
 - CollectRandomnessRound
 - GetPendingQuestionsRound
 - PostTransactionRound
@@ -37,6 +40,7 @@ states:
 - FinishedWithAnswerQuestionsRound
 - FinishedWithDepositDaiRound
 - FinishedWithGetPendingQuestionsRound
+- FinishedWithMechRequestRound
 - FinishedWithRedeemBondRound
 - FinishedWithRemoveFundingRound
 - FinishedWithoutTxRound
@@ -91,7 +95,7 @@ transition_func:
     (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
     (PostTransactionRound, DONE): GetPendingQuestionsRound
     (PostTransactionRound, ERROR): GetPendingQuestionsRound
-    (PostTransactionRound, MECH_REQUEST_DONE): AnswerQuestionsRound
+    (PostTransactionRound, MECH_REQUEST_DONE): FinishedWithMechRequestRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
     (PrepareTransactionRound, DONE): FinishedMarketCreationManagerRound
     (PrepareTransactionRound, NO_MAJORITY): CollectRandomnessRound

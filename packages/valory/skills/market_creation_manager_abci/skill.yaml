@@ -10,14 +10,14 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeidqp4wrsyv63j5ez3emaxhccy54t2xtvj3dma7eizzw2kpjw4zszq
+  behaviours.py: bafybeic2oksx2b4txk2j5gpf54a7wbkercdjnhxx46nedcyshfpbq4cpee
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
-  fsm_specification.yaml: bafybeibwlusq642hrdsej5zashw7oi44g2qpszmzmjqqvihzevag3uemhm
+  fsm_specification.yaml: bafybeid6xbgst3yeuam7hdg6wyl2xwgo7nxcud22a7sg66lkzgpc4ks3yq
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
   models.py: bafybeie4nanmiajuwgbd3hpmc7f3k4cgwauep5yl7s6n6yj26pc6etgvv4
   payloads.py: bafybeibu7sptf43adazxpyzwtfpph7bgfhtwiotg5sdlcwjt6iw3idqn7a
   prompts.py: bafybeigdrfhsufxatofbo5x56jcqjva2yccaoklrprdella52yuwuac6xi
-  rounds.py: bafybeibqcl3zr3qr2pyjmoqvyvrb56dqw5ubqt6pbl4sxm3diflyb3q6ba
+  rounds.py: bafybeifrmgdfcoizrl7exuznmvrnffsv4avggwsu6qqkmqc4msxv5l35rm
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
@@ -182,6 +182,8 @@ models:
       max_attempts: 10
       max_healthcheck: 120
       multisend_address: '0x0000000000000000000000000000000000000000'
+      multisend_batch_size: 5
+      ipfs_address: https://gateway.autonolas.tech/ipfs/
       on_chain_service_id: null
       request_retry_delay: 1.0
       request_timeout: 10.0
