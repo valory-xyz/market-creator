@@ -6,7 +6,7 @@
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeia746daapyl76tqeptlz2xgk6zschdkxnuqdivim6iawig4lht7ca",
         "skill/valory/market_maker_abci/0.1.0": "bafybeibfrzvvzpxsyqdxaxzaznbep4ezlfeoimo7h2f54weocyjvvjhsnm",
         "agent/valory/market_maker/0.1.0": "bafybeib3ukoxw43dxx6vggbit7ralr3jhlq7ru6ikobuafxgzytzyo6zm4",
-        "service/valory/market_maker/0.1.0": "bafybeigzq36ajt7rqp43xmvwqsre7sc6j7sqwb6qxbo6khoqbtiwtqegqi"
+        "service/valory/market_maker/0.1.0": "bafybeihiij5epctadoocxh2gv3uwe2qscyo7e2ky2zl5cwmut2gcsiz63y"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeidgu7o5llh26xp3u3ebq3yluull5lupiyeu6iooi2xyymdrgnzq5i",
