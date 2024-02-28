@@ -10,6 +10,7 @@ alphabet_in:
 - NO_MAJORITY
 - NO_MARKETS_RETRIEVED
 - NO_TX
+- REDEEM_BOND_DONE
 - ROUND_TIMEOUT
 - SKIP_MARKET_APPROVAL
 - SKIP_MARKET_PROPOSAL
@@ -97,6 +98,7 @@ transition_func:
     (PostTransactionRound, ERROR): GetPendingQuestionsRound
     (PostTransactionRound, MECH_REQUEST_DONE): FinishedWithMechRequestRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
+    (PostTransactionRound, REDEEM_BOND_DONE): CollectProposedMarketsRound
     (PrepareTransactionRound, DONE): FinishedMarketCreationManagerRound
     (PrepareTransactionRound, NO_MAJORITY): CollectRandomnessRound
     (PrepareTransactionRound, ROUND_TIMEOUT): CollectRandomnessRound

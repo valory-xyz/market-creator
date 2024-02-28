@@ -20,7 +20,6 @@
 """This package contains the rounds of MarketCreationManagerAbciApp."""
 
 import json
-from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
@@ -56,7 +55,6 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
 from packages.valory.skills.mech_interact_abci.states.base import (
     MechInteractionResponse,
     MechMetadata,
-    MechRequest,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -79,6 +77,7 @@ class Event(Enum):
     MAX_RETRIES_REACHED = "max_retries_reached"
     MECH_REQUEST_DONE = "mech_request_done"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
+    REDEEM_BOND_DONE = "redeem_bond_done"
     SKIP_MARKET_PROPOSAL = "skip_market_proposal"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
 
@@ -155,6 +154,13 @@ class SynchronizedData(TxSynchronizedData):
         serialized = self.db.get("mech_requests", "[]")
         requests = json.loads(serialized)
         return [MechMetadata(**metadata_item) for metadata_item in requests]
+
+    @property
+    def mech_responses(self) -> List[MechInteractionResponse]:
+        """Get the mech responses."""
+        serialized = self.db.get("mech_responses", "[]")
+        responses = json.loads(serialized)
+        return [MechInteractionResponse(**response_item) for response_item in responses]
 
     @property
     def approved_markets_data(self) -> dict:
@@ -305,6 +311,7 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     DONE_PAYLOAD = "DONE_PAYLOAD"
     MECH_REQUEST_DONE_PAYLOAD = "MECH_REQUEST_DONE_PAYLOAD"
+    REDEEM_BOND_DONE_PAYLOAD = "REDEEM_BOND_DONE_PAYLOAD"
 
     payload_class = PostTxPayload
     synchronized_data_class = SynchronizedData
@@ -317,6 +324,9 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
 
             if self.most_voted_payload == self.MECH_REQUEST_DONE_PAYLOAD:
                 return self.synchronized_data, Event.MECH_REQUEST_DONE
+
+            if self.most_voted_payload == self.REDEEM_BOND_DONE_PAYLOAD:
+                return self.synchronized_data, Event.REDEEM_BOND_DONE
 
             # no database update is required
             return self.synchronized_data, Event.DONE
@@ -889,6 +899,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ERROR: GetPendingQuestionsRound,
             Event.NO_MAJORITY: PostTransactionRound,
             Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
+            Event.REDEEM_BOND_DONE: CollectProposedMarketsRound,
         },
         GetPendingQuestionsRound: {
             Event.DONE: FinishedWithGetPendingQuestionsRound,

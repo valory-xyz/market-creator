@@ -95,10 +95,6 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RemoveFundingPayload,
     SyncMarketsPayload,
 )
-from packages.valory.skills.market_creation_manager_abci.prompts import (
-    OUTCOME_PROMPT_TEMPLATE,
-    URL_QUERY_PROMPT_TEMPLATE,
-)
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     AnswerQuestionsRound,
     ApproveMarketsRound,
@@ -127,7 +123,6 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 from packages.valory.skills.mech_interact_abci.states.base import (
     MechInteractionResponse,
     MechMetadata,
-    MechRequest,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -2123,6 +2118,15 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No settled tx hash.")
             return PostTransactionRound.DONE_PAYLOAD
 
+        if (
+            self.synchronized_data.tx_sender
+            == MechRequestStates.MechRequestRound.auto_round_id()
+        ):
+            return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
+
+        if self.synchronized_data.tx_sender == RedeemBondRound.auto_round_id():
+            return PostTransactionRound.REDEEM_ROUND_DONE_PAYLOAD
+
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set
         )
@@ -2140,12 +2144,6 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             f"Handling settled tx hash {settled_tx_hash}. "
             f"For market with id {market_id}. "
         )
-
-        if (
-            self.synchronized_data.tx_sender
-            == MechRequestStates.MechRequestRound.auto_round_id()
-        ):
-            return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
 
         if self.synchronized_data.tx_sender != PrepareTransactionRound.auto_round_id():
             # we only handle market creation txs atm, any other tx, we don't need to take action
@@ -2261,57 +2259,10 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         questions = response.get("data", {}).get("fixedProductMarketMakers", [])
         self.context.logger.info(f"Collected questions: {questions}")
 
-        # # TODO remove
-        # questions = json.loads(
-        #     """
-        #     [
-        #         {
-        #             "currentAnswerTimestamp": "1708682235",
-        #             "creator": "0x89c5cc945dd550bcffb72fe42bff002429f46fec",
-        #             "category": "politics",
-        #             "creationTimestamp": "1708265700",
-        #             "currentAnswer": "0x0000000000000000000000000000000000000000000000000000000000000001",
-        #             "id": "0xf596e134293fa4e4a2323f07cda8e7ca0791e350",
-        #             "answerFinalizedTimestamp": "1708768635",
-        #             "openingTimestamp": "1708646400",
-        #             "question": {
-        #                 "id": "0xc828523ed7d33c285a401697be26877935228774ce69101e7141f7be23d7d32f",
-        #                 "data": "Will the 'serious national security threat' warned by the House Intelligence Committee Chairman be publicly revealed by 22 February 2024? \\\"Yes\\\",\\\"No\\\" politics en_US",
-        #                 "currentAnswerBond": "1000000000000000"
-        #             },
-        #             "title": "Will the 'serious national security threat' warned by the House Intelligence Committee Chairman be publicly revealed by 22 February 2024?",
-        #             "timeout": "86400"
-        #         },
-        #         {
-        #             "currentAnswerTimestamp": "1708682410",
-        #             "creator": "0x89c5cc945dd550bcffb72fe42bff002429f46fec",
-        #             "category": "education",
-        #             "creationTimestamp": "1708259160",
-        #             "currentAnswer": "0x0000000000000000000000000000000000000000000000000000000000000001",
-        #             "id": "0xed96f303c2967743fb6ae662ed22d37342a45095",
-        #             "answerFinalizedTimestamp": "1708768810",
-        #             "openingTimestamp": "1708646400",
-        #             "question": {
-        #                 "id": "0xafa11b93932b890d63f8bd9e82cef5e1244c610075d3a8663b48cc6c8db47453",
-        #                 "data": "Will the Georgia Association of Educators win their lawsuit against Cobb County School officials by 22 February 2024? \\\"Yes\\\",\\\"No\\\" education en_US",
-        #                 "currentAnswerBond": "1000000000000000"
-        #             },
-        #             "title": "Will the Georgia Association of Educators win their lawsuit against Cobb County School officials by 22 February 2024?",
-        #             "timeout": "86400"
-        #         }
-        #     ]
-        # """
-        # )
-        # self.context.logger.info(f"Collected questions: {questions}")
-        # # TODO END-REMOVE
-
         if not questions:
             return []
 
-        random.seed(self.last_synced_timestamp)
-        num_questions = min(len(questions), self.params.multisend_batch_size)
-        random_questions = random.sample(questions, num_questions)
-        return random_questions
+        return questions
 
     def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
         """Get the balance of an account"""
@@ -2334,10 +2285,22 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     def get_payload(self) -> Generator[None, None, str]:
         """Get the transaction payload"""
         # get the questions to that need to be answered
-        questions = yield from self._get_unanswered_questions()
-        if questions is None:
+        unanswered_questions = yield from self._get_unanswered_questions()
+
+        if unanswered_questions is None:
             self.context.logger.info("Couldn't get the questions")
             return GetPendingQuestionsRound.ERROR_PAYLOAD
+
+        filtered_questions = [
+            question
+            for question in unanswered_questions
+            if question["question"]["id"].lower()
+            not in self.shared_state.questions_requested_mech
+        ]
+        random.seed(self.last_synced_timestamp)
+        num_questions = min(len(filtered_questions), self.params.multisend_batch_size)
+        random_questions = random.sample(filtered_questions, num_questions)
+        questions = random_questions
 
         if len(questions) == 0:
             self.context.logger.info("No questions to close")
@@ -2369,7 +2332,6 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             return GetPendingQuestionsRound.NO_TX
 
         # Prepare the Mech Requests for these questions
-        question_to_request_answer = {}
         new_mech_requests = []
         for question in questions:
             question_id = question["question"]["id"].lower()
@@ -2393,6 +2355,10 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.context.logger.info(f"new_mech_requests: {new_mech_requests}")
 
+        if len(new_mech_requests) == 0:
+            self.context.logger.info("No mech requests")
+            return GetPendingQuestionsRound.NO_TX
+
         return json.dumps(new_mech_requests, sort_keys=True)
 
 
@@ -2405,7 +2371,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            content = yield from self.get_payload()
+            content = yield from self._get_payload()
             payload = AnswerQuestionsPayload(sender=sender, content=content)
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
@@ -2415,14 +2381,14 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     def _parse_mech_response(self, response: MechInteractionResponse) -> str:
         has_occurred = json.loads(response.result).get("has_occurred", None)
 
-        if has_occurred == None:
+        if has_occurred is None:
             return None
-        if has_occurred == True:
+        if has_occurred is True:
             return ANSWER_YES
 
         return ANSWER_NO
 
-    def get_payload(self) -> Generator[None, None, str]:
+    def _get_payload(self) -> Generator[None, None, str]:
         self.context.logger.info(
             f"PostMech: mech_responses = {self.synchronized_data.mech_responses}"
         )
@@ -2445,8 +2411,6 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             answer = self._parse_mech_response(response)
             self.context.logger.warning(f"Got answer {answer} for question {question}")
 
-            # TODO remove
-            # exit(1)
             if answer is None:
                 self.context.logger.warning(
                     f"Couldn't get answer for question {question}"

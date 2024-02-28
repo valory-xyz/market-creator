@@ -40,6 +40,9 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 )
 from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
 from packages.valory.skills.mech_interact_abci.models import (
+    MechResponseSpecs as BaseMechResponseSpecs,
+)
+from packages.valory.skills.mech_interact_abci.models import (
     Params as MechInteractAbciParams,
 )
 from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEvent
@@ -49,6 +52,8 @@ from packages.valory.skills.transaction_settlement_abci.rounds import Event as T
 
 MARGIN = 5
 MULTIPLIER = 2
+
+MechResponseSpecs = BaseMechResponseSpecs
 
 Requests = BaseRequests
 BenchmarkTool = BaseBenchmarkTool

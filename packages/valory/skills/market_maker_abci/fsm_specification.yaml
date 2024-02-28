@@ -19,6 +19,7 @@ alphabet_in:
 - NO_MAJORITY
 - NO_MARKETS_RETRIEVED
 - NO_TX
+- REDEEM_BOND_DONE
 - RESET_AND_PAUSE_TIMEOUT
 - RESET_TIMEOUT
 - ROUND_TIMEOUT
@@ -137,6 +138,7 @@ transition_func:
     (PostTransactionRound, ERROR): GetPendingQuestionsRound
     (PostTransactionRound, MECH_REQUEST_DONE): MechResponseRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
+    (PostTransactionRound, REDEEM_BOND_DONE): CollectProposedMarketsRound
     (PrepareTransactionRound, DONE): RandomnessTransactionSubmissionRound
     (PrepareTransactionRound, NO_MAJORITY): CollectRandomnessRound
     (PrepareTransactionRound, ROUND_TIMEOUT): CollectRandomnessRound
