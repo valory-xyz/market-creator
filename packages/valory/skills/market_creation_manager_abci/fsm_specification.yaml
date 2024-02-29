@@ -16,10 +16,12 @@ default_start_state: CollectRandomnessRound
 final_states:
 - FinishedMarketCreationManagerRound
 - FinishedWithDepositDaiRound
+- FinishedWithRedeemBondRound
 - FinishedWithRemoveFundingRound
 - FinishedWithoutTxRound
 label: MarketCreationManagerAbciApp
 start_states:
+- CloseMarketsRound
 - CollectRandomnessRound
 - PostTransactionRound
 states:
@@ -31,11 +33,13 @@ states:
 - DepositDaiRound
 - FinishedMarketCreationManagerRound
 - FinishedWithDepositDaiRound
+- FinishedWithRedeemBondRound
 - FinishedWithRemoveFundingRound
 - FinishedWithoutTxRound
 - MarketProposalRound
 - PostTransactionRound
 - PrepareTransactionRound
+- RedeemBondRound
 - RemoveFundingRound
 - RetrieveApprovedMarketRound
 - SelectKeeperRound
@@ -49,7 +53,7 @@ transition_func:
     (CloseMarketsRound, ERROR): CollectRandomnessRound
     (CloseMarketsRound, NO_MAJORITY): CollectRandomnessRound
     (CloseMarketsRound, NO_TX): CollectRandomnessRound
-    (CloseMarketsRound, ROUND_TIMEOUT): CloseMarketsRound
+    (CloseMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
     (CollectProposedMarketsRound, DONE): ApproveMarketsRound
     (CollectProposedMarketsRound, ERROR): DataGatheringRound
     (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
@@ -82,6 +86,10 @@ transition_func:
     (PrepareTransactionRound, DONE): FinishedMarketCreationManagerRound
     (PrepareTransactionRound, NO_MAJORITY): CollectRandomnessRound
     (PrepareTransactionRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (RedeemBondRound, DONE): FinishedWithRedeemBondRound
+    (RedeemBondRound, ERROR): RedeemBondRound
+    (RedeemBondRound, NO_MAJORITY): RedeemBondRound
+    (RedeemBondRound, NO_TX): CollectProposedMarketsRound
     (RemoveFundingRound, DONE): FinishedWithRemoveFundingRound
     (RemoveFundingRound, ERROR): CollectRandomnessRound
     (RemoveFundingRound, NO_MAJORITY): RemoveFundingRound
@@ -93,7 +101,7 @@ transition_func:
     (RetrieveApprovedMarketRound, NO_MAJORITY): CollectRandomnessRound
     (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): DepositDaiRound
     (RetrieveApprovedMarketRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (SelectKeeperRound, DONE): CollectProposedMarketsRound
+    (SelectKeeperRound, DONE): RedeemBondRound
     (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
     (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
     (SyncMarketsRound, DONE): RemoveFundingRound

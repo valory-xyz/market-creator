@@ -2247,6 +2247,11 @@ class CloseMarketBehaviour(MarketCreationManagerBaseBehaviour):
         if response is None:
             return []
         questions = response.get("data", {}).get("fixedProductMarketMakers", [])
+
+        # TODO leave 3 unanswered questions for testing
+        if len(questions) <= 3:
+            return []
+
         random.seed(self.last_synced_timestamp)
         random_question = random.choice(questions)
         return [random_question]
