@@ -2369,6 +2369,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
+        self.context.logger.info("async_act")
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             content = yield from self._get_payload()
@@ -2378,8 +2379,10 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             yield from self.wait_until_round_end()
         self.set_done()
 
-    def _parse_mech_response(self, response: MechInteractionResponse) -> str:
+    def _parse_mech_response(self, response: MechInteractionResponse) -> Optional[str]:
+        self.context.logger.info("_parse_mech_response")
         has_occurred = json.loads(response.result).get("has_occurred", None)
+        self.context.logger.info(f"has_occurred={has_occurred}")
 
         if has_occurred is None:
             return None
@@ -2389,8 +2392,9 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         return ANSWER_NO
 
     def _get_payload(self) -> Generator[None, None, str]:
+        self.context.logger.info("_get_payload")
         self.context.logger.info(
-            f"PostMech: mech_responses = {self.synchronized_data.mech_responses}"
+            f"mech_responses = {self.synchronized_data.mech_responses}"
         )
 
         question_to_answer = {}
