@@ -2304,7 +2304,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         if len(questions) == 0:
             self.context.logger.info("No questions to close")
-            return GetPendingQuestionsRound.NO_TX
+            return GetPendingQuestionsRound.NO_TX_PAYLOAD
 
         self.context.logger.info(
             f"Got {len(questions)} questions to close. " f"Questions: {questions}"
@@ -2314,7 +2314,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         balance = yield from self._get_balance(safe_address)
         if balance is None:
             self.context.logger.info("Couldn't get balance")
-            return GetPendingQuestionsRound.NO_TX
+            return GetPendingQuestionsRound.NO_TX_PAYLOAD
 
         self.context.logger.info(f"Address {safe_address!r} has balance {balance}.")
         max_num_questions = min(
@@ -2329,7 +2329,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Not enough balance to close {max_num_questions} questions. "
                 f"Balance {balance}, required {bond_required}"
             )
-            return GetPendingQuestionsRound.NO_TX
+            return GetPendingQuestionsRound.NO_TX_PAYLOAD
 
         # Prepare the Mech Requests for these questions
         new_mech_requests = []
@@ -2357,7 +2357,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         if len(new_mech_requests) == 0:
             self.context.logger.info("No mech requests")
-            return GetPendingQuestionsRound.NO_TX
+            return GetPendingQuestionsRound.NO_TX_PAYLOAD
 
         return json.dumps(new_mech_requests, sort_keys=True)
 
@@ -2380,8 +2380,14 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         self.set_done()
 
     def _parse_mech_response(self, response: MechInteractionResponse) -> Optional[str]:
-        self.context.logger.info("_parse_mech_response")
-        has_occurred = json.loads(response.result).get("has_occurred", None)
+        self.context.logger.info(f"_parse_mech_response: {response}")
+
+        try:
+            data = json.loads(response.result)
+            has_occurred = data.get("has_occurred", None)
+        except json.JSONDecodeError:
+            has_occurred = None
+
         self.context.logger.info(f"has_occurred={has_occurred}")
 
         if has_occurred is None:
@@ -2413,7 +2419,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             question = self.shared_state.questions_requested_mech[question_id]
 
             answer = self._parse_mech_response(response)
-            self.context.logger.warning(f"Got answer {answer} for question {question}")
+            self.context.logger.info(f"Got answer {answer} for question {question}")
 
             if answer is None:
                 self.context.logger.warning(
@@ -2430,7 +2436,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if len(question_to_answer) == 0:
             # we couldn't get any answers, no tx to be made
-            return GetPendingQuestionsRound.NO_TX
+            return AnswerQuestionsRound.NO_TX_PAYLOAD
 
         # prepare tx for all the answers
         txs = []
@@ -2453,12 +2459,12 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.error(
                 "Couldn't get any txs for questions that we have answers for."
             )
-            return GetPendingQuestionsRound.ERROR_PAYLOAD
+            return AnswerQuestionsRound.ERROR_PAYLOAD
 
         multisend_tx_str = yield from self._to_multisend(txs)
         if multisend_tx_str is None:
             # something went wrong, respond with ERROR payload for now
-            return GetPendingQuestionsRound.ERROR_PAYLOAD
+            return AnswerQuestionsRound.ERROR_PAYLOAD
         return multisend_tx_str
 
     def _get_answer_tx(

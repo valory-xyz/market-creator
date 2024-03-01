@@ -273,7 +273,7 @@ class RedeemBondRound(CollectSameUntilThresholdRound):
     """A round for redeeming Realitio"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    NO_TX_PAYLOAD = "NO_TX"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
     payload_class = RedeemBondPayload
     synchronized_data_class = SynchronizedData
@@ -342,7 +342,7 @@ class DepositDaiRound(CollectSameUntilThresholdRound):
     """A round for depositing Dai"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    NO_TX_PAYLOAD = "NO_TX"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
     payload_class = DepositDaiPayload
     synchronized_data_class = SynchronizedData
@@ -768,8 +768,8 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
     collection_key = get_name(SynchronizedData.participant_to_selection)
     selection_key = get_name(SynchronizedData.mech_requests)
 
-    NO_TX = "no_tx"
-    ERROR_PAYLOAD = "error"
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
         """End block."""
@@ -800,7 +800,7 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
         if event == Event.DONE and payload == self.ERROR_PAYLOAD:
             return synced_data, Event.ERROR
 
-        if event == Event.DONE and payload == self.NO_TX:
+        if event == Event.DONE and payload == self.NO_TX_PAYLOAD:
             return synced_data, Event.NO_TX
 
         synced_data = synced_data.update(
@@ -819,7 +819,7 @@ class AnswerQuestionsRound(CollectSameUntilThresholdRound):
     """AnswerQuestionsRound"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    NO_TX_PAYLOAD = "NO_TX"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
     payload_class = AnswerQuestionsPayload
     synchronized_data_class = SynchronizedData
