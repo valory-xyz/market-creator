@@ -25,8 +25,33 @@ import random
 import time
 from typing import Any, Dict, Optional, Tuple
 
-import openai
 import requests
+from openai import OpenAI
+
+
+client: Optional[OpenAI] = None
+
+
+class OpenAIClientManager:
+    """Client context manager for OpenAI."""
+
+    def __init__(self, api_key: str):
+        """__init__"""
+        self.api_key = api_key
+
+    def __enter__(self) -> OpenAI:
+        """__enter__"""
+        global client  # pylint: disable=global-statement
+        if client is None:
+            client = OpenAI(api_key=self.api_key)
+        return client
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """__exit__"""
+        global client  # pylint: disable=global-statement
+        if client is not None:
+            client.close()
+            client = None
 
 
 DEFAULT_OPENAI_SETTINGS = {
@@ -71,87 +96,87 @@ def run(  # pylint: disable=too-many-locals
     **kwargs,
 ) -> Tuple[str, Optional[Dict[str, Any]]]:
     """Run the task"""
-    openai.api_key = kwargs["api_keys"]["openai"]
-    newsapi_api_key = kwargs["api_keys"]["newsapi"]
-    max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
-    temperature = kwargs.get("temperature", DEFAULT_OPENAI_SETTINGS["temperature"])
-    tool = kwargs["tool"]
+    with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+        newsapi_api_key = kwargs["api_keys"]["newsapi"]
+        max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
+        temperature = kwargs.get("temperature", DEFAULT_OPENAI_SETTINGS["temperature"])
+        tool = kwargs["tool"]
 
-    if tool not in ALLOWED_TOOLS:
-        raise ValueError(f"Tool {tool} is not supported.")
+        if tool not in ALLOWED_TOOLS:
+            raise ValueError(f"Tool {tool} is not supported.")
 
-    engine = TOOL_TO_ENGINE[tool]
+        engine = TOOL_TO_ENGINE[tool]
 
-    newsapi_url = "https://newsapi.org/v2/everything"
+        newsapi_url = "https://newsapi.org/v2/everything"
 
-    newsapi_headers = {"X-Api-Key": newsapi_api_key}
+        newsapi_headers = {"X-Api-Key": newsapi_api_key}
 
-    today = datetime.date.today()
-    from_date = today - datetime.timedelta(days=7)
-    to_date = today
+        today = datetime.date.today()
+        from_date = today - datetime.timedelta(days=7)
+        to_date = today
 
-    params = {
-        "q": "arts OR business OR finance OR cryptocurrency OR politics OR science OR technology OR sports OR weather OR entertainment",
-        "language": "en",
-        "sortBy": "popularity",
-        "from": from_date,
-        "to": to_date,
-    }
+        params = {
+            "q": "arts OR business OR finance OR cryptocurrency OR politics OR science OR technology OR sports OR weather OR entertainment",
+            "language": "en",
+            "sortBy": "popularity",
+            "from": from_date,
+            "to": to_date,
+        }
 
-    response = requests.get(newsapi_url, params=params, headers=newsapi_headers)
-    data = response.json()
+        response = requests.get(newsapi_url, params=params, headers=newsapi_headers)
+        data = response.json()
 
-    print(data)
+        print(data)
 
-    # Create the string with the desired format
-    articles = data["articles"]
-    random.shuffle(articles)
-    articles = articles[:20]
+        # Create the string with the desired format
+        articles = data["articles"]
+        random.shuffle(articles)
+        articles = articles[:20]
 
-    input_news = ""
-    for article in articles:
-        title = article["title"]
-        content = article["content"]
-        date = article["publishedAt"]
-        input_news += f"- ({date}) {title}\n  {content}\n\n"
+        input_news = ""
+        for article in articles:
+            title = article["title"]
+            content = article["content"]
+            date = article["publishedAt"]
+            input_news += f"- ({date}) {title}\n  {content}\n\n"
 
-    market_creation_prompt = MARKET_CREATION_PROMPT.format(
-        input_news=input_news, from_date=from_date, to_date=to_date, topics=TOPICS
-    )
+        market_creation_prompt = MARKET_CREATION_PROMPT.format(
+            input_news=input_news, from_date=from_date, to_date=to_date, topics=TOPICS
+        )
 
-    print(market_creation_prompt)
+        print(market_creation_prompt)
 
-    start_time = time.time()
+        start_time = time.time()
 
-    moderation_result = openai.Moderation.create(market_creation_prompt)
+        moderation_result = client.moderations.create(input=market_creation_prompt)
 
-    if moderation_result["results"][0]["flagged"]:
-        return "Moderation flagged the prompt as in violation of terms."
+        if moderation_result["results"][0]["flagged"]:
+            return "Moderation flagged the prompt as in violation of terms."
 
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": market_creation_prompt},
-    ]
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": market_creation_prompt},
+        ]
 
-    response = openai.ChatCompletion.create(
-        model=engine,
-        messages=messages,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        n=1,
-        timeout=120,
-        stop=None,
-    )
+        response = client.chat.completions.create(
+            model=engine,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            n=1,
+            timeout=120,
+            stop=None,
+        )
 
-    end_time = time.time()
+        end_time = time.time()
 
-    print(response.choices[0].message.content)
+        print(response.choices[0].message.content)
 
-    elapsed_time = end_time - start_time
+        elapsed_time = end_time - start_time
 
-    print(f"Function took {elapsed_time:.2f} seconds to execute.")
+        print(f"Function took {elapsed_time:.2f} seconds to execute.")
 
-    return response.choices[0].message.content, None
+        return response.choices[0].message.content, None
 
 
 # Testing the script

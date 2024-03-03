@@ -2125,7 +2125,7 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
 
         if self.synchronized_data.tx_sender == RedeemBondRound.auto_round_id():
-            return PostTransactionRound.REDEEM_ROUND_DONE_PAYLOAD
+            return PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
 
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set
@@ -2390,12 +2390,12 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.context.logger.info(f"has_occurred={has_occurred}")
 
-        if has_occurred is None:
-            return None
+        if has_occurred is False:
+            return ANSWER_NO
         if has_occurred is True:
             return ANSWER_YES
 
-        return ANSWER_NO
+        return None
 
     def _get_payload(self) -> Generator[None, None, str]:
         self.context.logger.info("_get_payload")

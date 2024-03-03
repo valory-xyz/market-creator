@@ -152,6 +152,8 @@ class SynchronizedData(TxSynchronizedData):
     def mech_requests(self) -> List[MechMetadata]:
         """Get the mech requests."""
         serialized = self.db.get("mech_requests", "[]")
+        if serialized is None:
+            serialized = "[]"
         requests = json.loads(serialized)
         return [MechMetadata(**metadata_item) for metadata_item in requests]
 
@@ -159,6 +161,8 @@ class SynchronizedData(TxSynchronizedData):
     def mech_responses(self) -> List[MechInteractionResponse]:
         """Get the mech responses."""
         serialized = self.db.get("mech_responses", "[]")
+        if serialized is None:
+            serialized = "[]"
         responses = json.loads(serialized)
         return [MechInteractionResponse(**response_item) for response_item in responses]
 
@@ -265,6 +269,7 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
         synced_data = synced_data.ensure_property_is_set(
             get_name(SynchronizedData.approved_markets_timestamp)
         )
+        # End fix
 
         return synced_data, event
 
@@ -771,7 +776,7 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """End block."""
 
         res = super().end_block()
@@ -803,16 +808,19 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
         if event == Event.DONE and payload == self.NO_TX_PAYLOAD:
             return synced_data, Event.NO_TX
 
-        synced_data = synced_data.update(
-            synchronized_data_class=SynchronizedData,
-            **{
-                get_name(
-                    SynchronizedData.tx_sender
-                ): MechRequestStates.MechRequestRound.auto_round_id(),
-            },
+        synced_data = cast(
+            SynchronizedData,
+            synced_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(
+                        SynchronizedData.tx_sender
+                    ): MechRequestStates.MechRequestRound.auto_round_id(),
+                },
+            ),
         )
 
-        return synced_data, event
+        return synced_data, event  # type: ignore
 
 
 class AnswerQuestionsRound(CollectSameUntilThresholdRound):
