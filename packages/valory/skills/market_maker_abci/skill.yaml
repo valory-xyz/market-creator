@@ -8,13 +8,13 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
-  __init__.py: bafybeie36nhohbz4t6hngy42nw7coe2hwrprywo4n6xmwqjkfz7ni3n6sq
-  behaviours.py: bafybeicx2lhsobq25vppcrfshwrowpbzmfil75y7rd7e3sqdo2gd6lesw4
-  composition.py: bafybeidxfy6fu4bi5bxrc655h462o3gilpmupi64af4kt5zyntlb2xv7hi
+  __init__.py: bafybeibn5i47enoott67jc54iihzwb6bxiuts4dzplu2lufh4w4r6emkty
+  behaviours.py: bafybeidajmnltkvswbtn6zay3lxcx5pp2k4ys5jnmjdgutada6hkmay5tu
+  composition.py: bafybeifjnei7s7ipbmbs4srzxsgodtlpouu4hjp3ywiwbwa23yeugk2g6i
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeifpmrwnlxmcsmza7combc2lme3svilfcz3kmepoj43stxgluwc5ia
   handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
-  models.py: bafybeiei3biiereni3ym3hyteja2oebz5qaozh2jvkbmjx6kw6kzgthl5i
+  models.py: bafybeib6c23io34zfkygorljd2ujyp4ehlrhcacvx4qfegexghxmcfu3qu
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
 fingerprint_ignore_patterns: []
 connections: []
