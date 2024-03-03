@@ -2382,6 +2382,9 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     def _parse_mech_response(self, response: MechInteractionResponse) -> Optional[str]:
         self.context.logger.info(f"_parse_mech_response: {response}")
 
+        if response.result is None:
+            return None
+
         try:
             data = json.loads(response.result)
             has_occurred = data.get("has_occurred", None)
