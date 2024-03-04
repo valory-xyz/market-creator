@@ -10,18 +10,17 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeib3jexkczm25eiscaphqgvvlf7zkiuruxpzetjbzxz7pktlhhrgz4
+  behaviours.py: bafybeia2766knraobahimj47uhrkil2qqdvihs4ujhepiws6dhiaickukm
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
-  fsm_specification.yaml: bafybeicg43ziivxys6dpj4l6chal7mam4mnjk5ws7sncjs5qmqnbsdekau
+  fsm_specification.yaml: bafybeicfwv355i3jwr2tl3vx6s7fcxadkr3cpasb3lh3i4vz5lc26yw6oa
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeigc4vhwylsqoioq5qy24dlflg63g63eirbeshkabsic7eeobj53mi
-  payloads.py: bafybeibmm6g6ryvqddsl4cdxuze3alloz6lcfocq54rftnyinkxcbeig6u
-  prompts.py: bafybeigdrfhsufxatofbo5x56jcqjva2yccaoklrprdella52yuwuac6xi
-  rounds.py: bafybeibsb3g3dcaelvrprst5v6ykx6p3bwsfcbeb3vc3ur4eoxqygebcxa
+  models.py: bafybeighhwkpen4lx5uir3ncqh5qktypakjficfj54vxgczje43ptm35ya
+  payloads.py: bafybeibu7sptf43adazxpyzwtfpph7bgfhtwiotg5sdlcwjt6iw3idqn7a
+  rounds.py: bafybeihrutocik63bguelok6sla7te6qwvhdnpf4akk6kdpcnu6whw6ity
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections:
-- valory/openai:0.1.0:bafybeidnryrgq6jp3mqvjcpei4nesbey54fhyrcvginby7fer32z32kpai
+- valory/openai:0.1.0:bafybeigyehjbahya5mp7vyp5tjvn36rey4btvzskp3ql3mgxp3zu6gwq5a
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeictjc7saviboxbsdcey3trvokrgo7uoh76mcrxecxhlvcrp47aqg4
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
@@ -31,12 +30,13 @@ contracts:
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
 - valory/fpmm:0.1.0:bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4
 protocols:
-- valory/llm:1.0.0:bafybeicpd5hxe5rlgp75kaqotzpy3jkdyl5pbdcutwqdzlqfknnmkgadsy
+- valory/llm:1.0.0:bafybeihj2orqapokafg7co3wlogwgf6cckaaj2bz3nuv4rm3opkoyhrlp4
 - valory/contract_api:1.0.0:bafybeidgu7o5llh26xp3u3ebq3yluull5lupiyeu6iooi2xyymdrgnzq5i
 - valory/ledger_api:1.0.0:bafybeihdk6psr4guxmbcrc26jr2cbgzpd5aljkqvpwo64bvaz7tdti2oni
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeigjrepaqpb3m7zunmt4hryos4vto4yyj3u6iyofdb2fotwho3bqvm
 - valory/transaction_settlement_abci:0.1.0:bafybeid57tozt5f3kgzmu22nbr3c3oy4p7bi2bu66rqsgnlylq6xgh2ixe
+- valory/mech_interact_abci:0.1.0:bafybeicjunamybs27vwz2jz5hdrtkrtr2xwy2a5dyhbqksjrgh266qpnha
 behaviours:
   main:
     args: {}
@@ -101,6 +101,9 @@ models:
       newsapi_endpoint: https://newsapi.org/v2
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       market_closing_newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      google_api_key: google_api_key
+      google_engine_id: google_engine_id
+      openai_api_key: openai_api_key
       topics:
       - business
       - cryptocurrency
@@ -178,6 +181,8 @@ models:
       max_attempts: 10
       max_healthcheck: 120
       multisend_address: '0x0000000000000000000000000000000000000000'
+      multisend_batch_size: 5
+      ipfs_address: https://gateway.autonolas.tech/ipfs/
       on_chain_service_id: null
       request_retry_delay: 1.0
       request_timeout: 10.0
@@ -211,6 +216,7 @@ models:
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
+      mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
     class_name: MarketCreationManagerParams
   randomness_api:
     args:
@@ -223,6 +229,18 @@ models:
       retries: 5
       url: https://drand.cloudflare.com/public/latest
     class_name: RandomnessApi
+  mech_response:
+    args:
+      api_id: mech_response
+      headers:
+        Content-Type: application/json
+      method: GET
+      parameters: {}
+      response_key: result
+      response_type: str
+      retries: 5
+      url: ''
+    class_name: MechResponseSpecs
   omen_subgraph:
     args:
       api_id: omen

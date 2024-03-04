@@ -23,6 +23,7 @@ import json
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
     AbciAppTransitionFunction,
@@ -35,12 +36,13 @@ from packages.valory.skills.abstract_round_abci.base import (
     get_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
+    AnswerQuestionsPayload,
     ApproveMarketsPayload,
-    CloseMarketsPayload,
     CollectProposedMarketsPayload,
     CollectRandomnessPayload,
     DataGatheringPayload,
     DepositDaiPayload,
+    GetPendingQuestionsPayload,
     MarketProposalPayload,
     PostTxPayload,
     PrepareTransactionPayload,
@@ -49,6 +51,10 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
     SyncMarketsPayload,
+)
+from packages.valory.skills.mech_interact_abci.states.base import (
+    MechInteractionResponse,
+    MechMetadata,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -69,7 +75,9 @@ class Event(Enum):
     MAX_PROPOSED_MARKETS_REACHED = "max_markets_reached"
     MAX_APPROVED_MARKETS_REACHED = "max_approved_markets_reached"
     MAX_RETRIES_REACHED = "max_retries_reached"
+    MECH_REQUEST_DONE = "mech_request_done"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
+    REDEEM_BOND_DONE = "redeem_bond_done"
     SKIP_MARKET_PROPOSAL = "skip_market_proposal"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
 
@@ -139,6 +147,24 @@ class SynchronizedData(TxSynchronizedData):
                 DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA,
             ),
         )
+
+    @property
+    def mech_requests(self) -> List[MechMetadata]:
+        """Get the mech requests."""
+        serialized = self.db.get("mech_requests", "[]")
+        if serialized is None:
+            serialized = "[]"
+        requests = json.loads(serialized)
+        return [MechMetadata(**metadata_item) for metadata_item in requests]
+
+    @property
+    def mech_responses(self) -> List[MechInteractionResponse]:
+        """Get the mech responses."""
+        serialized = self.db.get("mech_responses", "[]")
+        if serialized is None:
+            serialized = "[]"
+        responses = json.loads(serialized)
+        return [MechInteractionResponse(**response_item) for response_item in responses]
 
     @property
     def approved_markets_data(self) -> dict:
@@ -243,6 +269,7 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
         synced_data = synced_data.ensure_property_is_set(
             get_name(SynchronizedData.approved_markets_timestamp)
         )
+        # End fix
 
         return synced_data, event
 
@@ -251,7 +278,7 @@ class RedeemBondRound(CollectSameUntilThresholdRound):
     """A round for redeeming Realitio"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    NO_TX_PAYLOAD = "NO_TX"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
     payload_class = RedeemBondPayload
     synchronized_data_class = SynchronizedData
@@ -288,6 +315,8 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     DONE_PAYLOAD = "DONE_PAYLOAD"
+    MECH_REQUEST_DONE_PAYLOAD = "MECH_REQUEST_DONE_PAYLOAD"
+    REDEEM_BOND_DONE_PAYLOAD = "REDEEM_BOND_DONE_PAYLOAD"
 
     payload_class = PostTxPayload
     synchronized_data_class = SynchronizedData
@@ -297,6 +326,12 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 return self.synchronized_data, Event.ERROR
+
+            if self.most_voted_payload == self.MECH_REQUEST_DONE_PAYLOAD:
+                return self.synchronized_data, Event.MECH_REQUEST_DONE
+
+            if self.most_voted_payload == self.REDEEM_BOND_DONE_PAYLOAD:
+                return self.synchronized_data, Event.REDEEM_BOND_DONE
 
             # no database update is required
             return self.synchronized_data, Event.DONE
@@ -312,7 +347,7 @@ class DepositDaiRound(CollectSameUntilThresholdRound):
     """A round for depositing Dai"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    NO_TX_PAYLOAD = "NO_TX"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
     payload_class = DepositDaiPayload
     synchronized_data_class = SynchronizedData
@@ -727,56 +762,100 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
         return None
 
 
-class CloseMarketsRound(CollectSameUntilThresholdRound):
-    """CloseMarketsRound"""
+class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
+    """GetPendingQuestionsRound"""
 
-    payload_class = CloseMarketsPayload
+    payload_class = GetPendingQuestionsPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
-    collection_key = "content"
+    none_event = Event.NONE
+    collection_key = get_name(SynchronizedData.participant_to_selection)
+    selection_key = get_name(SynchronizedData.mech_requests)
 
-    NO_TX = "no_tx"
-    ERROR_PAYLOAD = "error"
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """End block."""
 
+        res = super().end_block()
+        if res is None:
+            return None
+
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
+        payload = self.most_voted_payload
+
+        # Fix to ensure properties are present on the SynchronizedData
+        # before ResetAndPause round.
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.approved_markets_count)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.proposed_markets_count)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.proposed_markets_data)
+        )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.approved_markets_timestamp)
+        )
+        # End fix
+
+        if event == Event.DONE and payload == self.ERROR_PAYLOAD:
+            return synced_data, Event.ERROR
+
+        if event == Event.DONE and payload == self.NO_TX_PAYLOAD:
+            return synced_data, Event.NO_TX
+
+        synced_data = cast(
+            SynchronizedData,
+            synced_data.update(
+                synchronized_data_class=SynchronizedData,
+                **{
+                    get_name(
+                        SynchronizedData.tx_sender
+                    ): MechRequestStates.MechRequestRound.auto_round_id(),
+                },
+            ),
+        )
+
+        return synced_data, event  # type: ignore
+
+
+class AnswerQuestionsRound(CollectSameUntilThresholdRound):
+    """AnswerQuestionsRound"""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
+
+    payload_class = AnswerQuestionsPayload
+    synchronized_data_class = SynchronizedData
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 return self.synchronized_data, Event.ERROR
-            if self.most_voted_payload == self.NO_TX:
-                return self.synchronized_data, Event.NO_TX
-            synced_data = cast(SynchronizedData, self.synchronized_data)
 
-            # Fix to ensure properties are present on the SynchronizedData
-            # before ResetAndPause round.
-            synced_data = synced_data.ensure_property_is_set(
-                get_name(SynchronizedData.approved_markets_count)
-            )
-            synced_data = synced_data.ensure_property_is_set(
-                get_name(SynchronizedData.proposed_markets_count)
-            )
-            synced_data = synced_data.ensure_property_is_set(
-                get_name(SynchronizedData.proposed_markets_data)
-            )
-            synced_data = synced_data.ensure_property_is_set(
-                get_name(SynchronizedData.approved_markets_timestamp)
-            )
-            state = synced_data.update(
-                synchronized_data_class=self.synchronized_data_class,
+            if self.most_voted_payload == self.NO_TX_PAYLOAD:
+                return self.synchronized_data, Event.NO_TX
+
+            synchronized_data = self.synchronized_data.update(
+                synchronized_data_class=SynchronizedData,
                 **{
                     get_name(
                         SynchronizedData.most_voted_tx_hash
                     ): self.most_voted_payload,
+                    get_name(SynchronizedData.tx_sender): self.round_id,
                 },
             )
-            return state, Event.DONE
+            return synchronized_data, Event.DONE
+
         if not self.is_majority_possible(
             self.collection, self.synchronized_data.nb_participants
         ):
             return self.synchronized_data, Event.NO_MAJORITY
-
         return None
 
 
@@ -800,27 +879,48 @@ class FinishedWithoutTxRound(DegenerateRound):
     """FinishedWithoutTxRound"""
 
 
+class FinishedWithGetPendingQuestionsRound(DegenerateRound):
+    """FinishedWithGetPendingQuestionsRound"""
+
+
+class FinishedWithAnswerQuestionsRound(DegenerateRound):
+    """FinishedWithAnswerQuestionsRound"""
+
+
+class FinishedWithMechRequestRound(DegenerateRound):
+    """FinishedWithMechRequestRound"""
+
+
 class MarketCreationManagerAbciApp(AbciApp[Event]):
     """MarketCreationManagerAbciApp"""
 
     initial_round_cls: AppState = CollectRandomnessRound
     initial_states: Set[AppState] = {
+        AnswerQuestionsRound,
         CollectRandomnessRound,
         PostTransactionRound,
-        CloseMarketsRound,
+        GetPendingQuestionsRound,
     }
     transition_function: AbciAppTransitionFunction = {
         PostTransactionRound: {
-            Event.DONE: CloseMarketsRound,
-            Event.ERROR: CloseMarketsRound,
+            Event.DONE: GetPendingQuestionsRound,
+            Event.ERROR: GetPendingQuestionsRound,
             Event.NO_MAJORITY: PostTransactionRound,
+            Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
+            Event.REDEEM_BOND_DONE: CollectProposedMarketsRound,
         },
-        CloseMarketsRound: {
-            Event.DONE: FinishedMarketCreationManagerRound,
+        GetPendingQuestionsRound: {
+            Event.DONE: FinishedWithGetPendingQuestionsRound,
             Event.NO_TX: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ERROR: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
+        },
+        AnswerQuestionsRound: {
+            Event.DONE: FinishedWithAnswerQuestionsRound,
+            Event.NO_TX: CollectRandomnessRound,
+            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.ERROR: CollectRandomnessRound,
         },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
@@ -902,15 +1002,21 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         FinishedMarketCreationManagerRound: {},
+        FinishedWithAnswerQuestionsRound: {},
+        FinishedWithMechRequestRound: {},
         FinishedWithRemoveFundingRound: {},
         FinishedWithDepositDaiRound: {},
+        FinishedWithGetPendingQuestionsRound: {},
         FinishedWithRedeemBondRound: {},
         FinishedWithoutTxRound: {},
     }
     final_states: Set[AppState] = {
         FinishedMarketCreationManagerRound,
+        FinishedWithAnswerQuestionsRound,
+        FinishedWithMechRequestRound,
         FinishedWithRemoveFundingRound,
         FinishedWithDepositDaiRound,
+        FinishedWithGetPendingQuestionsRound,
         FinishedWithRedeemBondRound,
         FinishedWithoutTxRound,
     }
@@ -924,11 +1030,15 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.approved_markets_timestamp),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
-        CloseMarketsRound: set(),
+        AnswerQuestionsRound: set(),
+        GetPendingQuestionsRound: set(),
         CollectRandomnessRound: set(),
         PostTransactionRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
+        FinishedWithAnswerQuestionsRound: {
+            get_name(SynchronizedData.most_voted_tx_hash),
+        },
         FinishedWithDepositDaiRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
@@ -941,5 +1051,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithRemoveFundingRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
+        FinishedWithMechRequestRound: set(),
+        FinishedWithGetPendingQuestionsRound: set(),
         FinishedWithoutTxRound: set(),
     }

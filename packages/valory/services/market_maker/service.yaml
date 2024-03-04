@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeib3ukoxw43dxx6vggbit7ralr3jhlq7ru6ikobuafxgzytzyo6zm4
+agent: valory/market_maker:0.1.0:bafybeibj5d4quoj3fgyrwp7nbgahmxq2pllsp54dzru6miz2jpbmnx3hdq
 number_of_agents: 1
 deployment:
   agent:
@@ -68,6 +68,9 @@ models:
       collateral_tokens_contract: ${COLLATERAL_TOKENS_CONTRACT:str:0xe91d153e0b41518a2ce8dd3d7944fa863463a97d}
       arbitrator_contract: ${ARBITRATOR_CONTRACT:str:0xe40dd83a262da3f56976038f1554fe541fa75ecd}
       multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
+      multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:1}
+      ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
+      mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x77af31de935740567cf4ff1986d04b2c964a786a}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
       reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
       reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
@@ -86,6 +89,7 @@ models:
       tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
       tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
       termination_sleep: ${TERMINATION_SLEEP:int:900}
+      termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
       xdai_threshold: ${XDAI_THRESHOLD:int:1000000000000000000}
       tx_timeout: ${TX_TIMEOUT:float:10.0}
       use_termination: ${USE_TERMINATION:bool:false}
@@ -96,6 +100,9 @@ models:
       light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
       serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
       market_closing_newsapi_api_key: ${MARKET_CLOSING_NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
+      google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
+      google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
+      openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
 ---
 public_id: valory/ledger:0.19.0
 type: connection

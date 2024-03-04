@@ -19,7 +19,7 @@
 
 """This module contains the shared state for the abci skill of MarketCreationManagerAbciApp."""
 
-from typing import Any, List, Set, Type
+from typing import Any, Dict, List, Set, Type
 
 from aea.skills.base import SkillContext
 
@@ -44,14 +44,18 @@ class SharedState(BaseSharedState):
 
     def __init__(self, *args: Any, skill_context: SkillContext, **kwargs: Any) -> None:
         """Initialize the shared state object."""
-        self.processed_question_ids: Set[str] = set()
+        self.questions_requested_mech: Dict[str, Any] = {}
+        self.questions_responded: Set[str] = set()
         super().__init__(*args, skill_context=skill_context, **kwargs)
 
 
 class MarketCreationManagerParams(BaseParams):
     """Parameters."""
 
+    # These parameters are from other ABCI skills, and are added
+    # here to avoid subclassing and avoid MyPy linter issues.
     multisend_address: str
+    multisend_batch_size: int
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the parameters object."""
@@ -151,6 +155,9 @@ class MarketCreationManagerParams(BaseParams):
         self.market_closing_newsapi_api_key = self._ensure(
             "market_closing_newsapi_api_key", kwargs, type_=str
         )
+        self.google_api_key = self._ensure("google_api_key", kwargs, type_=str)
+        self.google_engine_id = self._ensure("google_engine_id", kwargs, type_=str)
+        self.openai_api_key = self._ensure("openai_api_key", kwargs, type_=str)
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
         super().__init__(*args, **kwargs)
