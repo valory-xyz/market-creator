@@ -52,6 +52,8 @@ class SharedState(BaseSharedState):
 class MarketCreationManagerParams(BaseParams):
     """Parameters."""
 
+    # These parameters are from other ABCI skills, and are added
+    # here to avoid subclassing and avoid MyPy linter issues.
     multisend_address: str
     multisend_batch_size: int
 
