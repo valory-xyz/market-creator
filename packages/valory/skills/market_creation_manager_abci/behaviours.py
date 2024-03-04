@@ -214,7 +214,7 @@ OPEN_FPMM_QUERY = Template(
         answerFinalizedTimestamp: null
             currentAnswerBond: null
         }
-        first: $first
+        first: 1000
         orderBy: openingTimestamp
         orderDirection: asc
     ) {
@@ -2250,7 +2250,6 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_subgraph_result(
             query=OPEN_FPMM_QUERY.substitute(
                 creator=creator,
-                first=1000,
                 current_timestamp=self.last_synced_timestamp,
             )
         )
