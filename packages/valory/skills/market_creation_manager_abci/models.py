@@ -53,6 +53,7 @@ class MarketCreationManagerParams(BaseParams):
     """Parameters."""
 
     multisend_address: str
+    multisend_batch_size: int
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the parameters object."""
