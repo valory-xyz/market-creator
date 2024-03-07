@@ -19,7 +19,9 @@
 
 """This module contains the shared state for the abci skill of MarketCreationManagerAbciApp."""
 
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Set, Type
+from hexbytes import HexBytes
 
 from aea.skills.base import SkillContext
 
@@ -35,6 +37,78 @@ from packages.valory.skills.abstract_round_abci.models import (
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     MarketCreationManagerAbciApp,
 )
+from packages.valory.contracts.multisend.contract import MultiSendOperation
+
+
+@dataclass
+class MultisendBatch:
+    """A structure representing a single transaction of a multisend."""
+
+    to: str
+    data: HexBytes
+    value: int = 0
+    operation: MultiSendOperation = MultiSendOperation.CALL
+
+
+@dataclass
+class RedeemingProgress:
+    """A structure to keep track of the redeeming check progress."""
+
+    trades: Set[Trade] = field(default_factory=lambda: set())
+    utilized_tools: Dict[str, int] = field(default_factory=lambda: {})
+    policy: Optional[EGreedyPolicy] = None
+    claimable_amounts: Dict[HexBytes, int] = field(default_factory=lambda: {})
+    earliest_block_number: int = 0
+    event_filtering_batch_size: int = 0
+    check_started: bool = False
+    check_from_block: BlockIdentifier = "earliest"
+    check_to_block: BlockIdentifier = "latest"
+    cleaned: bool = False
+    payouts: Dict[str, int] = field(default_factory=lambda: {})
+    unredeemed_trades: Dict[str, int] = field(default_factory=lambda: {})
+    claim_started: bool = False
+    claim_from_block: BlockIdentifier = "earliest"
+    claim_to_block: BlockIdentifier = "latest"
+    answered: list = field(default_factory=lambda: [])
+    claiming_condition_ids: List[str] = field(default_factory=lambda: [])
+    claimed_condition_ids: List[str] = field(default_factory=lambda: [])
+
+    @property
+    def check_finished(self) -> bool:
+        """Whether the check has finished."""
+        return self.check_started and self.check_from_block == self.check_to_block
+
+    @property
+    def claim_finished(self) -> bool:
+        """Whether the claiming has finished."""
+        return self.claim_started and self.claim_from_block == self.claim_to_block
+
+    @property
+    def claim_params(self) -> Optional[ClaimParamsType]:
+        """The claim parameters, prepared for the `claimWinnings` call."""
+        history_hashes = []
+        addresses = []
+        bonds = []
+        answers = []
+        try:
+            for i, answer in enumerate(reversed(self.answered)):
+                # history_hashes second-last-to-first, the hash of each history entry, calculated as described here:
+                # https://realitio.github.io/docs/html/contract_explanation.html#answer-history-entries.
+                if i == len(self.answered) - 1:
+                    history_hashes.append(ZERO_BYTES)
+                else:
+                    history_hashes.append(self.answered[i + 1]["args"]["history_hash"])
+
+                # last-to-first, the address of each answerer or commitment sender
+                addresses.append(answer["args"]["user"])
+                # last-to-first, the bond supplied with each answer or commitment
+                bonds.append(answer["args"]["bond"])
+                # last-to-first, each answer supplied, or commitment ID if the answer was supplied with commit->reveal
+                answers.append(answer["args"]["answer"])
+        except KeyError:
+            return None
+
+        return history_hashes, addresses, bonds, answers
 
 
 class SharedState(BaseSharedState):
@@ -46,6 +120,7 @@ class SharedState(BaseSharedState):
         """Initialize the shared state object."""
         self.questions_requested_mech: Dict[str, Any] = {}
         self.questions_responded: Set[str] = set()
+        self.redeeming_progress: RedeemingProgress = RedeemingProgress()
         super().__init__(*args, skill_context=skill_context, **kwargs)
 
 
@@ -160,6 +235,20 @@ class MarketCreationManagerParams(BaseParams):
         self.openai_api_key = self._ensure("openai_api_key", kwargs, type_=str)
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
+
+        self.use_subgraph_for_redeeming = self._ensure("use_subgraph_for_redeeming", kwargs, type_=bool)
+        self.contract_timeout = self._ensure("contract_timeout", kwargs, type_=float)
+        self.max_filtering_retries = self._ensure("max_filtering_retries", kwargs, type_=int)
+        self.reduce_factor = self._ensure("reduce_factor", kwargs, type_=float)
+        self.redeeming_batch_size = self._ensure("redeeming_batch_size", kwargs, type_=int)
+        self.dust_threshold = self._ensure("dust_threshold", kwargs, type_=int)
+        self.minimum_batch_size = self._ensure("minimum_batch_size", kwargs, type_=int)
+
+        # TODO These variables are re-defined with names compatible with trader service
+        self.conditional_tokens_address = self.conditional_tokens_contract
+        self.realitio_address = self.realitio_contract
+        self.realitio_proxy_address = self.realitio_oracle_proxy_contract
+
         super().__init__(*args, **kwargs)
 
 
