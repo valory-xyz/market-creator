@@ -213,6 +213,14 @@ models:
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
       mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
+      use_subgraph_for_redeeming: true
+      contract_timeout: 300.0
+      max_filtering_retries: 6
+      reduce_factor: 0.25
+      conditional_tokens_address: '0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce'
+      redeeming_batch_size: 1
+      dust_threshold: 10000000000000
+      minimum_batch_size: 500
     class_name: Params
   randomness_api:
     args:

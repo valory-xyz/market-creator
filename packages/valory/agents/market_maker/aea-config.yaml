@@ -218,4 +218,12 @@ models:
       google_engine_id: ${str:google_engine_id}
       openai_api_key: ${str:openai_api_key}
       mech_contract_address: ${str:0x77af31de935740567cf4ff1986d04b2c964a786a}
+      use_subgraph_for_redeeming: ${bool:true}
+      contract_timeout: ${float:300.0}
+      max_filtering_retries: ${int:6}
+      reduce_factor: ${float:0.25}
+      conditional_tokens_address: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
+      redeeming_batch_size: ${int:1}
+      dust_threshold: ${int:10000000000000}
+      minimum_batch_size: ${int:500}
 is_abstract: false

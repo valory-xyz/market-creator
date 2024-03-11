@@ -274,7 +274,7 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
         return synced_data, event
 
 
-class RedeemBondRound(CollectSameUntilThresholdRound):
+class RedeemRound(CollectSameUntilThresholdRound):
     """A round for redeeming Realitio"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
@@ -871,7 +871,7 @@ class FinishedWithDepositDaiRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
 
-class FinishedWithRedeemBondRound(DegenerateRound):
+class FinishedWithRedeemRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
 
@@ -928,15 +928,15 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         SelectKeeperRound: {
-            Event.DONE: RedeemBondRound,
+            Event.DONE: RedeemRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
-        RedeemBondRound: {
-            Event.DONE: FinishedWithRedeemBondRound,
+        RedeemRound: {
+            Event.DONE: FinishedWithRedeemRound,
             Event.NO_TX: CollectProposedMarketsRound,
-            Event.NO_MAJORITY: RedeemBondRound,
-            Event.ERROR: RedeemBondRound,
+            Event.NO_MAJORITY: RedeemRound,
+            Event.ERROR: RedeemRound,
         },
         CollectProposedMarketsRound: {
             Event.DONE: ApproveMarketsRound,
@@ -1007,7 +1007,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithRemoveFundingRound: {},
         FinishedWithDepositDaiRound: {},
         FinishedWithGetPendingQuestionsRound: {},
-        FinishedWithRedeemBondRound: {},
+        FinishedWithRedeemRound: {},
         FinishedWithoutTxRound: {},
     }
     final_states: Set[AppState] = {
@@ -1017,7 +1017,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithRemoveFundingRound,
         FinishedWithDepositDaiRound,
         FinishedWithGetPendingQuestionsRound,
-        FinishedWithRedeemBondRound,
+        FinishedWithRedeemRound,
         FinishedWithoutTxRound,
     }
     event_to_timeout: EventToTimeout = {
@@ -1042,7 +1042,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithDepositDaiRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
-        FinishedWithRedeemBondRound: {
+        FinishedWithRedeemRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
         FinishedMarketCreationManagerRound: {
