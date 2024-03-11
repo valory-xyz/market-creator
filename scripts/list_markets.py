@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Script for listing markets."""
+"""Script for listing markets from the market approval server."""
 
 import argparse
 import csv
