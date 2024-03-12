@@ -146,9 +146,10 @@ _ONE_DAY = 86400
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
-ANSWER_YES, ANSWER_NO = (
+ANSWER_YES, ANSWER_NO, ANSWER_INVALID = (
     "0x0000000000000000000000000000000000000000000000000000000000000000",
     "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
 )
 
 FPMM_POOL_MEMBERSHIPS_QUERY = Template(
@@ -2384,23 +2385,27 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     def _parse_mech_response(self, response: MechInteractionResponse) -> Optional[str]:
         self.context.logger.info(f"_parse_mech_response: {response}")
 
-        if response.result is None:
-            return None
-
         try:
+            if response.result is None:
+                return None
+
             data = json.loads(response.result)
+            is_valid = data.get("is_valid", True)
+            is_determinable = data.get("is_determinable", True)
             has_occurred = data.get("has_occurred", None)
+
+            if not is_valid:
+                return ANSWER_INVALID
+            if not is_determinable:
+                return None
+            if has_occurred is False:
+                return ANSWER_NO
+            if has_occurred is True:
+                return ANSWER_YES
+
+            return None
         except json.JSONDecodeError:
-            has_occurred = None
-
-        self.context.logger.info(f"has_occurred={has_occurred}")
-
-        if has_occurred is False:
-            return ANSWER_NO
-        if has_occurred is True:
-            return ANSWER_YES
-
-        return None
+            return None
 
     def _get_payload(self) -> Generator[None, None, str]:
         self.context.logger.info("_get_payload")
