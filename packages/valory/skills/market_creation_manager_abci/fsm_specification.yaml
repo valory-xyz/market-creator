@@ -1,4 +1,5 @@
 alphabet_in:
+- DEPOSIT_DAI_DONE
 - DID_NOT_SEND
 - DONE
 - ERROR
@@ -95,6 +96,7 @@ transition_func:
     (MarketProposalRound, ERROR): RetrieveApprovedMarketRound
     (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
+    (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
     (PostTransactionRound, DONE): GetPendingQuestionsRound
     (PostTransactionRound, ERROR): GetPendingQuestionsRound
     (PostTransactionRound, MECH_REQUEST_DONE): FinishedWithMechRequestRound

@@ -921,6 +921,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: PostTransactionRound,
             Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
             Event.REDEEM_BOND_DONE: CollectProposedMarketsRound,
+            Event.DEPOSIT_DAI_DONE: GetPendingQuestionsRound,
         },
         GetPendingQuestionsRound: {
             Event.DONE: FinishedWithGetPendingQuestionsRound,
