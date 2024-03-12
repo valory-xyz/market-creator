@@ -2127,6 +2127,9 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         if self.synchronized_data.tx_sender == RedeemBondRound.auto_round_id():
             return PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
 
+        if self.synchronized_data.tx_sender == DepositDaiRound.auto_round_id():
+            return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
+
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set
         )

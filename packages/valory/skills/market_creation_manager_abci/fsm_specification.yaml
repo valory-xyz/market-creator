@@ -28,6 +28,7 @@ label: MarketCreationManagerAbciApp
 start_states:
 - AnswerQuestionsRound
 - CollectRandomnessRound
+- DepositDaiRound
 - GetPendingQuestionsRound
 - PostTransactionRound
 states:
@@ -83,7 +84,7 @@ transition_func:
     (DepositDaiRound, DONE): FinishedWithDepositDaiRound
     (DepositDaiRound, ERROR): DepositDaiRound
     (DepositDaiRound, NO_MAJORITY): DepositDaiRound
-    (DepositDaiRound, NO_TX): SyncMarketsRound
+    (DepositDaiRound, NO_TX): GetPendingQuestionsRound
     (GetPendingQuestionsRound, DONE): FinishedWithGetPendingQuestionsRound
     (GetPendingQuestionsRound, ERROR): CollectRandomnessRound
     (GetPendingQuestionsRound, NO_MAJORITY): CollectRandomnessRound
@@ -115,7 +116,7 @@ transition_func:
     (RetrieveApprovedMarketRound, DONE): PrepareTransactionRound
     (RetrieveApprovedMarketRound, ERROR): CollectRandomnessRound
     (RetrieveApprovedMarketRound, NO_MAJORITY): CollectRandomnessRound
-    (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): DepositDaiRound
+    (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): SyncMarketsRound
     (RetrieveApprovedMarketRound, ROUND_TIMEOUT): CollectRandomnessRound
     (SelectKeeperRound, DONE): RedeemBondRound
     (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
