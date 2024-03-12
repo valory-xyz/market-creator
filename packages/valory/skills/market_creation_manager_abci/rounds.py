@@ -78,6 +78,7 @@ class Event(Enum):
     MECH_REQUEST_DONE = "mech_request_done"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
     REDEEM_BOND_DONE = "redeem_bond_done"
+    DEPOSIT_DAI_DONE = "deposit_dai_done"
     SKIP_MARKET_PROPOSAL = "skip_market_proposal"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
 
@@ -313,10 +314,12 @@ class RedeemBondRound(CollectSameUntilThresholdRound):
 class PostTransactionRound(CollectSameUntilThresholdRound):
     """A round to be run after a transaction has been settled."""
 
-    ERROR_PAYLOAD = "ERROR_PAYLOAD"
     DONE_PAYLOAD = "DONE_PAYLOAD"
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MECH_REQUEST_DONE_PAYLOAD = "MECH_REQUEST_DONE_PAYLOAD"
     REDEEM_BOND_DONE_PAYLOAD = "REDEEM_BOND_DONE_PAYLOAD"
+    REDEEM_BOND_DONE_PAYLOAD = "REDEEM_BOND_DONE_PAYLOAD"
+    DEPOSIT_DAI_DONE_PAYLOAD = "DEPOSIT_DAI_DONE_PAYLOAD"
 
     payload_class = PostTxPayload
     synchronized_data_class = SynchronizedData
@@ -332,6 +335,9 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
 
             if self.most_voted_payload == self.REDEEM_BOND_DONE_PAYLOAD:
                 return self.synchronized_data, Event.REDEEM_BOND_DONE
+
+            if self.most_voted_payload == self.DEPOSIT_DAI_DONE_PAYLOAD:
+                return self.synchronized_data, Event.DEPOSIT_DAI_DONE
 
             # no database update is required
             return self.synchronized_data, Event.DONE
@@ -898,16 +904,24 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     initial_states: Set[AppState] = {
         AnswerQuestionsRound,
         CollectRandomnessRound,
+        DepositDaiRound,
         PostTransactionRound,
         GetPendingQuestionsRound,
     }
     transition_function: AbciAppTransitionFunction = {
+        DepositDaiRound: {
+            Event.DONE: FinishedWithDepositDaiRound,
+            Event.NO_TX: GetPendingQuestionsRound,
+            Event.NO_MAJORITY: DepositDaiRound,
+            Event.ERROR: DepositDaiRound,
+        },
         PostTransactionRound: {
             Event.DONE: GetPendingQuestionsRound,
             Event.ERROR: GetPendingQuestionsRound,
             Event.NO_MAJORITY: PostTransactionRound,
             Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
             Event.REDEEM_BOND_DONE: CollectProposedMarketsRound,
+            Event.DEPOSIT_DAI_DONE: GetPendingQuestionsRound,
         },
         GetPendingQuestionsRound: {
             Event.DONE: FinishedWithGetPendingQuestionsRound,
@@ -975,18 +989,12 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
             Event.DID_NOT_SEND: CollectRandomnessRound,
             Event.ERROR: CollectRandomnessRound,
-            Event.NO_MARKETS_RETRIEVED: DepositDaiRound,
+            Event.NO_MARKETS_RETRIEVED: SyncMarketsRound,
         },
         PrepareTransactionRound: {
             Event.DONE: FinishedMarketCreationManagerRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
-        },
-        DepositDaiRound: {
-            Event.DONE: FinishedWithDepositDaiRound,
-            Event.NO_TX: SyncMarketsRound,
-            Event.NO_MAJORITY: DepositDaiRound,
-            Event.ERROR: DepositDaiRound,
         },
         SyncMarketsRound: {
             Event.DONE: RemoveFundingRound,
@@ -1031,6 +1039,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         AnswerQuestionsRound: set(),
+        DepositDaiRound: set(),
         GetPendingQuestionsRound: set(),
         CollectRandomnessRound: set(),
         PostTransactionRound: set(),
