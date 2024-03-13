@@ -79,6 +79,8 @@ class Event(Enum):
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
     REDEEM_BOND_DONE = "redeem_bond_done"
     DEPOSIT_DAI_DONE = "deposit_dai_done"
+    ANSWER_QUESTION_DONE = "answer_question_done"
+    REMOVE_FUNDING_DONE = "remove_funding_done"
     SKIP_MARKET_PROPOSAL = "skip_market_proposal"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
 
@@ -318,8 +320,9 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MECH_REQUEST_DONE_PAYLOAD = "MECH_REQUEST_DONE_PAYLOAD"
     REDEEM_BOND_DONE_PAYLOAD = "REDEEM_BOND_DONE_PAYLOAD"
-    REDEEM_BOND_DONE_PAYLOAD = "REDEEM_BOND_DONE_PAYLOAD"
     DEPOSIT_DAI_DONE_PAYLOAD = "DEPOSIT_DAI_DONE_PAYLOAD"
+    ANSWER_QUESTION_DONE_PAYLOAD = "ANSWER_QUESTION_DONE_PAYLOAD"
+    REMOVE_FUNDING_DONE_PAYLOAD = "REMOVE_FUNDING_DONE_PAYLOAD"
 
     payload_class = PostTxPayload
     synchronized_data_class = SynchronizedData
@@ -338,6 +341,12 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
 
             if self.most_voted_payload == self.DEPOSIT_DAI_DONE_PAYLOAD:
                 return self.synchronized_data, Event.DEPOSIT_DAI_DONE
+
+            if self.most_voted_payload == self.ANSWER_QUESTION_DONE_PAYLOAD:
+                return self.synchronized_data, Event.ANSWER_QUESTION_DONE
+
+            if self.most_voted_payload == self.REMOVE_FUNDING_DONE_PAYLOAD:
+                return self.synchronized_data, Event.REMOVE_FUNDING_DONE
 
             # no database update is required
             return self.synchronized_data, Event.DONE
@@ -911,17 +920,19 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     transition_function: AbciAppTransitionFunction = {
         DepositDaiRound: {
             Event.DONE: FinishedWithDepositDaiRound,
-            Event.NO_TX: GetPendingQuestionsRound,
-            Event.NO_MAJORITY: DepositDaiRound,
-            Event.ERROR: DepositDaiRound,
+            Event.NO_TX: SyncMarketsRound,
+            Event.NO_MAJORITY: SyncMarketsRound,
+            Event.ERROR: SyncMarketsRound,
         },
         PostTransactionRound: {
-            Event.DONE: GetPendingQuestionsRound,
-            Event.ERROR: GetPendingQuestionsRound,
+            Event.DONE: FinishedMarketCreationManagerRound,
+            Event.ERROR: DepositDaiRound,
             Event.NO_MAJORITY: PostTransactionRound,
+            Event.DEPOSIT_DAI_DONE: SyncMarketsRound,
             Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
+            Event.ANSWER_QUESTION_DONE: GetPendingQuestionsRound,
             Event.REDEEM_BOND_DONE: CollectProposedMarketsRound,
-            Event.DEPOSIT_DAI_DONE: GetPendingQuestionsRound,
+            Event.REMOVE_FUNDING_DONE: GetPendingQuestionsRound,
         },
         GetPendingQuestionsRound: {
             Event.DONE: FinishedWithGetPendingQuestionsRound,
@@ -949,15 +960,15 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         RedeemBondRound: {
             Event.DONE: FinishedWithRedeemBondRound,
             Event.NO_TX: CollectProposedMarketsRound,
-            Event.NO_MAJORITY: RedeemBondRound,
-            Event.ERROR: RedeemBondRound,
+            Event.NO_MAJORITY: CollectProposedMarketsRound,
+            Event.ERROR: CollectProposedMarketsRound,
         },
         CollectProposedMarketsRound: {
             Event.DONE: ApproveMarketsRound,
             Event.MAX_APPROVED_MARKETS_REACHED: DataGatheringRound,
             Event.MAX_RETRIES_REACHED: DataGatheringRound,
             Event.SKIP_MARKET_APPROVAL: DataGatheringRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.NO_MAJORITY: DataGatheringRound,
             Event.ROUND_TIMEOUT: DataGatheringRound,
             Event.ERROR: DataGatheringRound,
         },
@@ -972,9 +983,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.MAX_PROPOSED_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
             Event.SKIP_MARKET_PROPOSAL: RetrieveApprovedMarketRound,
-            Event.ERROR: CollectRandomnessRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.ERROR: RetrieveApprovedMarketRound,
+            Event.NO_MAJORITY: RetrieveApprovedMarketRound,
+            Event.ROUND_TIMEOUT: RetrieveApprovedMarketRound,
         },
         MarketProposalRound: {
             Event.DONE: RetrieveApprovedMarketRound,
@@ -985,29 +996,29 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         RetrieveApprovedMarketRound: {
             Event.DONE: PrepareTransactionRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
-            Event.DID_NOT_SEND: CollectRandomnessRound,
-            Event.ERROR: CollectRandomnessRound,
-            Event.NO_MARKETS_RETRIEVED: SyncMarketsRound,
+            Event.NO_MAJORITY: FinishedWithoutTxRound,
+            Event.ROUND_TIMEOUT: FinishedWithoutTxRound,
+            Event.DID_NOT_SEND: FinishedWithoutTxRound,
+            Event.ERROR: FinishedWithoutTxRound,
+            Event.NO_MARKETS_RETRIEVED: FinishedWithoutTxRound,
         },
         PrepareTransactionRound: {
             Event.DONE: FinishedMarketCreationManagerRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_MAJORITY: FinishedWithoutTxRound,
+            Event.ROUND_TIMEOUT: FinishedWithoutTxRound,
         },
         SyncMarketsRound: {
             Event.DONE: RemoveFundingRound,
-            Event.NO_MAJORITY: CollectRandomnessRound,
-            Event.ERROR: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_MAJORITY: DepositDaiRound,
+            Event.ERROR: DepositDaiRound,
+            Event.ROUND_TIMEOUT: DepositDaiRound,
         },
         RemoveFundingRound: {
             Event.DONE: FinishedWithRemoveFundingRound,
-            Event.NO_TX: FinishedWithoutTxRound,
-            Event.NO_MAJORITY: RemoveFundingRound,
-            Event.ERROR: CollectRandomnessRound,
-            Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_TX: GetPendingQuestionsRound,
+            Event.NO_MAJORITY: GetPendingQuestionsRound,
+            Event.ERROR: GetPendingQuestionsRound,
+            Event.ROUND_TIMEOUT: GetPendingQuestionsRound,
         },
         FinishedMarketCreationManagerRound: {},
         FinishedWithAnswerQuestionsRound: {},
