@@ -272,6 +272,9 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
         synced_data = synced_data.ensure_property_is_set(
             get_name(SynchronizedData.approved_markets_timestamp)
         )
+        synced_data = synced_data.ensure_property_is_set(
+            get_name(SynchronizedData.mech_responses)
+        )
         # End fix
 
         return synced_data, event
@@ -1047,6 +1050,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         get_name(SynchronizedData.proposed_markets_data),
         get_name(SynchronizedData.approved_markets_count),
         get_name(SynchronizedData.approved_markets_timestamp),
+        get_name(SynchronizedData.mech_responses),
     }  # type: ignore
     db_pre_conditions: Dict[AppState, Set[str]] = {
         AnswerQuestionsRound: set(),
