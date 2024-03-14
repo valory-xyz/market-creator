@@ -34,6 +34,7 @@ start_states:
 - DepositDaiRound
 - GetPendingQuestionsRound
 - PostTransactionRound
+- SyncMarketsRound
 states:
 - AnswerQuestionsRound
 - ApproveMarketsRound
@@ -85,9 +86,9 @@ transition_func:
     (DataGatheringRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (DataGatheringRound, SKIP_MARKET_PROPOSAL): RetrieveApprovedMarketRound
     (DepositDaiRound, DONE): FinishedWithDepositDaiRound
-    (DepositDaiRound, ERROR): SyncMarketsRound
-    (DepositDaiRound, NO_MAJORITY): SyncMarketsRound
-    (DepositDaiRound, NO_TX): SyncMarketsRound
+    (DepositDaiRound, ERROR): GetPendingQuestionsRound
+    (DepositDaiRound, NO_MAJORITY): GetPendingQuestionsRound
+    (DepositDaiRound, NO_TX): GetPendingQuestionsRound
     (GetPendingQuestionsRound, DONE): FinishedWithGetPendingQuestionsRound
     (GetPendingQuestionsRound, ERROR): CollectRandomnessRound
     (GetPendingQuestionsRound, NO_MAJORITY): CollectRandomnessRound
@@ -99,13 +100,13 @@ transition_func:
     (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
     (PostTransactionRound, ANSWER_QUESTION_DONE): GetPendingQuestionsRound
-    (PostTransactionRound, DEPOSIT_DAI_DONE): SyncMarketsRound
-    (PostTransactionRound, DONE): FinishedMarketCreationManagerRound
+    (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
+    (PostTransactionRound, DONE): RetrieveApprovedMarketRound
     (PostTransactionRound, ERROR): DepositDaiRound
     (PostTransactionRound, MECH_REQUEST_DONE): FinishedWithMechRequestRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
     (PostTransactionRound, REDEEM_BOND_DONE): CollectProposedMarketsRound
-    (PostTransactionRound, REMOVE_FUNDING_DONE): GetPendingQuestionsRound
+    (PostTransactionRound, REMOVE_FUNDING_DONE): DepositDaiRound
     (PrepareTransactionRound, DONE): FinishedMarketCreationManagerRound
     (PrepareTransactionRound, NO_MAJORITY): FinishedWithoutTxRound
     (PrepareTransactionRound, ROUND_TIMEOUT): FinishedWithoutTxRound
@@ -116,7 +117,7 @@ transition_func:
     (RemoveFundingRound, DONE): FinishedWithRemoveFundingRound
     (RemoveFundingRound, ERROR): GetPendingQuestionsRound
     (RemoveFundingRound, NO_MAJORITY): GetPendingQuestionsRound
-    (RemoveFundingRound, NO_TX): GetPendingQuestionsRound
+    (RemoveFundingRound, NO_TX): DepositDaiRound
     (RemoveFundingRound, ROUND_TIMEOUT): GetPendingQuestionsRound
     (RetrieveApprovedMarketRound, DID_NOT_SEND): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, DONE): PrepareTransactionRound

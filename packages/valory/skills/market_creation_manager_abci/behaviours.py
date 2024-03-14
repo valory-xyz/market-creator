@@ -2134,7 +2134,7 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         if self.synchronized_data.tx_sender == AnswerQuestionsRound.auto_round_id():
             return PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_sender == AnswerQuestionsRound.auto_round_id():
+        if self.synchronized_data.tx_sender == RemoveFundingRound.auto_round_id():
             return PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
 
         is_approved_question_data_set = (

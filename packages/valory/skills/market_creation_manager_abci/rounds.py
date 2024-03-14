@@ -918,24 +918,25 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         CollectRandomnessRound,
         DepositDaiRound,
         PostTransactionRound,
+        SyncMarketsRound,
         GetPendingQuestionsRound,
     }
     transition_function: AbciAppTransitionFunction = {
         DepositDaiRound: {
             Event.DONE: FinishedWithDepositDaiRound,
-            Event.NO_TX: SyncMarketsRound,
-            Event.NO_MAJORITY: SyncMarketsRound,
-            Event.ERROR: SyncMarketsRound,
+            Event.NO_TX: GetPendingQuestionsRound,
+            Event.NO_MAJORITY: GetPendingQuestionsRound,
+            Event.ERROR: GetPendingQuestionsRound,
         },
         PostTransactionRound: {
-            Event.DONE: FinishedMarketCreationManagerRound,
+            Event.DONE: RetrieveApprovedMarketRound,
             Event.ERROR: DepositDaiRound,
             Event.NO_MAJORITY: PostTransactionRound,
-            Event.DEPOSIT_DAI_DONE: SyncMarketsRound,
+            Event.DEPOSIT_DAI_DONE: GetPendingQuestionsRound,
             Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
             Event.ANSWER_QUESTION_DONE: GetPendingQuestionsRound,
             Event.REDEEM_BOND_DONE: CollectProposedMarketsRound,
-            Event.REMOVE_FUNDING_DONE: GetPendingQuestionsRound,
+            Event.REMOVE_FUNDING_DONE: DepositDaiRound,
         },
         GetPendingQuestionsRound: {
             Event.DONE: FinishedWithGetPendingQuestionsRound,
@@ -1018,7 +1019,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         RemoveFundingRound: {
             Event.DONE: FinishedWithRemoveFundingRound,
-            Event.NO_TX: GetPendingQuestionsRound,
+            Event.NO_TX: DepositDaiRound,
             Event.NO_MAJORITY: GetPendingQuestionsRound,
             Event.ERROR: GetPendingQuestionsRound,
             Event.ROUND_TIMEOUT: GetPendingQuestionsRound,
@@ -1058,6 +1059,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         GetPendingQuestionsRound: set(),
         CollectRandomnessRound: set(),
         PostTransactionRound: set(),
+        SyncMarketsRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
         FinishedWithAnswerQuestionsRound: {
