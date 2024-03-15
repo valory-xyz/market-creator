@@ -1,4 +1,5 @@
 alphabet_in:
+- ANSWER_QUESTION_DONE
 - CHECK_HISTORY
 - CHECK_LATE_ARRIVING_MESSAGE
 - CHECK_TIMEOUT
@@ -21,6 +22,7 @@ alphabet_in:
 - NO_MARKETS_RETRIEVED
 - NO_TX
 - REDEEM_BOND_DONE
+- REMOVE_FUNDING_DONE
 - RESET_AND_PAUSE_TIMEOUT
 - RESET_TIMEOUT
 - ROUND_TIMEOUT
@@ -92,7 +94,7 @@ transition_func:
     (CollectProposedMarketsRound, ERROR): DataGatheringRound
     (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
     (CollectProposedMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
-    (CollectProposedMarketsRound, NO_MAJORITY): CollectRandomnessRound
+    (CollectProposedMarketsRound, NO_MAJORITY): DataGatheringRound
     (CollectProposedMarketsRound, ROUND_TIMEOUT): DataGatheringRound
     (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): DataGatheringRound
     (CollectRandomnessRound, DONE): SelectKeeperRound
@@ -102,15 +104,15 @@ transition_func:
     (CollectSignatureRound, NO_MAJORITY): ResetRound
     (CollectSignatureRound, ROUND_TIMEOUT): CollectSignatureRound
     (DataGatheringRound, DONE): MarketProposalRound
-    (DataGatheringRound, ERROR): CollectRandomnessRound
+    (DataGatheringRound, ERROR): RetrieveApprovedMarketRound
     (DataGatheringRound, MAX_PROPOSED_MARKETS_REACHED): RetrieveApprovedMarketRound
     (DataGatheringRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
-    (DataGatheringRound, NO_MAJORITY): CollectRandomnessRound
-    (DataGatheringRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (DataGatheringRound, NO_MAJORITY): RetrieveApprovedMarketRound
+    (DataGatheringRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (DataGatheringRound, SKIP_MARKET_PROPOSAL): RetrieveApprovedMarketRound
     (DepositDaiRound, DONE): RandomnessTransactionSubmissionRound
-    (DepositDaiRound, ERROR): DepositDaiRound
-    (DepositDaiRound, NO_MAJORITY): DepositDaiRound
+    (DepositDaiRound, ERROR): GetPendingQuestionsRound
+    (DepositDaiRound, NO_MAJORITY): GetPendingQuestionsRound
     (DepositDaiRound, NO_TX): GetPendingQuestionsRound
     (FinalizationRound, CHECK_HISTORY): CheckTransactionHistoryRound
     (FinalizationRound, CHECK_LATE_ARRIVING_MESSAGE): SynchronizeLateMessagesRound
@@ -135,42 +137,44 @@ transition_func:
     (MechResponseRound, DONE): AnswerQuestionsRound
     (MechResponseRound, NO_MAJORITY): MechResponseRound
     (MechResponseRound, ROUND_TIMEOUT): MechResponseRound
+    (PostTransactionRound, ANSWER_QUESTION_DONE): GetPendingQuestionsRound
     (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
-    (PostTransactionRound, DONE): GetPendingQuestionsRound
-    (PostTransactionRound, ERROR): GetPendingQuestionsRound
+    (PostTransactionRound, DONE): RetrieveApprovedMarketRound
+    (PostTransactionRound, ERROR): DepositDaiRound
     (PostTransactionRound, MECH_REQUEST_DONE): MechResponseRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
     (PostTransactionRound, REDEEM_BOND_DONE): CollectProposedMarketsRound
+    (PostTransactionRound, REMOVE_FUNDING_DONE): DepositDaiRound
     (PrepareTransactionRound, DONE): RandomnessTransactionSubmissionRound
-    (PrepareTransactionRound, NO_MAJORITY): CollectRandomnessRound
-    (PrepareTransactionRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (PrepareTransactionRound, NO_MAJORITY): ResetAndPauseRound
+    (PrepareTransactionRound, ROUND_TIMEOUT): ResetAndPauseRound
     (RandomnessTransactionSubmissionRound, DONE): SelectKeeperTransactionSubmissionARound
     (RandomnessTransactionSubmissionRound, NO_MAJORITY): RandomnessTransactionSubmissionRound
     (RandomnessTransactionSubmissionRound, ROUND_TIMEOUT): RandomnessTransactionSubmissionRound
     (RedeemBondRound, DONE): RandomnessTransactionSubmissionRound
-    (RedeemBondRound, ERROR): RedeemBondRound
-    (RedeemBondRound, NO_MAJORITY): RedeemBondRound
+    (RedeemBondRound, ERROR): CollectProposedMarketsRound
+    (RedeemBondRound, NO_MAJORITY): CollectProposedMarketsRound
     (RedeemBondRound, NO_TX): CollectProposedMarketsRound
-    (RegistrationRound, DONE): DepositDaiRound
+    (RegistrationRound, DONE): SyncMarketsRound
     (RegistrationRound, NO_MAJORITY): RegistrationRound
-    (RegistrationStartupRound, DONE): DepositDaiRound
+    (RegistrationStartupRound, DONE): SyncMarketsRound
     (RemoveFundingRound, DONE): RandomnessTransactionSubmissionRound
-    (RemoveFundingRound, ERROR): CollectRandomnessRound
-    (RemoveFundingRound, NO_MAJORITY): RemoveFundingRound
-    (RemoveFundingRound, NO_TX): ResetAndPauseRound
-    (RemoveFundingRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (ResetAndPauseRound, DONE): GetPendingQuestionsRound
+    (RemoveFundingRound, ERROR): GetPendingQuestionsRound
+    (RemoveFundingRound, NO_MAJORITY): GetPendingQuestionsRound
+    (RemoveFundingRound, NO_TX): DepositDaiRound
+    (RemoveFundingRound, ROUND_TIMEOUT): GetPendingQuestionsRound
+    (ResetAndPauseRound, DONE): SyncMarketsRound
     (ResetAndPauseRound, NO_MAJORITY): RegistrationRound
     (ResetAndPauseRound, RESET_AND_PAUSE_TIMEOUT): RegistrationRound
     (ResetRound, DONE): RandomnessTransactionSubmissionRound
     (ResetRound, NO_MAJORITY): ResetAndPauseRound
     (ResetRound, RESET_TIMEOUT): ResetAndPauseRound
-    (RetrieveApprovedMarketRound, DID_NOT_SEND): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, DID_NOT_SEND): ResetAndPauseRound
     (RetrieveApprovedMarketRound, DONE): PrepareTransactionRound
-    (RetrieveApprovedMarketRound, ERROR): CollectRandomnessRound
-    (RetrieveApprovedMarketRound, NO_MAJORITY): CollectRandomnessRound
-    (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): SyncMarketsRound
-    (RetrieveApprovedMarketRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (RetrieveApprovedMarketRound, ERROR): ResetAndPauseRound
+    (RetrieveApprovedMarketRound, NO_MAJORITY): ResetAndPauseRound
+    (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): ResetAndPauseRound
+    (RetrieveApprovedMarketRound, ROUND_TIMEOUT): ResetAndPauseRound
     (SelectKeeperRound, DONE): RedeemBondRound
     (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
     (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
@@ -189,9 +193,9 @@ transition_func:
     (SelectKeeperTransactionSubmissionBRound, NO_MAJORITY): ResetRound
     (SelectKeeperTransactionSubmissionBRound, ROUND_TIMEOUT): SelectKeeperTransactionSubmissionBRound
     (SyncMarketsRound, DONE): RemoveFundingRound
-    (SyncMarketsRound, ERROR): CollectRandomnessRound
-    (SyncMarketsRound, NO_MAJORITY): CollectRandomnessRound
-    (SyncMarketsRound, ROUND_TIMEOUT): CollectRandomnessRound
+    (SyncMarketsRound, ERROR): DepositDaiRound
+    (SyncMarketsRound, NO_MAJORITY): DepositDaiRound
+    (SyncMarketsRound, ROUND_TIMEOUT): DepositDaiRound
     (SynchronizeLateMessagesRound, DONE): CheckLateTxHashesRound
     (SynchronizeLateMessagesRound, NONE): SelectKeeperTransactionSubmissionBRound
     (SynchronizeLateMessagesRound, ROUND_TIMEOUT): SynchronizeLateMessagesRound
