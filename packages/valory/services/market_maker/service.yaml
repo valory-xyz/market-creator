@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeiaahjza3hirea4sfuugjydbubfe7ou5pjqh3mu7pgfwdj52mxjv5y
+agent: valory/market_maker:0.1.0:bafybeibcwjqoiymn7ttplpeet3ps5iv2go3nqwspaavuabor2zkdwyciiu
 number_of_agents: 1
 deployment:
   agent:
@@ -74,6 +74,7 @@ models:
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
       reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
       reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
+      mech_interact_round_timeout_seconds: ${MECH_INTERACT_ROUND_TIMEOUT_SECONDS:int:600}
       service_id: market_maker
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
       setup:

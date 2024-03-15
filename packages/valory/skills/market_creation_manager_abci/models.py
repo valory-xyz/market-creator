@@ -160,6 +160,9 @@ class MarketCreationManagerParams(BaseParams):
         self.openai_api_key = self._ensure("openai_api_key", kwargs, type_=str)
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
+        self.mech_interact_round_timeout_seconds = self._ensure(
+            "mech_interact_round_timeout_seconds", kwargs, type_=int
+        )
         super().__init__(*args, **kwargs)
 
 

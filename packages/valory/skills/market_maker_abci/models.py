@@ -45,6 +45,7 @@ from packages.valory.skills.mech_interact_abci.models import (
 from packages.valory.skills.mech_interact_abci.models import (
     Params as MechInteractAbciParams,
 )
+from packages.valory.skills.mech_interact_abci.rounds import Event as MechInteractEvent
 from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEvent
 from packages.valory.skills.termination_abci.models import TerminationParams
 from packages.valory.skills.transaction_settlement_abci.rounds import Event as TSEvent
@@ -113,6 +114,9 @@ class SharedState(BaseSharedState):
         MarketCreatorAbciApp.event_to_timeout[
             ResetPauseEvent.RESET_AND_PAUSE_TIMEOUT
         ] = (self.context.params.reset_pause_duration + MARGIN)
+        MarketCreatorAbciApp.event_to_timeout[
+            MechInteractEvent.ROUND_TIMEOUT
+        ] = self.context.params.mech_interact_round_timeout_seconds
 
 
 class Params(
