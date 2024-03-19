@@ -14,7 +14,7 @@ fingerprint:
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeicps5t2anm7fv35fwnw7oolaxxmpmjio6mdw4sc6rzpnsolph5xlm
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeighhwkpen4lx5uir3ncqh5qktypakjficfj54vxgczje43ptm35ya
+  models.py: bafybeibkjv4cgvje2ozuzbmcvhscvnvd5isenlpuwmgjr4oyscmgjdobre
   payloads.py: bafybeibu7sptf43adazxpyzwtfpph7bgfhtwiotg5sdlcwjt6iw3idqn7a
   rounds.py: bafybeie6rgwfulbu5xkuvxgrujbvenioyfggtzlmt23pbm6auzj3w4se44
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
@@ -22,11 +22,11 @@ fingerprint_ignore_patterns: []
 connections:
 - valory/openai:0.1.0:bafybeigyehjbahya5mp7vyp5tjvn36rey4btvzskp3ql3mgxp3zu6gwq5a
 contracts:
-- valory/gnosis_safe:0.1.0:bafybeictjc7saviboxbsdcey3trvokrgo7uoh76mcrxecxhlvcrp47aqg4
+- valory/gnosis_safe:0.1.0:bafybeif3n23srpc7kouvry6c5h3qmd4h63vtd3gg7el2upjm6xac6mligi
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
 - valory/realitio:0.1.0:bafybeignaxfk7fjlfa4lioflwsfru2z5xln5cyvyew3if5oas2sgm5wuii
 - valory/conditional_tokens:0.1.0:bafybeibnzmqmeph4cj5vfh3s622mo2o5627vjjwc6bptrhj4dk65mzgvhe
-- valory/fpmm_deterministic_factory:0.1.0:bafybeibrtxj6yfafeypjcq4myhjxpxystjnqvepqibklnwigawsftxvdce
+- valory/fpmm_deterministic_factory:0.1.0:bafybeihi2pozsqbgu6mkepoyqqwqxc3o7ks47tx7vuf5hxfkbsyuskzqjq
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
 - valory/fpmm:0.1.0:bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4
 protocols:
@@ -34,9 +34,9 @@ protocols:
 - valory/contract_api:1.0.0:bafybeidgu7o5llh26xp3u3ebq3yluull5lupiyeu6iooi2xyymdrgnzq5i
 - valory/ledger_api:1.0.0:bafybeihdk6psr4guxmbcrc26jr2cbgzpd5aljkqvpwo64bvaz7tdti2oni
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeigjrepaqpb3m7zunmt4hryos4vto4yyj3u6iyofdb2fotwho3bqvm
-- valory/transaction_settlement_abci:0.1.0:bafybeid57tozt5f3kgzmu22nbr3c3oy4p7bi2bu66rqsgnlylq6xgh2ixe
-- valory/mech_interact_abci:0.1.0:bafybeicjunamybs27vwz2jz5hdrtkrtr2xwy2a5dyhbqksjrgh266qpnha
+- valory/abstract_round_abci:0.1.0:bafybeic2emnylfmdtidobgdsxa4tgdelreeimtglqzrmic6cumhpsbfzhe
+- valory/transaction_settlement_abci:0.1.0:bafybeifhuemoavm6hf4vypg2sl7kng3iv4ipxgpk3itbh5hp73lworpuwq
+- valory/mech_interact_abci:0.1.0:bafybeigilca6rfqu4qw7yhz5lnhzgymj5cabtusx5hjndt7w7kulkn7cga
 behaviours:
   main:
     args: {}
@@ -187,6 +187,7 @@ models:
       request_retry_delay: 1.0
       request_timeout: 10.0
       reset_pause_duration: 1800
+      mech_interact_round_timeout_seconds: 900
       reset_tendermint_after: 1
       retry_attempts: 400
       retry_timeout: 3

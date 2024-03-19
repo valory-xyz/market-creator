@@ -10,24 +10,24 @@ fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeibn5i47enoott67jc54iihzwb6bxiuts4dzplu2lufh4w4r6emkty
   behaviours.py: bafybeidajmnltkvswbtn6zay3lxcx5pp2k4ys5jnmjdgutada6hkmay5tu
-  composition.py: bafybeif7bpsm6sbdwcqholzqawtw6ccg2kjgr3kohzfn2apc7jfrgopffy
+  composition.py: bafybeibags3bapzxlvsbjsxhlyxpd6ypnvwggu6jijktm4qfe4sn5ugfky
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
-  fsm_specification.yaml: bafybeibbibsamecve46u6oz53egtqhyyz2jpvyljeyk2q32f7vsfzxmw3e
+  fsm_specification.yaml: bafybeia3xga3f3kjawfl5v5ck3ymg5n5mpxbxszpsbpuvxkrbqvn6ifnka
   handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
-  models.py: bafybeib6c23io34zfkygorljd2ujyp4ehlrhcacvx4qfegexghxmcfu3qu
+  models.py: bafybeigyrb6tcpebn7gecgnkcerqmbembat4xdg2wvfybwg6op3rsee2sq
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols: []
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeigjrepaqpb3m7zunmt4hryos4vto4yyj3u6iyofdb2fotwho3bqvm
-- valory/registration_abci:0.1.0:bafybeif3ln6eg53ebrfe6uicjew4uqp2ynyrcxkw5wi4jm3ixqv3ykte4a
-- valory/reset_pause_abci:0.1.0:bafybeicm7onl72rfnn33pbvzwjpkl5gafeieyobfcnyresxz7kunjwmqea
-- valory/market_creation_manager_abci:0.1.0:bafybeif3zzx6sdr6iubp37fsyyuue5uyjrlapwrparlzxuim3ywf4xvfsi
-- valory/termination_abci:0.1.0:bafybeie6h7j4hyhgj2wte64n3xyudxq4pgqcqjmslxi5tff4mb6vce2tay
-- valory/transaction_settlement_abci:0.1.0:bafybeid57tozt5f3kgzmu22nbr3c3oy4p7bi2bu66rqsgnlylq6xgh2ixe
-- valory/mech_interact_abci:0.1.0:bafybeicjunamybs27vwz2jz5hdrtkrtr2xwy2a5dyhbqksjrgh266qpnha
+- valory/abstract_round_abci:0.1.0:bafybeic2emnylfmdtidobgdsxa4tgdelreeimtglqzrmic6cumhpsbfzhe
+- valory/registration_abci:0.1.0:bafybeibzduasg5pahk2d2glc36wlopg54ybwcdmjqbzozt2lmkp4reqsdu
+- valory/reset_pause_abci:0.1.0:bafybeib3geaw3o35aigmb4dhplxrjlsef7hbdwrozu4akiunlgyiegshj4
+- valory/market_creation_manager_abci:0.1.0:bafybeidmzffvwvh3euspl7rub2mnhhqj4qhurwbryxvxaxsntueu2gelve
+- valory/termination_abci:0.1.0:bafybeifnfuy3svz5oz6kwglu35q6jn7ai3riqplyypskb7za5ejyvjmfza
+- valory/transaction_settlement_abci:0.1.0:bafybeifhuemoavm6hf4vypg2sl7kng3iv4ipxgpk3itbh5hp73lworpuwq
+- valory/mech_interact_abci:0.1.0:bafybeigilca6rfqu4qw7yhz5lnhzgymj5cabtusx5hjndt7w7kulkn7cga
 behaviours:
   main:
     args: {}
@@ -177,6 +177,7 @@ models:
       request_retry_delay: 1.0
       request_timeout: 10.0
       reset_pause_duration: 1800
+      mech_interact_round_timeout_seconds: 900
       reset_tendermint_after: 1
       retry_attempts: 400
       retry_timeout: 3
@@ -263,5 +264,5 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.14.6
+    version: ==0.14.8
 is_abstract: false

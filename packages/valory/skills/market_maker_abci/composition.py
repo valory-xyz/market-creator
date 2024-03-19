@@ -59,6 +59,7 @@ abci_app_transition_mapping: AbciAppTransitionMapping = {
     MechFinalStates.FinishedMechRequestRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MechFinalStates.FinishedMechResponseRound: MarketCreationManagerAbci.AnswerQuestionsRound,
     MechFinalStates.FinishedMechRequestSkipRound: MarketCreationManagerAbci.CollectRandomnessRound,
+    MechFinalStates.FinishedMechResponseTimeoutRound: MarketCreationManagerAbci.CollectRandomnessRound,
     MarketCreationManagerAbci.FinishedWithMechRequestRound: MechResponseStates.MechResponseRound,
     MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     TransactionSettlementAbci.FinishedTransactionSubmissionRound: MarketCreationManagerAbci.PostTransactionRound,
