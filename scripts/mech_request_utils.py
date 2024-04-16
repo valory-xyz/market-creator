@@ -1,11 +1,33 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2024 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""Script for retrieving mech requests and their delivers."""
+
 import json
 import time
 from collections import defaultdict
-from typing import List, Any, Dict
-from tqdm import tqdm
+from typing import Any, Dict, List
+
 import requests
-from gql import gql, Client
+from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
+from tqdm import tqdm
 
 
 TEXT_ALIGNMENT = 30
@@ -76,14 +98,20 @@ def _populate_missing_responses(mech_requests: Dict[str, Any]) -> None:
     transport = RequestsHTTPTransport(url=THEGRAPH_ENDPOINT)
     client = Client(transport=transport, fetch_schema_from_transport=True)
 
-    for _, mech_request in tqdm(mech_requests.items(), desc=f"{'Fetching responses':>{TEXT_ALIGNMENT}}", miniters=1):
+    for _, mech_request in tqdm(
+        mech_requests.items(),
+        desc=f"{'Fetching responses':>{TEXT_ALIGNMENT}}",
+        miniters=1,
+    ):
         if "deliver" in mech_request:
             continue
 
         variables = {
             "requestId": mech_request["requestId"],
             "blockNumber_gte": mech_request["blockNumber"],
-            "blockNumber_lte": str(int(mech_request["blockNumber"]) + MECH_FROM_BLOCK_RANGE)
+            "blockNumber_lte": str(
+                int(mech_request["blockNumber"]) + MECH_FROM_BLOCK_RANGE
+            ),
         }
         response = client.execute(gql(DELIVERS_QUERY), variable_values=variables)
         items = response.get("delivers")
@@ -101,7 +129,11 @@ def _populate_missing_responses(mech_requests: Dict[str, Any]) -> None:
 
 
 def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> None:
-    for _, mech_request in tqdm(mech_requests.items(), desc=f"{'Fetching IPFS contents':>{TEXT_ALIGNMENT}}", miniters=1):
+    for _, mech_request in tqdm(
+        mech_requests.items(),
+        desc=f"{'Fetching IPFS contents':>{TEXT_ALIGNMENT}}",
+        miniters=1,
+    ):
         if "ipfsContents" not in mech_request:
             ipfs_hash = mech_request["ipfsHash"]
             url = f"{IPFS_ADDRESS}{ipfs_hash}/metadata.json"
@@ -126,10 +158,16 @@ def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> None:
     _write_mech_events_to_file(mech_requests, True)
 
 
-def _find_duplicate_delivers(mech_requests: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+def _find_duplicate_delivers(
+    mech_requests: Dict[str, Any]
+) -> Dict[str, List[Dict[str, Any]]]:
     requests_with_duplicate_deliver_ids = defaultdict(list)
 
-    for _, r in tqdm(mech_requests.items(), desc=f"{'Finding duplicate delivers':>{TEXT_ALIGNMENT}}", miniters=1):
+    for _, r in tqdm(
+        mech_requests.items(),
+        desc=f"{'Finding duplicate delivers':>{TEXT_ALIGNMENT}}",
+        miniters=1,
+    ):
         if "deliver" in r:
             requests_with_duplicate_deliver_ids[r["deliver"]["id"]].append(r)
 
@@ -137,20 +175,26 @@ def _find_duplicate_delivers(mech_requests: Dict[str, Any]) -> Dict[str, List[Di
         if len(requests_with_duplicate_deliver_ids[k]) == 1:
             del requests_with_duplicate_deliver_ids[k]
 
-    print(f"Duplicate deliver ids found: {len(requests_with_duplicate_deliver_ids.keys())}")
+    print(
+        f"Duplicate deliver ids found: {len(requests_with_duplicate_deliver_ids.keys())}"
+    )
     return requests_with_duplicate_deliver_ids
 
 
 def _process_duplicate_delivers(mech_requests: Dict[str, Any]) -> None:
     requests_with_duplicate_deliver_ids = _find_duplicate_delivers(mech_requests)
-    for mech_requests_list in tqdm(requests_with_duplicate_deliver_ids.values(), desc=f"{'Processing duplicate delivers':>{TEXT_ALIGNMENT}}", miniters=1):
+    for mech_requests_list in tqdm(
+        requests_with_duplicate_deliver_ids.values(),
+        desc=f"{'Processing duplicate delivers':>{TEXT_ALIGNMENT}}",
+        miniters=1,
+    ):
         min_difference_request = min(
             mech_requests_list,
-            key=lambda x: int(x['deliver']['blockNumber']) - int(x['blockNumber'])
+            key=lambda x: int(x["deliver"]["blockNumber"]) - int(x["blockNumber"]),
         )
         for mech_request in mech_requests_list:
             if mech_request is not min_difference_request:
-                mech_request.pop('deliver', None)
+                mech_request.pop("deliver", None)
 
     _write_mech_events_to_file(mech_requests, True)
 
