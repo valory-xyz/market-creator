@@ -2303,10 +2303,11 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         )
 
         for question in unanswered_questions:
-            if question in self.shared_state.questions_responded:
+            question_id = question["question"]["id"].lower()
+
+            if question_id in self.shared_state.questions_responded:
                 continue
 
-            question_id = question["question"]["id"].lower()
             if question_id not in self.shared_state.questions_requested_mech:
                 self.shared_state.questions_requested_mech[question_id] = {}
                 self.shared_state.questions_requested_mech[question_id][
