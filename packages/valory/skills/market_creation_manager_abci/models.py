@@ -163,6 +163,9 @@ class MarketCreationManagerParams(BaseParams):
         self.mech_interact_round_timeout_seconds = self._ensure(
             "mech_interact_round_timeout_seconds", kwargs, type_=int
         )
+        self.answer_retry_intervals = self._ensure(
+            key="answer_retry_intervals", kwargs=kwargs, type_=List[int]
+        )
         super().__init__(*args, **kwargs)
 
 
