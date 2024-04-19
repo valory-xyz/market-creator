@@ -2297,10 +2297,9 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         """Determine the eligible questions to answer at this time"""
         now = self.last_synced_timestamp
         eligible_questions_id = []
+        answer_retry_intervals = self.params.answer_retry_intervals
 
-        self.context.logger.info(
-            f"Answer retry intervals: {self.params.answer_retry_intervals}"
-        )
+        self.context.logger.info(f"Answer retry intervals: {answer_retry_intervals}")
 
         for question in unanswered_questions:
             question_id = question["question"]["id"].lower()
@@ -2311,14 +2310,14 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             if question_id not in self.shared_state.questions_requested_mech:
                 self.shared_state.questions_requested_mech[question_id] = {
                     "question": question,
-                    "retries": []
+                    "retries": [],
                 }
 
             retries = self.shared_state.questions_requested_mech[question_id]["retries"]
             n_retries = len(retries)
             time_since_last_retry = now - retries[-1] if retries else 0
-            retry_period = self.params.answer_retry_intervals[
-                min(n_retries, len(self.params.answer_retry_intervals) - 1)
+            retry_period = answer_retry_intervals[
+                min(n_retries, len(answer_retry_intervals) - 1)
             ]
             if n_retries == 0 or time_since_last_retry > retry_period:
                 eligible_questions_id.append(question_id)
