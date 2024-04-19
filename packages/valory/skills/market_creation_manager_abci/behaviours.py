@@ -2309,11 +2309,10 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
                 continue
 
             if question_id not in self.shared_state.questions_requested_mech:
-                self.shared_state.questions_requested_mech[question_id] = {}
-                self.shared_state.questions_requested_mech[question_id][
-                    "question"
-                ] = question
-                self.shared_state.questions_requested_mech[question_id]["retries"] = []
+                self.shared_state.questions_requested_mech[question_id] = {
+                    "question": question,
+                    "retries": []
+                }
 
             retries = self.shared_state.questions_requested_mech[question_id]["retries"]
             n_retries = len(retries)
