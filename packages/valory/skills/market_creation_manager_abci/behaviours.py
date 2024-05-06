@@ -2348,6 +2348,8 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         eligible_questions_id = self._eligible_questions_to_answer(unanswered_questions)
 
+        self.context.logger.info(f"{self.shared_state.questions_requested_mech=}")
+
         if len(eligible_questions_id) == 0:
             self.context.logger.info("No eligible questions to answer")
             return GetPendingQuestionsRound.NO_TX_PAYLOAD
