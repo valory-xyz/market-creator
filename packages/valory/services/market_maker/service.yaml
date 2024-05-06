@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeidsov3f5hchknxiyeouoeupqot5o44y2as6u2q4fcqeszz7bycd2a
+agent: valory/market_maker:0.1.0:bafybeib2jsel72sqshzqanf5zhraz2oajnrtdavybg3j26fc4kxrn7uabu
 number_of_agents: 1
 deployment:
   agent:
@@ -71,6 +71,8 @@ models:
       multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:1}
       ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
       mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x77af31de935740567cf4ff1986d04b2c964a786a}
+      answer_retry_intervals: ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
+        1209600]}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
       reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
       reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
