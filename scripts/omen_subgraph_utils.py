@@ -70,7 +70,7 @@ query fpmms_query($fpmm: String, $id_gt: ID) {
         where: {fpmm: $fpmm, id_gt: $id_gt, type: Buy}
         orderBy: id
         orderDirection: asc
-        first: 1000        
+        first: 1000
     ) {
         collateralAmount
         outcomeIndex
@@ -217,7 +217,3 @@ def get_fpmms(creator: str) -> Dict[str, Any]:
     _populate_missing_fpmms(creator.lower(), fpmms)
     _populate_missing_buy_trades(fpmms)
     return fpmms
-
-
-if __name__ == "__main__":
-    x = get_fpmms("0x89c5cc945dd550bcffb72fe42bff002429f46fec")
