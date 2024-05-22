@@ -98,7 +98,8 @@ class MarketState(Enum):
     UNKNOWN = 6
 
 
-def _get_market_state(market: Dict[str, Any]) -> MarketState:
+def get_market_state(market: Dict[str, Any]) -> MarketState:
+    """Get market state"""
     try:
         now = datetime.utcnow()
 
@@ -158,7 +159,7 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
         desc=f"{'Fetching trades':>{TEXT_ALIGNMENT}}",
         miniters=1,
     ):
-        state = _get_market_state(fpmm)
+        state = get_market_state(fpmm)
 
         if state is not MarketState.CLOSED:
             continue

@@ -15,7 +15,7 @@ classifiers = [ "Environment :: Console", "Environment :: Web Environment", "Dev
 include = "packages"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 open-autonomy = "==0.14.8"
 toml = "==0.10.2"
 hypothesis = "==6.21.6"
@@ -44,3 +44,8 @@ typing_extensions = ">=3.10.0.2"
 hexbytes = "*"
 packaging = "*"
 tomte = {version = "==0.2.15", extras = ["cli", "tests"]}
+ipykernel = "^6.29.4"
+ipympl = "^0.9.4"
+scipy = "^1.13.0"
+pandas = "^2.2.2"
+matplotlib = "3.5.1"
