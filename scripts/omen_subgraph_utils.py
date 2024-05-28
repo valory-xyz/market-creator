@@ -141,7 +141,7 @@ def _populate_missing_fpmms(creator: str, fpmms: Dict[str, Any]) -> None:
             break
 
         for fpmm in items:
-            if fpmm["id"] not in fpmms:
+            if fpmm["id"] not in fpmms or "trades" not in fpmms[fpmm["id"]]:
                 fpmms[fpmm["id"]] = fpmm
 
         id_gt = items[-1]["id"]
@@ -154,6 +154,7 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
     transport = RequestsHTTPTransport(url=THEGRAPH_ENDPOINT)
     client = Client(transport=transport, fetch_schema_from_transport=True)
 
+    updated_fpmms = {}
     for _, fpmm in tqdm(
         fpmms.items(),
         desc=f"{'Fetching trades':>{TEXT_ALIGNMENT}}",
@@ -167,6 +168,7 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
         if "trades" in fpmm:
             continue
 
+        updated_fpmms[fpmm["id"]] = fpmm
         trades = fpmm.setdefault("trades", {})
         id_gt = "0x00"
         while True:
@@ -188,6 +190,10 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
             _write_db_to_file(fpmms)
 
     _write_db_to_file(fpmms, True)
+
+    # print("Updated markets:")
+    # for fpmm in updated_fpmms.values():
+    #    print(f"  - {fpmm['id']} - {fpmm['question'].get('title', '')}")
 
 
 last_write_time = 0.0
@@ -218,3 +224,7 @@ def get_fpmms(creator: str) -> Dict[str, Any]:
     _populate_missing_fpmms(creator.lower(), fpmms)
     _populate_missing_buy_trades(fpmms)
     return fpmms
+
+
+if __name__ == "__main__":
+    get_fpmms("0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec")
