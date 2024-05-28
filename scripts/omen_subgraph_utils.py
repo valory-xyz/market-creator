@@ -191,9 +191,14 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
 
     _write_db_to_file(fpmms, True)
 
-    # print("Updated markets:")
-    # for fpmm in updated_fpmms.values():
-    #    print(f"  - {fpmm['id']} - {fpmm['question'].get('title', '')}")
+    total_fpmms = len(updated_fpmms)
+    print(f"Total updated markets: {total_fpmms}")
+    print(f"First {min(total_fpmms, 20)}:")
+
+    for i, fpmm in enumerate(updated_fpmms.values()):
+        if i >= 20:
+            break
+        print(f"  - {fpmm['id']} - {fpmm['question'].get('title', '')}")
 
 
 last_write_time = 0.0
