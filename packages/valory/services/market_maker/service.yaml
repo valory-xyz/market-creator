@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeictoxyqhimwypessy4nnmup65qq6t3umej2dyhv7w6ryn4zsavnta
+agent: valory/market_maker:0.1.0:bafybeihleobsaoavuxtdgmwqz6n3mkjxmnueb5kly4hp6hbgkm3f7pdjhu
 number_of_agents: 1
 deployment:
   agent:
@@ -106,6 +106,15 @@ models:
       google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
+  omen_subgraph:
+    args:
+      headers:
+        Content-Type: ${OMEN_SUBGRAPH_CONTENT_TYPE:str:application/json}
+      method: ${OMEN_SUBGRAPH_METHOD:str:POST}
+      response_key: ${OMEN_SUBGRAPH_RESPONSE_KEY:str:data:fixedProductMarketMakers}
+      response_type: ${OMEN_SUBGRAPH_RESPONSE_TYPE:str:list}
+      retries: ${OMEN_SUBGRAPH_RETRIES:int:5}
+      url: ${OMEN_SUBGRAPH_URL:str:https://api.thegraph.com/subgraphs/name/protofire/omen-xdai}
 ---
 public_id: valory/ledger:0.19.0
 type: connection
