@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeihleobsaoavuxtdgmwqz6n3mkjxmnueb5kly4hp6hbgkm3f7pdjhu
+agent: valory/market_maker:0.1.0:bafybeie4xnbsq32waqc5scvhgyg5nttalo7klfijf53bwaxo5u44nrqlbq
 number_of_agents: 1
 deployment:
   agent:
@@ -106,6 +106,22 @@ models:
       google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
+  randomness_api:
+    args:
+      method: ${RANDOMNESS_API_METHOD:str:GET}
+      response_key: ${RANDOMNESS_API_RESPONSE_KEY:str:null}
+      response_type: ${RANDOMNESS_API_RESPONSE_TYPE:str:dict}
+      retries: ${RANDOMNESS_API_RETRIES:int:5}
+      url: ${RANDOMNESS_API_URL:str:https://drand.cloudflare.com/public/latest}
+  mech_response:
+    args:
+      headers:
+        Content-Type: ${MECH_RESPONSE_API_CONTENT_TYPE:str:application/json}
+      method: ${MECH_RESPONSE_API_METHOD:str:GET}
+      response_key: ${MECH_RESPONSE_API_RESPONSE_KEY:str:result}
+      response_type: ${MECH_RESPONSE_API_RESPONSE_TYPE:str:str}
+      retries: ${MECH_RESPONSE_API_RETRIES:int:5}
+      url: ${MECH_RESPONSE_API_URL:str:''}
   omen_subgraph:
     args:
       headers:

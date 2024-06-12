@@ -34,7 +34,9 @@ from tqdm import tqdm
 TEXT_ALIGNMENT = 30
 MINIMUM_WRITE_FILE_DELAY_SECONDS = 20
 FPMMS_JSON_PATH = "fpmms.json"
-THEGRAPH_ENDPOINT = os.getenv('OMEN_SUBGRAPH_URL', 'https://api.thegraph.com/subgraphs/name/protofire/omen-xdai')
+THEGRAPH_ENDPOINT = os.getenv(
+    "OMEN_SUBGRAPH_URL", "https://api.thegraph.com/subgraphs/name/protofire/omen-xdai"
+)
 
 FPMMS_QUERY = """
 query fpmms_query($creator: Bytes, $id_gt: ID) {
