@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeictoxyqhimwypessy4nnmup65qq6t3umej2dyhv7w6ryn4zsavnta
+agent: valory/market_maker:0.1.0:bafybeicgujg3os4bgurlx6ddkrksvduinkaolm4dsjt23fdzw4sqfh37iy
 number_of_agents: 1
 deployment:
   agent:
@@ -106,6 +106,7 @@ models:
       google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
+      mech_interaction_sleep_time: ${MECH_INTERACTION_SLEEP_TIME:int:10}
 ---
 public_id: valory/ledger:0.19.0
 type: connection
