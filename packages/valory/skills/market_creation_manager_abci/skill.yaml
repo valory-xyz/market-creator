@@ -10,11 +10,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeigqohcwcmboyit2ihfo3b5bxoedltvrgr2u6uotb7aomr4d4aotle
+  behaviours.py: bafybeicpwlydvflhvmcxrjj4rfzpoi5bu72k3iwzryfxj2zfe3xsykhvem
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeicps5t2anm7fv35fwnw7oolaxxmpmjio6mdw4sc6rzpnsolph5xlm
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeibef4czds6n7h6bgdcpfmfrhakbtegm4iffauz24pmsu7xaaw6abe
+  models.py: bafybeidwkm77ozr2x7qpxpvyiuerz6ih2k4bd5p25hqzzbrvhkyknwcrue
   payloads.py: bafybeibu7sptf43adazxpyzwtfpph7bgfhtwiotg5sdlcwjt6iw3idqn7a
   rounds.py: bafybeie6rgwfulbu5xkuvxgrujbvenioyfggtzlmt23pbm6auzj3w4se44
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
@@ -95,12 +95,10 @@ models:
       markets_to_approve_per_day: 10
       min_approve_markets_epoch_seconds: 43200
       approve_market_event_days_offset: 5
-      approve_market_creator: '0x0000000000000000000000000000000000000000'
       market_approval_server_url: http://127.0.0.1:5000
       market_approval_server_api_key: api_key
       newsapi_endpoint: https://newsapi.org/v2
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
-      market_closing_newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       google_api_key: google_api_key
       google_engine_id: google_engine_id
       openai_api_key: openai_api_key

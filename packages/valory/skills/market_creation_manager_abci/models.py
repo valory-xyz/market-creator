@@ -103,11 +103,6 @@ class MarketCreationManagerParams(BaseParams):
         self.approve_market_event_days_offset = self._ensure(
             "approve_market_event_days_offset", kwargs, type_=int
         )
-        self.approve_market_creator = self._ensure(
-            key="approve_market_creator",
-            kwargs=kwargs,
-            type_=str,
-        )
         self.realitio_contract = self._ensure(
             key="realitio_contract",
             kwargs=kwargs,
@@ -151,9 +146,6 @@ class MarketCreationManagerParams(BaseParams):
         )
         self.market_proposal_round_timeout_seconds_per_day = self._ensure(
             "market_proposal_round_timeout_seconds_per_day", kwargs, type_=int
-        )
-        self.market_closing_newsapi_api_key = self._ensure(
-            "market_closing_newsapi_api_key", kwargs, type_=str
         )
         self.google_api_key = self._ensure("google_api_key", kwargs, type_=str)
         self.google_engine_id = self._ensure("google_engine_id", kwargs, type_=str)

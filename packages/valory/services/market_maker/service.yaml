@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeie4xnbsq32waqc5scvhgyg5nttalo7klfijf53bwaxo5u44nrqlbq
+agent: valory/market_maker:0.1.0:bafybeifdtifzedjt3qyz37ws25khq6qjspzka37uctjht3an4ymsoh4use
 number_of_agents: 1
 deployment:
   agent:
@@ -47,7 +47,6 @@ models:
       markets_to_approve_per_day: ${MARKETS_TO_APPROVE_PER_DAY:int:10}
       min_approve_markets_epoch_seconds: ${MIN_APPROVE_MARKETS_EPOCH_SECONDS:int:43200}
       approve_market_event_days_offset: ${APPROVE_MARKET_EVENT_DAYS_OFFSET:int:5}
-      approve_market_creator: ${APPROVE_MARKET_CREATOR:str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}
       market_approval_server_url: ${MARKET_APPROVAL_SERVER_URL:str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2}
@@ -102,7 +101,6 @@ models:
       slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
       light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
       serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
-      market_closing_newsapi_api_key: ${MARKET_CLOSING_NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
       google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}

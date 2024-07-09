@@ -516,7 +516,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 int(entry["creationTimestamp"])
                 for entry in latest_open_markets.get("fixedProductMarketMakers", {})
             ]
-            largest_creation_timestamp = max(creation_timestamps)
+            largest_creation_timestamp = max(creation_timestamps, default=0)
             self.context.logger.info(
                 f"largest_creation_timestamp={largest_creation_timestamp}"
             )
@@ -565,7 +565,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             else:
                 self.context.logger.info("Timeout to approve markets reached.")
 
-                min_timestamp_to_approve = min(
+                max_timestamp_to_approve = max(
                     (
                         ts
                         for ts, value in required_markets_to_approve.items()
@@ -576,8 +576,8 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
                 # On the market approval server, resolution_time is one day less than openingTimestamp
                 proposed_markets = yield from self._collect_latest_proposed_markets(
-                    min_timestamp_to_approve - _ONE_DAY,
-                    min_timestamp_to_approve,
+                    max_timestamp_to_approve - _ONE_DAY,
+                    max_timestamp_to_approve,
                 )
 
                 proposed_markets_timestamps: Dict[int, int] = defaultdict(int)
@@ -592,7 +592,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 content_data.update(latest_open_markets)
                 content_data.update(proposed_markets)
                 content_data["num_markets_to_approve"] = required_markets_to_approve[
-                    min_timestamp_to_approve
+                    max_timestamp_to_approve
                 ]
                 content_data["timestamp"] = current_timestamp
                 content = json.dumps(content_data, sort_keys=True)
@@ -659,7 +659,8 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         self, openingTimestamp_gte: int, openingTimestamp_lte: int
     ) -> Generator[None, None, Dict[str, Any]]:
         """Collect FPMM from subgraph."""
-        creator = self.params.approve_market_creator
+        creator = self.synchronized_data.safe_contract_address.lower()
+        self.context.logger.info(f"_collect_latest_open_markets {creator=}")
         response = yield from self.get_subgraph_result(
             query=FPMM_QUERY.substitute(
                 creator=creator,
@@ -1132,10 +1133,10 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def get_markets(self) -> Generator[None, None, Tuple[List[Dict[str, Any]], int]]:
         """Collect FMPMM from subgraph."""
+        creator = self.synchronized_data.safe_contract_address.lower()
+        self.context.logger.info(f"get_markets {creator=}")
         response = yield from self.get_subgraph_result(
-            query=FPMM_POOL_MEMBERSHIPS_QUERY.substitute(
-                creator=self.synchronized_data.safe_contract_address.lower(),
-            )
+            query=FPMM_POOL_MEMBERSHIPS_QUERY.substitute(creator=creator)
         )
         if response is None:
             return [], 0
@@ -1749,9 +1750,10 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         self, proposed_market_data: Dict[str, str]
     ) -> Generator[None, None, str]:
         """Auxiliary method to propose a market to the endpoint."""
-        self.context.logger.info(f"Proposing market {proposed_market_data}")
 
         url = self.params.market_approval_server_url + "/propose_market"
+        self.context.logger.info(f"Proposing market {proposed_market_data} on {url}")
+
         headers = {
             "Authorization": self.params.market_approval_server_api_key,
             "Content-Type": "application/json",
@@ -2257,6 +2259,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, List[Dict[str, Any]]]:
         """Collect FPMM from subgraph."""
         creator = self.synchronized_data.safe_contract_address.lower()
+        self.context.logger.info(f"_get_unanswered_questions {creator=}")
         response = yield from self.get_subgraph_result(
             query=OPEN_FPMM_QUERY.substitute(
                 creator=creator,
