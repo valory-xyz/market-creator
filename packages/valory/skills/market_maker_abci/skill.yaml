@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
-- valory/market_creation_manager_abci:0.1.0:bafybeibg5r6nfsc6vriijjkwx7k5banxdalwl4umu5ggjbwrselvgs2z7u
+- valory/market_creation_manager_abci:0.1.0:bafybeidzxfrtwdd65c5uqbcwj5csw6dnrmdcoi7lb2w4hc5rwouwtzh6ee
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
 - valory/mech_interact_abci:0.1.0:bafybeieryw7rk2tspyxx46loqqqimr2l5vvhtshiyg2mmdxijzb7pdoi6a
@@ -89,7 +89,6 @@ models:
       markets_to_approve_per_day: 10
       min_approve_markets_epoch_seconds: 43200
       approve_market_event_days_offset: 5
-      approve_market_creator: '0x0000000000000000000000000000000000000000'
       market_approval_server_url: http://127.0.0.1:5000
       market_approval_server_api_key: api_key
       newsapi_endpoint: https://newsapi.org/v2
@@ -204,7 +203,6 @@ models:
       use_slashing: false
       slash_cooldown_hours: 3
       questions_to_close_batch_size: 1
-      market_closing_newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       google_api_key: google_api_key
       google_engine_id: google_engine_id
       openai_api_key: openai_api_key
