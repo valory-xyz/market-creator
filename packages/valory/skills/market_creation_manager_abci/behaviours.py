@@ -660,7 +660,6 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, Dict[str, Any]]:
         """Collect FPMM from subgraph."""
         creator = self.synchronized_data.safe_contract_address.lower()
-        self.context.logger.info(f"_collect_latest_open_markets {creator=}")
         response = yield from self.get_subgraph_result(
             query=FPMM_QUERY.substitute(
                 creator=creator,
@@ -1134,7 +1133,6 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
     def get_markets(self) -> Generator[None, None, Tuple[List[Dict[str, Any]], int]]:
         """Collect FMPMM from subgraph."""
         creator = self.synchronized_data.safe_contract_address.lower()
-        self.context.logger.info(f"get_markets {creator=}")
         response = yield from self.get_subgraph_result(
             query=FPMM_POOL_MEMBERSHIPS_QUERY.substitute(creator=creator)
         )
@@ -2259,7 +2257,6 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, List[Dict[str, Any]]]:
         """Collect FPMM from subgraph."""
         creator = self.synchronized_data.safe_contract_address.lower()
-        self.context.logger.info(f"_get_unanswered_questions {creator=}")
         response = yield from self.get_subgraph_result(
             query=OPEN_FPMM_QUERY.substitute(
                 creator=creator,
