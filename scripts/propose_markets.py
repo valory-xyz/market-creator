@@ -55,7 +55,7 @@ ENGINES = {
     "chat": ["gpt-3.5-turbo", "gpt-4", "gpt-4-0125-preview"],
 }
 
-MARKET_IDENTIFICATION_PROMPT = """Based on the
+MARKET_IDENTIFICATION_PROMPT_ORIGINAL = """Based on the
         following news snippets under INPUT, formulate 10 prediction market questions
         with clear, objective\noutcomes that can be verified on a specific date and
         leave no room for interpretation or subjectivity.\nAvoid incorporating questions
@@ -84,6 +84,7 @@ MARKET_IDENTIFICATION_PROMPT = """Based on the
         - It must not encourage unethical behavior or violence.
         - It should follow a structure similar to this: "Will EVENT occur on or before EVENT_DAY?"
         - It must not include unmeasurable statements like "significant increase".
+        - It must not reference matches, sport events or any other event that do not occur on EVENT_DAY.
         - Its answer must be 'yes' or 'no.
         - Its answer must be verified using publicly available sources or news media.
         - Its answer must not be an opinion.
