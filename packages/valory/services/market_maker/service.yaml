@@ -86,7 +86,7 @@ models:
       tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
       tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
       tendermint_max_retries: ${TENDERMINT_MAX_RETRIES:int:5}
-      close_question_bond: ${CLOSE_QUESTION_BOND:int:1000000000000000}
+      close_question_bond: ${CLOSE_QUESTION_BOND:int:100000000000000000}
       questions_to_close_batch_size: ${QUESTIONS_TO_CLOSE_BATCH_SIZE:int:1}
       tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
       tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
