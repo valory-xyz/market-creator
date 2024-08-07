@@ -1932,7 +1932,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         return {
             "to": self.params.realitio_contract,
             "data": response.state.body["data"],
-            "value": ETHER_VALUE,
+            "value": self.params.realitio_answer_question_bounty,
         }
 
     def _prepare_prepare_condition_mstx(

@@ -97,6 +97,9 @@ class MarketCreationManagerParams(BaseParams):
         self.realitio_answer_question_bond = self._ensure(
             "realitio_answer_question_bond", kwargs, type_=int
         )
+        self.realitio_answer_question_bounty = self._ensure(
+            "realitio_answer_question_bounty", kwargs, type_=int
+        )
         self.min_approve_markets_epoch_seconds = self._ensure(
             "min_approve_markets_epoch_seconds", kwargs, type_=int
         )
