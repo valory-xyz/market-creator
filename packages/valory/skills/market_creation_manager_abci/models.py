@@ -94,8 +94,8 @@ class MarketCreationManagerParams(BaseParams):
         self.questions_to_close_batch_size = self._ensure(
             "questions_to_close_batch_size", kwargs, type_=int
         )
-        self.close_question_bond = self._ensure(
-            "close_question_bond", kwargs, type_=int
+        self.realitio_answer_question_bond = self._ensure(
+            "realitio_answer_question_bond", kwargs, type_=int
         )
         self.min_approve_markets_epoch_seconds = self._ensure(
             "min_approve_markets_epoch_seconds", kwargs, type_=int

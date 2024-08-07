@@ -207,7 +207,7 @@ models:
       use_termination: ${bool:false}
       use_slashing: ${bool:false}
       slash_cooldown_hours: ${int:3}
-      close_question_bond: ${int:1000000000000000}
+      realitio_answer_question_bond: ${int:1000000000000000}
       questions_to_close_batch_size: ${int:1}
       slash_threshold_amount: ${int:10000000000000000}
       light_slash_unit_amount: ${int:5000000000000000}

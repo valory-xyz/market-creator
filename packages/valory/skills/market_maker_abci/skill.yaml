@@ -207,7 +207,7 @@ models:
       google_engine_id: google_engine_id
       openai_api_key: openai_api_key
       xdai_threshold: 1000000000000000000
-      close_question_bond: 1000000000000000
+      realitio_answer_question_bond: 1000000000000000
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000

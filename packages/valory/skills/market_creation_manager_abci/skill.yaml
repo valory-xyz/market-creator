@@ -205,7 +205,7 @@ models:
       tendermint_p2p_url: localhost:26656
       tendermint_url: http://localhost:26657
       tx_timeout: 10.0
-      close_question_bond: 1000000000000000
+      realitio_answer_question_bond: 1000000000000000
       questions_to_close_batch_size: 1
       validate_timeout: 1205
       use_termination: false
