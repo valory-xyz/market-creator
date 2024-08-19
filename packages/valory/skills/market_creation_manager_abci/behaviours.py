@@ -1932,7 +1932,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         return {
             "to": self.params.realitio_contract,
             "data": response.state.body["data"],
-            "value": ETHER_VALUE,
+            "value": self.params.realitio_answer_question_bounty,
         }
 
     def _prepare_prepare_condition_mstx(
@@ -2369,7 +2369,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         max_num_questions = min(
             len(eligible_questions_id), self.params.questions_to_close_batch_size
         )
-        bond_required = self.params.close_question_bond * max_num_questions
+        bond_required = self.params.realitio_answer_question_bond * max_num_questions
 
         # TODO uncomment
         if balance < bond_required:
@@ -2561,7 +2561,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         data = cast(bytes, response.state.body["data"])
         return {
             "to": self.params.realitio_contract,
-            "value": self.params.close_question_bond,
+            "value": self.params.realitio_answer_question_bond,
             "data": data,
         }
 
