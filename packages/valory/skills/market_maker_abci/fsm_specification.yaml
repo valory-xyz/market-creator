@@ -137,7 +137,7 @@ transition_func:
     (MechResponseRound, DONE): AnswerQuestionsRound
     (MechResponseRound, NO_MAJORITY): MechResponseRound
     (MechResponseRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (PostTransactionRound, ANSWER_QUESTION_DONE): GetPendingQuestionsRound
+    (PostTransactionRound, ANSWER_QUESTION_DONE): CollectRandomnessRound
     (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
     (PostTransactionRound, DONE): RetrieveApprovedMarketRound
     (PostTransactionRound, ERROR): DepositDaiRound
