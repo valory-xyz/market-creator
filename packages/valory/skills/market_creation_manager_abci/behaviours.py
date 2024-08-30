@@ -2398,7 +2398,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
                 asdict(
                     MechMetadata(
                         nonce=question_id,
-                        tool="resolve-market-reasoning-gpt-4",
+                        tool=self.params.mech_tool_resolve_market,
                         prompt=question["title"],
                     )
                 )

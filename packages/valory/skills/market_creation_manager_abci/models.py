@@ -136,6 +136,11 @@ class MarketCreationManagerParams(BaseParams):
             kwargs=kwargs,
             type_=str,
         )
+        self.mech_tool_resolve_market = self._ensure(
+            key="mech_tool_resolve_market",
+            kwargs=kwargs,
+            type_=str,
+        )
         self.market_fee = self._ensure("market_fee", kwargs, type_=float)
         self.market_timeout = self._ensure("market_timeout", kwargs, type_=int)
         self.event_offset_start_days = self._ensure(

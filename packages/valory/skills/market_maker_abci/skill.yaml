@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
-- valory/market_creation_manager_abci:0.1.0:bafybeibuw4lootgmocuktlkojapcpcqjx6naj35jbtyoyzogx2vrfyczhe
+- valory/market_creation_manager_abci:0.1.0:bafybeigopmjddoomz57pkeafpjvssvvbemgtl6zitjvvjgj2y2dbyazf5e
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
 - valory/mech_interact_abci:0.1.0:bafybeieryw7rk2tspyxx46loqqqimr2l5vvhtshiyg2mmdxijzb7pdoi6a
@@ -213,6 +213,7 @@ models:
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
       mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
+      mech_tool_resolve_market: resolve-market-reasoning-gpt-4
       answer_retry_intervals:
       - 0
       - 86400

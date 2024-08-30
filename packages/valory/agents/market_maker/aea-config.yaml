@@ -37,9 +37,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeieh4ei3qdelmacnm7vwq57phoewgumr3udvxt6pybmuggwc3yk65q
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
-- valory/market_maker_abci:0.1.0:bafybeigr7anwsma3ezjcksmgc6voc3nnnogm3uje2urfw2wohzdcy6eg44
+- valory/market_maker_abci:0.1.0:bafybeih7cs656swz6l33cdw43njf5dqro3lu2rbkr362jtkw3ixahll2ya
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
-- valory/market_creation_manager_abci:0.1.0:bafybeibuw4lootgmocuktlkojapcpcqjx6naj35jbtyoyzogx2vrfyczhe
+- valory/market_creation_manager_abci:0.1.0:bafybeigopmjddoomz57pkeafpjvssvvbemgtl6zitjvvjgj2y2dbyazf5e
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
@@ -218,6 +218,7 @@ models:
       google_engine_id: ${str:google_engine_id}
       openai_api_key: ${str:openai_api_key}
       mech_contract_address: ${str:0x77af31de935740567cf4ff1986d04b2c964a786a}
+      mech_tool_resolve_market: ${str:resolve-market-reasoning-gpt-4}
       answer_retry_intervals: ${list:[0, 86400, 259200, 604800, 1209600]}
   randomness_api:
     args:
