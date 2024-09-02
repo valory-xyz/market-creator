@@ -10,11 +10,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeieq7lwoujmsyevbhv3vwz3d6f3ysj6a2yxq57wf4fmhzpad3vgpjm
+  behaviours.py: bafybeibaeqww3qnhiqck3pi7t276azxv7jt4tzscex25onaoobtrakqnoi
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiebwzp5jirrwo475r2hzwrirx45jlxtp5duo4275phypqfkueybtq
   handlers.py: bafybeietxjfli2i57kb7heoy772rcq2znusl36gg7jjj5g3pddw7egny3q
-  models.py: bafybeib6zsvkkqszeg3zhzuiirkuwxkfzniiyauwaggn7elaw33bnen2lu
+  models.py: bafybeic2w6gyk3hhn4ksea3nte4c6mron6f2zojxjgo6u5kyvkfnx2g6ie
   payloads.py: bafybeibu7sptf43adazxpyzwtfpph7bgfhtwiotg5sdlcwjt6iw3idqn7a
   rounds.py: bafybeifnezj3cw323fj5xnieuucfqarznzlpesaj75huylfkpeyuunqkvy
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
@@ -217,6 +217,7 @@ models:
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
       mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
+      mech_tool_resolve_market: resolve-market-reasoning-gpt-4
       answer_retry_intervals:
       - 0
       - 86400
