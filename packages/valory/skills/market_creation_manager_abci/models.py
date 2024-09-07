@@ -94,8 +94,11 @@ class MarketCreationManagerParams(BaseParams):
         self.questions_to_close_batch_size = self._ensure(
             "questions_to_close_batch_size", kwargs, type_=int
         )
-        self.close_question_bond = self._ensure(
-            "close_question_bond", kwargs, type_=int
+        self.realitio_answer_question_bond = self._ensure(
+            "realitio_answer_question_bond", kwargs, type_=int
+        )
+        self.realitio_answer_question_bounty = self._ensure(
+            "realitio_answer_question_bounty", kwargs, type_=int
         )
         self.min_approve_markets_epoch_seconds = self._ensure(
             "min_approve_markets_epoch_seconds", kwargs, type_=int
@@ -130,6 +133,11 @@ class MarketCreationManagerParams(BaseParams):
         )
         self.arbitrator_contract = self._ensure(
             key="arbitrator_contract",
+            kwargs=kwargs,
+            type_=str,
+        )
+        self.mech_tool_resolve_market = self._ensure(
+            key="mech_tool_resolve_market",
             kwargs=kwargs,
             type_=str,
         )

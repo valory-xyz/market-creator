@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeidstcny2k2brq3e7wnsr72lugj3rq3nzy7pjwswnf5evknc2i2ht4
+agent: valory/market_maker:0.1.0:bafybeih4jazyeuw7w3npc36eujvkrdc4yk5yt33iep2jhj6rjzmpgyjj6e
 number_of_agents: 1
 deployment:
   agent:
@@ -70,6 +70,7 @@ models:
       multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:1}
       ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
       mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x77af31de935740567cf4ff1986d04b2c964a786a}
+      mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4}
       answer_retry_intervals: ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
         1209600]}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
@@ -86,7 +87,8 @@ models:
       tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
       tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
       tendermint_max_retries: ${TENDERMINT_MAX_RETRIES:int:5}
-      close_question_bond: ${CLOSE_QUESTION_BOND:int:1000000000000000}
+      realitio_answer_question_bond: ${REALITIO_ANSWER_QUESTION_BOND:int:1000000000000000}
+      realitio_answer_question_bounty: ${REALITIO_ANSWER_QUESTION_BOUNTY:int:0}
       questions_to_close_batch_size: ${QUESTIONS_TO_CLOSE_BATCH_SIZE:int:1}
       tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
       tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
