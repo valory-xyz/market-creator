@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023 Valory AG
+#   Copyright 2023-2024 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -23,17 +23,12 @@ import json
 import logging
 import os
 import random
-import secrets
-import time
-import traceback
-import uuid
-from string import Template
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import requests
-import yaml
 from dotenv import load_dotenv
-from openai import AuthenticationError, OpenAI, RateLimitError
+from openai import OpenAI
+
 
 load_dotenv(dotenv_path=".env")
 
@@ -78,7 +73,7 @@ MARKET_IDENTIFICATION_PROMPT_ORIGINAL = """Based on the
 MARKET_IDENTIFICATION_PROMPT = """Based on the
         following news snippets under NEWS_SNIPPETS, formulate 15 prediction market questions
         with clear, objective outcomes.
-        
+
         Each question must satisfy all the following criteria:
         - It must be related to an event happening before EVENT_DAY or on EVENT_DAY.
         - It must not encourage unethical behavior or violence.
@@ -89,10 +84,10 @@ MARKET_IDENTIFICATION_PROMPT = """Based on the
         - Its answer must be verified using publicly available sources or news media.
         - Its answer must not be an opinion.
         - Its answer must be known after EVENT_DAY.
-        
+
         OUTPUT_FORMAT
         You must provide a JSON array with entries "question" and "topic". "topic" must be a topic under TOPICS.
-        
+
         EVENT_DAY
         {event_day}
 
@@ -111,15 +106,18 @@ class OpenAIClientManager:
     """Client context manager for OpenAI."""
 
     def __init__(self, api_key: str):
+        """__init__"""
         self.api_key = api_key
 
     def __enter__(self) -> OpenAI:
+        """__enter__"""
         global client
         if client is None:
             client = OpenAI(api_key=self.api_key)
         return client
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """__exit__"""
         global client
         if client is not None:
             client.close()
@@ -127,7 +125,10 @@ class OpenAIClientManager:
 
 
 class Context:
+    """Mock class Context"""
+
     def __init__(self):
+        """__init__"""
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(
             logging.DEBUG
@@ -142,14 +143,16 @@ class Context:
 
 
 class Params:
-    pass
+    """Mock class Params"""
 
 
 class SynchronizedData:
-    pass
+    """Mock class SynchronizedData"""
 
 
 class DataGatheringRound:
+    """Mock class DataGatheringRound"""
+
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
     MAX_PROPOSED_MARKETS_REACHED_PAYLOAD = "MAX_PROPOSED_MARKETS_REACHED_PAYLOAD"
@@ -157,13 +160,16 @@ class DataGatheringRound:
 
 
 class MarketProposalBehaviourMock:
+    """Mock class MarketProposalBehaviourMock"""
+
     params = Params()
     synchronized_data = SynchronizedData()
     context = Context()
 
     def __init__(self):
+        """__init__"""
         self.synchronized_data.most_voted_randomness = "".join(
-            [str(random.randint(0, 9)) for _ in range(74)]
+            [str(random.randint(0, 9)) for _ in range(74)]  # nosec
         )
         self.params.topics = [
             "business",
@@ -225,7 +231,6 @@ class MarketProposalBehaviourMock:
         # only get articles from top headlines
         url = f"{self.params.newsapi_endpoint}/{TOP_HEADLINES}"
         response = requests.get(
-            # method="GET",
             url=url,
             headers=headers,
             params=parameters,
@@ -307,6 +312,8 @@ class MarketProposalBehaviourMock:
 
 
 def main() -> None:
+    """Main method"""
+
     mp_behaviour = MarketProposalBehaviourMock()
     mp_behaviour._gather_data()
     news_articles = mp_behaviour.synchronized_data.gathered_data

@@ -21,10 +21,10 @@
 
 import json
 import time
-from datetime import timedelta
 from collections import defaultdict
-from typing import Any, Dict, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import timedelta
+from typing import Any, Dict, List
 
 import requests
 from gql import Client, gql
@@ -103,7 +103,9 @@ def _populate_missing_delivers(mech_requests: Dict[str, Any]) -> None:
     client = Client(transport=transport, fetch_schema_from_transport=True)
 
     NUM_REQUESTS_PER_QUERY = 100
-    pending_mech_requests = {k: req for k, req in mech_requests.items() if "deliver" not in req}
+    pending_mech_requests = {
+        k: req for k, req in mech_requests.items() if "deliver" not in req
+    }
 
     progress_bar = tqdm(
         total=len(pending_mech_requests),
@@ -112,18 +114,16 @@ def _populate_missing_delivers(mech_requests: Dict[str, Any]) -> None:
     )
 
     while pending_mech_requests:
-
         picked_requests = list(pending_mech_requests.values())[:NUM_REQUESTS_PER_QUERY]
 
         for mech_request in picked_requests:
             del pending_mech_requests[mech_request["id"]]
 
-        requestsId_in = [mech_request['requestId'] for mech_request in picked_requests]
+        requestsId_in = [mech_request["requestId"] for mech_request in picked_requests]
 
         mech_delivers = []
         id_gt = "0x00"
         while True:
-
             variables = {
                 "requestId_in": requestsId_in,
                 "id_gt": id_gt,
@@ -146,10 +146,9 @@ def _populate_missing_delivers(mech_requests: Dict[str, Any]) -> None:
         # smallest blockNumber such that >= request's blockNumber
         for mech_request in picked_requests:
             for deliver in mech_delivers:
-                if (
-                    deliver["requestId"] == mech_request["requestId"]
-                    and int(deliver["blockNumber"]) >= int(mech_request["blockNumber"])
-                ):
+                if deliver["requestId"] == mech_request["requestId"] and int(
+                    deliver["blockNumber"]
+                ) >= int(mech_request["blockNumber"]):
                     mech_request["deliver"] = deliver
                     break
 
@@ -166,7 +165,6 @@ def _populate_event_ipfs_contents(event: Dict[str, Any], url: str) -> None:
 
 
 def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
-
     error_count = 0
 
     # Collect all pending events
@@ -192,7 +190,12 @@ def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
             for event, url in pending_events
         ]
 
-        for future in tqdm(as_completed(futures), total=len(futures), desc=f"{'Fetching IPFS contents':>{TEXT_ALIGNMENT}}", miniters=1):
+        for future in tqdm(
+            as_completed(futures),
+            total=len(futures),
+            desc=f"{'Fetching IPFS contents':>{TEXT_ALIGNMENT}}",
+            miniters=1,
+        ):
             try:
                 future.result()
                 _write_mech_events_to_file(mech_requests)
@@ -270,7 +273,9 @@ def _write_mech_events_to_file(
         last_write_time = now
 
 
-def get_mech_requests(sender: str, json_path: str = MECH_REQUESTS_JSON_PATH) -> Dict[str, Any]:
+def get_mech_requests(
+    sender: str, json_path: str = MECH_REQUESTS_JSON_PATH
+) -> Dict[str, Any]:
     """Get Mech requests populated with the associated response and IPFS contents."""
     start_time = time.time()
 
