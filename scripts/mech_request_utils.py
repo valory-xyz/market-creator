@@ -35,7 +35,7 @@ from tqdm import tqdm
 TEXT_ALIGNMENT = 30
 MINIMUM_WRITE_FILE_DELAY_SECONDS = 20
 MECH_FROM_BLOCK_RANGE = 50000
-MECH_REQUESTS_JSON_PATH = "mech_requests.json"
+DEFAULT_MECH_REQUESTS_JSON_PATH = "mech_requests.json"
 IPFS_ADDRESS = "https://gateway.autonolas.tech/ipfs/"
 THEGRAPH_ENDPOINT = "https://api.studio.thegraph.com/query/57238/mech/0.0.2"
 THREAD_POOL_EXECUTOR_MAX_WORKERS = 10
@@ -249,7 +249,7 @@ def _process_duplicate_delivers(mech_requests: Dict[str, Any]) -> None:
 
 
 last_write_time = 0.0
-mech_events_json_path = MECH_REQUESTS_JSON_PATH
+mech_events_json_path = DEFAULT_MECH_REQUESTS_JSON_PATH
 
 
 def _write_mech_events_to_file(
@@ -274,7 +274,7 @@ def _write_mech_events_to_file(
 
 
 def get_mech_requests(
-    sender: str, json_path: str = MECH_REQUESTS_JSON_PATH
+    sender: str, json_path: str = DEFAULT_MECH_REQUESTS_JSON_PATH
 ) -> Dict[str, Any]:
     """Get Mech requests populated with the associated response and IPFS contents."""
     start_time = time.time()

@@ -111,20 +111,20 @@ class OpenAIClientManager:
 
     def __enter__(self) -> OpenAI:
         """__enter__"""
-        global client
+        global client  # pylint: disable=global-statement
         if client is None:
             client = OpenAI(api_key=self.api_key)
         return client
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         """__exit__"""
-        global client
+        global client  # pylint: disable=global-statement
         if client is not None:
             client.close()
             client = None
 
 
-class Context:
+class Context:  # pylint: disable=too-few-public-methods
     """Mock class Context"""
 
     def __init__(self):
@@ -142,15 +142,15 @@ class Context:
         self.logger.addHandler(console_handler)
 
 
-class Params:
+class Params:  # pylint: disable=too-few-public-methods
     """Mock class Params"""
 
 
-class SynchronizedData:
+class SynchronizedData:  # pylint: disable=too-few-public-methods
     """Mock class SynchronizedData"""
 
 
-class DataGatheringRound:
+class DataGatheringRound:  # pylint: disable=too-few-public-methods
     """Mock class DataGatheringRound"""
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
@@ -159,7 +159,7 @@ class DataGatheringRound:
     SKIP_MARKET_PROPOSAL_PAYLOAD = "SKIP_MARKET_PROPOSAL_PAYLOAD"
 
 
-class MarketProposalBehaviourMock:
+class MarketProposalBehaviourMock:  # pylint: disable=too-few-public-methods
     """Mock class MarketProposalBehaviourMock"""
 
     params = Params()
@@ -212,6 +212,7 @@ class MarketProposalBehaviourMock:
             "techradar",
         ]
         self.params.newsapi_api_key = os.getenv("NEWSAPI_API_KEY")
+        self.synchronized_data.gathered_data = None
 
     def _gather_data(self) -> str:
         """Auxiliary method to collect data from endpoint."""
@@ -276,7 +277,7 @@ class MarketProposalBehaviourMock:
             )
         )
 
-    def _get_response(self, prompt_template: str, prompt_values: Dict[str, str]):
+    def _get_response(self, prompt_template: str, prompt_values: Dict[str, str]):  # pylint: disable=no-self-use
         """Get response from openai."""
 
         # Format the prompt using input variables and prompt_values
@@ -315,11 +316,11 @@ def main() -> None:
     """Main method"""
 
     mp_behaviour = MarketProposalBehaviourMock()
-    mp_behaviour._gather_data()
+    mp_behaviour._gather_data()  # pylint: disable=protected-access
     news_articles = mp_behaviour.synchronized_data.gathered_data
     k = min(40, len(news_articles))
     selected_news_articles = random.sample(news_articles, k)
-    mp_behaviour._get_llm_response("30 July 2024", selected_news_articles)
+    mp_behaviour._get_llm_response("30 July 2024", selected_news_articles)  # pylint: disable=protected-access
 
 
 if __name__ == "__main__":
