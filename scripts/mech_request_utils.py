@@ -199,7 +199,7 @@ def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
             try:
                 future.result()
                 _write_mech_events_to_file(mech_requests)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 error_count += 1
                 print(f"Error occurred: {e}")
 
