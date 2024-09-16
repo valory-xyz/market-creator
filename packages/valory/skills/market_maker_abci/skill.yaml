@@ -13,7 +13,7 @@ fingerprint:
   composition.py: bafybeibags3bapzxlvsbjsxhlyxpd6ypnvwggu6jijktm4qfe4sn5ugfky
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeicsotlxzvvpw2jk7assimkvrsgtogfvlirkmpg2rxqseg3j6qqbem
-  handlers.py: bafybeidlgouig5odju36dkjl5vdqx6mqrukaoyn2chnl5dv2ca6owqlecm
+  handlers.py: bafybeig2srdonivh5nyiwxs7jr3n5ihtro22m6pp3bzi3ves6xtaaqa3ai
   models.py: bafybeigyrb6tcpebn7gecgnkcerqmbembat4xdg2wvfybwg6op3rsee2sq
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
 fingerprint_ignore_patterns: []
@@ -24,7 +24,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
-- valory/market_creation_manager_abci:0.1.0:bafybeigopmjddoomz57pkeafpjvssvvbemgtl6zitjvvjgj2y2dbyazf5e
+- valory/market_creation_manager_abci:0.1.0:bafybeie6623xr5okk7e5xgpy5v4sxwetqhetsetrjb7zku5petdhnvsqay
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
 - valory/mech_interact_abci:0.1.0:bafybeieryw7rk2tspyxx46loqqqimr2l5vvhtshiyg2mmdxijzb7pdoi6a
