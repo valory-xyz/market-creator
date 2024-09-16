@@ -29,6 +29,9 @@ from urllib.parse import urlparse
 from aea.configurations.data_types import PublicId
 from aea.protocols.base import Message
 
+from packages.valory.connections.http_server.connection import (
+    PUBLIC_ID as HTTP_SERVER_PUBLIC_ID,
+)
 from packages.valory.protocols.http import HttpMessage
 from packages.valory.protocols.llm import LlmMessage
 from packages.valory.skills.abstract_round_abci.handlers import (

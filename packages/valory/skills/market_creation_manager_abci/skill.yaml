@@ -13,7 +13,7 @@ fingerprint:
   behaviours.py: bafybeibaeqww3qnhiqck3pi7t276azxv7jt4tzscex25onaoobtrakqnoi
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiebwzp5jirrwo475r2hzwrirx45jlxtp5duo4275phypqfkueybtq
-  handlers.py: bafybeibxiuiviykaf3m2ehm7vddb6ymdkekjmq7h4gizfni4f4zvk5gj7a
+  handlers.py: bafybeieqlhdlqv426zt5ji7ckyygachagoql5peacindgqq5oc336lixjq
   models.py: bafybeicfdblqzyj6ex3qvjmbejjdt6qwecblfsgjdrfj7rydqgo6h7xasm
   payloads.py: bafybeibu7sptf43adazxpyzwtfpph7bgfhtwiotg5sdlcwjt6iw3idqn7a
   rounds.py: bafybeifnezj3cw323fj5xnieuucfqarznzlpesaj75huylfkpeyuunqkvy
@@ -21,6 +21,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections:
 - valory/openai:0.1.0:bafybeigyehjbahya5mp7vyp5tjvn36rey4btvzskp3ql3mgxp3zu6gwq5a
+- valory/http_server:0.22.0:bafybeihpgu56ovmq4npazdbh6y6ru5i7zuv6wvdglpxavsckyih56smu7m
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeidcb25wneezfd2iaiqa7ygxlimwwacvycahhenvpw7tdvwdigllzm
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
@@ -64,6 +65,9 @@ handlers:
   llm:
     args: {}
     class_name: LlmHandler
+  http:
+    args: {}
+    class_name: HttpHandler
 models:
   abci_dialogues:
     args: {}
