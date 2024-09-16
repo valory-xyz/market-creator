@@ -27,7 +27,9 @@ from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 from aea.configurations.data_types import PublicId
+from aea.protocols.base import Message
 
+from packages.valory.protocols.http import HttpMessage
 from packages.valory.protocols.llm import LlmMessage
 from packages.valory.skills.abstract_round_abci.handlers import (
     ABCIRoundHandler as BaseABCIRoundHandler,
@@ -35,6 +37,9 @@ from packages.valory.skills.abstract_round_abci.handlers import (
 from packages.valory.skills.abstract_round_abci.handlers import AbstractResponseHandler
 from packages.valory.skills.abstract_round_abci.handlers import (
     ContractApiHandler as BaseContractApiHandler,
+)
+from packages.valory.skills.abstract_round_abci.handlers import (
+    HttpHandler as BaseHttpHandler,
 )
 from packages.valory.skills.abstract_round_abci.handlers import (
     IpfsHandler as BaseIpfsHandler,
@@ -48,6 +53,12 @@ from packages.valory.skills.abstract_round_abci.handlers import (
 from packages.valory.skills.abstract_round_abci.handlers import (
     TendermintHandler as BaseTendermintHandler,
 )
+from packages.valory.skills.market_creation_manager_abci.dialogues import (
+    HttpDialogue,
+    HttpDialogues,
+)
+from packages.valory.skills.market_creation_manager_abci.models import SharedState
+from packages.valory.skills.market_creation_manager_abci.rounds import SynchronizedData
 
 
 ABCIHandler = BaseABCIRoundHandler
@@ -115,7 +126,6 @@ class HttpHandler(BaseHttpHandler):
             (HttpMethod.POST.value,): [],
             (HttpMethod.GET.value, HttpMethod.HEAD.value): [
                 (health_url_regex, self._handle_get_health),
-                (self.handler_url_regex, self._get_data),
             ],
         }
 
@@ -256,40 +266,6 @@ class HttpHandler(BaseHttpHandler):
         self.context.logger.info("Responding with: {}".format(http_response))
         self.context.outbox.put_message(message=http_response)
 
-    def _send_not_ready_response(
-        self, http_msg: HttpMessage, http_dialogue: HttpDialogue
-    ) -> None:
-        """Send an not ready response"""
-        http_response = http_dialogue.reply(
-            performative=HttpMessage.Performative.RESPONSE,
-            target_message=http_msg,
-            version=http_msg.version,
-            status_code=HttpCode.NOT_READY.value,
-            status_text="Data not ready",
-            headers=http_msg.headers,
-            body=b"Data not ready",
-        )
-        # Send response
-        self.context.logger.info("Responding with: {}".format(http_response))
-        self.context.outbox.put_message(message=http_response)
-
-    def _send_not_found_response(
-        self, http_msg: HttpMessage, http_dialogue: HttpDialogue
-    ) -> None:
-        """Send an not found response"""
-        http_response = http_dialogue.reply(
-            performative=HttpMessage.Performative.RESPONSE,
-            target_message=http_msg,
-            version=http_msg.version,
-            status_code=HttpCode.NOT_FOUND_CODE.value,
-            status_text="Not found",
-            headers=http_msg.headers,
-            body=b"",
-        )
-        # Send response
-        self.context.logger.info("Responding with: {}".format(http_response))
-        self.context.outbox.put_message(message=http_response)
-
     def _handle_get_health(
         self, http_msg: HttpMessage, http_dialogue: HttpDialogue
     ) -> None:
@@ -339,16 +315,4 @@ class HttpHandler(BaseHttpHandler):
             "is_transitioning_fast": is_transitioning_fast,
         }
 
-        self._send_ok_response(http_msg, http_dialogue, data)
-
-    def _get_data(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
-        """Get data and status code for response."""
-        if not self.synchronized_data.data_json:
-            self._send_not_ready_response(http_msg, http_dialogue)
-            return
-
-        data = {
-            "payload": self.synchronized_data.data_json,
-            "signatures": self.synchronized_data.participant_to_signatures,
-        }
         self._send_ok_response(http_msg, http_dialogue, data)
