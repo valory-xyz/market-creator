@@ -277,7 +277,9 @@ class MarketProposalBehaviourMock:  # pylint: disable=too-few-public-methods
             )
         )
 
-    def _get_response(self, prompt_template: str, prompt_values: Dict[str, str]):  # pylint: disable=no-self-use
+    def _get_response(
+        self, prompt_template: str, prompt_values: Dict[str, str]
+    ):  # pylint: disable=no-self-use
         """Get response from openai."""
 
         # Format the prompt using input variables and prompt_values
@@ -320,7 +322,9 @@ def main() -> None:
     news_articles = mp_behaviour.synchronized_data.gathered_data
     k = min(40, len(news_articles))
     selected_news_articles = random.sample(news_articles, k)
-    mp_behaviour._get_llm_response("30 July 2024", selected_news_articles)  # pylint: disable=protected-access
+    mp_behaviour._get_llm_response(
+        "30 July 2024", selected_news_articles
+    )  # pylint: disable=protected-access
 
 
 if __name__ == "__main__":
