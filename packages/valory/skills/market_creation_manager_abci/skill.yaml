@@ -224,6 +224,7 @@ models:
       - 259200
       - 604800
       - 1209600
+      service_endpoint_base: https://dummy_service.autonolas.tech/
     class_name: MarketCreationManagerParams
   randomness_api:
     args:

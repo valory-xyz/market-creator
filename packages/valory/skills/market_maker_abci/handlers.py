@@ -25,9 +25,6 @@ from packages.valory.skills.abstract_round_abci.handlers import (
     ContractApiHandler as BaseContractApiHandler,
 )
 from packages.valory.skills.abstract_round_abci.handlers import (
-    HttpHandler as BaseHttpHandler,
-)
-from packages.valory.skills.abstract_round_abci.handlers import (
     IpfsHandler as BaseIpfsHandler,
 )
 from packages.valory.skills.abstract_round_abci.handlers import (
@@ -38,6 +35,9 @@ from packages.valory.skills.abstract_round_abci.handlers import (
 )
 from packages.valory.skills.abstract_round_abci.handlers import (
     TendermintHandler as BaseTendermintHandler,
+)
+from packages.valory.skills.market_creation_manager_abci.handlers import (
+    HttpHandler as BaseHttpHandler,
 )
 from packages.valory.skills.market_creation_manager_abci.handlers import (
     LlmHandler as BaseLlmHandler,
