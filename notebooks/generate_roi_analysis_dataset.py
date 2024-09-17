@@ -21,6 +21,7 @@
 """Generates dataset for trader analysis"""
 
 # pylint: disable=wrong-import-position
+# noqa: E402
 
 import argparse
 import bisect
