@@ -18,9 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-Generates dataset for ROI analysis
-"""
+"""Generates dataset for trader analysis"""
 
 # pylint: disable=wrong-import-position
 
@@ -122,13 +120,13 @@ def _populate_mech_requests(
                 found = True
                 if i != idx:
                     print(
-                        f"WARNING: '{trade['title']}' was not found at idx={idx}, used idx={i} instead."
+                        f"WARNING: {trade['title']} was not found at idx={idx}, used idx={i} instead."
                     )
                 break
 
         if not found:
             print(
-                f"ERROR: '{trade['title']}' is not found in any mech request up to {N} indices before idx={idx}."
+                f"ERROR: {trade['title']} is not found in any mech request up to {N} indices before idx={idx}."
             )
             print(f"{trade['id']=}")
 
@@ -175,13 +173,9 @@ def generate_dataset(service_id: int) -> (Dict[str, Any], Dict[str, Any], List[s
 
     mech_requests = get_mech_requests(service_safe_address, dataset_json)
 
-    fpmm_trades = trades._query_omen_xdai_subgraph(
+    fpmm_trades = trades._query_omen_xdai_subgraph(  # pylint: disable=protected-access
         service_safe_address.lower()
-    )[  # pylint: disable=protected-access
-        "data"
-    ][
-        "fpmmTrades"
-    ]
+    )["data"]["fpmmTrades"]
     outstanding_mech_request_ids = _populate_mech_requests(fpmm_trades, mech_requests)
     _populate_market_states(fpmm_trades)
 
