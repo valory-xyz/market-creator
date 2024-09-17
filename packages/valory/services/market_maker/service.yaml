@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeih4jazyeuw7w3npc36eujvkrdc4yk5yt33iep2jhj6rjzmpgyjj6e
+agent: valory/market_maker:0.1.0:bafybeibbnx4azoeyuh2zsd6ebxvv2k2y3yvmuhfl4776p5pz4tzjb5uyuu
 number_of_agents: 1
 deployment:
   agent:
@@ -106,6 +106,7 @@ models:
       google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
+      service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
   randomness_api:
     args:
       method: ${RANDOMNESS_API_METHOD:str:GET}

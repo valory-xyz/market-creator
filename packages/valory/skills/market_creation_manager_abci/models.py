@@ -166,6 +166,7 @@ class MarketCreationManagerParams(BaseParams):
         self.answer_retry_intervals = self._ensure(
             key="answer_retry_intervals", kwargs=kwargs, type_=List[int]
         )
+        self.service_endpoint_base = self._ensure("service_endpoint_base", kwargs, str)
         super().__init__(*args, **kwargs)
 
 

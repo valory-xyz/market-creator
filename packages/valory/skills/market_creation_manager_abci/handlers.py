@@ -19,6 +19,7 @@
 
 """This module contains the handlers for the skill of MarketCreationManagerAbciApp."""
 
+
 from typing import Optional
 
 from aea.configurations.data_types import PublicId
