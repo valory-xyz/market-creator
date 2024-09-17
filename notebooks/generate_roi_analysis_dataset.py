@@ -20,7 +20,7 @@
 
 """Generates dataset for trader analysis"""
 
-# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-position,protected-access
 # noqa: E402
 
 import argparse
@@ -110,7 +110,14 @@ def _populate_mech_requests(
             print("ERROR: idx < 0")
             continue
 
-        N = 3  # Adjust N to the number of indices you want to check
+        # Almost always, the corresponding mech request should be the mech
+        # request immediately before the trade 'creationTimestamp', which is
+        # at position 'idx'. Under some exceptional circumstances, it might
+        # be a few positions before (e.g., if the trader was crashed and
+        # the mech responded 2 requests on the same block). For this reason,
+        # this part of the code searches up to N mech requests before the
+        # expected one.
+        N = 3
         for i in range(idx, max(0, idx - N), -1):
             mech_request = sorted_mech_requests[i]
             mech_request_id = mech_request["id"]
@@ -139,7 +146,7 @@ def _populate_market_states(fpmm_trades: Dict[str, Any]) -> None:
 
     for trade in fpmm_trades:
         fpmm = trade["fpmm"]
-        state = trades._get_market_state(fpmm)  # pylint: disable=protected-access
+        state = trades._get_market_state(fpmm)
         fpmm["state"] = state.value
 
         if state == MarketState.CLOSED:
@@ -174,9 +181,9 @@ def generate_dataset(service_id: int) -> (Dict[str, Any], Dict[str, Any], List[s
 
     mech_requests = get_mech_requests(service_safe_address, dataset_json)
 
-    fpmm_trades = trades._query_omen_xdai_subgraph(  # pylint: disable=protected-access
-        service_safe_address.lower()
-    )["data"]["fpmmTrades"]
+    fpmm_trades = trades._query_omen_xdai_subgraph(service_safe_address.lower())[
+        "data"
+    ]["fpmmTrades"]
     outstanding_mech_request_ids = _populate_mech_requests(fpmm_trades, mech_requests)
     _populate_market_states(fpmm_trades)
 
