@@ -21,7 +21,6 @@
 """Generates dataset for trader analysis"""
 
 # pylint: disable=wrong-import-position,protected-access
-# noqa: E402
 
 import argparse
 import bisect
@@ -46,9 +45,9 @@ sys.path.insert(0, "../scripts")
 sys.path.insert(0, os.path.expanduser(trader_quickstart_path))
 sys.path.insert(0, os.path.expanduser(f"{trader_quickstart_path}/scripts"))
 
-import trades
-from mech_request_utils import get_mech_requests
-from trades import INVALID_ANSWER, MarketState, TradeResult
+import trades  # noqa: E402
+from mech_request_utils import get_mech_requests  # noqa: E402
+from trades import INVALID_ANSWER, MarketState, TradeResult  # noqa: E402
 
 
 RPC = env_file_vars.get("RPC")
