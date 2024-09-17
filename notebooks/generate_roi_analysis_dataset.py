@@ -52,6 +52,7 @@ from trades import INVALID_ANSWER, MarketState, TradeResult
 
 RPC = env_file_vars.get("RPC")
 SERVICE_REGISTRY_ADDRESS = "0x9338b5153AE39BB89f50468E608eD9d764B755fD"
+DATASET_PREFIX = "roi_analysis_dataset_"
 
 
 def _get_contract(address: str) -> Any:
@@ -162,7 +163,7 @@ def get_service_safe(service_id: int) -> str:
 
 def generate_dataset(service_id: int) -> (Dict[str, Any], Dict[str, Any], List[str]):
     """Generates the dataset"""
-    dataset_json = f"dataset_{service_id}.json"
+    dataset_json = f"{DATASET_PREFIX}{service_id}.json"
 
     service_safe_address = get_service_safe(service_id)
 
