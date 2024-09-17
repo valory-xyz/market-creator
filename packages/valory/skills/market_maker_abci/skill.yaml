@@ -271,5 +271,5 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.14.12
+    version: ==0.15.2
 is_abstract: false
