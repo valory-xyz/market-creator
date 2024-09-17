@@ -36,19 +36,21 @@ import requests
 from dotenv import dotenv_values
 from web3 import Web3
 
+
 SCRIPT_PATH = Path(__file__).resolve().parent
 DOTENV_PATH = Path(SCRIPT_PATH, ".env")
 
 env_file_vars = dotenv_values(DOTENV_PATH)
 trader_quickstart_path = env_file_vars.get("TRADER_QUICKSTART_PATH")
 
-sys.path.insert(0, '../scripts')
+sys.path.insert(0, "../scripts")
 sys.path.insert(0, os.path.expanduser(trader_quickstart_path))
 sys.path.insert(0, os.path.expanduser(f"{trader_quickstart_path}/scripts"))
 
 import trades
 from mech_request_utils import get_mech_requests
 from trades import INVALID_ANSWER, MarketState, TradeResult
+
 
 RPC = env_file_vars.get("RPC")
 SERVICE_REGISTRY_ADDRESS = "0x9338b5153AE39BB89f50468E608eD9d764B755fD"
@@ -173,9 +175,13 @@ def generate_dataset(service_id: int) -> (Dict[str, Any], Dict[str, Any], List[s
 
     mech_requests = get_mech_requests(service_safe_address, dataset_json)
 
-    fpmm_trades = trades._query_omen_xdai_subgraph(service_safe_address.lower())[  # pylint: disable=protected-access
+    fpmm_trades = trades._query_omen_xdai_subgraph(
+        service_safe_address.lower()
+    )[  # pylint: disable=protected-access
         "data"
-    ]["fpmmTrades"]
+    ][
+        "fpmmTrades"
+    ]
     outstanding_mech_request_ids = _populate_mech_requests(fpmm_trades, mech_requests)
     _populate_market_states(fpmm_trades)
 
