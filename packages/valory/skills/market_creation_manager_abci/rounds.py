@@ -934,7 +934,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: PostTransactionRound,
             Event.DEPOSIT_DAI_DONE: GetPendingQuestionsRound,
             Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
-            Event.ANSWER_QUESTION_DONE: GetPendingQuestionsRound,
+            Event.ANSWER_QUESTION_DONE: CollectRandomnessRound,
             Event.REDEEM_BOND_DONE: CollectProposedMarketsRound,
             Event.REMOVE_FUNDING_DONE: DepositDaiRound,
         },

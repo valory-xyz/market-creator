@@ -516,7 +516,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 int(entry["creationTimestamp"])
                 for entry in latest_open_markets.get("fixedProductMarketMakers", {})
             ]
-            largest_creation_timestamp = max(creation_timestamps)
+            largest_creation_timestamp = max(creation_timestamps, default=0)
             self.context.logger.info(
                 f"largest_creation_timestamp={largest_creation_timestamp}"
             )
@@ -565,7 +565,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             else:
                 self.context.logger.info("Timeout to approve markets reached.")
 
-                min_timestamp_to_approve = min(
+                max_timestamp_to_approve = max(
                     (
                         ts
                         for ts, value in required_markets_to_approve.items()
@@ -576,8 +576,8 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
                 # On the market approval server, resolution_time is one day less than openingTimestamp
                 proposed_markets = yield from self._collect_latest_proposed_markets(
-                    min_timestamp_to_approve - _ONE_DAY,
-                    min_timestamp_to_approve,
+                    max_timestamp_to_approve - _ONE_DAY,
+                    max_timestamp_to_approve,
                 )
 
                 proposed_markets_timestamps: Dict[int, int] = defaultdict(int)
@@ -592,7 +592,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 content_data.update(latest_open_markets)
                 content_data.update(proposed_markets)
                 content_data["num_markets_to_approve"] = required_markets_to_approve[
-                    min_timestamp_to_approve
+                    max_timestamp_to_approve
                 ]
                 content_data["timestamp"] = current_timestamp
                 content = json.dumps(content_data, sort_keys=True)
@@ -659,7 +659,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         self, openingTimestamp_gte: int, openingTimestamp_lte: int
     ) -> Generator[None, None, Dict[str, Any]]:
         """Collect FPMM from subgraph."""
-        creator = self.params.approve_market_creator
+        creator = self.synchronized_data.safe_contract_address.lower()
         response = yield from self.get_subgraph_result(
             query=FPMM_QUERY.substitute(
                 creator=creator,
@@ -1132,10 +1132,9 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def get_markets(self) -> Generator[None, None, Tuple[List[Dict[str, Any]], int]]:
         """Collect FMPMM from subgraph."""
+        creator = self.synchronized_data.safe_contract_address.lower()
         response = yield from self.get_subgraph_result(
-            query=FPMM_POOL_MEMBERSHIPS_QUERY.substitute(
-                creator=self.synchronized_data.safe_contract_address.lower(),
-            )
+            query=FPMM_POOL_MEMBERSHIPS_QUERY.substitute(creator=creator)
         )
         if response is None:
             return [], 0
@@ -1749,9 +1748,10 @@ class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
         self, proposed_market_data: Dict[str, str]
     ) -> Generator[None, None, str]:
         """Auxiliary method to propose a market to the endpoint."""
-        self.context.logger.info(f"Proposing market {proposed_market_data}")
 
         url = self.params.market_approval_server_url + "/propose_market"
+        self.context.logger.info(f"Proposing market {proposed_market_data} on {url}")
+
         headers = {
             "Authorization": self.params.market_approval_server_api_key,
             "Content-Type": "application/json",
@@ -1932,7 +1932,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         return {
             "to": self.params.realitio_contract,
             "data": response.state.body["data"],
-            "value": ETHER_VALUE,
+            "value": self.params.realitio_answer_question_bounty,
         }
 
     def _prepare_prepare_condition_mstx(
@@ -2369,7 +2369,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         max_num_questions = min(
             len(eligible_questions_id), self.params.questions_to_close_batch_size
         )
-        bond_required = self.params.close_question_bond * max_num_questions
+        bond_required = self.params.realitio_answer_question_bond * max_num_questions
 
         # TODO uncomment
         if balance < bond_required:
@@ -2398,7 +2398,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
                 asdict(
                     MechMetadata(
                         nonce=question_id,
-                        tool="resolve-market-reasoning-gpt-4",
+                        tool=self.params.mech_tool_resolve_market,
                         prompt=question["title"],
                     )
                 )
@@ -2561,7 +2561,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         data = cast(bytes, response.state.body["data"])
         return {
             "to": self.params.realitio_contract,
-            "value": self.params.close_question_bond,
+            "value": self.params.realitio_answer_question_bond,
             "data": data,
         }
 

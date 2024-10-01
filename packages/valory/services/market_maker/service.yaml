@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeie4xnbsq32waqc5scvhgyg5nttalo7klfijf53bwaxo5u44nrqlbq
+agent: valory/market_maker:0.1.0:bafybeibbnx4azoeyuh2zsd6ebxvv2k2y3yvmuhfl4776p5pz4tzjb5uyuu
 number_of_agents: 1
 deployment:
   agent:
@@ -47,7 +47,6 @@ models:
       markets_to_approve_per_day: ${MARKETS_TO_APPROVE_PER_DAY:int:10}
       min_approve_markets_epoch_seconds: ${MIN_APPROVE_MARKETS_EPOCH_SECONDS:int:43200}
       approve_market_event_days_offset: ${APPROVE_MARKET_EVENT_DAYS_OFFSET:int:5}
-      approve_market_creator: ${APPROVE_MARKET_CREATOR:str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}
       market_approval_server_url: ${MARKET_APPROVAL_SERVER_URL:str:http://127.0.0.1:5000}
       market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2}
@@ -71,6 +70,7 @@ models:
       multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:1}
       ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
       mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x77af31de935740567cf4ff1986d04b2c964a786a}
+      mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4}
       answer_retry_intervals: ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
         1209600]}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
@@ -87,7 +87,8 @@ models:
       tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
       tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
       tendermint_max_retries: ${TENDERMINT_MAX_RETRIES:int:5}
-      close_question_bond: ${CLOSE_QUESTION_BOND:int:1000000000000000}
+      realitio_answer_question_bond: ${REALITIO_ANSWER_QUESTION_BOND:int:1000000000000000}
+      realitio_answer_question_bounty: ${REALITIO_ANSWER_QUESTION_BOUNTY:int:0}
       questions_to_close_batch_size: ${QUESTIONS_TO_CLOSE_BATCH_SIZE:int:1}
       tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
       tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
@@ -102,10 +103,10 @@ models:
       slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
       light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
       serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
-      market_closing_newsapi_api_key: ${MARKET_CLOSING_NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
       google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
+      service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
   randomness_api:
     args:
       method: ${RANDOMNESS_API_METHOD:str:GET}

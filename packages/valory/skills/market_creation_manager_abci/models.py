@@ -94,19 +94,17 @@ class MarketCreationManagerParams(BaseParams):
         self.questions_to_close_batch_size = self._ensure(
             "questions_to_close_batch_size", kwargs, type_=int
         )
-        self.close_question_bond = self._ensure(
-            "close_question_bond", kwargs, type_=int
+        self.realitio_answer_question_bond = self._ensure(
+            "realitio_answer_question_bond", kwargs, type_=int
+        )
+        self.realitio_answer_question_bounty = self._ensure(
+            "realitio_answer_question_bounty", kwargs, type_=int
         )
         self.min_approve_markets_epoch_seconds = self._ensure(
             "min_approve_markets_epoch_seconds", kwargs, type_=int
         )
         self.approve_market_event_days_offset = self._ensure(
             "approve_market_event_days_offset", kwargs, type_=int
-        )
-        self.approve_market_creator = self._ensure(
-            key="approve_market_creator",
-            kwargs=kwargs,
-            type_=str,
         )
         self.realitio_contract = self._ensure(
             key="realitio_contract",
@@ -138,6 +136,11 @@ class MarketCreationManagerParams(BaseParams):
             kwargs=kwargs,
             type_=str,
         )
+        self.mech_tool_resolve_market = self._ensure(
+            key="mech_tool_resolve_market",
+            kwargs=kwargs,
+            type_=str,
+        )
         self.market_fee = self._ensure("market_fee", kwargs, type_=float)
         self.market_timeout = self._ensure("market_timeout", kwargs, type_=int)
         self.event_offset_start_days = self._ensure(
@@ -152,9 +155,6 @@ class MarketCreationManagerParams(BaseParams):
         self.market_proposal_round_timeout_seconds_per_day = self._ensure(
             "market_proposal_round_timeout_seconds_per_day", kwargs, type_=int
         )
-        self.market_closing_newsapi_api_key = self._ensure(
-            "market_closing_newsapi_api_key", kwargs, type_=str
-        )
         self.google_api_key = self._ensure("google_api_key", kwargs, type_=str)
         self.google_engine_id = self._ensure("google_engine_id", kwargs, type_=str)
         self.openai_api_key = self._ensure("openai_api_key", kwargs, type_=str)
@@ -166,6 +166,7 @@ class MarketCreationManagerParams(BaseParams):
         self.answer_retry_intervals = self._ensure(
             key="answer_retry_intervals", kwargs=kwargs, type_=List[int]
         )
+        self.service_endpoint_base = self._ensure("service_endpoint_base", kwargs, str)
         super().__init__(*args, **kwargs)
 
 

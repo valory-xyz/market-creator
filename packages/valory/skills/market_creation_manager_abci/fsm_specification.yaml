@@ -99,7 +99,7 @@ transition_func:
     (MarketProposalRound, ERROR): RetrieveApprovedMarketRound
     (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
-    (PostTransactionRound, ANSWER_QUESTION_DONE): GetPendingQuestionsRound
+    (PostTransactionRound, ANSWER_QUESTION_DONE): CollectRandomnessRound
     (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
     (PostTransactionRound, DONE): RetrieveApprovedMarketRound
     (PostTransactionRound, ERROR): DepositDaiRound
