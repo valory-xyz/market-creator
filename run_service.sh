@@ -19,7 +19,7 @@ export MIN_MARKET_PROPOSAL_INTERVAL_SECONDS=1800
 export TOPICS='["business","science","technology","politics","arts","weather"]'
 export MARKET_FEE=2
 export INITIAL_FUNDS=1
-export MARKET_TIMEOUT=1
+export MARKET_TIMEOUT=3
 export MARKET_IDENTIFICATION_PROMPT=$(sed -e ':a' -e 'N' -e '$!ba' \
   -e 's/"/\\"/g' \
   -e "s/'/\\\'/g" \

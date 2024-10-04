@@ -122,7 +122,7 @@ models:
       - international
       market_fee: 2.0
       initial_funds: 1.0
-      market_timeout: 1
+      market_timeout: 3
       min_market_proposal_interval_seconds: 7200
       news_sources:
       - bbc-news

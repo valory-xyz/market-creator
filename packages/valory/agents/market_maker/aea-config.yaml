@@ -170,7 +170,7 @@ models:
       topics: ${list:["business","cryptocurrency","politics","science","technology","trending","fashion","social","health","sustainability","internet","travel","food","pets","animals","curiosities","music","economy","arts","entertainment","weather","sports","finance","international"]}
       market_fee: ${float:2.0}
       initial_funds: ${float:1.0}
-      market_timeout: ${int:1}
+      market_timeout: ${int:3}
       min_market_proposal_interval_seconds: ${int:7200}
       news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","google-news","reuters","usa-today","breitbart-news","the-verge","techradar"]}
       event_offset_start_days: ${int:4}
