@@ -4,9 +4,7 @@ alphabet_in:
 - DID_NOT_SEND
 - DONE
 - ERROR
-- MARKET_PROPOSAL_ROUND_TIMEOUT
 - MAX_APPROVED_MARKETS_REACHED
-- MAX_PROPOSED_MARKETS_REACHED
 - MAX_RETRIES_REACHED
 - MECH_REQUEST_DONE
 - NO_MAJORITY
@@ -16,7 +14,6 @@ alphabet_in:
 - REMOVE_FUNDING_DONE
 - ROUND_TIMEOUT
 - SKIP_MARKET_APPROVAL
-- SKIP_MARKET_PROPOSAL
 default_start_state: CollectRandomnessRound
 final_states:
 - FinishedMarketCreationManagerRound
@@ -40,7 +37,6 @@ states:
 - ApproveMarketsRound
 - CollectProposedMarketsRound
 - CollectRandomnessRound
-- DataGatheringRound
 - DepositDaiRound
 - FinishedMarketCreationManagerRound
 - FinishedWithAnswerQuestionsRound
@@ -51,7 +47,6 @@ states:
 - FinishedWithRemoveFundingRound
 - FinishedWithoutTxRound
 - GetPendingQuestionsRound
-- MarketProposalRound
 - PostTransactionRound
 - PrepareTransactionRound
 - RedeemBondRound
@@ -64,27 +59,20 @@ transition_func:
     (AnswerQuestionsRound, ERROR): CollectRandomnessRound
     (AnswerQuestionsRound, NO_MAJORITY): CollectRandomnessRound
     (AnswerQuestionsRound, NO_TX): CollectRandomnessRound
-    (ApproveMarketsRound, DONE): DataGatheringRound
-    (ApproveMarketsRound, ERROR): DataGatheringRound
-    (ApproveMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
-    (ApproveMarketsRound, ROUND_TIMEOUT): DataGatheringRound
+    (ApproveMarketsRound, DONE): RetrieveApprovedMarketRound
+    (ApproveMarketsRound, ERROR): RetrieveApprovedMarketRound
+    (ApproveMarketsRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
+    (ApproveMarketsRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, DONE): ApproveMarketsRound
-    (CollectProposedMarketsRound, ERROR): DataGatheringRound
-    (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
-    (CollectProposedMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
-    (CollectProposedMarketsRound, NO_MAJORITY): DataGatheringRound
-    (CollectProposedMarketsRound, ROUND_TIMEOUT): DataGatheringRound
-    (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): DataGatheringRound
+    (CollectProposedMarketsRound, ERROR): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, NO_MAJORITY): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): RetrieveApprovedMarketRound
     (CollectRandomnessRound, DONE): SelectKeeperRound
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
     (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (DataGatheringRound, DONE): MarketProposalRound
-    (DataGatheringRound, ERROR): RetrieveApprovedMarketRound
-    (DataGatheringRound, MAX_PROPOSED_MARKETS_REACHED): RetrieveApprovedMarketRound
-    (DataGatheringRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
-    (DataGatheringRound, NO_MAJORITY): RetrieveApprovedMarketRound
-    (DataGatheringRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
-    (DataGatheringRound, SKIP_MARKET_PROPOSAL): RetrieveApprovedMarketRound
     (DepositDaiRound, DONE): FinishedWithDepositDaiRound
     (DepositDaiRound, ERROR): GetPendingQuestionsRound
     (DepositDaiRound, NO_MAJORITY): GetPendingQuestionsRound
@@ -94,11 +82,6 @@ transition_func:
     (GetPendingQuestionsRound, NO_MAJORITY): CollectRandomnessRound
     (GetPendingQuestionsRound, NO_TX): CollectRandomnessRound
     (GetPendingQuestionsRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (MarketProposalRound, DID_NOT_SEND): RetrieveApprovedMarketRound
-    (MarketProposalRound, DONE): RetrieveApprovedMarketRound
-    (MarketProposalRound, ERROR): RetrieveApprovedMarketRound
-    (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
-    (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
     (PostTransactionRound, ANSWER_QUESTION_DONE): CollectRandomnessRound
     (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
     (PostTransactionRound, DONE): RetrieveApprovedMarketRound

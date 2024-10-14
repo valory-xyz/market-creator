@@ -40,10 +40,8 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     ApproveMarketsPayload,
     CollectProposedMarketsPayload,
     CollectRandomnessPayload,
-    DataGatheringPayload,
     DepositDaiPayload,
     GetPendingQuestionsPayload,
-    MarketProposalPayload,
     PostTxPayload,
     PrepareTransactionPayload,
     RedeemBondPayload,
@@ -559,66 +557,6 @@ class ApproveMarketsRound(OnlyKeeperSendsRound):
         return synced_data, event
 
 
-class DataGatheringRound(CollectSameUntilThresholdRound):
-    """DataGatheringRound"""
-
-    ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
-    MAX_PROPOSED_MARKETS_REACHED_PAYLOAD = "MAX_PROPOSED_MARKETS_REACHED_PAYLOAD"
-    SKIP_MARKET_PROPOSAL_PAYLOAD = "SKIP_MARKET_PROPOSAL_PAYLOAD"
-
-    payload_class = DataGatheringPayload
-    synchronized_data_class = SynchronizedData
-
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
-        """Process the end of the block."""
-
-        if self.threshold_reached:
-            if self.most_voted_payload == self.ERROR_PAYLOAD:
-                newsapi_api_retries = cast(
-                    SynchronizedData, self.synchronized_data
-                ).newsapi_api_retries
-                synchronized_data = self.synchronized_data.update(
-                    synchronized_data_class=SynchronizedData,
-                    **{
-                        get_name(
-                            SynchronizedData.newsapi_api_retries
-                        ): newsapi_api_retries
-                        + 1,
-                    },
-                )
-                return synchronized_data, Event.ERROR
-
-            if self.most_voted_payload == DataGatheringRound.MAX_RETRIES_PAYLOAD:
-                return self.synchronized_data, Event.MAX_RETRIES_REACHED
-
-            if (
-                self.most_voted_payload
-                == DataGatheringRound.MAX_PROPOSED_MARKETS_REACHED_PAYLOAD
-            ):
-                return self.synchronized_data, Event.MAX_PROPOSED_MARKETS_REACHED
-
-            if (
-                self.most_voted_payload
-                == DataGatheringRound.SKIP_MARKET_PROPOSAL_PAYLOAD
-            ):
-                return self.synchronized_data, Event.SKIP_MARKET_PROPOSAL
-
-            synchronized_data = self.synchronized_data.update(
-                synchronized_data_class=SynchronizedData,
-                **{
-                    get_name(SynchronizedData.gathered_data): self.most_voted_payload,
-                },
-            )
-            return synchronized_data, Event.DONE
-
-        if not self.is_majority_possible(
-            self.collection, self.synchronized_data.nb_participants
-        ):
-            return self.synchronized_data, Event.NO_MAJORITY
-        return None
-
-
 class SelectKeeperRound(CollectSameUntilThresholdRound):
     """A round in a which keeper is selected"""
 
@@ -628,59 +566,6 @@ class SelectKeeperRound(CollectSameUntilThresholdRound):
     no_majority_event = Event.NO_MAJORITY
     collection_key = get_name(SynchronizedData.participant_to_selection)
     selection_key = get_name(SynchronizedData.most_voted_keeper_address)
-
-
-class MarketProposalRound(OnlyKeeperSendsRound):
-    """MarketProposalRound"""
-
-    ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
-
-    payload_class = MarketProposalPayload
-    payload_attribute = "content"
-    synchronized_data_class = SynchronizedData
-    done_event = Event.DONE
-    no_majority_event = Event.NO_MAJORITY
-
-    def end_block(
-        self,
-    ) -> Optional[
-        Tuple[BaseSynchronizedData, Enum]
-    ]:  # pylint: disable=too-many-return-statements
-        """Process the end of the block."""
-        if self.keeper_payload is None:
-            return None
-
-        # Keeper did not send
-        if self.keeper_payload is None:  # pragma: no cover
-            return self.synchronized_data, Event.DID_NOT_SEND
-
-        # API error
-        if (
-            cast(MarketProposalPayload, self.keeper_payload).content
-            == self.ERROR_PAYLOAD
-        ):
-            return self.synchronized_data, Event.ERROR
-
-        # Happy path
-        proposed_markets_data = json.loads(
-            cast(MarketProposalPayload, self.keeper_payload).content
-        )  # there could be problems loading this from the LLM response
-
-        proposed_markets_count = len(proposed_markets_data.get("proposed_markets", []))
-
-        synchronized_data = self.synchronized_data.update(
-            synchronized_data_class=SynchronizedData,
-            **{
-                get_name(SynchronizedData.proposed_markets_data): proposed_markets_data,
-                get_name(SynchronizedData.proposed_markets_count): cast(
-                    SynchronizedData, self.synchronized_data
-                ).proposed_markets_count
-                + proposed_markets_count,
-            },
-        )
-
-        return synchronized_data, Event.DONE
 
 
 class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
@@ -735,7 +620,7 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
 
         # Happy path
         approved_question_data = json.loads(
-            cast(MarketProposalPayload, self.keeper_payload).content
+            cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
         )
 
         synchronized_data = self.synchronized_data.update(
@@ -969,33 +854,17 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         CollectProposedMarketsRound: {
             Event.DONE: ApproveMarketsRound,
-            Event.MAX_APPROVED_MARKETS_REACHED: DataGatheringRound,
-            Event.MAX_RETRIES_REACHED: DataGatheringRound,
-            Event.SKIP_MARKET_APPROVAL: DataGatheringRound,
-            Event.NO_MAJORITY: DataGatheringRound,
-            Event.ROUND_TIMEOUT: DataGatheringRound,
-            Event.ERROR: DataGatheringRound,
-        },
-        ApproveMarketsRound: {
-            Event.DONE: DataGatheringRound,
-            Event.ROUND_TIMEOUT: DataGatheringRound,
-            Event.MAX_RETRIES_REACHED: DataGatheringRound,
-            Event.ERROR: DataGatheringRound,
-        },
-        DataGatheringRound: {
-            Event.DONE: MarketProposalRound,
-            Event.MAX_PROPOSED_MARKETS_REACHED: RetrieveApprovedMarketRound,
+            Event.MAX_APPROVED_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
-            Event.SKIP_MARKET_PROPOSAL: RetrieveApprovedMarketRound,
-            Event.ERROR: RetrieveApprovedMarketRound,
+            Event.SKIP_MARKET_APPROVAL: RetrieveApprovedMarketRound,
             Event.NO_MAJORITY: RetrieveApprovedMarketRound,
             Event.ROUND_TIMEOUT: RetrieveApprovedMarketRound,
+            Event.ERROR: RetrieveApprovedMarketRound,
         },
-        MarketProposalRound: {
+        ApproveMarketsRound: {
             Event.DONE: RetrieveApprovedMarketRound,
-            Event.NO_MAJORITY: RetrieveApprovedMarketRound,
-            Event.MARKET_PROPOSAL_ROUND_TIMEOUT: RetrieveApprovedMarketRound,
-            Event.DID_NOT_SEND: RetrieveApprovedMarketRound,
+            Event.ROUND_TIMEOUT: RetrieveApprovedMarketRound,
+            Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
             Event.ERROR: RetrieveApprovedMarketRound,
         },
         RetrieveApprovedMarketRound: {

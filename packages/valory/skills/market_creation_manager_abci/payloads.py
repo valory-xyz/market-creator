@@ -34,24 +34,10 @@ class CollectRandomnessPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
-class DataGatheringPayload(BaseTxPayload):
-    """Represent a transaction payload for the DataGatheringRound."""
-
-    gathered_data: str
-
-
-@dataclass(frozen=True)
 class SelectKeeperPayload(BaseTxPayload):
     """Represent a transaction payload of type 'select_keeper'."""
 
     keeper: str
-
-
-@dataclass(frozen=True)
-class MarketProposalPayload(BaseTxPayload):
-    """Represent a transaction payload for the MarketProposalRound."""
-
-    content: str
 
 
 @dataclass(frozen=True)
