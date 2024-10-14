@@ -101,7 +101,8 @@ class MarketState(Enum):
     UNKNOWN = 6
 
 
-def _get_market_state(market: Dict[str, Any]) -> MarketState:
+def get_market_state(market: Dict[str, Any]) -> MarketState:
+    """Get market state"""
     try:
         now = datetime.utcnow()
 
@@ -143,7 +144,7 @@ def _populate_missing_fpmms(creator: str, fpmms: Dict[str, Any]) -> None:
             break
 
         for fpmm in items:
-            if fpmm["id"] not in fpmms:
+            if fpmm["id"] not in fpmms or "trades" not in fpmms[fpmm["id"]]:
                 fpmms[fpmm["id"]] = fpmm
 
         id_gt = items[-1]["id"]
@@ -156,12 +157,13 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
     transport = RequestsHTTPTransport(url=THEGRAPH_ENDPOINT)
     client = Client(transport=transport, fetch_schema_from_transport=True)
 
+    updated_fpmms = {}
     for _, fpmm in tqdm(
         fpmms.items(),
         desc=f"{'Fetching trades':>{TEXT_ALIGNMENT}}",
         miniters=1,
     ):
-        state = _get_market_state(fpmm)
+        state = get_market_state(fpmm)
 
         if state is not MarketState.CLOSED:
             continue
@@ -169,6 +171,7 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
         if "trades" in fpmm:
             continue
 
+        updated_fpmms[fpmm["id"]] = fpmm
         trades = fpmm.setdefault("trades", {})
         id_gt = "0x00"
         while True:
@@ -190,6 +193,15 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
             _write_db_to_file(fpmms)
 
     _write_db_to_file(fpmms, True)
+
+    total_fpmms = len(updated_fpmms)
+    print(f"Total updated markets: {total_fpmms}")
+    print(f"First {min(total_fpmms, 20)}:")
+
+    for i, fpmm in enumerate(updated_fpmms.values()):
+        if i >= 20:
+            break
+        print(f"  - {fpmm['id']} - {fpmm['question'].get('title', '')}")
 
 
 last_write_time = 0.0
@@ -220,3 +232,7 @@ def get_fpmms(creator: str) -> Dict[str, Any]:
     _populate_missing_fpmms(creator.lower(), fpmms)
     _populate_missing_buy_trades(fpmms)
     return fpmms
+
+
+if __name__ == "__main__":
+    get_fpmms("0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec")
