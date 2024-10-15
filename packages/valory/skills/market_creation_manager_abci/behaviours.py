@@ -1908,11 +1908,14 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         self, id_: str, fpmm_id: str
     ) -> Generator[None, None, Optional[str]]:
         """Call the market approval server to signal that the provided market is created."""
-        url = f"{self.params.market_approval_server_url}/update_market"
+
         headers = {
             "Authorization": self.params.market_approval_server_api_key,
             "Content-Type": "application/json",
         }
+
+        # Update the 'fpmm' field
+        url = f"{self.params.market_approval_server_url}/update_market"
         body = {"id": id_, "fpmm_id": fpmm_id}
         http_response = yield from self.get_http_response(
             headers=headers,
@@ -1922,14 +1925,35 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if http_response.status_code != HTTP_OK:
             self.context.logger.warning(
-                f"Failed to mark market as done: {http_response.status_code} {http_response}"
+                f"Failed to update market: {http_response.status_code} {http_response}"
             )
             return str(http_response.body)
 
         body = json.loads(http_response.body.decode())
         self.context.logger.info(
-            f"Successfully marked market as done, received body {body}"
+            f"Successfully updated market, received body {body}"
         )
+
+        # Update the market id to match the 'fpmm' id
+        url = f"{self.params.market_approval_server_url}/update_market_id"
+        body = {"id": id_, "new_id": fpmm_id}
+        http_response = yield from self.get_http_response(
+            headers=headers,
+            method="PUT",
+            url=url,
+            content=json.dumps(body).encode("utf-8"),
+        )
+        if http_response.status_code != HTTP_OK:
+            self.context.logger.warning(
+                f"Failed to update market id: {http_response.status_code} {http_response}"
+            )
+            return str(http_response.body)
+
+        body = json.loads(http_response.body.decode())
+        self.context.logger.info(
+            f"Successfully updated market id, received body {body}"
+        )
+
         return None
 
 
