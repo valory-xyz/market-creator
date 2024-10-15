@@ -174,6 +174,35 @@ def get_markets() -> Tuple[Response, int]:
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/proposed_market/<market_id>", methods=["GET"])
+@app.route("/approved_market/<market_id>", methods=["GET"])
+@app.route("/rejected_market/<market_id>", methods=["GET"])
+@app.route("/processed_market/<market_id>", methods=["GET"])
+def get_market_by_id(market_id: str) -> Tuple[Response, int]:
+    """Retrieve a specific market by its ID from the corresponding market database."""
+    try:
+        endpoint = request.path.split("/")[1]
+
+        if endpoint == "proposed_market":
+            markets = proposed_markets
+        elif endpoint == "approved_market":
+            markets = approved_markets
+        elif endpoint == "rejected_market":
+            markets = rejected_markets
+        elif endpoint == "processed_market":
+            markets = processed_markets
+        else:
+            return jsonify({"error": "Invalid endpoint."}), 404
+
+        if market_id in markets:
+            market = markets[market_id]
+            return jsonify(market), 200
+        else:
+            return jsonify({"error": f"Market ID {market_id} not found."}), 404
+    except Exception as e:  # pylint: disable=broad-except
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/clear_proposed_markets", methods=["DELETE"])
 @app.route("/clear_approved_markets", methods=["DELETE"])
 @app.route("/clear_rejected_markets", methods=["DELETE"])
@@ -390,6 +419,51 @@ def update_market() -> Tuple[Response, int]:
             jsonify({"error": f"Market ID {market_id} not found in any database."}),
             404,
         )
+
+    except Exception as e:  # pylint: disable=broad-except
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/update_market_id", methods=["PUT"])
+def update_market_id() -> Tuple[Response, int]:
+    """Update the market ID in any of the databases if the market exists."""
+    try:
+        api_key = request.headers.get("Authorization")
+        if not check_api_key(api_key):
+            return jsonify({"error": "Unauthorized access. Invalid API key."}), 401
+
+        data = request.get_json()
+        current_market_id = data.get("current_market_id")
+        new_market_id = data.get("new_market_id")
+
+        if not current_market_id:
+            return jsonify({"error": "'current_market_id' is required."}), 400
+        if not new_market_id:
+            return jsonify({"error": "'new_market_id' is required."}), 400
+        if current_market_id == new_market_id:
+            return jsonify({"error": "'new_market_id' is equal to 'current_market_id' in the request."}), 409
+
+        databases = [
+            ("proposed_markets", proposed_markets),
+            ("approved_markets", approved_markets),
+            ("rejected_markets", rejected_markets),
+            ("processed_markets", processed_markets),
+        ]
+
+        if any(new_market_id in db for _, db in databases):
+            return jsonify({"error": f"Market ID {new_market_id} already exists in database. Try using a different ID."}), 409
+
+        for db_name, db in databases:
+            if current_market_id in db:
+                db[new_market_id] = db.pop(current_market_id)
+                db[new_market_id]["id"] = new_market_id
+                db[new_market_id]["utc_timestamp_updated"] = int(
+                    datetime.utcnow().timestamp()
+                )
+                save_config()
+                return jsonify({"message": f"Market ID '{current_market_id}' successfully changed to '{new_market_id}' in {db_name}."}), 200
+
+        return jsonify({"error": f"Market ID '{current_market_id}' not found in any database."}), 404
 
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
