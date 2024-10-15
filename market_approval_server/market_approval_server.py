@@ -416,7 +416,7 @@ def update_market() -> Tuple[Response, int]:
             )
 
         return (
-            jsonify({"error": f"Market ID {market_id} not found in any database."}),
+            jsonify({"error": f"Market ID {market_id} not found in the database."}),
             404,
         )
 
@@ -433,15 +433,15 @@ def update_market_id() -> Tuple[Response, int]:
             return jsonify({"error": "Unauthorized access. Invalid API key."}), 401
 
         data = request.get_json()
-        current_market_id = data.get("current_market_id")
-        new_market_id = data.get("new_market_id")
+        current_market_id = data.get("id")
+        new_market_id = data.get("new_id")
 
         if not current_market_id:
-            return jsonify({"error": "'current_market_id' is required."}), 400
+            return jsonify({"error": "'id' is required."}), 400
         if not new_market_id:
-            return jsonify({"error": "'new_market_id' is required."}), 400
+            return jsonify({"error": "'new_id' is required."}), 400
         if current_market_id == new_market_id:
-            return jsonify({"error": "'new_market_id' is equal to 'current_market_id' in the request."}), 409
+            return jsonify({"error": "'id' is equal to 'new_id' in the request."}), 409
 
         databases = [
             ("proposed_markets", proposed_markets),
@@ -463,7 +463,7 @@ def update_market_id() -> Tuple[Response, int]:
                 save_config()
                 return jsonify({"message": f"Market ID '{current_market_id}' successfully changed to '{new_market_id}' in {db_name}."}), 200
 
-        return jsonify({"error": f"Market ID '{current_market_id}' not found in any database."}), 404
+        return jsonify({"error": f"Market ID '{current_market_id}' not found in the database."}), 404
 
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
