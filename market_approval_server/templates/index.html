@@ -24,6 +24,16 @@
         <li><a href="/all_markets">All markets</a></li>
     </ul>
 
+    <h2>View a single market by MARKET_ID endpoints</h2>
+    <p>Requires to know the MARKET_ID:</p>
+    <ul>
+        <li><code>/proposed_market/MARKET_ID</code>: Marked in "Proposed markets" database</a></li>
+        <li><code>/approved_market/MARKET_ID</code>: Marked in "Approved markets" database</a></li>
+        <li><code>/rejected_market/MARKET_ID</code>: Marked in "Rejected markets" database</a></li>
+        <li><code>/processed_market/MARKET_ID</code>: Marked in "Processed markets" database</a></li>
+        <li><code>/market/MARKET_ID</code>: Marked in any database</a></li>
+    </ul>
+
     <h2>Main interaction methods</h2>
 
     <ul>
@@ -48,6 +58,10 @@
 
         <li>Update a market:
             <pre>curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k {{ server_ip }}/update_market</pre>
+        </li>
+
+        <li>Update a market id:
+            <pre>curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", "new_id": "NEW_MARKET_ID"}' -k {{ server_ip }}/update_market_id</pre>
         </li>
 
         <li>Get a random accepted market and mark it as processed:
