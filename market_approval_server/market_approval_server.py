@@ -93,6 +93,17 @@ processed_markets: Dict[str, Any] = {}
 api_keys: Dict[str, str] = {}
 
 
+def get_databases() -> Dict[str, Dict[str, Any]]:
+    """Returns all databases into a single object."""
+
+    return {
+        "proposed_markets": proposed_markets,
+        "approved_markets": approved_markets,
+        "rejected_markets": rejected_markets,
+        "processed_markets": processed_markets,
+    }
+
+
 def load_config() -> None:
     """Loads the configuration from a JSON file."""
     global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys  # pylint: disable=global-statement
@@ -198,7 +209,21 @@ def get_market_by_id(market_id: str) -> Tuple[Response, int]:
             market = markets[market_id]
             return jsonify(market), 200
         else:
-            return jsonify({"error": f"Market ID {market_id} not found."}), 404
+            return jsonify({"error": f"Market ID {market_id} not found in {endpoint}s."}), 404
+    except Exception as e:  # pylint: disable=broad-except
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/market/<market_id>", methods=["GET"])
+def get_market_by_id_all_databases(market_id: str) -> Tuple[Response, int]:
+    """Retrieve a market by its ID from any database."""
+    try:
+        for _, db in get_databases().items():
+            if market_id in db:
+                return jsonify(db[market_id]), 200
+
+        return jsonify({"error": f"Market ID '{market_id}' not found in any database."}), 404
+
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
 
@@ -443,17 +468,19 @@ def update_market_id() -> Tuple[Response, int]:
         if current_market_id == new_market_id:
             return jsonify({"error": "'id' is equal to 'new_id' in the request."}), 409
 
-        databases = [
-            ("proposed_markets", proposed_markets),
-            ("approved_markets", approved_markets),
-            ("rejected_markets", rejected_markets),
-            ("processed_markets", processed_markets),
-        ]
+        databases = get_databases()
 
-        if any(new_market_id in db for _, db in databases):
-            return jsonify({"error": f"Market ID {new_market_id} already exists in database. Try using a different ID."}), 409
+        if any(new_market_id in db for _, db in databases.items()):
+            return (
+                jsonify(
+                    {
+                        "error": f"Market ID {new_market_id} already exists in database. Try using a different ID."
+                    }
+                ),
+                409,
+            )
 
-        for db_name, db in databases:
+        for db_name, db in databases.items():
             if current_market_id in db:
                 db[new_market_id] = db.pop(current_market_id)
                 db[new_market_id]["id"] = new_market_id
@@ -461,9 +488,21 @@ def update_market_id() -> Tuple[Response, int]:
                     datetime.utcnow().timestamp()
                 )
                 save_config()
-                return jsonify({"message": f"Market ID '{current_market_id}' successfully changed to '{new_market_id}' in {db_name}."}), 200
+                return (
+                    jsonify(
+                        {
+                            "message": f"Market ID '{current_market_id}' successfully changed to '{new_market_id}' in {db_name}."
+                        }
+                    ),
+                    200,
+                )
 
-        return jsonify({"error": f"Market ID '{current_market_id}' not found in the database."}), 404
+        return (
+            jsonify(
+                {"error": f"Market ID '{current_market_id}' not found in the database."}
+            ),
+            404,
+        )
 
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
