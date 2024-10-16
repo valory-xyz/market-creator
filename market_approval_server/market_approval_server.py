@@ -31,14 +31,15 @@ CLI Usage:
     Usage for server running in http mode (replace by https if applies).
 
     - Service API:
-        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k http://127.0.0.1:5000/propose_market
-        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/process_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", ...}' -k http://127.0.0.1:5000/propose_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k http://127.0.0.1:5000/process_market
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -k http://127.0.0.1:5000/get_process_random_approved_market
-        curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k http://127.0.0.1:5000/update_market
+        curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", ...}' -k http://127.0.0.1:5000/update_market
+        curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", "new_id": "new_market_id"}' -k http://127.0.0.1:5000/update_market_id
 
     - User API
-        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/approve_market
-        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/reject_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k http://127.0.0.1:5000/approve_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k http://127.0.0.1:5000/reject_market
 
         curl -X DELETE -H "Authorization: YOUR_API_KEY" -k http://127.0.0.1:5000/clear_proposed_markets
         curl -X DELETE -H "Authorization: YOUR_API_KEY" -k http://127.0.0.1:5000/clear_approved_markets
@@ -209,7 +210,10 @@ def get_market_by_id(market_id: str) -> Tuple[Response, int]:
             market = markets[market_id]
             return jsonify(market), 200
         else:
-            return jsonify({"error": f"Market ID {market_id} not found in {endpoint}s."}), 404
+            return (
+                jsonify({"error": f"Market ID {market_id} not found in {endpoint}s."}),
+                404,
+            )
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
 
@@ -222,7 +226,10 @@ def get_market_by_id_all_databases(market_id: str) -> Tuple[Response, int]:
             if market_id in db:
                 return jsonify(db[market_id]), 200
 
-        return jsonify({"error": f"Market ID '{market_id}' not found in any database."}), 404
+        return (
+            jsonify({"error": f"Market ID '{market_id}' not found in any database."}),
+            404,
+        )
 
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
@@ -294,6 +301,8 @@ def propose_market() -> Tuple[Response, int]:
             market["id"] = str(uuid.uuid4())
 
         market_id = str(market["id"])
+        market_id = market_id.lower()
+        market["id"] = market_id
 
         if any(
             market_id in db
@@ -358,6 +367,7 @@ def move_market() -> Tuple[Response, int]:
             return jsonify({"error": "Invalid JSON format. Missing id."}), 400
 
         market_id = data["id"]
+        market_id = market_id.lower()
 
         if market_id not in move_from:
             return jsonify({"error": f"Market ID {market_id} not found."}), 404
@@ -386,7 +396,7 @@ def get_random_approved_market() -> Tuple[Response, int]:
             return (
                 jsonify({"info": "No approved markets available."}),
                 204,
-            )  # No content, json will be ignored by the server
+            )
 
         market_id = secrets.choice(list(approved_markets.keys()))
         market = approved_markets[market_id]
@@ -414,6 +424,7 @@ def update_market() -> Tuple[Response, int]:
             return jsonify({"error": "Invalid JSON format. Missing id."}), 400
 
         market_id = market["id"]
+        market_id = market_id.lower()
 
         # Check if the market exists in any of the databases
         databases = [
@@ -467,6 +478,10 @@ def update_market_id() -> Tuple[Response, int]:
             return jsonify({"error": "'new_id' is required."}), 400
         if current_market_id == new_market_id:
             return jsonify({"error": "'id' is equal to 'new_id' in the request."}), 409
+
+        # The next line is intentionally commented to allow fixing uppercase market_ids externally.
+        # current_market_id = current_market_id.lower()
+        new_market_id = new_market_id.lower()
 
         databases = get_databases()
 
