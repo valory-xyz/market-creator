@@ -561,39 +561,4 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
             "article": article,
         }
 
-    print(questions_dict)
     return json.dumps(questions_dict, sort_keys=True), None, None, None
-
-
-if __name__ == "__main__":
-    import os
-
-    tool = "propose-question"
-    keys = KeyChain(
-        {
-            "openai": [os.getenv("OPENAI_API_KEY")],
-            "newsapi": [os.getenv("NEWSAPI_API_KEY")],
-            "serper": [os.getenv("SERPER_API_KEY")],
-            "subgraph": [os.getenv("SUBGRAPH_API_KEY")],
-        }
-    )
-
-    my_kwargs = dict(
-        tool=tool,
-        api_keys=keys,
-        # news_sources=news_sources,  # Use default value
-        # topics=topics,              # Use default value
-        resolution_time=1730329200,
-        num_questions=5,
-    )
-
-    print("================================")
-    print(f"Start request {tool=}")
-    tool_output = run(**my_kwargs)[0]
-    print("================================")
-    print(f"Output of {tool=}")
-    # print(tool_output[0])
-
-    from icecream import ic
-
-    ic(json.loads(tool_output))

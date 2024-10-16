@@ -736,9 +736,6 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     )
                 else:
                     for market in proposed_markets.values():
-                        self.context.logger.info(
-                            f"_propose_and_approve_market {market=}"
-                        )
                         yield from self._propose_and_approve_market(market)
 
                     approved_markets_count = len(proposed_markets)
@@ -1635,10 +1632,6 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 "language": data["language"],
             }
             self.context.logger.info(f"Preparing txs for {question_data=}")
-
-            import sys
-
-            sys.exit(1)
 
             opening_timestamp, timeout = self._calculate_time_parameters(
                 resolution_time=data["resolution_time"],

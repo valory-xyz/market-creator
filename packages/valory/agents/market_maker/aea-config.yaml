@@ -38,9 +38,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeieh4ei3qdelmacnm7vwq57phoewgumr3udvxt6pybmuggwc3yk65q
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
-- valory/market_maker_abci:0.1.0:bafybeidmaydchl2v62h6d4xaqv5aib3xyyywpxl6nkclxbcje4cqbtlhn4
+- valory/market_maker_abci:0.1.0:bafybeiabjlo7zv3shr3fsubkngcrmzfxcalthd2hrvlsbpq3fvvxxwduby
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
-- valory/market_creation_manager_abci:0.1.0:bafybeifw74f4zmyi5xqfqyilfkvyf3tlyz22rmm7xppct65bomhug2tnki
+- valory/market_creation_manager_abci:0.1.0:bafybeicrf4ow3kvm65qrah7zbpbe3fp4ccxfdaldpp6ybqwye47p24j7u4
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
@@ -82,6 +82,10 @@ dependencies:
     version: ==1.52.0
   open-aea-test-autonomy:
     version: ==0.14.12
+  gql:
+    version: ==3.5.0
+  requests-toolbelt:
+    version: ==1.0.0
 default_connection: null
 ---
 public_id: valory/abci:0.1.0
@@ -172,10 +176,11 @@ models:
       initial_funds: ${float:1.0}
       market_timeout: ${int:1}
       min_market_proposal_interval_seconds: ${int:7200}
-      news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","google-news","reuters","usa-today","breitbart-news","the-verge","techradar"]}
+      news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","reuters","usa-today","breitbart-news","the-verge","techradar"]}
       event_offset_start_days: ${int:4}
       event_offset_end_days: ${int:7}
       market_proposal_round_timeout_seconds_per_day: ${int:45}
+      max_markets_per_story: ${int:5}
       realitio_contract: ${str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
       realitio_oracle_proxy_contract: ${str:0xab16d643ba051c11962da645f74632d3130c81e2}
       conditional_tokens_contract: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
@@ -215,6 +220,8 @@ models:
       light_slash_unit_amount: ${int:5000000000000000}
       serious_slash_unit_amount: ${int:8000000000000000}
       xdai_threshold: ${int:1000000000000000000}
+      serper_api_key: ${str:serper_api_key}
+      subgraph_api_key: ${str:subgraph_api_key}
       google_api_key: ${str:google_api_key}
       google_engine_id: ${str:google_engine_id}
       openai_api_key: ${str:openai_api_key}
