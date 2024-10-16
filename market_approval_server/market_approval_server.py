@@ -209,11 +209,11 @@ def get_market_by_id(market_id: str) -> Tuple[Response, int]:
         if market_id in markets:
             market = markets[market_id]
             return jsonify(market), 200
-        else:
-            return (
-                jsonify({"error": f"Market ID {market_id} not found in {endpoint}s."}),
-                404,
-            )
+
+        return (
+            jsonify({"error": f"Market ID {market_id} not found in {endpoint}s."}),
+            404,
+        )
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
 
@@ -461,7 +461,9 @@ def update_market() -> Tuple[Response, int]:
 
 
 @app.route("/update_market_id", methods=["PUT"])
-def update_market_id() -> Tuple[Response, int]:
+def update_market_id() -> (
+    Tuple[Response, int]
+):  # pylint: disable=too-many-return-statements
     """Update the market ID in any of the databases if the market exists."""
     try:
         api_key = request.headers.get("Authorization")
