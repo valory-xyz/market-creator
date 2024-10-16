@@ -155,6 +155,11 @@ class MarketCreationManagerParams(BaseParams):
         self.market_proposal_round_timeout_seconds_per_day = self._ensure(
             "market_proposal_round_timeout_seconds_per_day", kwargs, type_=int
         )
+        self.max_markets_per_story = self._ensure(
+            "max_markets_per_story", kwargs, type_=int
+        )
+        self.serper_api_key = self._ensure("serper_api_key", kwargs, type_=str)
+        self.subgraph_api_key = self._ensure("subgraph_api_key", kwargs, type_=str)
         self.google_api_key = self._ensure("google_api_key", kwargs, type_=str)
         self.google_engine_id = self._ensure("google_engine_id", kwargs, type_=str)
         self.openai_api_key = self._ensure("openai_api_key", kwargs, type_=str)

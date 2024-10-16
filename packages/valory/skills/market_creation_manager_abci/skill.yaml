@@ -10,12 +10,13 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeihnigxnhiylcsugw5fr25iodlfiu56y7ghf563yugl2vq43gjgtjq
+  behaviours.py: bafybeib2mhai3prw44jb4wbmtvjdbxgvnekeftrv46vo7z4o7h7jhaftdu
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeicx5sxhfp6ggzihheeco4qnmdlpxurthw3eqqs4oukoqh6knvfa5u
   handlers.py: bafybeicj2skzmias5pqvbctiidwgioreaabspsppxn5ytl6e356is4lgga
-  models.py: bafybeicfdblqzyj6ex3qvjmbejjdt6qwecblfsgjdrfj7rydqgo6h7xasm
+  models.py: bafybeidi4nqk7egjllztjlobogr766e745ixjubrlw67aisbnyih644nau
   payloads.py: bafybeifococfoabmghaniuqivshbnh4ttuqotpol25jnd7h75lo46krcr4
+  propose_questions.py: bafybeicbnt3a2tg43arnmh6eyc3vkfsapybhlq76nxd4m7bqiurmlu7jwm
   rounds.py: bafybeigo4na5fqjyaq3az7a3r267f3zjdl5kn7i764bfe7lmwxd3jgguqy
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
@@ -99,6 +100,8 @@ models:
       market_approval_server_api_key: api_key
       newsapi_endpoint: https://newsapi.org/v2
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      serper_api_key: serper_api_key
+      subgraph_api_key: subgraph_api_key
       google_api_key: google_api_key
       google_engine_id: google_engine_id
       openai_api_key: openai_api_key
@@ -136,7 +139,6 @@ models:
       - bbc-sport
       - abc-news
       - cnn
-      - google-news
       - reuters
       - usa-today
       - breitbart-news
@@ -145,6 +147,7 @@ models:
       event_offset_start_days: 4
       event_offset_end_days: 7
       market_proposal_round_timeout_seconds_per_day: 45
+      max_markets_per_story: 5
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
