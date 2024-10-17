@@ -614,7 +614,9 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return {"approved_markets": {}}
 
         body = json.loads(http_response.body.decode())
-        self.context.logger.info(f"Successfully updated market, received body {body}")
+        self.context.logger.info(
+            f"Successfully collected approved markets, received body {body}"
+        )
         return body
 
     def _collect_latest_open_markets(
@@ -1634,7 +1636,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info(f"Preparing txs for {question_data=}")
 
             opening_timestamp, timeout = self._calculate_time_parameters(
-                resolution_time=data["resolution_time"],
+                resolution_time=float(data["resolution_time"]),
                 timeout=self.params.market_timeout,
             )
             self.context.logger.info(
