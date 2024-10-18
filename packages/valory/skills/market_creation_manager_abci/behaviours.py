@@ -90,11 +90,11 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RemoveFundingPayload,
     SyncMarketsPayload,
 )
-from packages.valory.skills.market_creation_manager_abci.propose_questions import (
+from packages.valory.skills.market_creation_manager_abci.propose_questions import (  # type: ignore
     KeyChain,
 )
 from packages.valory.skills.market_creation_manager_abci.propose_questions import (
-    run as run_propose_questions,
+    run as run_propose_questions,  # type: ignore
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     AnswerQuestionsRound,
@@ -735,7 +735,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 proposed_markets = run_propose_questions(**tool_kwargs)[0]
                 # END MECH INTERACT EMULATION
 
-                proposed_markets = json.loads(proposed_markets)
+                proposed_markets = json.loads(proposed_markets)  # type: ignore
 
                 if "error" in proposed_markets:
                     approved_markets_count = 0

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2023-2024 Valory AG
@@ -18,7 +19,8 @@
 # ------------------------------------------------------------------------------
 """Contains the job definitions"""
 
-# IMPORTANT: remove this when ported to the mech repository
+# IMPORTANT: remove this when ported to the mech repository.
+# Remove also mypy skip at the top of the file
 # flake8: noqa
 
 import functools
