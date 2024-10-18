@@ -17,6 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 """Contains the job definitions"""
+
+# IMPORTANT: remove this when ported to the mech repository
+# flake8: noqa
+
 import functools
 import json
 import random
@@ -32,9 +36,7 @@ from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from openai import OpenAI
 from pydantic import BaseModel
-
-
-# from tiktoken import encoding_for_model
+from tiktoken import encoding_for_model
 
 
 NEWSAPI_TOP_HEADLINES_URL = "https://newsapi.org/v2/top-headlines"
@@ -106,7 +108,7 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
     snippets under ARTICLES. You are provided a list of existing questions under
     EXISTING_QUESTIONS. Your task is to choose one article or story which is suitable
     to create questions for prediction markets. The chosen article should be that the
-    questions created are of public interest. The chosen article should ideally 
+    questions created are of public interest. The chosen article should ideally
     be used to create questions based on topics different from the EXISTING_QUESTIONS.
     You must output the article ID a topic from TOPICS and a brief reasoning.
 
@@ -154,10 +156,14 @@ MechResponse = Tuple[str, Optional[str], Optional[Dict[str, Any]], Any, Any]
 
 
 class LLMQuestionProposalSchema(BaseModel):
+    """Schema for proposed questions."""
+
     questions: List[str]
 
 
 class LLMStorySelectionSchema(BaseModel):
+    """Schema for story selection."""
+
     topic: str
     article_id: int
     reasoning: str
@@ -208,7 +214,7 @@ class KeyChain:
         return self.services[service_name][index]
 
 
-def with_key_rotation(func: Callable):
+def with_key_rotation(func: Callable):  # noqa
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> MechResponse:
         # this is expected to be a KeyChain object,
@@ -277,10 +283,10 @@ class OpenAIClientManager:
             client = None
 
 
-# def count_tokens(text: str, model: str) -> int:
-#     """Count the number of tokens in a text."""
-#     enc = encoding_for_model(model)
-#     return len(enc.encode(text))
+def count_tokens(text: str, model: str) -> int:
+    """Count the number of tokens in a text."""
+    enc = encoding_for_model(model)
+    return len(enc.encode(text))
 
 
 DEFAULT_OPENAI_SETTINGS = {
@@ -367,6 +373,8 @@ def scrape_url(serper_api_key: str, url: str) -> Optional[dict]:
 def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
     """Run the task"""
     try:
+        counter_callback = kwargs.get("counter_callback", None)
+
         # Verify input
         tool = kwargs.get("tool")
         if not tool or tool not in ALLOWED_TOOLS:
@@ -374,7 +382,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 f'{{"error": "Tool {tool} is not in the list of supported tools.", "tool": {tool}}}',
                 None,
                 None,
-                None,
+                counter_callback,
             )
 
         resolution_time = kwargs.get("resolution_time")
@@ -383,7 +391,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 f'{{"error": "\'resolution_time\' is not defined.", "tool": {tool}}}',
                 None,
                 None,
-                None,
+                counter_callback,
             )
 
         num_questions = kwargs.get("num_questions")
@@ -400,7 +408,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 f'{{"error": "Failed to retrieve latest questions.", "tool": {tool}}}',
                 None,
                 None,
-                None,
+                counter_callback,
             )
 
         latest_questions = random.sample(
@@ -417,7 +425,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 f'{{"error": "Failed to retrieve articles from NewsAPI.", "tool": {tool}}}',
                 None,
                 None,
-                None,
+                counter_callback,
             )
 
         print(
@@ -440,8 +448,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
             temperature = kwargs.get(
                 "temperature", DEFAULT_OPENAI_SETTINGS["temperature"]
             )
-            counter_callback = kwargs.get("counter_callback", None)
-            engine = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
+            model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
 
             prompt_values = {
                 "articles": articles_string,
@@ -457,7 +464,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                     f'{{"error": "Moderation flagged the prompt as in violation of terms.", "tool": {tool}}}',
                     None,
                     None,
-                    None,
+                    counter_callback,
                 )
 
             messages = [
@@ -465,7 +472,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 {"role": "user", "content": prompt},
             ]
             response = client.chat.completions.create(
-                model=engine,
+                model=model,
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
@@ -480,6 +487,13 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                     },
                 },
             )
+            if counter_callback:
+                counter_callback(
+                    input_tokens=response.usage.prompt_tokens,
+                    output_tokens=response.usage.completion_tokens,
+                    model=model,
+                    token_counter=count_tokens,
+                )
 
             response = json.loads(response.choices[0].message.content)
             article_id = response["article_id"]
@@ -487,7 +501,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
             article = articles[article_id]
 
             print(
-                f"ARTICLE \"{article['title']}\" SELECTED BECAUSE \"{response['reasoning']}\"\n"
+                f"ARTICLE {article['title']!r} SELECTED BECAUSE {response['reasoning']!r}\n"
             )
 
         # Scrape selected article
@@ -498,7 +512,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 f'{{"error": "Failed to scrape url {article["url"]}", "tool": {tool}}}',
                 None,
                 None,
-                None,
+                counter_callback,
             )
 
         # Second call to LLM
@@ -507,8 +521,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
             temperature = kwargs.get(
                 "temperature", DEFAULT_OPENAI_SETTINGS["temperature"]
             )
-            counter_callback = kwargs.get("counter_callback", None)
-            engine = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
+            model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
 
             prompt_values = {
                 "article": f"{scrape_result['text']}",
@@ -525,7 +538,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                     f'{{"error": "Moderation flagged the prompt as in violation of terms.", "tool": {tool}}}',
                     None,
                     None,
-                    None,
+                    counter_callback,
                 )
 
             messages = [
@@ -533,7 +546,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 {"role": "user", "content": prompt},
             ]
             response = client.chat.completions.create(
-                model=engine,
+                model=model,
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
@@ -548,6 +561,13 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                     },
                 },
             )
+            if counter_callback:
+                counter_callback(
+                    input_tokens=response.usage.prompt_tokens,
+                    output_tokens=response.usage.completion_tokens,
+                    model=model,
+                    token_counter=count_tokens,
+                )
             response = json.loads(response.choices[0].message.content)
 
         # Generate output
@@ -573,5 +593,5 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
             f'{{"error": "An exception has occurred: {e}.", "tool": {tool}}}',
             None,
             None,
-            None,
+            counter_callback,
         )

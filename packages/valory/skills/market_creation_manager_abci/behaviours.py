@@ -25,7 +25,7 @@ import time
 from abc import ABC
 from collections import defaultdict
 from dataclasses import asdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from string import Template
 from typing import (
     Any,
@@ -41,9 +41,6 @@ from typing import (
 )
 
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
-from packages.valory.connections.openai.connection import (
-    PUBLIC_ID as LLM_CONNECTION_PUBLIC_ID,
-)
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
@@ -77,10 +74,7 @@ from packages.valory.skills.abstract_round_abci.models import Requests
 from packages.valory.skills.market_creation_manager_abci import (
     PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
 )
-from packages.valory.skills.market_creation_manager_abci.dialogues import (
-    LlmDialogue,
-    LlmDialogues,
-)
+from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
     SharedState,

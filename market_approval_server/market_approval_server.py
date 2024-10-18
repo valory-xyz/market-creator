@@ -227,7 +227,7 @@ def get_market_by_id_all_databases(market_id: str) -> Tuple[Response, int]:
                 return jsonify(db[market_id]), 200
 
         return (
-            jsonify({"error": f"Market ID '{market_id}' not found in any database."}),
+            jsonify({"error": f"Market ID {market_id!r} not found in any database."}),
             404,
         )
 
@@ -482,7 +482,7 @@ def update_market_id() -> (
             return jsonify({"error": "'id' is equal to 'new_id' in the request."}), 409
 
         # The next line is intentionally commented to allow fixing uppercase market_ids externally.
-        # current_market_id = current_market_id.lower()
+        # current_market_id = current_market_id.lower()  # noqa
         new_market_id = new_market_id.lower()
 
         databases = get_databases()
@@ -508,7 +508,7 @@ def update_market_id() -> (
                 return (
                     jsonify(
                         {
-                            "message": f"Market ID '{current_market_id}' successfully changed to '{new_market_id}' in {db_name}."
+                            "message": f"Market ID {current_market_id!r} successfully changed to {new_market_id!r} in {db_name}."
                         }
                     ),
                     200,
@@ -516,7 +516,7 @@ def update_market_id() -> (
 
         return (
             jsonify(
-                {"error": f"Market ID '{current_market_id}' not found in the database."}
+                {"error": f"Market ID {current_market_id!r} not found in the database."}
             ),
             404,
         )
