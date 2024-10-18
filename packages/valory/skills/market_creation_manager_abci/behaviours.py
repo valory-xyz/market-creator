@@ -40,6 +40,7 @@ from typing import (
     cast,
 )
 
+import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
@@ -89,12 +90,6 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RedeemBondPayload,
     RemoveFundingPayload,
     SyncMarketsPayload,
-)
-from packages.valory.skills.market_creation_manager_abci.propose_questions import (  # type: ignore
-    KeyChain,
-)
-from packages.valory.skills.market_creation_manager_abci.propose_questions import (
-    run as run_propose_questions,  # type: ignore
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     AnswerQuestionsRound,
@@ -715,7 +710,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     self.params.max_markets_per_story,
                 )
 
-                keys = KeyChain(
+                keys = mech_tool_propose_questions.KeyChain(  # type: ignore
                     {
                         "openai": [self.params.openai_api_key],
                         "newsapi": [self.params.newsapi_api_key],
@@ -732,7 +727,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     num_questions=num_questions,
                     resolution_time=resolution_time,
                 )
-                proposed_markets = run_propose_questions(**tool_kwargs)[0]
+                proposed_markets = mech_tool_propose_questions.run(**tool_kwargs)[0]  # type: ignore
                 # END MECH INTERACT EMULATION
 
                 proposed_markets = json.loads(proposed_markets)  # type: ignore
