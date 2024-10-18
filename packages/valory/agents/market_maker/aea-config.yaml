@@ -186,7 +186,7 @@ models:
       conditional_tokens_contract: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
       fpmm_deterministic_factory_contract: ${str:0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0}
       collateral_tokens_contract: ${str:0xe91d153e0b41518a2ce8dd3d7944fa863463a97d}
-      arbitrator_contract: ${str:0xe40dd83a262da3f56976038f1554fe541fa75ecd}
+      arbitrator_contract: ${str:0x29f39de98d750eb77b5fafb31b2837f079fce222}
       multisend_address: ${str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       multisend_batch_size: ${int:5}
       ipfs_address: ${str:https://gateway.autonolas.tech/ipfs/}
