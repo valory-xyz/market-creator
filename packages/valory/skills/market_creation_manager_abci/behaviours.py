@@ -713,7 +713,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 # TODO THIS EMULATES MECH INTERACT SENDING REQUEST TO A TOOL
 
                 # This is very important, the resolution_time (i.e., the event day)
-                # is one day less than the opening_ts
+                # is one day less than the openingTimestamp
                 resolution_time = int(opening_ts) - _ONE_DAY
 
                 num_questions = min(

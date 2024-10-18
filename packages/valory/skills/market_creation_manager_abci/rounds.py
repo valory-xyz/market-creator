@@ -594,16 +594,11 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
         if self.keeper_payload is None:  # pragma: no cover
             return self.synchronized_data, Event.DID_NOT_SEND
 
-        print("!!!!!!!!!!!!!!!!!!!!!")
-        print(cast(RetrieveApprovedMarketPayload, self.keeper_payload).content)
-        print(self.ERROR_PAYLOAD)
-
         # API error
         if (
             cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
             == self.ERROR_PAYLOAD
         ):
-            print("2!!!!!!!!!!!!!!!!!!!!!")
             return self.synchronized_data, Event.ERROR
 
         # No markets available
