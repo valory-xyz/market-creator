@@ -819,7 +819,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ERROR: GetPendingQuestionsRound,
         },
         PostTransactionRound: {
-            Event.DONE: RetrieveApprovedMarketRound,
+            Event.DONE: FinishedWithoutTxRound,
             Event.ERROR: DepositDaiRound,
             Event.NO_MAJORITY: PostTransactionRound,
             Event.DEPOSIT_DAI_DONE: GetPendingQuestionsRound,

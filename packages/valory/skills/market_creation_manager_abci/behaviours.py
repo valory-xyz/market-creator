@@ -476,6 +476,8 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info(f"openingTimestamp_lte={openingTimestamp_lte}")
 
             # Compute required openingTimestamp (between now and now + approve_market_event_days_offset)
+            # openingTimestamp refers to the time the market is closed for trades, and open for answer
+            # in Realitio. We require "self.params.markets_to_approve_per_day" markets to close for trades every day.
             required_opening_ts = []
             current_day_start_timestamp = (
                 openingTimestamp_gte - (openingTimestamp_gte % _ONE_DAY) + _ONE_DAY
@@ -484,7 +486,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 required_opening_ts.append(current_day_start_timestamp)
                 current_day_start_timestamp += _ONE_DAY
 
-            self.context.logger.info(f"required_opening_ts={required_opening_ts}")
+            self.context.logger.info(f"{required_opening_ts=}")
 
             # Get existing (open) markets count per openingTimestamp (between now and now + approve_market_event_days_offset)
             latest_open_markets = yield from self._collect_latest_open_markets(
@@ -499,18 +501,22 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info(f"existing_market_count={existing_market_count}")
 
             # Determine number of markets required to be approved per openingTimestamp (between now and now + approve_market_event_days_offset)
-            required_markets_to_approve: Dict[int, int] = defaultdict(int)
+            required_markets_to_approve_per_opening_ts: Dict[int, int] = defaultdict(
+                int
+            )
             N = self.params.markets_to_approve_per_day
 
             for ts in required_opening_ts:
-                required_markets_to_approve[ts] = max(
+                required_markets_to_approve_per_opening_ts[ts] = max(
                     0, N - existing_market_count.get(ts, 0)
                 )
 
-            num_markets_to_approve = sum(required_markets_to_approve.values())
+            num_markets_to_approve = sum(
+                required_markets_to_approve_per_opening_ts.values()
+            )
 
-            self.context.logger.info(f"{required_markets_to_approve=}")
-            self.context.logger.info(f"num_markets_to_approve={num_markets_to_approve}")
+            self.context.logger.info(f"{required_markets_to_approve_per_opening_ts=}")
+            self.context.logger.info(f"{num_markets_to_approve=}")
 
             # Determine largest creation timestamp in markets with openingTimestamp between now and now + approve_market_event_days_offset
             creation_timestamps = [
@@ -518,26 +524,20 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 for entry in latest_open_markets.get("fixedProductMarketMakers", {})
             ]
             largest_creation_timestamp = max(creation_timestamps, default=0)
-            self.context.logger.info(
-                f"largest_creation_timestamp={largest_creation_timestamp}"
-            )
+            self.context.logger.info(f"{largest_creation_timestamp=}")
 
             # Collect misc data related to market approval
             min_approve_markets_epoch_seconds = (
                 self.params.min_approve_markets_epoch_seconds
             )
-            self.context.logger.info(
-                f"min_approve_markets_epoch_seconds={min_approve_markets_epoch_seconds}"
-            )
+            self.context.logger.info(f"{min_approve_markets_epoch_seconds=}")
             approved_markets_count = self.synchronized_data.approved_markets_count
-            self.context.logger.info(f"approved_markets_count={approved_markets_count}")
+            self.context.logger.info(f"{approved_markets_count=}")
 
             latest_approve_market_timestamp = (
                 self.synchronized_data.approved_markets_timestamp
             )
-            self.context.logger.info(
-                f"latest_approve_market_execution={latest_approve_market_timestamp}"
-            )
+            self.context.logger.info(f"{latest_approve_market_timestamp=}")
 
             # Collect approved markets (not yet processed by the service)
             approved_markets = yield from self._collect_approved_markets()
@@ -576,8 +576,8 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 content_data.update(latest_open_markets)
                 content_data.update(approved_markets)
                 content_data[
-                    "required_markets_to_approve"
-                ] = required_markets_to_approve
+                    "required_markets_to_approve_per_opening_ts"
+                ] = required_markets_to_approve_per_opening_ts
                 content_data["timestamp"] = current_timestamp
                 content = json.dumps(content_data, sort_keys=True)
 
@@ -690,22 +690,34 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 self.synchronized_data.collected_proposed_markets_data
             )
 
-            required_markets_to_approve = collected_proposed_markets_json[
-                "required_markets_to_approve"
-            ]
-
-            # Select a timestamp with >0 markets to approve
-            market_ts = next(
-                (k for k, v in required_markets_to_approve.items() if v > 0), None
+            required_markets_to_approve_per_opening_ts = (
+                collected_proposed_markets_json[
+                    "required_markets_to_approve_per_opening_ts"
+                ]
             )
-            self.context.logger.info(f"{market_ts=}")
+
+            # Select an openingTimestamp with >0 markets to approve
+            opening_ts = next(
+                (
+                    k
+                    for k, v in required_markets_to_approve_per_opening_ts.items()
+                    if v > 0
+                ),
+                None,
+            )
+            self.context.logger.info(f"{opening_ts=}")
             proposed_markets = {}
             approved_markets_count = 0
 
-            if market_ts:
+            if opening_ts:
                 # TODO THIS EMULATES MECH INTERACT SENDING REQUEST TO A TOOL
+
+                # This is very important, the resolution_time (i.e., the event day)
+                # is one day less than the opening_ts
+                resolution_time = int(opening_ts) - _ONE_DAY
+
                 num_questions = min(
-                    required_markets_to_approve[market_ts],
+                    required_markets_to_approve_per_opening_ts[opening_ts],
                     self.params.max_markets_per_story,
                 )
 
@@ -724,7 +736,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     news_sources=self.params.news_sources,
                     topics=self.params.topics,
                     num_questions=num_questions,
-                    resolution_time=market_ts,
+                    resolution_time=resolution_time,
                 )
                 proposed_markets = run_propose_questions(**tool_kwargs)[0]
                 # END MECH INTERACT EMULATION

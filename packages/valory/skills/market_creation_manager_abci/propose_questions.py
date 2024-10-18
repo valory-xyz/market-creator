@@ -366,199 +366,212 @@ def scrape_url(serper_api_key: str, url: str) -> Optional[dict]:
 @with_key_rotation
 def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
     """Run the task"""
-
-    # Verify input
-    tool = kwargs.get("tool")
-    if not tool or tool not in ALLOWED_TOOLS:
-        return (
-            f'{{"error": "Tool {tool} is not in the list of supported tools."}}',
-            None,
-            None,
-            None,
-        )
-
-    resolution_time = kwargs.get("resolution_time")
-    if resolution_time is None:
-        return (
-            '{"error": "\'resolution_time\' is not defined."}',
-            None,
-            None,
-            None,
-        )
-
-    num_questions = kwargs.get("num_questions")
-    if num_questions is None:
-        num_questions = 1
-
-    # Gather latest opened questions from input or from TheGraph
-    latest_questions = kwargs.get("latest_questions")
-    if latest_questions is None:
-        latest_questions = gather_latest_questions(kwargs["api_keys"]["subgraph"])
-
-    if latest_questions is None:
-        return (
-            '{"error": "Failed to retrieve latest questions."}',
-            None,
-            None,
-            None,
-        )
-
-    latest_questions = random.sample(
-        latest_questions, min(MAX_LATEST_QUESTIONS, len(latest_questions))
-    )
-    latest_questions_string = "\n".join(latest_questions)
-
-    # Gather recent news articles from NewsAPI
-    news_sources = kwargs.get("news_sources", NEWSAPI_DEFAULT_NEWS_SOURCES)
-    articles = gather_articles(news_sources, kwargs["api_keys"]["newsapi"])
-
-    if articles is None:
-        return (
-            '{"error": "Failed to retrieve articles from NewsAPI."}',
-            None,
-            None,
-            None,
-        )
-
-    print(f"{len(articles)} articles collected from {len(news_sources)} news sources\n")
-
-    articles = random.sample(articles, min(MAX_ARTICLES, len(articles)))
-
-    articles_string = ""
-    for i, article in enumerate(articles, start=0):
-        articles_string += f"{i} - {article['title']} ({article['publishedAt']}): {article['content']}\n"
-
-    # Define topics
-    topics = kwargs.get("topics", DEFAULT_TOPICS)
-    topics_string = ", ".join(topics)
-
-    # First call to LLM
-    with OpenAIClientManager(kwargs["api_keys"]["openai"]):
-        max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
-        temperature = kwargs.get("temperature", DEFAULT_OPENAI_SETTINGS["temperature"])
-        counter_callback = kwargs.get("counter_callback", None)
-        engine = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
-
-        prompt_values = {
-            "articles": articles_string,
-            "topics": topics_string,
-            "latest_questions": latest_questions_string,
-        }
-
-        prompt = SELECT_STORY_PROMPT.format(**prompt_values)
-
-        moderation_result = client.moderations.create(input=prompt)
-        if moderation_result.results[0].flagged:
+    try:
+        # Verify input
+        tool = kwargs.get("tool")
+        if not tool or tool not in ALLOWED_TOOLS:
             return (
-                '{"error": "Moderation flagged the prompt as in violation of terms."}',
+                f'{{"error": "Tool {tool} is not in the list of supported tools.", "tool": {tool}}}',
                 None,
                 None,
                 None,
             )
 
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ]
-        response = client.chat.completions.create(
-            model=engine,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            n=1,
-            timeout=120,
-            stop=None,
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "LLMStorySelectionSchema",
-                    "schema": LLMStorySelectionSchema.model_json_schema(),
-                },
-            },
-        )
+        resolution_time = kwargs.get("resolution_time")
+        if resolution_time is None:
+            return (
+                f'{{"error": "\'resolution_time\' is not defined.", "tool": {tool}}}',
+                None,
+                None,
+                None,
+            )
 
-        response = json.loads(response.choices[0].message.content)
-        article_id = response["article_id"]
-        topic = response["topic"]
-        article = articles[article_id]
+        num_questions = kwargs.get("num_questions")
+        if num_questions is None:
+            num_questions = 1
+
+        # Gather latest opened questions from input or from TheGraph
+        latest_questions = kwargs.get("latest_questions")
+        if latest_questions is None:
+            latest_questions = gather_latest_questions(kwargs["api_keys"]["subgraph"])
+
+        if latest_questions is None:
+            return (
+                f'{{"error": "Failed to retrieve latest questions.", "tool": {tool}}}',
+                None,
+                None,
+                None,
+            )
+
+        latest_questions = random.sample(
+            latest_questions, min(MAX_LATEST_QUESTIONS, len(latest_questions))
+        )
+        latest_questions_string = "\n".join(latest_questions)
+
+        # Gather recent news articles from NewsAPI
+        news_sources = kwargs.get("news_sources", NEWSAPI_DEFAULT_NEWS_SOURCES)
+        articles = gather_articles(news_sources, kwargs["api_keys"]["newsapi"])
+
+        if articles is None:
+            return (
+                f'{{"error": "Failed to retrieve articles from NewsAPI.", "tool": {tool}}}',
+                None,
+                None,
+                None,
+            )
 
         print(
-            f"ARTICLE \"{article['title']}\" SELECTED BECAUSE \"{response['reasoning']}\"\n"
+            f"{len(articles)} articles collected from {len(news_sources)} news sources\n"
         )
 
-    # Scrape selected article
-    scrape_result = scrape_url(kwargs["api_keys"]["serper"], article["url"])
+        articles = random.sample(articles, min(MAX_ARTICLES, len(articles)))
 
-    if scrape_result is None:
-        return (
-            f'{{"error": "Failed to scrape url {article["url"]}"}}',
-            None,
-            None,
-            None,
-        )
+        articles_string = ""
+        for i, article in enumerate(articles, start=0):
+            articles_string += f"{i} - {article['title']} ({article['publishedAt']}): {article['content']}\n"
 
-    # Second call to LLM
-    with OpenAIClientManager(kwargs["api_keys"]["openai"]):
-        max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
-        temperature = kwargs.get("temperature", DEFAULT_OPENAI_SETTINGS["temperature"])
-        counter_callback = kwargs.get("counter_callback", None)
-        engine = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
+        # Define topics
+        topics = kwargs.get("topics", DEFAULT_TOPICS)
+        topics_string = ", ".join(topics)
 
-        prompt_values = {
-            "article": f"{scrape_result['text']}",
-            "event_day": format_utc_timestamp(int(resolution_time)),
-            "latest_questions": latest_questions_string,
-            "num_questions": f"{num_questions}",
-        }
+        # First call to LLM
+        with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+            max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
+            temperature = kwargs.get(
+                "temperature", DEFAULT_OPENAI_SETTINGS["temperature"]
+            )
+            counter_callback = kwargs.get("counter_callback", None)
+            engine = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
 
-        prompt = PROPOSE_QUESTION_PROMPT.format(**prompt_values)
+            prompt_values = {
+                "articles": articles_string,
+                "topics": topics_string,
+                "latest_questions": latest_questions_string,
+            }
 
-        moderation_result = client.moderations.create(input=prompt)
-        if moderation_result.results[0].flagged:
+            prompt = SELECT_STORY_PROMPT.format(**prompt_values)
+
+            moderation_result = client.moderations.create(input=prompt)
+            if moderation_result.results[0].flagged:
+                return (
+                    f'{{"error": "Moderation flagged the prompt as in violation of terms.", "tool": {tool}}}',
+                    None,
+                    None,
+                    None,
+                )
+
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ]
+            response = client.chat.completions.create(
+                model=engine,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                n=1,
+                timeout=120,
+                stop=None,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "LLMStorySelectionSchema",
+                        "schema": LLMStorySelectionSchema.model_json_schema(),
+                    },
+                },
+            )
+
+            response = json.loads(response.choices[0].message.content)
+            article_id = response["article_id"]
+            topic = response["topic"]
+            article = articles[article_id]
+
+            print(
+                f"ARTICLE \"{article['title']}\" SELECTED BECAUSE \"{response['reasoning']}\"\n"
+            )
+
+        # Scrape selected article
+        scrape_result = scrape_url(kwargs["api_keys"]["serper"], article["url"])
+
+        if scrape_result is None:
             return (
-                '{"error": "Moderation flagged the prompt as in violation of terms."}',
+                f'{{"error": "Failed to scrape url {article["url"]}", "tool": {tool}}}',
                 None,
                 None,
                 None,
             )
 
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ]
-        response = client.chat.completions.create(
-            model=engine,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            n=1,
-            timeout=120,
-            stop=None,
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "LLMQuestionProposalSchema",
-                    "schema": LLMQuestionProposalSchema.model_json_schema(),
+        # Second call to LLM
+        with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+            max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
+            temperature = kwargs.get(
+                "temperature", DEFAULT_OPENAI_SETTINGS["temperature"]
+            )
+            counter_callback = kwargs.get("counter_callback", None)
+            engine = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
+
+            prompt_values = {
+                "article": f"{scrape_result['text']}",
+                "event_day": format_utc_timestamp(int(resolution_time)),
+                "latest_questions": latest_questions_string,
+                "num_questions": f"{num_questions}",
+            }
+
+            prompt = PROPOSE_QUESTION_PROMPT.format(**prompt_values)
+
+            moderation_result = client.moderations.create(input=prompt)
+            if moderation_result.results[0].flagged:
+                return (
+                    f'{{"error": "Moderation flagged the prompt as in violation of terms.", "tool": {tool}}}',
+                    None,
+                    None,
+                    None,
+                )
+
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ]
+            response = client.chat.completions.create(
+                model=engine,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                n=1,
+                timeout=120,
+                stop=None,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "LLMQuestionProposalSchema",
+                        "schema": LLMQuestionProposalSchema.model_json_schema(),
+                    },
                 },
-            },
+            )
+            response = json.loads(response.choices[0].message.content)
+
+        # Generate output
+        questions = response["questions"][:num_questions]
+        answers = ["Yes", "No"]
+        language = "en_US"
+        questions_dict = {}
+        for q in questions:
+            question_id = str(uuid.uuid4())
+            questions_dict[question_id] = {
+                "answers": answers,
+                "id": question_id,
+                "language": language,
+                "question": q,
+                "resolution_time": resolution_time,
+                "topic": topic,
+                "article": article,
+            }
+
+        return json.dumps(questions_dict, sort_keys=True), None, None, None
+    except Exception as e:
+        return (
+            f'{{"error": "An exception has occurred: {e}.", "tool": {tool}}}',
+            None,
+            None,
+            None,
         )
-        response = json.loads(response.choices[0].message.content)
-
-    # Generate output
-    questions = response["questions"][:num_questions]
-    answers = ["Yes", "No"]
-    language = "en_US"
-    questions_dict = {}
-    for q in questions:
-        question_id = str(uuid.uuid4())
-        questions_dict[question_id] = {
-            "answers": answers,
-            "id": question_id,
-            "language": language,
-            "question": q,
-            "resolution_time": resolution_time,
-            "topic": topic,
-            "article": article,
-        }
-
-    return json.dumps(questions_dict, sort_keys=True), None, None, None
