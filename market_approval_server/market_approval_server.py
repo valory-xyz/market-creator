@@ -53,6 +53,7 @@ import hashlib
 import logging
 import os
 import secrets
+import sys
 import uuid
 from datetime import datetime
 from enum import Enum
@@ -66,7 +67,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-CONFIG_FILE = "server_config.json"
+CONFIG_FILE = os.getenv("MARKET_APPROVAL_SERVER_CONFIG_FILE", "server_config.json")
 LOG_FILE = "market_approval_server.log"
 CERT_FILE = "server_cert.pem"
 KEY_FILE = "server_key.pem"
@@ -110,15 +111,12 @@ def load_config() -> None:
     global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys  # pylint: disable=global-statement
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            logger.info("Using config file: %s", CONFIG_FILE)
             data = json.load(f)
     except FileNotFoundError:
         # If the file is not found, set the dictionaries to empty
-        proposed_markets = {}
-        approved_markets = {}
-        rejected_markets = {}
-        processed_markets = {}
-        api_keys = DEFAULT_API_KEYS
-        save_config()
+        logger.info("FileNotFoundError: %s", CONFIG_FILE)
+        sys.exit(1)
     else:
         # If the file is found, set the dictionaries to the loaded data
         proposed_markets = data.get("proposed_markets", {})
