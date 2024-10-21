@@ -727,10 +727,13 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     num_questions=num_questions,
                     resolution_time=resolution_time,
                 )
-                proposed_markets = mech_tool_propose_questions.run(**tool_kwargs)[0]  # type: ignore
+                mech_tool_output = mech_tool_propose_questions.run(**tool_kwargs)[0]  # type: ignore
+                mech_tool_output_json = json.loads(mech_tool_output)
                 # END MECH INTERACT EMULATION
 
-                proposed_markets = json.loads(proposed_markets)  # type: ignore
+                self.context.logger.info(f"{mech_tool_output_json['reasoning']=}")
+
+                proposed_markets = mech_tool_output_json["questions"]  # type: ignore
 
                 if "error" in proposed_markets:
                     approved_markets_count = 0
@@ -1472,7 +1475,6 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
         response_data = json.loads(response.body.decode())
         self.context.logger.info(f"Response received from {url}:\n {response_data}")
 
-        print(response_data)
         return json.dumps(response_data, sort_keys=True)
 
 

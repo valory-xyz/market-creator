@@ -501,10 +501,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
             article_id = response["article_id"]
             topic = response["topic"]
             article = articles[article_id]
-
-            print(
-                f"ARTICLE {article['title']!r} SELECTED BECAUSE {response['reasoning']!r}\n"
-            )
+            reasoning = f"The article {article['title']!r} ({article.get('author', '')!r}) has been selected to generate prediction market questions because: {response['reasoning']}"
 
         # Scrape selected article
         scrape_result = scrape_url(kwargs["api_keys"]["serper"], article["url"])
@@ -589,7 +586,13 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 "article": article,
             }
 
-        return json.dumps(questions_dict, sort_keys=True), None, None, None
+        output = {
+            "questions": questions_dict,
+            "reasoning": reasoning,
+            "article": article,
+        }
+
+        return json.dumps(output, sort_keys=True), None, None, None
     except Exception as e:
         return (
             f'{{"error": "An exception has occurred: {e}.", "tool": {tool}}}',
