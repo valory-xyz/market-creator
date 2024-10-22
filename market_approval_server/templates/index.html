@@ -24,30 +24,47 @@
         <li><a href="/all_markets">All markets</a></li>
     </ul>
 
+    <h2>View a single market by <code>market_id</code> endpoints</h2>
+    <p>Requires to know the <code>market_id</code>:</p>
+    <ul>
+        <li><code>/proposed_market/market_id</code>: Marked in "Proposed markets" database</a></li>
+        <li><code>/approved_market/market_id</code>: Marked in "Approved markets" database</a></li>
+        <li><code>/rejected_market/market_id</code>: Marked in "Rejected markets" database</a></li>
+        <li><code>/processed_market/market_id</code>: Marked in "Processed markets" database</a></li>
+        <li><code>/market/market_id</code>: Marked in any database</a></li>
+    </ul>
+
+    <h2>Note on <code>market_id</code>s</h2>
+    <p>All <code>market_id</code>s must be lowercase. The server will always convert received market IDs to lowercase before storing or modifying the IDs of any market on the database.</p>
+
     <h2>Main interaction methods</h2>
 
     <ul>
         <li>Approve a market:
-            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k {{ server_ip }}/approve_market</pre>
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k {{ server_ip }}/approve_market</pre>
         </li>
 
         <li>Reject a market:
-            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k {{ server_ip }}/reject_market</pre>
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k {{ server_ip }}/reject_market</pre>
         </li>
     </ul>
 
     <h2>Other methods</h2>
     <ul>
         <li>Propose a market:
-            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k {{ server_ip }}/propose_market</pre>
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", ...}' -k {{ server_ip }}/propose_market</pre>
         </li>
 
         <li>Mark a market as processed:
-            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k {{ server_ip }}/process_market</pre>
+            <pre>curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k {{ server_ip }}/process_market</pre>
         </li>
 
         <li>Update a market:
-            <pre>curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k {{ server_ip }}/update_market</pre>
+            <pre>curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", ...}' -k {{ server_ip }}/update_market</pre>
+        </li>
+
+        <li>Update a market id:
+            <pre>curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", "new_id": "new_market_id"}' -k {{ server_ip }}/update_market_id</pre>
         </li>
 
         <li>Get a random accepted market and mark it as processed:

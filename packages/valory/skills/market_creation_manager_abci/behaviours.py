@@ -21,10 +21,11 @@
 
 import json
 import random
+import time
 from abc import ABC
 from collections import defaultdict
 from dataclasses import asdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from string import Template
 from typing import (
     Any,
@@ -39,10 +40,8 @@ from typing import (
     cast,
 )
 
+import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
-from packages.valory.connections.openai.connection import (
-    PUBLIC_ID as LLM_CONNECTION_PUBLIC_ID,
-)
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
@@ -76,10 +75,7 @@ from packages.valory.skills.abstract_round_abci.models import Requests
 from packages.valory.skills.market_creation_manager_abci import (
     PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
 )
-from packages.valory.skills.market_creation_manager_abci.dialogues import (
-    LlmDialogue,
-    LlmDialogues,
-)
+from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
     SharedState,
@@ -101,13 +97,9 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectProposedMarketsRound,
     CollectRandomnessPayload,
     CollectRandomnessRound,
-    DataGatheringPayload,
-    DataGatheringRound,
     DepositDaiRound,
     GetPendingQuestionsRound,
     MarketCreationManagerAbciApp,
-    MarketProposalPayload,
-    MarketProposalRound,
     PostTransactionRound,
     PrepareTransactionPayload,
     PrepareTransactionRound,
@@ -473,6 +465,8 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info(f"openingTimestamp_lte={openingTimestamp_lte}")
 
             # Compute required openingTimestamp (between now and now + approve_market_event_days_offset)
+            # openingTimestamp refers to the time the market is closed for trades, and open for answer
+            # in Realitio. We require "self.params.markets_to_approve_per_day" markets to close for trades every day.
             required_opening_ts = []
             current_day_start_timestamp = (
                 openingTimestamp_gte - (openingTimestamp_gte % _ONE_DAY) + _ONE_DAY
@@ -481,7 +475,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 required_opening_ts.append(current_day_start_timestamp)
                 current_day_start_timestamp += _ONE_DAY
 
-            self.context.logger.info(f"required_opening_ts={required_opening_ts}")
+            self.context.logger.info(f"{required_opening_ts=}")
 
             # Get existing (open) markets count per openingTimestamp (between now and now + approve_market_event_days_offset)
             latest_open_markets = yield from self._collect_latest_open_markets(
@@ -496,20 +490,22 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info(f"existing_market_count={existing_market_count}")
 
             # Determine number of markets required to be approved per openingTimestamp (between now and now + approve_market_event_days_offset)
-            required_markets_to_approve: Dict[int, int] = defaultdict(int)
+            required_markets_to_approve_per_opening_ts: Dict[int, int] = defaultdict(
+                int
+            )
             N = self.params.markets_to_approve_per_day
 
             for ts in required_opening_ts:
-                required_markets_to_approve[ts] = max(
+                required_markets_to_approve_per_opening_ts[ts] = max(
                     0, N - existing_market_count.get(ts, 0)
                 )
 
-            num_markets_to_approve = sum(required_markets_to_approve.values())
-
-            self.context.logger.info(
-                f"markets_to_approve={required_markets_to_approve}"
+            num_markets_to_approve = sum(
+                required_markets_to_approve_per_opening_ts.values()
             )
-            self.context.logger.info(f"num_markets_to_approve={num_markets_to_approve}")
+
+            self.context.logger.info(f"{required_markets_to_approve_per_opening_ts=}")
+            self.context.logger.info(f"{num_markets_to_approve=}")
 
             # Determine largest creation timestamp in markets with openingTimestamp between now and now + approve_market_event_days_offset
             creation_timestamps = [
@@ -517,26 +513,23 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 for entry in latest_open_markets.get("fixedProductMarketMakers", {})
             ]
             largest_creation_timestamp = max(creation_timestamps, default=0)
-            self.context.logger.info(
-                f"largest_creation_timestamp={largest_creation_timestamp}"
-            )
+            self.context.logger.info(f"{largest_creation_timestamp=}")
 
             # Collect misc data related to market approval
             min_approve_markets_epoch_seconds = (
                 self.params.min_approve_markets_epoch_seconds
             )
-            self.context.logger.info(
-                f"min_approve_markets_epoch_seconds={min_approve_markets_epoch_seconds}"
-            )
+            self.context.logger.info(f"{min_approve_markets_epoch_seconds=}")
             approved_markets_count = self.synchronized_data.approved_markets_count
-            self.context.logger.info(f"approved_markets_count={approved_markets_count}")
+            self.context.logger.info(f"{approved_markets_count=}")
 
             latest_approve_market_timestamp = (
                 self.synchronized_data.approved_markets_timestamp
             )
-            self.context.logger.info(
-                f"latest_approve_market_execution={latest_approve_market_timestamp}"
-            )
+            self.context.logger.info(f"{latest_approve_market_timestamp=}")
+
+            # Collect approved markets (not yet processed by the service)
+            approved_markets = yield from self._collect_approved_markets()
 
             # Main logic of the behaviour
             if (
@@ -562,38 +555,18 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             elif num_markets_to_approve <= 0:
                 self.context.logger.info("No market approval required.")
                 content = CollectProposedMarketsRound.SKIP_MARKET_APPROVAL_PAYLOAD
+            elif len(approved_markets["approved_markets"]) > 0:
+                self.context.logger.info("There are unprocessed approved markets.")
+                content = CollectProposedMarketsRound.SKIP_MARKET_APPROVAL_PAYLOAD
             else:
                 self.context.logger.info("Timeout to approve markets reached.")
 
-                max_timestamp_to_approve = max(
-                    (
-                        ts
-                        for ts, value in required_markets_to_approve.items()
-                        if value > 0
-                    ),
-                    default=0,
-                )
-
-                # On the market approval server, resolution_time is one day less than openingTimestamp
-                proposed_markets = yield from self._collect_latest_proposed_markets(
-                    max_timestamp_to_approve - _ONE_DAY,
-                    max_timestamp_to_approve,
-                )
-
-                proposed_markets_timestamps: Dict[int, int] = defaultdict(int)
-
-                for market_data in proposed_markets["proposed_markets"].values():
-                    proposed_markets_timestamps[market_data["resolution_time"]] += 1
-
-                self.context.logger.info(
-                    f"proposed_markets_timestamps={proposed_markets_timestamps}"
-                )
                 content_data = {}
                 content_data.update(latest_open_markets)
-                content_data.update(proposed_markets)
-                content_data["num_markets_to_approve"] = required_markets_to_approve[
-                    max_timestamp_to_approve
-                ]
+                content_data.update(approved_markets)
+                content_data[
+                    "required_markets_to_approve_per_opening_ts"
+                ] = required_markets_to_approve_per_opening_ts
                 content_data["timestamp"] = current_timestamp
                 content = json.dumps(content_data, sort_keys=True)
 
@@ -608,58 +581,41 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.set_done()
 
-    def _collect_latest_proposed_markets(
-        self, from_timestamp: int, to_timestamp: int
-    ) -> Generator[None, None, Dict[str, Any]]:
-        """Auxiliary method to collect data from the endpoint."""
-        self.context.logger.info("Collecting proposed markets.")
+    def _collect_approved_markets(self) -> Generator[None, None, Dict[str, Any]]:
+        """Auxiliary method to collect approved and unprocessed markets from the endpoint."""
+        self.context.logger.info("Collecting approved markets.")
 
-        self.context.logger.info(f"from_timestamp={from_timestamp}")
-        self.context.logger.info(f"to_timestamp={to_timestamp}")
-
-        url = self.params.market_approval_server_url + "/proposed_markets"
+        url = f"{self.params.market_approval_server_url}/approved_markets"
         headers = {
             "Authorization": self.params.market_approval_server_api_key,
             "Content-Type": "application/json",
         }
-
-        response = yield from self.get_http_response(
+        http_response = yield from self.get_http_response(
             method="GET",
             url=url,
             headers=headers,
         )
-        if response is None or response.status_code != HTTP_OK:
-            self.context.logger.error(
-                f"Could not retrieve response from {url}."
-                f"Received status code {response.status_code}.\n{response}"
+        if http_response.status_code != HTTP_OK:
+            self.context.logger.warning(
+                f"Failed to retrieve approved markets: {http_response.status_code} {http_response}"
             )
-            # TODO Handle retries
-            return {"proposed_markets": {}}
+            # TODO return error instead?
+            return {"approved_markets": {}}
 
-        response_data = json.loads(response.body.decode())
+        body = json.loads(http_response.body.decode())
         self.context.logger.info(
-            f"Response received from {url} (length {len(response_data['proposed_markets'])})"
+            f"Successfully collected approved markets, received body {body}"
         )
-
-        filtered_markets_data = {
-            "proposed_markets": {
-                market_id: market_info
-                for market_id, market_info in response_data["proposed_markets"].items()
-                if from_timestamp <= market_info["resolution_time"] < to_timestamp
-            }
-        }
-
-        self.context.logger.info(
-            f"len(filtered_markets_data)={len(filtered_markets_data['proposed_markets'])}"
-        )
-
-        return filtered_markets_data
+        return body
 
     def _collect_latest_open_markets(
         self, openingTimestamp_gte: int, openingTimestamp_lte: int
     ) -> Generator[None, None, Dict[str, Any]]:
         """Collect FPMM from subgraph."""
         creator = self.synchronized_data.safe_contract_address.lower()
+
+        self.context.logger.info(f"_collect_latest_open_markets for {creator=}")
+
         response = yield from self.get_subgraph_result(
             query=FPMM_QUERY.substitute(
                 creator=creator,
@@ -722,20 +678,79 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             collected_proposed_markets_json = json.loads(
                 self.synchronized_data.collected_proposed_markets_data
             )
-            markets_to_approve = yield from self._get_llm_response(
-                collected_proposed_markets_json
+
+            required_markets_to_approve_per_opening_ts = (
+                collected_proposed_markets_json[
+                    "required_markets_to_approve_per_opening_ts"
+                ]
             )
 
-            for market_id in markets_to_approve.get("markets_to_approve", []):
-                yield from self._approve_market(market_id)
-                yield from self._update_market(market_id)
+            # Select an openingTimestamp with >0 markets to approve
+            opening_ts = next(
+                (
+                    k
+                    for k, v in required_markets_to_approve_per_opening_ts.items()
+                    if v > 0
+                ),
+                None,
+            )
+            self.context.logger.info(f"{opening_ts=}")
+            proposed_markets = {}
+            approved_markets_count = 0
+
+            if opening_ts:
+                # TODO THIS EMULATES MECH INTERACT SENDING REQUEST TO A TOOL
+
+                # This is very important, the resolution_time (i.e., the event day)
+                # is one day less than the openingTimestamp
+                resolution_time = int(opening_ts) - _ONE_DAY
+
+                num_questions = min(
+                    required_markets_to_approve_per_opening_ts[opening_ts],
+                    self.params.max_markets_per_story,
+                )
+
+                keys = mech_tool_propose_questions.KeyChain(  # type: ignore
+                    {
+                        "openai": [self.params.openai_api_key],
+                        "newsapi": [self.params.newsapi_api_key],
+                        "serper": [self.params.serper_api_key],
+                        "subgraph": [self.params.subgraph_api_key],
+                    }
+                )
+
+                tool_kwargs = dict(
+                    tool="propose-question",
+                    api_keys=keys,
+                    news_sources=self.params.news_sources,
+                    topics=self.params.topics,
+                    num_questions=num_questions,
+                    resolution_time=resolution_time,
+                )
+                mech_tool_output = mech_tool_propose_questions.run(**tool_kwargs)[0]  # type: ignore
+                mech_tool_output_json = json.loads(mech_tool_output)
+                # END MECH INTERACT EMULATION
+
+                self.context.logger.info(f"{mech_tool_output_json['reasoning']=}")
+
+                proposed_markets = mech_tool_output_json["questions"]  # type: ignore
+
+                if "error" in proposed_markets:
+                    approved_markets_count = 0
+                    self.context.logger.error(
+                        f"An error occurred interacting with the Mech tool {proposed_markets=}"
+                    )
+                else:
+                    for market in proposed_markets.values():
+                        yield from self._propose_and_approve_market(market)
+
+                    approved_markets_count = len(proposed_markets)
 
             sender = self.context.agent_address
-
             payload = ApproveMarketsPayload(
                 sender=sender,
-                content=json.dumps(markets_to_approve, sort_keys=True),
-                approved_markets_count=len(markets_to_approve["markets_to_approve"])
+                content=json.dumps(proposed_markets, sort_keys=True),
+                approved_markets_count=approved_markets_count
                 + self.synchronized_data.approved_markets_count,
                 timestamp=self.last_synced_timestamp,
             )
@@ -746,181 +761,80 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.set_done()
 
-    def _get_llm_response(
-        self, json_data: dict[str, Any]
-    ) -> Generator[None, None, dict[str, Any]]:
-        """Get the LLM response"""
-
-        markets_to_approve_per_epoch = self.params.markets_to_approve_per_epoch
-        self.context.logger.info(
-            f"markets_to_approve_per_epoch={markets_to_approve_per_epoch}"
-        )
-
-        # TODO make params
-        prompt_template = """Choose the best questions under PROPOSED_QUESTIONS
-            suitable to open prediction markets. The chosen questions must satisfy the following:
-            - The topic must interesting.
-            - Not be repeated.
-            - Have different meanings.
-            - Each question has to be easily verifiable through public sources (newspaper, search engines, etc.)
-            - When possible, not be too similar to the questions under EXISTING_QUESTIONS
-
-            Each question in the list has an ID. Your output must be a a single JSON array to be parsed
-            by Python "json.loads()" with the following form: {{"markets_to_approve": [id1, id2, id3, ...] }}.
-            The length of "markets_to_approve" must be {markets_to_approve_per_epoch}.
-
-            PROPOSED_QUESTIONS
-            {proposed_questions}
-
-            EXISTING_QUESTIONS
-            {existing_questions}
-
-            Output the JSON array as specified. Do not produce any other outpupt."""
-
-        # Extracting N random questions
-        N = 40  # Replace with the desired number of recent questions
-        all_proposed_questions = list(json_data["proposed_markets"].values())
-
-        random.seed(
-            "ApproveMarketsBehaviour._get_llm_response"
-            + self.synchronized_data.most_voted_randomness,
-            2,
-        )  # nosec
-        random_questions = random.sample(
-            all_proposed_questions, min(N, len(all_proposed_questions))
-        )
-        proposed_question_lines = []
-        for value in random_questions:
-            question_id = value["id"]
-            question_text = value["question"]
-            proposed_question_lines.append(f"- {question_id} - {question_text}")
-
-        proposed_questions = "\n".join(proposed_question_lines)
-
-        # Extract "N" most recent questions
-        N = 40  # Replace with the desired number of recent questions
-        most_recent_questions = sorted(
-            json_data["fixedProductMarketMakers"],
-            key=lambda x: int(x["creationTimestamp"]),
-            reverse=True,
-        )[:N]
-
-        existing_questions = "\n".join(
-            [f"- {question['title']}" for question in most_recent_questions]
-        )
-
-        prompt_values = {
-            "markets_to_approve_per_epoch": str(markets_to_approve_per_epoch),
-            "proposed_questions": proposed_questions,
-            "existing_questions": existing_questions,
-        }
-
-        self.context.logger.info(
-            f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
-        )
-
-        llm_dialogues = cast(LlmDialogues, self.context.llm_dialogues)
-
-        # llm request message
-        request_llm_message, llm_dialogue = llm_dialogues.create(
-            counterparty=str(LLM_CONNECTION_PUBLIC_ID),
-            performative=LlmMessage.Performative.REQUEST,
-            prompt_template=prompt_template,
-            prompt_values=prompt_values,
-        )
-        request_llm_message = cast(LlmMessage, request_llm_message)
-        llm_dialogue = cast(LlmDialogue, llm_dialogue)
-        llm_response_message = yield from self.do_llm_request(
-            request_llm_message, llm_dialogue
-        )
-        result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
-        self.context.logger.info(f"Got LLM response: {result}")
-
-        # Sanitize LLM response
-        sanitized_result: dict[str, Any] = {"markets_to_approve": []}
-        try:
-            json_data = json.loads(result)
-            if isinstance(json_data, dict) and "markets_to_approve" in json_data:
-                if isinstance(json_data["markets_to_approve"], list):
-                    sanitized_result = {
-                        "markets_to_approve": json_data["markets_to_approve"][
-                            :markets_to_approve_per_epoch
-                        ]
-                    }
-        except json.JSONDecodeError:
-            self.context.logger.error("Error decoding JSON response.")
-
-        self.context.logger.info(f"sanitized_result: {sanitized_result}")
-
-        return sanitized_result
-
-    def _approve_market(self, market_id: Dict[str, str]) -> Generator[None, None, str]:
+    def _propose_and_approve_market(
+        self, market: Dict[str, Any]
+    ) -> Generator[None, None, str]:
         """Auxiliary method to approve markets on the endpoint."""
-        self.context.logger.info(f"Approving markets {market_id}")
 
-        url = self.params.market_approval_server_url + "/approve_market"
         headers = {
             "Authorization": self.params.market_approval_server_api_key,
             "Content-Type": "application/json",
         }
 
-        response = yield from self.get_http_response(
+        market_id = market["id"]
+
+        # Step 1: Propose market
+        self.context.logger.info(f"proposing market {market_id=}")
+        url = self.params.market_approval_server_url + "/propose_market"
+        body = market
+        http_response = yield from self.get_http_response(
             method="POST",
             url=url,
             headers=headers,
-            content=json.dumps({"id": market_id}).encode("utf-8"),
+            content=json.dumps(body).encode("utf-8"),
         )
-        if response.status_code != HTTP_OK:
-            self.context.logger.error(
-                f"Could not retrieve response from {url}."
-                f"Received status code {response.status_code}.\n{response}"
+        if http_response.status_code != HTTP_OK:
+            self.context.logger.warning(
+                f"Failed to propose market: {http_response.status_code} {http_response}"
             )
-            # TODO Handle retries
-            retries = 3  # TODO: Make params
-            if retries >= MAX_RETRIES:
-                return MarketProposalRound.MAX_RETRIES_PAYLOAD
-            return MarketProposalRound.ERROR_PAYLOAD
+            return ApproveMarketsRound.ERROR_PAYLOAD
+        body = json.loads(http_response.body.decode())
+        self.context.logger.info(f"Successfully proposed market, received body {body}")
+        time.sleep(3)
 
-        response_data = json.loads(response.body.decode())
-        self.context.logger.info(f"Response received from {url}:\n {response_data}")
-        return json.dumps(response_data, sort_keys=True)
+        # Step 2: Approve market
+        self.context.logger.info(f"Approving market {market_id=}")
+        url = self.params.market_approval_server_url + "/approve_market"
+        body = {"id": market_id}
+        http_response = yield from self.get_http_response(
+            method="POST",
+            url=url,
+            headers=headers,
+            content=json.dumps(body).encode("utf-8"),
+        )
+        if http_response.status_code != HTTP_OK:
+            self.context.logger.warning(
+                f"Failed to approve market: {http_response.status_code} {http_response}"
+            )
+            return ApproveMarketsRound.ERROR_PAYLOAD
+        body = json.loads(http_response.body.decode())
+        self.context.logger.info(f"Successfully approved market, received body {body}")
+        time.sleep(3)
 
-    def _update_market(self, market_id: str) -> Generator[None, None, str]:
-        """Auxiliary method to update markets on the endpoint."""
-        self.context.logger.info(f"Updating market {market_id}")
-
+        # Step 3: Update market data
+        self.context.logger.info(f"Updating market {market_id=}")
         url = self.params.market_approval_server_url + "/update_market"
-        headers = {
-            "Authorization": self.params.market_approval_server_api_key,
-            "Content-Type": "application/json",
-        }
-
-        sender = self.context.agent_address
-        payload = {
+        body = {
             "id": market_id,
-            "approved_by": f"{MARKET_CREATION_MANAGER_PUBLIC_ID}@{sender}",
+            "approved_by": f"{MARKET_CREATION_MANAGER_PUBLIC_ID}@{self.context.agent_address}",
         }
-
-        response = yield from self.get_http_response(
+        http_response = yield from self.get_http_response(
             method="PUT",
             url=url,
             headers=headers,
-            content=json.dumps(payload).encode("utf-8"),
+            content=json.dumps(body).encode("utf-8"),
         )
-        if response.status_code != HTTP_OK:
-            self.context.logger.error(
-                f"Could not retrieve response from {url}."
-                f"Received status code {response.status_code}.\n{response}"
+        if http_response.status_code != HTTP_OK:
+            self.context.logger.warning(
+                f"Failed to update market: {http_response.status_code} {http_response}"
             )
-            # TODO Handle retries
-            retries = 3  # TODO: Make params
-            if retries >= MAX_RETRIES:
-                return MarketProposalRound.MAX_RETRIES_PAYLOAD
-            return MarketProposalRound.ERROR_PAYLOAD
+            return ApproveMarketsRound.ERROR_PAYLOAD
 
-        response_data = json.loads(response.body.decode())
-        self.context.logger.info(f"Response received from {url}:\n {response_data}")
-        return json.dumps(response_data, sort_keys=True)
+        body = json.loads(http_response.body.decode())
+        self.context.logger.info(f"Successfully updated market, received body {body}")
+        time.sleep(3)
+
+        return json.dumps(body, sort_keys=True)
 
 
 class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
@@ -1472,310 +1386,11 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         }
 
 
-class DataGatheringBehaviour(MarketCreationManagerBaseBehaviour):
-    """DataGatheringBehaviour"""
-
-    matching_round: Type[AbstractRound] = DataGatheringRound
-
-    def async_act(self) -> Generator:
-        """Do the act, supporting asynchronous execution."""
-
-        with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            sender = self.context.agent_address
-            current_timestamp = self.last_synced_timestamp
-            last_proposed_markets_timestamp = (
-                self.synchronized_data.proposed_markets_data["timestamp"]
-            )
-            proposed_markets_count = self.synchronized_data.proposed_markets_count
-
-            self.context.logger.info(
-                f"proposed_markets_count={proposed_markets_count} max_proposed_markets={self.params.max_proposed_markets} proposed_markets_data_timestamp={last_proposed_markets_timestamp} current_timestamp={current_timestamp} min_market_proposal_interval_seconds={self.params.min_market_proposal_interval_seconds}"
-            )
-
-            if (
-                self.params.max_proposed_markets >= 0
-                and proposed_markets_count >= self.params.max_proposed_markets
-            ):
-                self.context.logger.info("Max markets proposed reached.")
-                gathered_data = DataGatheringRound.MAX_PROPOSED_MARKETS_REACHED_PAYLOAD
-            elif (
-                current_timestamp - last_proposed_markets_timestamp
-                < self.params.min_market_proposal_interval_seconds
-            ):
-                self.context.logger.info("Timeout to propose new markets not reached.")
-                gathered_data = DataGatheringRound.SKIP_MARKET_PROPOSAL_PAYLOAD
-            else:
-                self.context.logger.info("Timeout to propose new markets reached.")
-                gathered_data = yield from self._gather_data()
-
-            payload = DataGatheringPayload(
-                sender=sender,
-                gathered_data=gathered_data,
-            )
-        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
-            yield from self.send_a2a_transaction(payload)
-            yield from self.wait_until_round_end()
-
-        self.set_done()
-
-    def _gather_data(self) -> Generator[None, None, str]:
-        """Auxiliary method to collect data from endpoint."""
-        news_sources = self.params.news_sources
-        headers = {"X-Api-Key": self.params.newsapi_api_key}
-
-        random.seed(
-            "DataGatheringBehaviour" + self.synchronized_data.most_voted_randomness, 2
-        )  # nosec
-        k = min(10, len(news_sources))
-        sources = random.sample(news_sources, k)
-
-        parameters = {
-            "sources": ",".join(sources),
-            "pageSize": "100",
-        }
-        # only get articles from top headlines
-        url = f"{self.params.newsapi_endpoint}/{TOP_HEADLINES}"
-        response = yield from self.get_http_response(
-            method="GET",
-            url=url,
-            headers=headers,
-            parameters=parameters,
-        )
-        if response.status_code != HTTP_OK:
-            self.context.logger.error(
-                f"Could not retrieve response from {self.params.newsapi_endpoint}."
-                f"Received status code {response.status_code}.\n{response}"
-            )
-            retries = 3  # TODO: Make params
-            if retries >= MAX_RETRIES:
-                return DataGatheringRound.MAX_RETRIES_PAYLOAD
-            return DataGatheringRound.ERROR_PAYLOAD
-
-        response_data = json.loads(response.body.decode())
-        self.context.logger.info(
-            f"Response received from {self.params.newsapi_endpoint}:\n {response_data}"
-        )
-        return json.dumps(response_data, sort_keys=True)
-
-
 class SelectKeeperMarketProposalBehaviour(SelectKeeperBehaviour):
     """Select the keeper agent."""
 
     matching_round = SelectKeeperRound
     payload_class = SelectKeeperPayload
-
-
-class MarketProposalBehaviour(MarketCreationManagerBaseBehaviour):
-    """MarketProposalBehaviour"""
-
-    matching_round: Type[AbstractRound] = MarketProposalRound
-
-    def _i_am_not_sending(self) -> bool:
-        """Indicates if the current agent is the sender or not."""
-        return (
-            self.context.agent_address
-            != self.synchronized_data.most_voted_keeper_address
-        )
-
-    def async_act(self) -> Generator[None, None, None]:
-        """
-        Do the action.
-
-        Steps:
-        - If the agent is the keeper, then prepare the transaction and send it.
-        - Otherwise, wait until the next round.
-        - If a timeout is hit, set exit A event, otherwise set done event.
-        """
-        if self._i_am_not_sending():
-            yield from self._not_sender_act()
-        else:
-            yield from self._sender_act()
-
-    def _not_sender_act(self) -> Generator:
-        """Do the non-sender action."""
-        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
-            self.context.logger.info(
-                f"Waiting for the keeper to do its keeping: {self.synchronized_data.most_voted_keeper_address}"
-            )
-            yield from self.wait_until_round_end()
-        self.set_done()
-
-    def _sender_act(self) -> Generator:
-        """Do the act, supporting asynchronous execution."""
-
-        with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            random.seed(
-                "MarketProposalBehaviour"
-                + self.synchronized_data.most_voted_randomness,
-                2,
-            )  # nosec
-
-            events_datetime = self._generate_events_datetime(
-                self.last_synced_timestamp,
-                self.params.event_offset_start_days,
-                self.params.event_offset_end_days,
-            )
-
-            all_proposed_markets = []
-            for dt in events_datetime:
-                self.context.logger.info(f"Proposing markets for {dt}")
-                data = json.loads(self.synchronized_data.gathered_data)
-                k = min(40, len(data["articles"]))
-                selected_news_articles = random.sample(data["articles"], k)
-                proposed_markets = yield from self._get_llm_response(
-                    dt, selected_news_articles
-                )
-
-                all_proposed_markets.extend(proposed_markets)
-
-            if self.params.max_proposed_markets == -1:
-                n_markets_to_propose = len(all_proposed_markets)
-            else:
-                remaining_markets = (
-                    self.params.max_proposed_markets
-                    - self.synchronized_data.proposed_markets_count
-                )
-                n_markets_to_propose = min(remaining_markets, len(all_proposed_markets))
-
-            for q in all_proposed_markets[:n_markets_to_propose]:
-                yield from self._propose_market(q)
-
-            sender = self.context.agent_address
-            payload_content = {
-                "proposed_markets": all_proposed_markets,
-                "timestamp": self.last_synced_timestamp,
-            }
-            payload = MarketProposalPayload(
-                sender=sender,
-                content=json.dumps(payload_content, sort_keys=True),
-            )
-
-        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
-            yield from self.send_a2a_transaction(payload)
-            yield from self.wait_until_round_end()
-
-        self.set_done()
-
-    def _generate_events_datetime(
-        self,
-        reference_day_timestamp: float,
-        offset_start_days: int,
-        offset_end_days: int,
-    ) -> list[datetime]:
-        """Generate 02:00 UTC datetimes between date(timestamp) + offset_start_days and date(timestamp) + offset_end_days"""
-        datetimes = []
-        reference_day = datetime.utcfromtimestamp(reference_day_timestamp).date()
-        reference_day_at_midnight = datetime(
-            reference_day.year, reference_day.month, reference_day.day
-        ).replace(hour=2, minute=0, second=0)
-        reference_day_at_midnight.replace(tzinfo=timezone.utc)
-
-        for i in range(offset_start_days, offset_end_days + 1):
-            new_day_timestamp = reference_day_at_midnight + timedelta(days=i)
-            datetimes.append(new_day_timestamp)
-
-        return datetimes
-
-    def _get_llm_response(
-        self, event_day: datetime, news_articles: List[Dict[str, Any]]
-    ) -> Generator[None, None, list[Any]]:
-        """Get the LLM response"""
-
-        input_news = ""
-        for article in news_articles:
-            title = article["title"]
-            content = article["content"]
-            date = article["publishedAt"]
-            input_news += f"- ({date}) {title}\n  {content}\n\n"
-
-        topics = ", ".join(self.params.topics)
-        prompt_template = self.params.market_identification_prompt
-        prompt_values = {
-            "input_news": input_news,
-            "topics": topics,
-            "event_day": event_day.strftime("%-d %B %Y"),
-        }
-
-        self.context.logger.info(
-            f"Sending LLM request...\nprompt_template={prompt_template}\nprompt_values={prompt_values}"
-        )
-
-        llm_dialogues = cast(LlmDialogues, self.context.llm_dialogues)
-
-        # llm request message
-        request_llm_message, llm_dialogue = llm_dialogues.create(
-            counterparty=str(LLM_CONNECTION_PUBLIC_ID),
-            performative=LlmMessage.Performative.REQUEST,
-            prompt_template=prompt_template,
-            prompt_values=prompt_values,
-        )
-        request_llm_message = cast(LlmMessage, request_llm_message)
-        llm_dialogue = cast(LlmDialogue, llm_dialogue)
-        llm_response_message = yield from self.do_llm_request(
-            request_llm_message, llm_dialogue
-        )
-        result = llm_response_message.value.replace("OUTPUT:", "").rstrip().lstrip()
-        self.context.logger.info(f"Got LLM response: {result}")
-
-        data = json.loads(result)
-        valid_responses = []
-        for q in data:
-            try:
-                # Date of the outcome
-                resolution_date = parse_date_timestring(q["resolution_date"])
-                if resolution_date is None:
-                    self.context.logger.error(
-                        "Cannot parse datestring " + q["resolution_date"]
-                    )
-                    continue
-                valid_responses.append(
-                    {
-                        "question": q["question"],
-                        "answers": q["answers"],
-                        "topic": q["topic"],
-                        "language": "en_US",
-                        "resolution_time": int(resolution_date.timestamp()),
-                    }
-                )
-            except (ValueError, TypeError, KeyError) as e:
-                self.context.logger.error(
-                    f"Error converting question object {q} with error {e}"
-                )
-                continue
-        return valid_responses
-
-    def _propose_market(
-        self, proposed_market_data: Dict[str, str]
-    ) -> Generator[None, None, str]:
-        """Auxiliary method to propose a market to the endpoint."""
-
-        url = self.params.market_approval_server_url + "/propose_market"
-        self.context.logger.info(f"Proposing market {proposed_market_data} on {url}")
-
-        headers = {
-            "Authorization": self.params.market_approval_server_api_key,
-            "Content-Type": "application/json",
-        }
-
-        response = yield from self.get_http_response(
-            method="POST",
-            url=url,
-            headers=headers,
-            content=json.dumps(proposed_market_data).encode("utf-8"),
-        )
-        if response.status_code != HTTP_OK:
-            self.context.logger.error(
-                f"Could not retrieve response from {url}."
-                f"Received status code {response.status_code}.\n{response}"
-            )
-            retries = 3  # TODO: Make params
-            if retries >= MAX_RETRIES:
-                return MarketProposalRound.MAX_RETRIES_PAYLOAD
-            return MarketProposalRound.ERROR_PAYLOAD
-
-        response_data = json.loads(response.body.decode())
-        self.context.logger.info(f"Response received from {url}:\n {response_data}")
-        return json.dumps(response_data, sort_keys=True)
 
 
 class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
@@ -1860,7 +1475,6 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
         response_data = json.loads(response.body.decode())
         self.context.logger.info(f"Response received from {url}:\n {response_data}")
 
-        print(response_data)
         return json.dumps(response_data, sort_keys=True)
 
 
@@ -2025,7 +1639,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info(f"Preparing txs for {question_data=}")
 
             opening_timestamp, timeout = self._calculate_time_parameters(
-                resolution_time=data["resolution_time"],
+                resolution_time=float(data["resolution_time"]),
                 timeout=self.params.market_timeout,
             )
             self.context.logger.info(
@@ -2211,11 +1825,14 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         self, id_: str, fpmm_id: str
     ) -> Generator[None, None, Optional[str]]:
         """Call the market approval server to signal that the provided market is created."""
-        url = f"{self.params.market_approval_server_url}/update_market"
+
         headers = {
             "Authorization": self.params.market_approval_server_api_key,
             "Content-Type": "application/json",
         }
+
+        # Update the 'fpmm' field
+        url = f"{self.params.market_approval_server_url}/update_market"
         body = {"id": id_, "fpmm_id": fpmm_id}
         http_response = yield from self.get_http_response(
             headers=headers,
@@ -2225,14 +1842,33 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if http_response.status_code != HTTP_OK:
             self.context.logger.warning(
-                f"Failed to mark market as done: {http_response.status_code} {http_response}"
+                f"Failed to update market: {http_response.status_code} {http_response}"
+            )
+            return str(http_response.body)
+
+        body = json.loads(http_response.body.decode())
+        self.context.logger.info(f"Successfully updated market, received body {body}")
+
+        # Update the market id to match the 'fpmm' id
+        url = f"{self.params.market_approval_server_url}/update_market_id"
+        body = {"id": id_, "new_id": fpmm_id}
+        http_response = yield from self.get_http_response(
+            headers=headers,
+            method="PUT",
+            url=url,
+            content=json.dumps(body).encode("utf-8"),
+        )
+        if http_response.status_code != HTTP_OK:
+            self.context.logger.warning(
+                f"Failed to update market id: {http_response.status_code} {http_response}"
             )
             return str(http_response.body)
 
         body = json.loads(http_response.body.decode())
         self.context.logger.info(
-            f"Successfully marked market as done, received body {body}"
+            f"Successfully updated market id, received body {body}"
         )
+
         return None
 
 
@@ -2577,9 +2213,7 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
         GetPendingQuestionsBehaviour,
         AnswerQuestionsBehaviour,
         ApproveMarketsBehaviour,
-        DataGatheringBehaviour,
         SelectKeeperMarketProposalBehaviour,
-        MarketProposalBehaviour,
         RetrieveApprovedMarketBehaviour,
         PrepareTransactionBehaviour,
         SyncMarketsBehaviour,

@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: bafybeidajmnltkvswbtn6zay3lxcx5pp2k4ys5jnmjdgutada6hkmay5tu
   composition.py: bafybeibags3bapzxlvsbjsxhlyxpd6ypnvwggu6jijktm4qfe4sn5ugfky
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
-  fsm_specification.yaml: bafybeicsotlxzvvpw2jk7assimkvrsgtogfvlirkmpg2rxqseg3j6qqbem
+  fsm_specification.yaml: bafybeidos4vf76w3nejitdsrjpxwtz3phjqjv6xng4m5ku7sskgibwc5s4
   handlers.py: bafybeidl5pzel4ui7m3kipu4tavx6blcxd6yy46jaraqqcpjgh2qtprkra
   models.py: bafybeigyrb6tcpebn7gecgnkcerqmbembat4xdg2wvfybwg6op3rsee2sq
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
@@ -26,7 +26,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
-- valory/market_creation_manager_abci:0.1.0:bafybeidgpctdcbxubjdlqzcrzr2qwtuocv236ngtjduabkmja7qvqr3fri
+- valory/market_creation_manager_abci:0.1.0:bafybeibjvymcbydezmteqymyepunrgpgd4trrobvnp5ympqf6fz7lvhgjq
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
 - valory/mech_interact_abci:0.1.0:bafybeieryw7rk2tspyxx46loqqqimr2l5vvhtshiyg2mmdxijzb7pdoi6a
@@ -129,7 +129,6 @@ models:
       - bbc-sport
       - abc-news
       - cnn
-      - google-news
       - reuters
       - usa-today
       - breitbart-news
@@ -138,6 +137,7 @@ models:
       event_offset_start_days: 4
       event_offset_end_days: 7
       market_proposal_round_timeout_seconds_per_day: 45
+      max_markets_per_story: 5
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
@@ -205,6 +205,8 @@ models:
       use_slashing: false
       slash_cooldown_hours: 3
       questions_to_close_batch_size: 1
+      serper_api_key: serper_api_key
+      subgraph_api_key: subgraph_api_key
       google_api_key: google_api_key
       google_engine_id: google_engine_id
       openai_api_key: openai_api_key

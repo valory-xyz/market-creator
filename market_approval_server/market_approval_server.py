@@ -31,14 +31,15 @@ CLI Usage:
     Usage for server running in http mode (replace by https if applies).
 
     - Service API:
-        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k http://127.0.0.1:5000/propose_market
-        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/process_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", ...}' -k http://127.0.0.1:5000/propose_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k http://127.0.0.1:5000/process_market
         curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -k http://127.0.0.1:5000/get_process_random_approved_market
-        curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID", ...}' -k http://127.0.0.1:5000/update_market
+        curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", ...}' -k http://127.0.0.1:5000/update_market
+        curl -X PUT -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id", "new_id": "new_market_id"}' -k http://127.0.0.1:5000/update_market_id
 
     - User API
-        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/approve_market
-        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "MARKET_ID"}' -k http://127.0.0.1:5000/reject_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k http://127.0.0.1:5000/approve_market
+        curl -X POST -H "Authorization: YOUR_API_KEY" -H "Content-Type: application/json" -d '{"id": "market_id"}' -k http://127.0.0.1:5000/reject_market
 
         curl -X DELETE -H "Authorization: YOUR_API_KEY" -k http://127.0.0.1:5000/clear_proposed_markets
         curl -X DELETE -H "Authorization: YOUR_API_KEY" -k http://127.0.0.1:5000/clear_approved_markets
@@ -52,6 +53,7 @@ import hashlib
 import logging
 import os
 import secrets
+import sys
 import uuid
 from datetime import datetime
 from enum import Enum
@@ -65,7 +67,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-CONFIG_FILE = "server_config.json"
+CONFIG_FILE = os.getenv("MARKET_APPROVAL_SERVER_CONFIG_FILE", "server_config.json")
 LOG_FILE = "market_approval_server.log"
 CERT_FILE = "server_cert.pem"
 KEY_FILE = "server_key.pem"
@@ -93,20 +95,28 @@ processed_markets: Dict[str, Any] = {}
 api_keys: Dict[str, str] = {}
 
 
+def get_databases() -> Dict[str, Dict[str, Any]]:
+    """Returns all databases into a single object."""
+
+    return {
+        "proposed_markets": proposed_markets,
+        "approved_markets": approved_markets,
+        "rejected_markets": rejected_markets,
+        "processed_markets": processed_markets,
+    }
+
+
 def load_config() -> None:
     """Loads the configuration from a JSON file."""
     global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys  # pylint: disable=global-statement
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            logger.info("Using config file: %s", CONFIG_FILE)
             data = json.load(f)
     except FileNotFoundError:
         # If the file is not found, set the dictionaries to empty
-        proposed_markets = {}
-        approved_markets = {}
-        rejected_markets = {}
-        processed_markets = {}
-        api_keys = DEFAULT_API_KEYS
-        save_config()
+        logger.info("FileNotFoundError: %s", CONFIG_FILE)
+        sys.exit(1)
     else:
         # If the file is found, set the dictionaries to the loaded data
         proposed_markets = data.get("proposed_markets", {})
@@ -170,6 +180,55 @@ def get_markets() -> Tuple[Response, int]:
 
         response_json = json.dumps({endpoint: markets}, indent=4)
         return Response(response_json, status=200, content_type="application/json")
+    except Exception as e:  # pylint: disable=broad-except
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/proposed_market/<market_id>", methods=["GET"])
+@app.route("/approved_market/<market_id>", methods=["GET"])
+@app.route("/rejected_market/<market_id>", methods=["GET"])
+@app.route("/processed_market/<market_id>", methods=["GET"])
+def get_market_by_id(market_id: str) -> Tuple[Response, int]:
+    """Retrieve a specific market by its ID from the corresponding market database."""
+    try:
+        endpoint = request.path.split("/")[1]
+
+        if endpoint == "proposed_market":
+            markets = proposed_markets
+        elif endpoint == "approved_market":
+            markets = approved_markets
+        elif endpoint == "rejected_market":
+            markets = rejected_markets
+        elif endpoint == "processed_market":
+            markets = processed_markets
+        else:
+            return jsonify({"error": "Invalid endpoint."}), 404
+
+        if market_id in markets:
+            market = markets[market_id]
+            return jsonify(market), 200
+
+        return (
+            jsonify({"error": f"Market ID {market_id} not found in {endpoint}s."}),
+            404,
+        )
+    except Exception as e:  # pylint: disable=broad-except
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/market/<market_id>", methods=["GET"])
+def get_market_by_id_all_databases(market_id: str) -> Tuple[Response, int]:
+    """Retrieve a market by its ID from any database."""
+    try:
+        for _, db in get_databases().items():
+            if market_id in db:
+                return jsonify(db[market_id]), 200
+
+        return (
+            jsonify({"error": f"Market ID {market_id!r} not found in any database."}),
+            404,
+        )
+
     except Exception as e:  # pylint: disable=broad-except
         return jsonify({"error": str(e)}), 500
 
@@ -240,6 +299,8 @@ def propose_market() -> Tuple[Response, int]:
             market["id"] = str(uuid.uuid4())
 
         market_id = str(market["id"])
+        market_id = market_id.lower()
+        market["id"] = market_id
 
         if any(
             market_id in db
@@ -304,6 +365,7 @@ def move_market() -> Tuple[Response, int]:
             return jsonify({"error": "Invalid JSON format. Missing id."}), 400
 
         market_id = data["id"]
+        market_id = market_id.lower()
 
         if market_id not in move_from:
             return jsonify({"error": f"Market ID {market_id} not found."}), 404
@@ -332,7 +394,7 @@ def get_random_approved_market() -> Tuple[Response, int]:
             return (
                 jsonify({"info": "No approved markets available."}),
                 204,
-            )  # No content, json will be ignored by the server
+            )
 
         market_id = secrets.choice(list(approved_markets.keys()))
         market = approved_markets[market_id]
@@ -360,6 +422,7 @@ def update_market() -> Tuple[Response, int]:
             return jsonify({"error": "Invalid JSON format. Missing id."}), 400
 
         market_id = market["id"]
+        market_id = market_id.lower()
 
         # Check if the market exists in any of the databases
         databases = [
@@ -387,7 +450,72 @@ def update_market() -> Tuple[Response, int]:
             )
 
         return (
-            jsonify({"error": f"Market ID {market_id} not found in any database."}),
+            jsonify({"error": f"Market ID {market_id} not found in the database."}),
+            404,
+        )
+
+    except Exception as e:  # pylint: disable=broad-except
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/update_market_id", methods=["PUT"])
+def update_market_id() -> (
+    Tuple[Response, int]
+):  # pylint: disable=too-many-return-statements
+    """Update the market ID in any of the databases if the market exists."""
+    try:
+        api_key = request.headers.get("Authorization")
+        if not check_api_key(api_key):
+            return jsonify({"error": "Unauthorized access. Invalid API key."}), 401
+
+        data = request.get_json()
+        current_market_id = data.get("id")
+        new_market_id = data.get("new_id")
+
+        if not current_market_id:
+            return jsonify({"error": "'id' is required."}), 400
+        if not new_market_id:
+            return jsonify({"error": "'new_id' is required."}), 400
+        if current_market_id == new_market_id:
+            return jsonify({"error": "'id' is equal to 'new_id' in the request."}), 409
+
+        # The next line is intentionally commented to allow fixing uppercase market_ids externally.
+        # current_market_id = current_market_id.lower()  # noqa
+        new_market_id = new_market_id.lower()
+
+        databases = get_databases()
+
+        if any(new_market_id in db for _, db in databases.items()):
+            return (
+                jsonify(
+                    {
+                        "error": f"Market ID {new_market_id} already exists in database. Try using a different ID."
+                    }
+                ),
+                409,
+            )
+
+        for db_name, db in databases.items():
+            if current_market_id in db:
+                db[new_market_id] = db.pop(current_market_id)
+                db[new_market_id]["id"] = new_market_id
+                db[new_market_id]["utc_timestamp_updated"] = int(
+                    datetime.utcnow().timestamp()
+                )
+                save_config()
+                return (
+                    jsonify(
+                        {
+                            "message": f"Market ID {current_market_id!r} successfully changed to {new_market_id!r} in {db_name}."
+                        }
+                    ),
+                    200,
+                )
+
+        return (
+            jsonify(
+                {"error": f"Market ID {current_market_id!r} not found in the database."}
+            ),
             404,
         )
 

@@ -11,9 +11,7 @@ alphabet_in:
 - FINALIZE_TIMEOUT
 - INCORRECT_SERIALIZATION
 - INSUFFICIENT_FUNDS
-- MARKET_PROPOSAL_ROUND_TIMEOUT
 - MAX_APPROVED_MARKETS_REACHED
-- MAX_PROPOSED_MARKETS_REACHED
 - MAX_RETRIES_REACHED
 - MECH_REQUEST_DONE
 - NEGATIVE
@@ -27,7 +25,6 @@ alphabet_in:
 - RESET_TIMEOUT
 - ROUND_TIMEOUT
 - SKIP_MARKET_APPROVAL
-- SKIP_MARKET_PROPOSAL
 - SKIP_REQUEST
 - SUSPICIOUS_ACTIVITY
 - VALIDATE_TIMEOUT
@@ -45,11 +42,9 @@ states:
 - CollectProposedMarketsRound
 - CollectRandomnessRound
 - CollectSignatureRound
-- DataGatheringRound
 - DepositDaiRound
 - FinalizationRound
 - GetPendingQuestionsRound
-- MarketProposalRound
 - MechRequestRound
 - MechResponseRound
 - PostTransactionRound
@@ -74,10 +69,10 @@ transition_func:
     (AnswerQuestionsRound, ERROR): CollectRandomnessRound
     (AnswerQuestionsRound, NO_MAJORITY): CollectRandomnessRound
     (AnswerQuestionsRound, NO_TX): CollectRandomnessRound
-    (ApproveMarketsRound, DONE): DataGatheringRound
-    (ApproveMarketsRound, ERROR): DataGatheringRound
-    (ApproveMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
-    (ApproveMarketsRound, ROUND_TIMEOUT): DataGatheringRound
+    (ApproveMarketsRound, DONE): RetrieveApprovedMarketRound
+    (ApproveMarketsRound, ERROR): RetrieveApprovedMarketRound
+    (ApproveMarketsRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
+    (ApproveMarketsRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (CheckLateTxHashesRound, CHECK_LATE_ARRIVING_MESSAGE): SynchronizeLateMessagesRound
     (CheckLateTxHashesRound, CHECK_TIMEOUT): CheckLateTxHashesRound
     (CheckLateTxHashesRound, DONE): PostTransactionRound
@@ -91,25 +86,18 @@ transition_func:
     (CheckTransactionHistoryRound, NONE): ResetAndPauseRound
     (CheckTransactionHistoryRound, NO_MAJORITY): CheckTransactionHistoryRound
     (CollectProposedMarketsRound, DONE): ApproveMarketsRound
-    (CollectProposedMarketsRound, ERROR): DataGatheringRound
-    (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): DataGatheringRound
-    (CollectProposedMarketsRound, MAX_RETRIES_REACHED): DataGatheringRound
-    (CollectProposedMarketsRound, NO_MAJORITY): DataGatheringRound
-    (CollectProposedMarketsRound, ROUND_TIMEOUT): DataGatheringRound
-    (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): DataGatheringRound
+    (CollectProposedMarketsRound, ERROR): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, NO_MAJORITY): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): RetrieveApprovedMarketRound
     (CollectRandomnessRound, DONE): SelectKeeperRound
     (CollectRandomnessRound, NO_MAJORITY): CollectRandomnessRound
     (CollectRandomnessRound, ROUND_TIMEOUT): CollectRandomnessRound
     (CollectSignatureRound, DONE): FinalizationRound
     (CollectSignatureRound, NO_MAJORITY): ResetRound
     (CollectSignatureRound, ROUND_TIMEOUT): CollectSignatureRound
-    (DataGatheringRound, DONE): MarketProposalRound
-    (DataGatheringRound, ERROR): RetrieveApprovedMarketRound
-    (DataGatheringRound, MAX_PROPOSED_MARKETS_REACHED): RetrieveApprovedMarketRound
-    (DataGatheringRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
-    (DataGatheringRound, NO_MAJORITY): RetrieveApprovedMarketRound
-    (DataGatheringRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
-    (DataGatheringRound, SKIP_MARKET_PROPOSAL): RetrieveApprovedMarketRound
     (DepositDaiRound, DONE): RandomnessTransactionSubmissionRound
     (DepositDaiRound, ERROR): GetPendingQuestionsRound
     (DepositDaiRound, NO_MAJORITY): GetPendingQuestionsRound
@@ -125,11 +113,6 @@ transition_func:
     (GetPendingQuestionsRound, NO_MAJORITY): CollectRandomnessRound
     (GetPendingQuestionsRound, NO_TX): CollectRandomnessRound
     (GetPendingQuestionsRound, ROUND_TIMEOUT): CollectRandomnessRound
-    (MarketProposalRound, DID_NOT_SEND): RetrieveApprovedMarketRound
-    (MarketProposalRound, DONE): RetrieveApprovedMarketRound
-    (MarketProposalRound, ERROR): RetrieveApprovedMarketRound
-    (MarketProposalRound, MARKET_PROPOSAL_ROUND_TIMEOUT): RetrieveApprovedMarketRound
-    (MarketProposalRound, NO_MAJORITY): RetrieveApprovedMarketRound
     (MechRequestRound, DONE): RandomnessTransactionSubmissionRound
     (MechRequestRound, NO_MAJORITY): MechRequestRound
     (MechRequestRound, ROUND_TIMEOUT): MechRequestRound
@@ -139,7 +122,7 @@ transition_func:
     (MechResponseRound, ROUND_TIMEOUT): CollectRandomnessRound
     (PostTransactionRound, ANSWER_QUESTION_DONE): CollectRandomnessRound
     (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
-    (PostTransactionRound, DONE): RetrieveApprovedMarketRound
+    (PostTransactionRound, DONE): ResetAndPauseRound
     (PostTransactionRound, ERROR): DepositDaiRound
     (PostTransactionRound, MECH_REQUEST_DONE): MechResponseRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
