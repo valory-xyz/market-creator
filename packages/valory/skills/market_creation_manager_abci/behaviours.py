@@ -749,6 +749,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     topics=self.params.topics,
                     num_questions=num_questions,
                     resolution_time=resolution_time,
+                    use_specific_topic=self.params.create_markets_flag
                 )
                 mech_tool_output = mech_tool_propose_questions.run(**tool_kwargs)[0]  # type: ignore
                 mech_tool_output_json = json.loads(mech_tool_output)
