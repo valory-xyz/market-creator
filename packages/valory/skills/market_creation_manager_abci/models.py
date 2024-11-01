@@ -79,6 +79,9 @@ class MarketCreationManagerParams(BaseParams):
         self.news_sources = self._ensure(
             key="news_sources", kwargs=kwargs, type_=List[str]
         )
+        self.create_markets_flag = self._ensure(
+            "create_markets_flag", kwargs, type_=bool
+        )
         self.max_proposed_markets = self._ensure(
             "max_proposed_markets", kwargs, type_=int
         )

@@ -10,14 +10,14 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeibsa74q3fbd66pnb5r4vaxhpaf76domfjjbpxxi2igjpz5gzypn2i
+  behaviours.py: bafybeifppb4bp7chtd7enai6s2lhfscskixqfpz3iyn4dvjgynskbduqcq
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
-  fsm_specification.yaml: bafybeiachforfqr5yuhz4kwafzhapn2rtnqandhwjthrcwr4ck26jpuegy
+  fsm_specification.yaml: bafybeignycknz7kr7kb6d3txsdfyhxancqxxqxlxvhwau5wavnu7bqbyo4
   handlers.py: bafybeicj2skzmias5pqvbctiidwgioreaabspsppxn5ytl6e356is4lgga
-  models.py: bafybeidi4nqk7egjllztjlobogr766e745ixjubrlw67aisbnyih644nau
+  models.py: bafybeieuqi5mdkhxb5bntv5deh6khofcxq6l2x2qr3gwwx77vsweexumla
   payloads.py: bafybeifococfoabmghaniuqivshbnh4ttuqotpol25jnd7h75lo46krcr4
-  propose_questions.py: bafybeiewzztwirocscn27ozuhcu227iya42gb2tqr4rdwma4pa3jdzz55m
-  rounds.py: bafybeiagptxnkns5mu24jx45ysneiqlufi6iuccaovkpz4c5lmwpboj2da
+  propose_questions.py: bafybeihcm4eggv5y3dwvxiamn5u5cdwwuzkwf5hrnho6t6vbhnasva7lce
+  rounds.py: bafybeidslosv7v4wdrn4zozgqmpxoseoi26yszsyocpmvpuwq26ih3wvgq
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
 connections: []
@@ -89,6 +89,7 @@ models:
   params:
     args:
       market_identification_prompt: market_identification_prompt
+      create_markets_flag: false
       max_proposed_markets: -1
       max_approved_markets: -1
       markets_to_approve_per_epoch: 1

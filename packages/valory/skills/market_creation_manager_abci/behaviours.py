@@ -530,9 +530,18 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
             # Collect approved markets (not yet processed by the service)
             approved_markets = yield from self._collect_approved_markets()
+            filtered_approved_market_count = yield from self._count_filtered_approved_markets()
 
             # Main logic of the behaviour
             if (
+                not self.params.create_markets_flag
+                and filtered_approved_market_count >= self.params.max_approved_markets
+            ):
+                self.context.logger.info("Max markets approved reached.")
+                content = (
+                    CollectProposedMarketsRound.MAX_APPROVED_MARKETS_REACHED_PAYLOAD
+                )
+            elif (
                 self.params.max_approved_markets >= 0
                 and approved_markets_count >= self.params.max_approved_markets
             ):
@@ -607,6 +616,20 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             f"Successfully collected approved markets, received body {body}"
         )
         return body
+
+    def _count_filtered_approved_markets(self, from_ts, to_ts) -> Generator[None, None, int]:
+        approved_markets = yield from self._collect_approved_markets()
+
+        filtered_markets_data = {
+            "filtered_approved_markets": {
+                market_id: market_info
+                for market_id, market_info in approved_markets["approved_markets"].items()
+                if from_ts <= market_info["resolution_time"] < to_ts
+                and self.params.multisend_address in market_info
+            }
+        }
+
+        return len(filtered_markets_data)
 
     def _collect_latest_open_markets(
         self, openingTimestamp_gte: int, openingTimestamp_lte: int
@@ -726,6 +749,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     topics=self.params.topics,
                     num_questions=num_questions,
                     resolution_time=resolution_time,
+                    use_specific_topic=self.params.create_markets_flag
                 )
                 mech_tool_output = mech_tool_propose_questions.run(**tool_kwargs)[0]  # type: ignore
                 mech_tool_output_json = json.loads(mech_tool_output)
@@ -1433,7 +1457,13 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            response = yield from self._get_process_random_approved_market()
+            if not self.params.create_markets_flag:
+                self.context.logger.info("Not opening markets.")
+                response = (
+                    RetrieveApprovedMarketRound.SKIP_MARKET_OPENING_PAYLOAD
+                )
+            else:
+                response = yield from self._get_process_random_approved_market()
             payload = RetrieveApprovedMarketPayload(sender=sender, content=response)
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)

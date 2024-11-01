@@ -27,7 +27,7 @@ import functools
 import json
 import random
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # import anthropic
@@ -42,6 +42,8 @@ from tiktoken import encoding_for_model
 
 
 NEWSAPI_TOP_HEADLINES_URL = "https://newsapi.org/v2/top-headlines"
+NEWSAPI_EVERYTHING_URL = "https://newsapi.org/v2/everything"
+
 NEWSAPI_DEFAULT_NEWS_SOURCES = [
     "bbc-news",
     "bbc-sport",
@@ -307,15 +309,30 @@ def format_utc_timestamp(utc_timestamp: int) -> str:
 
 
 def gather_articles(
-    news_sources: List[str], newsapi_api_key: str
+        news_sources: List[str], newsapi_api_key: str,
+        topics=None
 ) -> Optional[List[Dict[str, Any]]]:
     """Gather news from NewsAPI (top-headlines endpoint)"""
+
     headers = {"X-Api-Key": newsapi_api_key}
-    parameters = {
-        "sources": ",".join(news_sources),
-        "pageSize": "100",  # TODO: pagination
-    }
-    url = NEWSAPI_TOP_HEADLINES_URL
+
+    if topics is not None:
+        from_date = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+
+        parameters = {
+            "sources": ",".join(news_sources),
+            "pageSize": "100",
+            "q": ",".join(topics),
+            "from": from_date
+        }
+        url = NEWSAPI_EVERYTHING_URL
+
+    else:
+        parameters = {
+            "sources": ",".join(news_sources),
+            "pageSize": "100",  # TODO: pagination
+        }
+        url = NEWSAPI_TOP_HEADLINES_URL
     response = requests.get(
         url=url,
         headers=headers,
@@ -419,8 +436,13 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
         latest_questions_string = "\n".join(latest_questions)
 
         # Gather recent news articles from NewsAPI
+        use_specific_topic = kwargs.get("use_specific_topic")
         news_sources = kwargs.get("news_sources", NEWSAPI_DEFAULT_NEWS_SOURCES)
-        articles = gather_articles(news_sources, kwargs["api_keys"]["newsapi"])
+        topics = kwargs.get("topics")
+        if use_specific_topic:
+            articles = gather_articles(news_sources, topics, kwargs["api_keys"]["newsapi"])
+        else:
+            articles = gather_articles(news_sources, kwargs["api_keys"]["newsapi"])
 
         if articles is None:
             return (
