@@ -81,6 +81,7 @@ class Event(Enum):
     REMOVE_FUNDING_DONE = "remove_funding_done"
     SKIP_MARKET_PROPOSAL = "skip_market_proposal"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
+    SKIP_MARKET_OPENING = "skip_market_opening"
 
 
 DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
@@ -580,6 +581,7 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
     NO_MARKETS_RETRIEVED_PAYLOAD = "NO_MARKETS_RETRIEVED_PAYLOAD"
+    SKIP_MARKET_OPENING_PAYLOAD = "SKIP_MARKET_OPENING_PAYLOAD"
 
     def end_block(
         self,
@@ -601,6 +603,22 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
         ):
             return self.synchronized_data, Event.ERROR
 
+        # Not opening markets
+        if (
+            cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
+            == self.SKIP_MARKET_OPENING_PAYLOAD
+        ):
+            return (
+                self.synchronized_data.update(
+                    synchronized_data_class=self.synchronized_data_class,
+                    **{
+                        get_name(SynchronizedData.proposed_markets_count): cast(
+                            SynchronizedData, self.synchronized_data
+                        ).proposed_markets_count,
+                    },
+                ),
+                Event.SKIP_MARKET_OPENING,
+            )
         # No markets available
         if (
             cast(RetrieveApprovedMarketPayload, self.keeper_payload).content

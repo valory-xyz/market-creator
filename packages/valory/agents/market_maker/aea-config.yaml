@@ -38,9 +38,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeieh4ei3qdelmacnm7vwq57phoewgumr3udvxt6pybmuggwc3yk65q
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
-- valory/market_maker_abci:0.1.0:bafybeibnllwu777bvc5lbztp2jroxpoyscehhv6ci2low4vp24mafbdimu
+- valory/market_maker_abci:0.1.0:bafybeihbxegtl7hsus7osk746myb5ygctteyca2pkcn25eciieyapbjwje
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
-- valory/market_creation_manager_abci:0.1.0:bafybeibjvymcbydezmteqymyepunrgpgd4trrobvnp5ympqf6fz7lvhgjq
+- valory/market_creation_manager_abci:0.1.0:bafybeifs4rcj56jgenlu5lkn5jkovhz3tri24r5gfuwtcr74y23fd3in7a
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
@@ -161,6 +161,7 @@ models:
         outcome of the market to be verified.\n - topic; One word description of the
         topic of the news and it should be one of; {topics}.\n* Output only the JSON
         object. Do not include any other contents in your response.}
+      create_markets_flag: ${int:False}
       max_proposed_markets: ${int:-1}
       max_approved_markets: ${int:-1}
       markets_to_approve_per_epoch: ${int:1}
@@ -176,7 +177,7 @@ models:
       initial_funds: ${float:1.0}
       market_timeout: ${int:1}
       min_market_proposal_interval_seconds: ${int:7200}
-      news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","reuters","usa-today","breitbart-news","the-verge","techradar"]}
+      news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","google-news","reuters","usa-today","breitbart-news","the-verge","techradar"]}
       event_offset_start_days: ${int:4}
       event_offset_end_days: ${int:7}
       market_proposal_round_timeout_seconds_per_day: ${int:45}

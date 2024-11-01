@@ -108,6 +108,7 @@ transition_func:
     (RetrieveApprovedMarketRound, NO_MAJORITY): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, ROUND_TIMEOUT): FinishedWithoutTxRound
+    (RetrieveApprovedMarketRound, SKIP_MARKET_OPENING): FinishedWithoutTxRound
     (SelectKeeperRound, DONE): RedeemBondRound
     (SelectKeeperRound, NO_MAJORITY): CollectRandomnessRound
     (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
