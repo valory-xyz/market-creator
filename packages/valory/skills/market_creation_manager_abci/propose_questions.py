@@ -139,6 +139,7 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     - The answer must be 'yes' or 'no.
     - The answer must be verified using publicly available sources or news media.
     - The answer must not be an opinion.
+    - The answer must not be ambiguous.
     - The answer must be known after EVENT_DAY.
 
     EXISTING_QUESTIONS
