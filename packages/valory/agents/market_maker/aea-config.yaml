@@ -38,9 +38,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeieh4ei3qdelmacnm7vwq57phoewgumr3udvxt6pybmuggwc3yk65q
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
-- valory/market_maker_abci:0.1.0:bafybeieksbj44rdrqklqyijfc2hslcwb2qt7eywz23ze3jhpoa2bk5kvja
+- valory/market_maker_abci:0.1.0:bafybeiewq4gg4huigziuntv5l5zjjr6ay3y4zawqtuvc5jyy7ni7xdy7cq
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
-- valory/market_creation_manager_abci:0.1.0:bafybeidzfxu74aku264h7jm2mg2h4cghidlbmyy4wc7wc5dkwacgaxtoqm
+- valory/market_creation_manager_abci:0.1.0:bafybeibdilqzp2fg3gwvokq6mhemi2h5s4lgwjg3jau5irqj7dtdengaoe
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
@@ -180,7 +180,7 @@ models:
       event_offset_start_days: ${int:4}
       event_offset_end_days: ${int:7}
       market_proposal_round_timeout_seconds_per_day: ${int:45}
-      max_markets_per_story: ${int:1}
+      max_markets_per_story: ${int:5}
       realitio_contract: ${str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
       realitio_oracle_proxy_contract: ${str:0xab16d643ba051c11962da645f74632d3130c81e2}
       conditional_tokens_contract: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}

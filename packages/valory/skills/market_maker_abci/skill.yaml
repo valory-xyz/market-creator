@@ -26,7 +26,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiar2yhzxacfe3qqamqhaihtlcimquwedffctw55sowx6rac3cm3ui
 - valory/registration_abci:0.1.0:bafybeieu7vq3pyns4t5ty6u3sbmpkd7yznpg3rmqifoz3jhy7pmqyg3w6q
 - valory/reset_pause_abci:0.1.0:bafybeiameewywqigpupy3u2iwnkfczeiiucue74x2l5lbge74rmw6bgaie
-- valory/market_creation_manager_abci:0.1.0:bafybeidzfxu74aku264h7jm2mg2h4cghidlbmyy4wc7wc5dkwacgaxtoqm
+- valory/market_creation_manager_abci:0.1.0:bafybeibdilqzp2fg3gwvokq6mhemi2h5s4lgwjg3jau5irqj7dtdengaoe
 - valory/termination_abci:0.1.0:bafybeif2zim2de356eo3sipkmoev5emwadpqqzk3huwqarywh4tmqt3vzq
 - valory/transaction_settlement_abci:0.1.0:bafybeic3tccdjypuge2lewtlgprwkbb53lhgsgn7oiwzyrcrrptrbeyote
 - valory/mech_interact_abci:0.1.0:bafybeieryw7rk2tspyxx46loqqqimr2l5vvhtshiyg2mmdxijzb7pdoi6a
@@ -137,7 +137,7 @@ models:
       event_offset_start_days: 4
       event_offset_end_days: 7
       market_proposal_round_timeout_seconds_per_day: 45
-      max_markets_per_story: 1
+      max_markets_per_story: 5
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'

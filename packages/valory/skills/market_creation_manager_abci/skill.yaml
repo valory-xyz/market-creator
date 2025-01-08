@@ -146,7 +146,7 @@ models:
       event_offset_start_days: 4
       event_offset_end_days: 7
       market_proposal_round_timeout_seconds_per_day: 45
-      max_markets_per_story: 1
+      max_markets_per_story: 5
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
