@@ -20,111 +20,35 @@
 """This package contains remove funding behaviours of MarketCreationManagerAbciApp."""
 
 import json
-import random
-import time
-from abc import ABC
-from collections import defaultdict
-from dataclasses import asdict
-from datetime import datetime
-from string import Template
 from typing import (
     Any,
-    Callable,
     Dict,
     Generator,
     List,
     Optional,
-    Set,
     Tuple,
-    Type,
     cast,
 )
-
-import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
 from packages.valory.contracts.fpmm.contract import FPMMContract
-from packages.valory.contracts.fpmm_deterministic_factory.contract import (
-    FPMMDeterministicFactory,
-)
-from packages.valory.contracts.gnosis_safe.contract import (
-    GnosisSafeContract,
-    SafeOperation,
-)
-from packages.valory.contracts.multisend.contract import (
-    MultiSendContract,
-    MultiSendOperation,
-)
-from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.protocols.ledger_api import LedgerApiMessage
-from packages.valory.protocols.llm.message import LlmMessage
-from packages.valory.skills.abstract_round_abci.base import AbstractRound
-from packages.valory.skills.abstract_round_abci.behaviours import (
-    AbstractRoundBehaviour,
-    BaseBehaviour,
-)
-from packages.valory.skills.abstract_round_abci.common import (
-    RandomnessBehaviour,
-    SelectKeeperBehaviour,
-)
-from packages.valory.skills.abstract_round_abci.models import Requests
-from packages.valory.skills.market_creation_manager_abci import (
-    PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
-)
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     ETHER_VALUE,
     MarketCreationManagerBaseBehaviour,
-    ZERO_HASH,
     get_callable_name,
 )
-from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
-from packages.valory.skills.market_creation_manager_abci.models import (
-    MarketCreationManagerParams,
-    SharedState,
-)
 from packages.valory.skills.market_creation_manager_abci.payloads import (
-    AnswerQuestionsPayload,
-    ApproveMarketsPayload,
-    CollectProposedMarketsPayload,
-    DepositDaiPayload,
-    GetPendingQuestionsPayload,
-    PostTxPayload,
-    RedeemBondPayload,
     RemoveFundingPayload,
-    SyncMarketsPayload,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
-    AnswerQuestionsRound,
-    ApproveMarketsRound,
-    CollectProposedMarketsRound,
-    CollectRandomnessPayload,
-    CollectRandomnessRound,
-    DepositDaiRound,
-    GetPendingQuestionsRound,
-    MarketCreationManagerAbciApp,
-    PostTransactionRound,
-    PrepareTransactionPayload,
-    PrepareTransactionRound,
-    RedeemBondRound,
     RemoveFundingRound,
-    RetrieveApprovedMarketPayload,
-    RetrieveApprovedMarketRound,
-    SelectKeeperPayload,
-    SelectKeeperRound,
-    SyncMarketsRound,
-    SynchronizedData,
 )
-from packages.valory.skills.mech_interact_abci.states.base import (
-    MechInteractionResponse,
-    MechMetadata,
-)
-from packages.valory.skills.transaction_settlement_abci.payload_tools import (
-    hash_payload_to_hex,
-)
+
+
+ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 
 class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
