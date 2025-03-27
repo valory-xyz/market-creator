@@ -1,0 +1,245 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2023-2024 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This package contains sync markets behaviours of MarketCreationManagerAbciApp."""
+
+import json
+import random
+import time
+from abc import ABC
+from collections import defaultdict
+from dataclasses import asdict
+from datetime import datetime
+from string import Template
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    cast,
+)
+
+import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
+from packages.valory.contracts.conditional_tokens.contract import (
+    ConditionalTokensContract,
+)
+from packages.valory.contracts.fpmm.contract import FPMMContract
+from packages.valory.contracts.fpmm_deterministic_factory.contract import (
+    FPMMDeterministicFactory,
+)
+from packages.valory.contracts.gnosis_safe.contract import (
+    GnosisSafeContract,
+    SafeOperation,
+)
+from packages.valory.contracts.multisend.contract import (
+    MultiSendContract,
+    MultiSendOperation,
+)
+from packages.valory.contracts.realitio.contract import RealitioContract
+from packages.valory.contracts.wxdai.contract import WxDAIContract
+from packages.valory.protocols.contract_api import ContractApiMessage
+from packages.valory.protocols.ledger_api import LedgerApiMessage
+from packages.valory.protocols.llm.message import LlmMessage
+from packages.valory.skills.abstract_round_abci.base import AbstractRound
+from packages.valory.skills.abstract_round_abci.behaviours import (
+    AbstractRoundBehaviour,
+    BaseBehaviour,
+)
+from packages.valory.skills.abstract_round_abci.common import (
+    RandomnessBehaviour,
+    SelectKeeperBehaviour,
+)
+from packages.valory.skills.abstract_round_abci.models import Requests
+from packages.valory.skills.market_creation_manager_abci import (
+    PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, \
+    FPMM_POOL_MEMBERSHIPS_QUERY, _ONE_DAY, get_callable_name, ZERO_ADDRESS
+from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
+from packages.valory.skills.market_creation_manager_abci.models import (
+    MarketCreationManagerParams,
+    SharedState,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    AnswerQuestionsPayload,
+    ApproveMarketsPayload,
+    CollectProposedMarketsPayload,
+    DepositDaiPayload,
+    GetPendingQuestionsPayload,
+    PostTxPayload,
+    RedeemBondPayload,
+    RemoveFundingPayload,
+    SyncMarketsPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.rounds import (
+    AnswerQuestionsRound,
+    ApproveMarketsRound,
+    CollectProposedMarketsRound,
+    CollectRandomnessPayload,
+    CollectRandomnessRound,
+    DepositDaiRound,
+    GetPendingQuestionsRound,
+    MarketCreationManagerAbciApp,
+    PostTransactionRound,
+    PrepareTransactionPayload,
+    PrepareTransactionRound,
+    RedeemBondRound,
+    RemoveFundingRound,
+    RetrieveApprovedMarketPayload,
+    RetrieveApprovedMarketRound,
+    SelectKeeperPayload,
+    SelectKeeperRound,
+    SyncMarketsRound,
+    SynchronizedData,
+)
+from packages.valory.skills.mech_interact_abci.states.base import (
+    MechInteractionResponse,
+    MechMetadata,
+)
+from packages.valory.skills.transaction_settlement_abci.payload_tools import (
+    hash_payload_to_hex,
+)
+
+
+class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
+    """SyncMarketsBehaviour"""
+
+    matching_round = SyncMarketsRound
+
+    def async_act(self) -> Generator:
+        """Do the act, supporting asynchronous execution."""
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            sender = self.context.agent_address
+            payload_content = yield from self.get_payload()
+            payload = SyncMarketsPayload(sender=sender, content=payload_content)
+        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+            yield from self.send_a2a_transaction(payload)
+            yield from self.wait_until_round_end()
+        self.set_done()
+
+    def get_payload(self) -> Generator[None, None, str]:
+        """Get the payload."""
+        market_removal = yield from self.get_markets()
+        if market_removal is None:
+            # something went wrong
+            return SyncMarketsRound.ERROR_PAYLOAD
+        markets, from_block = market_removal
+        if len(markets) == 0:
+            # no markets to sync
+            return SyncMarketsRound.NO_UPDATE_PAYLOAD
+        payload = dict(markets=markets, from_block=from_block)
+        return json.dumps(payload, sort_keys=True)
+
+    def get_markets(self) -> Generator[None, None, Tuple[List[Dict[str, Any]], int]]:
+        """Collect FMPMM from subgraph."""
+        creator = self.synchronized_data.safe_contract_address.lower()
+        response = yield from self.get_subgraph_result(
+            query=FPMM_POOL_MEMBERSHIPS_QUERY.substitute(creator=creator)
+        )
+        if response is None:
+            return [], 0
+        markets = []
+        for entry in response["data"]["fpmmPoolMemberships"]:
+            market = {}
+            liquidity_measure = entry["pool"].get("liquidityMeasure")
+            if liquidity_measure is None:
+                continue
+
+            liquidity_measure = int(liquidity_measure)
+            if liquidity_measure == 0:
+                continue
+
+            if entry["pool"]["openingTimestamp"] is None:
+                continue
+
+            market["address"] = entry["pool"]["id"]
+            market["amount"] = sum(map(int, entry["pool"]["outcomeTokenAmounts"]))
+            market["opening_timestamp"] = int(entry["pool"]["openingTimestamp"])
+            market["removal_timestamp"] = market["opening_timestamp"] - _ONE_DAY
+
+            # The markets created by the agent will only have one condition per market
+            condition, *_ = entry["pool"]["conditions"]
+            market["condition_id"] = condition["id"]
+            market["outcome_slot_count"] = condition["outcomeSlotCount"]
+            if condition["question"] is None:
+                continue
+
+            market["question_id"] = condition["question"]["id"]
+            markets.append(market)
+
+        market_addresses = [market["address"] for market in markets]
+        market_addresses_with_funds = yield from self._get_markets_with_funds(
+            market_addresses, self.synchronized_data.safe_contract_address
+        )
+        market_addresses_with_funds_str = [
+            str(market).lower() for market in market_addresses_with_funds
+        ]
+        markets_with_funds = []
+        for market in markets:
+            if str(market["address"]).lower() not in market_addresses_with_funds_str:
+                continue
+            markets_with_funds.append(market)
+            log_msg = "\n\t".join(
+                [
+                    "Adding market with",
+                    "Address: " + market["address"],
+                    "Liquidity: " + str(market["amount"]),
+                    "Opening time: "
+                    + str(datetime.fromtimestamp(market["opening_timestamp"])),
+                    "Liquidity removal time: "
+                    + str(datetime.fromtimestamp(market["removal_timestamp"])),
+                ]
+            )
+            self.context.logger.info(log_msg)
+
+        return markets_with_funds, 0
+
+    def _get_markets_with_funds(
+        self,
+        market_addresses: List[str],
+        safe_address: str,
+    ) -> Generator[None, None, List[str]]:
+        """Get markets with funds."""
+        # no need to query the contract if there are no markets
+        if len(market_addresses) == 0:
+            return []
+
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=ZERO_ADDRESS,  # NOT USED!
+            contract_id=str(FPMMContract.contract_id),
+            contract_callable=get_callable_name(FPMMContract.get_markets_with_funds),
+            markets=market_addresses,
+            safe_address=safe_address,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.error(
+                f"Couldn't get tx data for FPMMContract.get_markets_with_funds. "
+                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"received {response.performative.value}."
+            )
+            return []
+        return cast(List[str], response.state.body["data"])
+
