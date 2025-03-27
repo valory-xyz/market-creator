@@ -20,45 +20,14 @@
 
 
 import json
-import random
-import time
 from collections import defaultdict
-from dataclasses import asdict
-from datetime import datetime
-from string import Template
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Type, cast
-
-import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
-from packages.valory.contracts.conditional_tokens.contract import (
-    ConditionalTokensContract,
-)
-from packages.valory.contracts.fpmm.contract import FPMMContract
-from packages.valory.contracts.fpmm_deterministic_factory.contract import (
-    FPMMDeterministicFactory,
-)
-from packages.valory.contracts.realitio.contract import RealitioContract
-from packages.valory.contracts.wxdai.contract import WxDAIContract
-from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.protocols.ledger_api import LedgerApiMessage
+from typing import Any, Dict, Generator, Type
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
-from packages.valory.skills.abstract_round_abci.behaviours import (
-    AbstractRoundBehaviour,
-    BaseBehaviour,
-)
-from packages.valory.skills.abstract_round_abci.common import SelectKeeperBehaviour
-from packages.valory.skills.market_creation_manager_abci import (
-    PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
-)
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    CollectRandomnessBehaviour,
-    ETHER_VALUE,
     FPMM_QUERY,
     HTTP_OK,
     MarketCreationManagerBaseBehaviour,
-    SAFE_TX_GAS,
     _ONE_DAY,
-    get_callable_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectProposedMarketsPayload,
