@@ -19,11 +19,8 @@
 
 """This package contains deposit dai behaviours of MarketCreationManagerAbciApp."""
 
-from typing import (
-    Generator,
-    Optional,
-    cast,
-)
+from typing import Generator, Optional, cast
+
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage

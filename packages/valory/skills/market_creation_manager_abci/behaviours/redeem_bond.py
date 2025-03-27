@@ -19,12 +19,8 @@
 
 """This package contains redeem bond behaviours of MarketCreationManagerAbciApp."""
 
-from typing import (
-    Dict,
-    Generator,
-    Optional,
-    cast,
-)
+from typing import Dict, Generator, Optional, cast
+
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
@@ -36,9 +32,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     RedeemBondPayload,
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import (
-    RedeemBondRound,
-)
+from packages.valory.skills.market_creation_manager_abci.rounds import RedeemBondRound
 
 
 class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):

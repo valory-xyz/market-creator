@@ -22,14 +22,7 @@
 import json
 import random
 from dataclasses import asdict
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    cast,
-)
+from typing import Any, Dict, Generator, List, Optional, cast
 
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
@@ -42,9 +35,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     GetPendingQuestionsRound,
 )
-from packages.valory.skills.mech_interact_abci.states.base import (
-    MechMetadata,
-)
+from packages.valory.skills.mech_interact_abci.states.base import MechMetadata
 
 
 class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):

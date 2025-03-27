@@ -20,10 +20,7 @@
 """This package contains retrieve approved market behaviours of MarketCreationManagerAbciApp."""
 
 import json
-from typing import (
-    Generator,
-    Type,
-)
+from typing import Generator, Type
 
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (

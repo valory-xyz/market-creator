@@ -20,14 +20,7 @@
 """This package contains post transaction behaviours of MarketCreationManagerAbciApp."""
 
 import json
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    Optional,
-    Type,
-    cast,
-)
+from typing import Any, Dict, Generator, Optional, Type, cast
 
 import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
@@ -41,9 +34,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     MarketCreationManagerBaseBehaviour,
     get_callable_name,
 )
-from packages.valory.skills.market_creation_manager_abci.payloads import (
-    PostTxPayload,
-)
+from packages.valory.skills.market_creation_manager_abci.payloads import PostTxPayload
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     AnswerQuestionsRound,
     DepositDaiRound,

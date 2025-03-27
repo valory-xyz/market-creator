@@ -21,14 +21,8 @@
 
 import json
 from datetime import datetime
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    List,
-    Tuple,
-    cast,
-)
+from typing import Any, Dict, Generator, List, Tuple, cast
+
 from packages.valory.contracts.fpmm.contract import FPMMContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
@@ -41,9 +35,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     SyncMarketsPayload,
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import (
-    SyncMarketsRound,
-)
+from packages.valory.skills.market_creation_manager_abci.rounds import SyncMarketsRound
 
 
 class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):

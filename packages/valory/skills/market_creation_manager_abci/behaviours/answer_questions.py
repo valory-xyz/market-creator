@@ -20,13 +20,8 @@
 """This package contains answer questions behaviours of MarketCreationManagerAbciApp."""
 
 import json
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    Optional,
-    cast,
-)
+from typing import Any, Dict, Generator, Optional, cast
+
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (

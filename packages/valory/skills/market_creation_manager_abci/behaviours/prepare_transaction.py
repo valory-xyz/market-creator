@@ -20,14 +20,8 @@
 """This package contains prepare transaction behaviours of MarketCreationManagerAbciApp."""
 
 from datetime import datetime
-from typing import (
-    Dict,
-    Generator,
-    Optional,
-    Tuple,
-    Type,
-    cast,
-)
+from typing import Dict, Generator, Optional, Tuple, Type, cast
+
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )

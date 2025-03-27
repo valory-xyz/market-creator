@@ -20,34 +20,13 @@
 """This package contains base round behaviours of MarketCreationManagerAbciApp."""
 
 import json
-import random
-import time
 from abc import ABC
-from collections import defaultdict
-from dataclasses import asdict
 from datetime import datetime
 from string import Template
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    cast,
-)
+from typing import Any, Callable, Dict, Generator, List, Optional, Type, cast
 
-import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
-)
-from packages.valory.contracts.fpmm.contract import FPMMContract
-from packages.valory.contracts.fpmm_deterministic_factory.contract import (
-    FPMMDeterministicFactory,
 )
 from packages.valory.contracts.gnosis_safe.contract import (
     GnosisSafeContract,
@@ -57,16 +36,10 @@ from packages.valory.contracts.multisend.contract import (
     MultiSendContract,
     MultiSendOperation,
 )
-from packages.valory.contracts.realitio.contract import RealitioContract
-from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.protocols.llm.message import LlmMessage
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
-from packages.valory.skills.abstract_round_abci.behaviours import (
-    AbstractRoundBehaviour,
-    BaseBehaviour,
-)
+from packages.valory.skills.abstract_round_abci.behaviours import BaseBehaviour
 from packages.valory.skills.abstract_round_abci.common import (
     RandomnessBehaviour,
     SelectKeeperBehaviour,

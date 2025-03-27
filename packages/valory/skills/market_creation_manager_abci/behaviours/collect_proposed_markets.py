@@ -22,6 +22,7 @@
 import json
 from collections import defaultdict
 from typing import Any, Dict, Generator, Type
+
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     FPMM_QUERY,

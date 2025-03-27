@@ -20,15 +20,8 @@
 """This package contains remove funding behaviours of MarketCreationManagerAbciApp."""
 
 import json
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Tuple,
-    cast,
-)
+from typing import Any, Dict, Generator, List, Optional, Tuple, cast
+
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
