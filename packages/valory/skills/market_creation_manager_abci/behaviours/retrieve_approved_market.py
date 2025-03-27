@@ -75,8 +75,12 @@ from packages.valory.skills.abstract_round_abci.models import Requests
 from packages.valory.skills.market_creation_manager_abci import (
     PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import MAX_RETRIES, HTTP_NO_CONTENT, HTTP_OK, \
-    MarketCreationManagerBaseBehaviour
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    HTTP_NO_CONTENT,
+    HTTP_OK,
+    MAX_RETRIES,
+    MarketCreationManagerBaseBehaviour,
+)
 from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
@@ -206,4 +210,3 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
         self.context.logger.info(f"Response received from {url}:\n {response_data}")
 
         return json.dumps(response_data, sort_keys=True)
-

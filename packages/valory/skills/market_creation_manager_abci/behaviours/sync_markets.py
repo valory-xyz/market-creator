@@ -75,8 +75,13 @@ from packages.valory.skills.abstract_round_abci.models import Requests
 from packages.valory.skills.market_creation_manager_abci import (
     PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, \
-    FPMM_POOL_MEMBERSHIPS_QUERY, _ONE_DAY, get_callable_name, ZERO_ADDRESS
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    FPMM_POOL_MEMBERSHIPS_QUERY,
+    MarketCreationManagerBaseBehaviour,
+    ZERO_ADDRESS,
+    _ONE_DAY,
+    get_callable_name,
+)
 from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
@@ -242,4 +247,3 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return []
         return cast(List[str], response.state.body["data"])
-

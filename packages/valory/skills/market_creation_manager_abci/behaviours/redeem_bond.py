@@ -75,8 +75,12 @@ from packages.valory.skills.abstract_round_abci.models import Requests
 from packages.valory.skills.market_creation_manager_abci import (
     PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import ETHER_VALUE, get_callable_name, \
-    MIN_BALANCE_WITHDRAW_REALITIO, MarketCreationManagerBaseBehaviour
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    ETHER_VALUE,
+    MIN_BALANCE_WITHDRAW_REALITIO,
+    MarketCreationManagerBaseBehaviour,
+    get_callable_name,
+)
 from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,

@@ -26,17 +26,7 @@ from collections import defaultdict
 from dataclasses import asdict
 from datetime import datetime
 from string import Template
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    cast,
-)
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Type, cast
 
 import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
@@ -56,18 +46,19 @@ from packages.valory.skills.abstract_round_abci.behaviours import (
     AbstractRoundBehaviour,
     BaseBehaviour,
 )
-from packages.valory.skills.abstract_round_abci.common import (
-    SelectKeeperBehaviour,
-)
+from packages.valory.skills.abstract_round_abci.common import SelectKeeperBehaviour
 from packages.valory.skills.market_creation_manager_abci import (
     PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
 )
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     CollectRandomnessBehaviour,
     ETHER_VALUE,
+    FPMM_QUERY,
+    HTTP_OK,
     MarketCreationManagerBaseBehaviour,
     SAFE_TX_GAS,
-    get_callable_name, _ONE_DAY, HTTP_OK, FPMM_QUERY,
+    _ONE_DAY,
+    get_callable_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectProposedMarketsPayload,

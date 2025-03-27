@@ -75,8 +75,10 @@ from packages.valory.skills.abstract_round_abci.models import Requests
 from packages.valory.skills.market_creation_manager_abci import (
     PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, \
-    SAFE_TX_GAS
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    MarketCreationManagerBaseBehaviour,
+    SAFE_TX_GAS,
+)
 from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
@@ -93,9 +95,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     RemoveFundingPayload,
     SyncMarketsPayload,
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import (
-    DepositDaiRound,
-)
+from packages.valory.skills.market_creation_manager_abci.rounds import DepositDaiRound
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
 )

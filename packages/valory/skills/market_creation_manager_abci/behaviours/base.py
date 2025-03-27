@@ -77,11 +77,14 @@ from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
     SharedState,
 )
-from packages.valory.skills.market_creation_manager_abci.payloads import SelectKeeperPayload
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    SelectKeeperPayload,
+)
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectRandomnessPayload,
     CollectRandomnessRound,
-    SynchronizedData, SelectKeeperRound,
+    SelectKeeperRound,
+    SynchronizedData,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
@@ -105,11 +108,6 @@ _ONE_DAY = 86400
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
-ANSWER_YES, ANSWER_NO, ANSWER_INVALID = (
-    "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "0x0000000000000000000000000000000000000000000000000000000000000001",
-    "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-)
 
 FPMM_POOL_MEMBERSHIPS_QUERY = Template(
     """  {
