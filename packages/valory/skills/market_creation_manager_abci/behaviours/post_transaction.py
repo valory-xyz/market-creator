@@ -22,7 +22,6 @@
 import json
 from typing import Any, Dict, Generator, Optional, Type, cast
 
-import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.contracts.fpmm_deterministic_factory.contract import (
     FPMMDeterministicFactory,
@@ -175,7 +174,7 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             url=url,
             content=json.dumps(body).encode("utf-8"),
         )
-        if http_response.status_code != mech_tool_propose_questions.HTTP_OK:
+        if http_response.status_code != HTTP_OK:
             self.context.logger.warning(
                 f"Failed to update market: {http_response.status_code} {http_response}"
             )
