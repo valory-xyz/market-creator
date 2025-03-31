@@ -5,8 +5,8 @@
         "contract/valory/fpmm/0.1.0": "bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiaegejg3co3tvav5y5rw25qiiquqmqeaq3lnhswmlakxslo2psl64",
         "skill/valory/market_maker_abci/0.1.0": "bafybeihhby2kktmyjwjamco4p6zwofooqxumugybx6f6e4m7fqzde7l5ku",
-        "agent/valory/market_maker/0.1.0": "bafybeigc57fbr6632rjup2bhl4nacx6ltbsea354mgfg7fbmmtvaimrtqe",
-        "service/valory/market_maker/0.1.0": "bafybeieljv7juf42makd2u64e5qq5d7ro3qxeuodqahvmrav7zrjica64a"
+        "agent/valory/market_maker/0.1.0": "bafybeiarxtmb77cwj7lepo4rvsoaucq5katfsqugvsfmhkyghl3jomjtj4",
+        "service/valory/market_maker/0.1.0": "bafybeiftx74lzss2yvmyikv2jq5k3ft22ypenh3la3veerbr3vbgb4dm5e"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeidgu7o5llh26xp3u3ebq3yluull5lupiyeu6iooi2xyymdrgnzq5i",
