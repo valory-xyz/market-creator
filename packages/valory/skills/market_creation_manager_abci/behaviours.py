@@ -139,13 +139,9 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
 from packages.valory.skills.market_creation_manager_abci.behaviours.post_transaction import (
     PostTransactionBehaviour,
 )
-
-
-class CollectRandomnessBehaviour(RandomnessBehaviour):
-    """CollectRandomnessBehaviour"""
-
-    matching_round: Type[AbstractRound] = CollectRandomnessRound
-    payload_class = CollectRandomnessPayload
+from packages.valory.skills.market_creation_manager_abci.behaviours.randomness import (
+    CollectRandomnessBehaviour,
+)
 
 
 class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
