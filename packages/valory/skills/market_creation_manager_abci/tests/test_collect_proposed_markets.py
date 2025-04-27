@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import CollectProposedMarketsBehaviour, _ONE_DAY
 from packages.valory.protocols.http import HttpMessage
-from packages.valory.skills.market_creation_manager_abci.rounds.collect_proposed_markets import CollectProposedMarketsRound
+from packages.valory.skills.market_creation_manager_abci.rounds import CollectProposedMarketsRound
 
 # --------------------------------------------------------------------------- #
 # Helpers                                                                     #
