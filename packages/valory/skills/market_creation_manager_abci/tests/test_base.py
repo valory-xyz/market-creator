@@ -30,11 +30,12 @@ def gen_side_effect(resp):
 
 
 def dummy_ctx() -> MagicMock:
+    """Create a standard mock context for behaviour testing."""
     ctx = MagicMock()
     ctx.state = MagicMock()
     ctx.logger = MagicMock()
     ctx.omen_subgraph = MagicMock()
-    ctx.omen_subgraph.get_spec.return_value = {}
+    ctx.omen_subgraph.get_spec.return_value = {}  # used in subgraph tests
     ctx.outbox = MagicMock()
     ctx.requests = MagicMock()
     ctx.requests.request_id_to_callback = {}
@@ -42,14 +43,17 @@ def dummy_ctx() -> MagicMock:
 
 
 class DummyBehaviour(base.MarketCreationManagerBaseBehaviour):
+    """A minimal concrete subclass so we can instantiate & test."""
+
     matching_round = None  # satisfy framework
 
     def __init__(self):
+        # BaseBehaviour doesn't call super().__init__; we can leave it blank.
         self._params = SimpleNamespace(multisend_address="0xMULTI")
         self._synchronized_data = SimpleNamespace(safe_contract_address="0xSAFE")
         self._shared_state = MagicMock()
 
-    # minimal overrides – everything mocked
+    # --- async helpers the Base uses (all mocked) ------------------------- #
     def get_contract_api_response(self, *a, **kw):
         return (yield MagicMock())
 
@@ -62,22 +66,22 @@ class DummyBehaviour(base.MarketCreationManagerBaseBehaviour):
     def get_callback_request(self):  # noqa: D401
         return MagicMock()
 
-    def _get_request_nonce_from_dialogue(self, *_):
+    def _get_request_nonce_from_dialogue(self, _dialogue):
         return "nonce"
 
-    async def async_act(self):  # pragma: no cover
+    async def async_act(self):
         pass
 
 
 # --------------------------------------------------------------------------- #
 # Fixtures                                                                    #
 # --------------------------------------------------------------------------- #
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def behaviour(monkeypatch):
     """Provide a behaviour instance whose `.context` is patched globally."""
     beh = DummyBehaviour()
     ctx_patch = patch.object(DummyBehaviour, "context", new_callable=PropertyMock)
-    monkeypatch.experimental_ctx_patch = ctx_patch  # to stop later
+    monkeypatch.setattr("_pytest_context_patch", ctx_patch)  # to stop later
     mock_ctx_prop = ctx_patch.start()
     mock_ctx_prop.return_value = dummy_ctx()
     yield beh
@@ -85,50 +89,57 @@ def behaviour(monkeypatch):
 
 
 # --------------------------------------------------------------------------- #
-# Utility-function tests (Hypothesis)                                         #
+# Utility-function tests                                                      #
 # --------------------------------------------------------------------------- #
 @given(st.text(min_size=1))
 def test_to_content_roundtrip(q):
+    """Test to_content serialization/deserialization with property-based testing."""
     blob = base.to_content(q)
     decoded = json.loads(blob.decode())
     assert decoded["query"] == q
 
 
-VALID_TS = datetime(2024, 4, 27, 12, 0)
 @pytest.mark.parametrize(
     "ts_str, expected",
     [
-        ("2024-04-27T12:00:00Z", VALID_TS),
+        ("2024-04-27T12:00:00Z", datetime(2024, 4, 27, 12, 0)),
         ("2024-04-27", datetime(2024, 4, 27)),
-        ("bogus", None),
+        ("foo", None),
+        ("2024/04/27", None),
+        ("04-27-2024", None),
     ],
 )
-def test_parse_date(ts_str, expected):
+def test_parse_date_timestring(ts_str, expected):
+    """Test parsing of dates in various formats."""
     assert base.parse_date_timestring(ts_str) == expected
 
 
 def test_get_callable_name():
-    class Foo:  # noqa: D401
+    """Test get_callable_name function."""
+    def foo():
         pass
-    def bar():  # noqa: D401
+
+    class Bar:
         pass
-    assert base.get_callable_name(Foo()) == "Foo"
-    assert base.get_callable_name(bar) == "bar"
+
+    assert base.get_callable_name(foo) == "foo"
+    assert base.get_callable_name(Bar()) == "Bar"
 
 
 # --------------------------------------------------------------------------- #
 # Properties / last_synced_timestamp                                          #
 # --------------------------------------------------------------------------- #
 def test_last_synced_timestamp(behaviour):
-    dummy_ts = 1_650_000_000
+    """Test last_synced_timestamp property."""
+    dummy_ts = 1_234_567_890
     mock_seq = MagicMock()
     mock_seq.last_round_transition_timestamp.timestamp.return_value = float(dummy_ts)
     behaviour.context.state.round_sequence = mock_seq
     assert behaviour.last_synced_timestamp == dummy_ts
 
 
-# Test property methods that aren't in the pytest version
 def test_synchronized_data_property(behaviour):
+    """Test synchronized_data property."""
     sentinel = MagicMock()
     with patch.object(BaseBehaviour, "synchronized_data", new_callable=PropertyMock) as prop:
         prop.return_value = sentinel
@@ -136,6 +147,7 @@ def test_synchronized_data_property(behaviour):
 
 
 def test_params_property(behaviour):
+    """Test params property."""
     sentinel = MagicMock()
     with patch.object(BaseBehaviour, "params", new_callable=PropertyMock) as prop:
         prop.return_value = sentinel
@@ -143,6 +155,7 @@ def test_params_property(behaviour):
 
 
 def test_shared_state_property(behaviour):
+    """Test shared_state property."""
     sentinel = MagicMock()
     behaviour.context.state = sentinel
     assert behaviour.shared_state is sentinel
@@ -152,6 +165,7 @@ def test_shared_state_property(behaviour):
 # _get_safe_tx_hash                                                           #
 # --------------------------------------------------------------------------- #
 def _mock_safe_response(perf: ContractApiMessage.Performative, tx_hash="0xAA"):
+    """Create a mock safe response with the specified performative and tx_hash."""
     resp = MagicMock()
     resp.performative = perf
     resp.state.body = {"tx_hash": tx_hash}
@@ -163,6 +177,7 @@ def _mock_safe_response(perf: ContractApiMessage.Performative, tx_hash="0xAA"):
     (ContractApiMessage.Performative.ERROR, True),
 ])
 def test_get_safe_tx_hash(behaviour, perf, expect_none):
+    """Test _get_safe_tx_hash with different response performatives."""
     behaviour.get_contract_api_response = MagicMock(
         side_effect=[gen_side_effect(_mock_safe_response(perf))],
     )
@@ -177,6 +192,7 @@ def test_get_safe_tx_hash(behaviour, perf, expect_none):
 # _to_multisend success / error                                               #
 # --------------------------------------------------------------------------- #
 def _mk_multisend_resp(ok: bool):
+    """Create a mock multisend response that is either successful or an error."""
     resp = MagicMock()
     if ok:
         resp.performative = ContractApiMessage.Performative.RAW_TRANSACTION
@@ -186,8 +202,8 @@ def _mk_multisend_resp(ok: bool):
     return resp
 
 
-@pytest.mark.parametrize("multi_ok", [True, False])
-def test_to_multisend_single(behaviour, multi_ok):
+def _setup_multisend_side_effects(behaviour, multi_ok=True):
+    """Set up the side effects for multisend tests."""
     multisend_resp = _mk_multisend_resp(multi_ok)
     safe_hash_resp = _mock_safe_response(ContractApiMessage.Performative.STATE, "0x1234")
 
@@ -198,6 +214,14 @@ def test_to_multisend_single(behaviour, multi_ok):
         ]
     )
     behaviour._get_safe_tx_hash = MagicMock(side_effect=[gen_side_effect(safe_hash_resp)])
+    
+    return {"multisend_resp": multisend_resp, "safe_hash_resp": safe_hash_resp}
+
+
+@pytest.mark.parametrize("multi_ok", [True, False])
+def test_to_multisend_single(behaviour, multi_ok):
+    """Test _to_multisend with a single transaction."""
+    _setup_multisend_side_effects(behaviour, multi_ok)
     txs = [{"to": "0xTO", "value": 0}]
 
     with patch(
@@ -215,6 +239,25 @@ def test_to_multisend_single(behaviour, multi_ok):
         assert stp.value.value is None
 
 
+def test_to_multisend_multiple_transactions(behaviour):
+    """Test _to_multisend with multiple transactions."""
+    _setup_multisend_side_effects(behaviour)
+    txs = [
+        {"to": "0xTO1", "value": 0},
+        {"to": "0xTO2", "value": 10},
+    ]
+    
+    with patch(
+        "packages.valory.skills.market_creation_manager_abci.behaviours.base.hash_payload_to_hex",
+        return_value="payload_hex",
+    ):
+        g = behaviour._to_multisend(txs)
+        with pytest.raises(StopIteration) as stp:
+            while True:
+                next(g)
+        assert stp.value.value == "payload_hex"
+
+
 # --------------------------------------------------------------------------- #
 # get_subgraph_result (200, 404, None)                                        #
 # --------------------------------------------------------------------------- #
@@ -223,6 +266,7 @@ def test_to_multisend_single(behaviour, multi_ok):
     (404, 'Not Found', True),
 ])
 def test_subgraph(behaviour, status, body, expect_none):
+    """Test get_subgraph_result with different response status codes."""
     resp = MagicMock()
     resp.status_code = status
     resp.body.decode.return_value = body
@@ -239,6 +283,7 @@ def test_subgraph(behaviour, status, body, expect_none):
 
 
 def test_subgraph_none_response(behaviour):
+    """Test get_subgraph_result with a None response."""
     behaviour.get_http_response = MagicMock(side_effect=[gen_side_effect(None)])
     g = behaviour.get_subgraph_result("q")
     next(g)
@@ -251,6 +296,7 @@ def test_subgraph_none_response(behaviour):
 # do_llm_request                                                              #
 # --------------------------------------------------------------------------- #
 def test_do_llm_request(behaviour):
+    """Test do_llm_request method."""
     reply = MagicMock()
     behaviour.wait_for_message = MagicMock(
         side_effect=[gen_side_effect(reply)]
@@ -263,59 +309,37 @@ def test_do_llm_request(behaviour):
 
 
 # --------------------------------------------------------------------------- #
-# _calculate_condition_id (basic positive)                                    #
+# _calculate_condition_id                                                     #
 # --------------------------------------------------------------------------- #
 def test_calculate_condition_id(behaviour):
+    """Test _calculate_condition_id method."""
     resp = MagicMock()
     resp.performative = ContractApiMessage.Performative.STATE
-    resp.state.body = {"condition_id": "COND1"}
+    resp.state.body = {"condition_id": "0xCONDITION123"}
+    
     behaviour.get_contract_api_response = MagicMock(
         side_effect=[gen_side_effect(resp)]
     )
-    behaviour.params.conditional_tokens_contract = "0xTOKEN"
-    g = behaviour._calculate_condition_id("0xORACLE", "0xQUESTION")
-    next(g)
-    with pytest.raises(StopIteration) as stp:
-        next(g)
-    assert stp.value.value == "COND1"
-    behaviour.get_contract_api_response.assert_called_once()
-
-
-# --------------------------------------------------------------------------- #
-# Property-based sanity: multisend handles arbitrary transaction batches      #
-# --------------------------------------------------------------------------- #
-#  We create a **fresh behaviour** inside the test, so we don't rely on the
-#  function-scoped fixture across Hypothesis examples (avoids health-check).
-@given(
-    st.lists(
-        st.fixed_dictionaries(
-            {"to": st.from_regex(r"0x[0-9A-Fa-f]{4,}", fullmatch=True), "value": st.integers(min_value=0)}
-        )
+    
+    # Set the necessary parameters
+    behaviour.params.conditional_tokens_contract = "0xCONDITIONAL_TOKENS"
+    
+    # Call the method
+    g = behaviour._calculate_condition_id(
+        oracle_contract="0xORACLE", 
+        question_id="0xQUESTION", 
+        outcome_slot_count=2
     )
-)
-def test_multisend_variable_batches(txs: List[Dict[str, Any]]):
-    behaviour = DummyBehaviour()
-    with patch.object(DummyBehaviour, "context", PropertyMock(return_value=dummy_ctx())):
-        multisend_resp = _mk_multisend_resp(True)
-        safe_hash_resp = _mock_safe_response(ContractApiMessage.Performative.STATE, "0x1234")
-
-        behaviour.get_contract_api_response = MagicMock(
-            side_effect=[
-                gen_side_effect(multisend_resp),
-                gen_side_effect(safe_hash_resp),
-            ]
-        )
-        behaviour._get_safe_tx_hash = MagicMock(side_effect=[gen_side_effect(safe_hash_resp)])
-
-        with patch(
-            "packages.valory.skills.market_creation_manager_abci.behaviours.base.hash_payload_to_hex",
-            return_value="hex",
-        ):
-            g = behaviour._to_multisend(txs)
-            with pytest.raises(StopIteration) as stp:
-                while True:
-                    next(g)
-            assert stp.value.value == "hex"
+    
+    next(g)  # Start the generator
+    with pytest.raises(StopIteration) as stp:
+        next(g)  # Should raise StopIteration with value
+        
+    # Assert the result is the expected condition_id
+    assert stp.value.value == "0xCONDITION123"
+    
+    # Verify the contract API was called with correct parameters
+    behaviour.get_contract_api_response.assert_called_once()
 
 
 # --------------------------------------------------------------------------- #
@@ -348,9 +372,9 @@ def test_get_ledger_api_response(behaviour):
         account="0xADDRESS"
     )
     next(g)  # Start the generator
-    with pytest.raises(StopIteration) as stop:
+    with pytest.raises(StopIteration) as stp:
         next(g)  # Should raise StopIteration with value
-    assert stop.value.value == valid_response
+    assert stp.value.value == valid_response
     
     # Test error response
     g = behaviour.get_ledger_api_response(
@@ -359,6 +383,42 @@ def test_get_ledger_api_response(behaviour):
         account="0xADDRESS"
     )
     next(g)  # Start the generator
-    with pytest.raises(StopIteration) as stop:
+    with pytest.raises(StopIteration) as stp:
         next(g)  # Should raise StopIteration with value
-    assert stop.value.value == error_response
+    assert stp.value.value == error_response
+
+
+# --------------------------------------------------------------------------- #
+# Property-based sanity: multisend handles arbitrary transaction batches      #
+# --------------------------------------------------------------------------- #
+@given(
+    st.lists(
+        st.fixed_dictionaries(
+            {"to": st.from_regex(r"0x[0-9A-Fa-f]{4,}", fullmatch=True), "value": st.integers(min_value=0)}
+        )
+    )
+)
+def test_multisend_variable_batches(txs: List[Dict[str, Any]]):
+    """Property-based test for _to_multisend with various transaction batches."""
+    behaviour = DummyBehaviour()
+    with patch.object(DummyBehaviour, "context", PropertyMock(return_value=dummy_ctx())):
+        multisend_resp = _mk_multisend_resp(True)
+        safe_hash_resp = _mock_safe_response(ContractApiMessage.Performative.STATE, "0x1234")
+
+        behaviour.get_contract_api_response = MagicMock(
+            side_effect=[
+                gen_side_effect(multisend_resp),
+                gen_side_effect(safe_hash_resp),
+            ]
+        )
+        behaviour._get_safe_tx_hash = MagicMock(side_effect=[gen_side_effect(safe_hash_resp)])
+
+        with patch(
+            "packages.valory.skills.market_creation_manager_abci.behaviours.base.hash_payload_to_hex",
+            return_value="hex",
+        ):
+            g = behaviour._to_multisend(txs)
+            with pytest.raises(StopIteration) as stp:
+                while True:
+                    next(g)
+            assert stp.value.value == "hex"
