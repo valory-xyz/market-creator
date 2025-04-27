@@ -23,7 +23,7 @@ import json
 from abc import ABC
 from datetime import datetime
 from string import Template
-from typing import Any, Callable, Dict, Generator, List, Optional, cast
+from typing import Any, Callable, Generator, Optional, cast
 
 from packages.valory.contracts.gnosis_safe.contract import GnosisSafeContract, SafeOperation
 from packages.valory.contracts.conditional_tokens.contract import ConditionalTokensContract
@@ -174,8 +174,8 @@ def parse_date_timestring(string: str) -> Optional[datetime]:
 
 
 def get_callable_name(method: Callable) -> str:
-    """Return callable name."""
-    return getattr(method, "__name__")  # noqa: B009
+    """Return callable name, fallback to type name if not present."""
+    return getattr(method, "__name__", type(method).__name__)
 
 
 class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
@@ -250,18 +250,18 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
-                f"Couldn't get safe hash. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
-                f"received {response.performative.value}."
+                "Couldn't get safe hash. Expected response performative %s, received %s.",
+                ContractApiMessage.Performative.STATE.value,
+                response.performative.value,
             )
             return None
 
         # strip "0x" from the response hash
-        tx_hash = cast(str, response.state.body["tx_hash"])[2:]
+        tx_hash = cast(str, response.state.body.get("tx_hash", ""))[2:]
         return tx_hash
 
     def _to_multisend(
-        self, transactions: List[Dict]
+        self, transactions: list[dict]
     ) -> Generator[None, None, Optional[str]]:
         """Transform payload to MultiSend."""
         multi_send_txs = []
@@ -283,14 +283,14 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         )
         if response.performative != ContractApiMessage.Performative.RAW_TRANSACTION:
             self.context.logger.error(
-                f"Couldn't compile the multisend tx. "
-                f"Expected performative {ContractApiMessage.Performative.RAW_TRANSACTION.value}, "  # type: ignore
-                f"received {response.performative.value}."
+                "Couldn't compile the multisend tx. Expected performative %s, received %s.",
+                ContractApiMessage.Performative.RAW_TRANSACTION.value,
+                response.performative.value,
             )
             return None
 
         # strip "0x" from the response
-        multisend_data_str = cast(str, response.raw_transaction.body["data"])[2:]
+        multisend_data_str = cast(str, response.raw_transaction.body.get("data", ""))[2:]
         tx_data = bytes.fromhex(multisend_data_str)
         tx_hash = yield from self._get_safe_tx_hash(
             self.params.multisend_address,
@@ -313,17 +313,23 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
     def get_subgraph_result(
         self,
         query: str,
-    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Get question ids."""
+    ) -> Generator[None, None, Optional[dict[str, Any]]]:
+        """Get question ids from the Omen subgraph."""
         response = yield from self.get_http_response(
             content=to_content(query),
             **self.context.omen_subgraph.get_spec(),
         )
 
-        if response is None or response.status_code != HTTP_OK:
+        if response is None:
             self.context.logger.error(
-                f"Could not retrieve response from Omen subgraph."
-                f"Received status code {response.status_code}.\n{response}"
+                "Could not retrieve response from Omen subgraph. Response was None."
+            )
+            return None
+        if response.status_code != HTTP_OK:
+            self.context.logger.error(
+                "Could not retrieve response from Omen subgraph. Received status code %s.\n%s",
+                response.status_code,
+                response,
             )
             return None
 
