@@ -226,6 +226,14 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             question_id=question_id,
             outcome_slot_count=outcome_slot_count,
         )
+        # handle non-STATE error performatives
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.error(
+                "Couldn't calculate condition id. Expected response performative %s, received %s.",
+                ContractApiMessage.Performative.STATE.value,
+                response.performative.value,
+            )
+            return None
         return cast(str, response.state.body["condition_id"])
 
     def _get_safe_tx_hash(
