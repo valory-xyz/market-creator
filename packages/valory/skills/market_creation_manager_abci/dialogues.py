@@ -19,7 +19,9 @@
 
 """This module contains the dialogues of the MarketCreationManagerAbciApp."""
 
-from typing import Any
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
 
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -70,6 +72,25 @@ from packages.valory.skills.abstract_round_abci.dialogues import (
     TendermintDialogues as BaseTendermintDialogues,
 )
 
+
+__all__ = [
+    "AbciDialogue",
+    "AbciDialogues",
+    "HttpDialogue",
+    "HttpDialogues",
+    "SigningDialogue",
+    "SigningDialogues",
+    "LedgerApiDialogue",
+    "LedgerApiDialogues",
+    "ContractApiDialogue",
+    "ContractApiDialogues",
+    "TendermintDialogue",
+    "TendermintDialogues",
+    "IpfsDialogue",
+    "IpfsDialogues",
+    "LlmDialogue",
+    "LlmDialogues",
+]
 
 AbciDialogue = BaseAbciDialogue
 AbciDialogues = BaseAbciDialogues
