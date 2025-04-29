@@ -31,7 +31,8 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     HTTP_OK,
     _ONE_DAY
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import ApproveMarketsPayload, ApproveMarketsRound
+from packages.valory.skills.market_creation_manager_abci.rounds import ApproveMarketsRound
+from packages.valory.skills.market_creation_manager_abci.payloads import ApproveMarketsPayload
 
 
 class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
@@ -191,7 +192,8 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"Failed to propose market: {http_response.status_code} {http_response}"
             )
-            return ApproveMarketsRound.ERROR_PAYLOAD
+            yield ApproveMarketsRound.ERROR_PAYLOAD
+            return
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully proposed market, received body {body}")
         time.sleep(3)
@@ -210,7 +212,8 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"Failed to approve market: {http_response.status_code} {http_response}"
             )
-            return ApproveMarketsRound.ERROR_PAYLOAD
+            yield ApproveMarketsRound.ERROR_PAYLOAD
+            return
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully approved market, received body {body}")
         time.sleep(3)
@@ -232,10 +235,11 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"Failed to update market: {http_response.status_code} {http_response}"
             )
-            return ApproveMarketsRound.ERROR_PAYLOAD
+            yield ApproveMarketsRound.ERROR_PAYLOAD
+            return
 
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully updated market, received body {body}")
         time.sleep(3)
 
-        return json.dumps(body, sort_keys=True)
+        yield json.dumps(body, sort_keys=True)

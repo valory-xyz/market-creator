@@ -192,14 +192,22 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"Failed to retrieve approved markets: {http_response.status_code} {http_response}"
             )
-            # TODO return error instead?
-            return {"approved_markets": {}}
+            yield {"approved_markets": {}}
+            return
 
-        body = json.loads(http_response.body.decode())
-        self.context.logger.info(
-            f"Successfully collected approved markets, received body {body}"
-        )
-        return body
+        try:
+            body = json.loads(http_response.body.decode())
+        except json.JSONDecodeError:
+            self.context.logger.warning("Invalid JSON response received.")
+            yield {"approved_markets": {}}
+            return
+
+        if "approved_markets" not in body:
+            self.context.logger.warning("Missing 'approved_markets' key in response.")
+            yield {"approved_markets": {}}
+            return
+
+        yield body
 
     def _collect_latest_open_markets(
         self, openingTimestamp_gte: int, openingTimestamp_lte: int

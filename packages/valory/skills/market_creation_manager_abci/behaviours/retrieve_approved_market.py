@@ -24,7 +24,8 @@ from typing import Generator
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import HTTP_OK, HTTP_NO_CONTENT, MAX_RETRIES
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour
-from packages.valory.skills.market_creation_manager_abci.rounds import RetrieveApprovedMarketPayload, RetrieveApprovedMarketRound
+from packages.valory.skills.market_creation_manager_abci.rounds import RetrieveApprovedMarketRound
+from packages.valory.skills.market_creation_manager_abci.payloads import RetrieveApprovedMarketPayload
 
 
 class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
@@ -94,7 +95,8 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
         )
 
         if response.status_code == HTTP_NO_CONTENT:
-            return RetrieveApprovedMarketRound.NO_MARKETS_RETRIEVED_PAYLOAD
+            yield RetrieveApprovedMarketRound.NO_MARKETS_RETRIEVED_PAYLOAD
+            return
 
         if response.status_code != HTTP_OK:
             self.context.logger.error(
@@ -103,10 +105,12 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
             )
             retries = 3  # TODO: Make params
             if retries >= MAX_RETRIES:
-                return RetrieveApprovedMarketRound.MAX_RETRIES_PAYLOAD
-            return RetrieveApprovedMarketRound.ERROR_PAYLOAD
+                yield RetrieveApprovedMarketRound.MAX_RETRIES_PAYLOAD
+                return
+            yield RetrieveApprovedMarketRound.ERROR_PAYLOAD
+            return
 
         response_data = json.loads(response.body.decode())
         self.context.logger.info(f"Response received from {url}:\n {response_data}")
 
-        return json.dumps(response_data, sort_keys=True)
+        yield json.dumps(response_data, sort_keys=True)

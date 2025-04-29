@@ -29,7 +29,8 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     MarketCreationManagerBaseBehaviour,
     OPEN_FPMM_QUERY
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import GetPendingQuestionsPayload, GetPendingQuestionsRound
+from packages.valory.skills.market_creation_manager_abci.rounds import GetPendingQuestionsRound
+from packages.valory.skills.market_creation_manager_abci.payloads import GetPendingQuestionsPayload
 from packages.valory.skills.mech_interact_abci.states.base import MechMetadata
 
 
@@ -61,14 +62,16 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             )
         )
         if response is None:
-            return []
+            yield []
+            return
         questions = response.get("data", {}).get("fixedProductMarketMakers", [])
         self.context.logger.info(f"Collected questions: {questions}")
 
         if not questions:
-            return []
+            yield []
+            return
 
-        return questions
+        yield questions
 
     def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
         """Get the balance of an account"""
@@ -78,15 +81,16 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             account=account,
         )
         if ledger_api_response.performative != LedgerApiMessage.Performative.STATE:
-            # something went wrong
             self.context.logger.error(
                 f"Couldn't get balance for account {account}. "
-                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "  # type: ignore
-                f"Received {ledger_api_response.performative.value}."  # type: ignore
+                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "
+                f"Received {ledger_api_response.performative.value}."
             )
-            return None
+            yield None
+            return
+
         balance = cast(int, ledger_api_response.state.body.get("get_balance_result"))
-        return balance
+        yield balance
 
     def _eligible_questions_to_answer(
         self, unanswered_questions: List[Dict[str, Any]]
@@ -141,7 +145,8 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         if unanswered_questions is None:
             self.context.logger.info("Couldn't get the questions")
-            return GetPendingQuestionsRound.ERROR_PAYLOAD
+            yield GetPendingQuestionsRound.ERROR_PAYLOAD
+            return
 
         eligible_questions_id = self._eligible_questions_to_answer(unanswered_questions)
 
@@ -149,7 +154,8 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         if len(eligible_questions_id) == 0:
             self.context.logger.info("No eligible questions to answer")
-            return GetPendingQuestionsRound.NO_TX_PAYLOAD
+            yield GetPendingQuestionsRound.NO_TX_PAYLOAD
+            return
 
         self.context.logger.info(
             f"Got {len(eligible_questions_id)} questions to close. "
@@ -160,7 +166,8 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         balance = yield from self._get_balance(safe_address)
         if balance is None:
             self.context.logger.info("Couldn't get balance")
-            return GetPendingQuestionsRound.NO_TX_PAYLOAD
+            yield GetPendingQuestionsRound.NO_TX_PAYLOAD
+            return
 
         self.context.logger.info(f"Address {safe_address!r} has balance {balance}.")
         max_num_questions = min(
@@ -170,12 +177,12 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         # TODO uncomment
         if balance < bond_required:
-            # not enough balance to close the questions
             self.context.logger.info(
                 f"Not enough balance to close {max_num_questions} questions. "
                 f"Balance {balance}, required {bond_required}"
             )
-            return GetPendingQuestionsRound.NO_TX_PAYLOAD
+            yield GetPendingQuestionsRound.NO_TX_PAYLOAD
+            return
 
         # Prepare the Mech Requests for these questions
         new_mech_requests = []
@@ -205,6 +212,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         if len(new_mech_requests) == 0:
             self.context.logger.info("No mech requests")
-            return GetPendingQuestionsRound.NO_TX_PAYLOAD
+            yield GetPendingQuestionsRound.NO_TX_PAYLOAD
+            return
 
-        return json.dumps(new_mech_requests, sort_keys=True)
+        yield json.dumps(new_mech_requests, sort_keys=True)

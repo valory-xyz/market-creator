@@ -28,7 +28,8 @@ from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, ETHER_VALUE, _ONE_DAY, get_callable_name
-from packages.valory.skills.market_creation_manager_abci.rounds import PrepareTransactionPayload, PrepareTransactionRound
+from packages.valory.skills.market_creation_manager_abci.rounds import PrepareTransactionRound
+from packages.valory.skills.market_creation_manager_abci.payloads import PrepareTransactionPayload
 
 
 class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
@@ -215,12 +216,16 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 timeout=timeout,
             )
             if ask_question_tx is None:
+                yield
                 return
+
             prepare_condition_tx = yield from self._prepare_prepare_condition_mstx(
                 question_id=question_id,
             )
             if prepare_condition_tx is None:
+                yield
                 return
+
             condition_id = yield from self._calculate_condition_id(
                 oracle_contract=self.params.realitio_oracle_proxy_contract,
                 question_id=question_id,
@@ -233,11 +238,13 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 market_fee=self.params.market_fee,
             )
             if create_fpmm_tx is None:
+                yield
                 return
 
             amount = cast(int, create_fpmm_tx["approval_amount"])
             wxdai_approval_tx = yield from self._get_approve_tx(amount=amount)
             if wxdai_approval_tx is None:
+                yield
                 return
 
             self.context.logger.info(f"Added approval for {amount}")
@@ -250,6 +257,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 ]
             )
             if tx_hash is None:
+                yield
                 return
 
             payload = PrepareTransactionPayload(

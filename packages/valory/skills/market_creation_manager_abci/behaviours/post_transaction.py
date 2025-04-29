@@ -64,38 +64,46 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         settled_tx_hash = self.synchronized_data.settled_tx_hash
         if settled_tx_hash is None:
             self.context.logger.info("No settled tx hash.")
-            return PostTransactionRound.DONE_PAYLOAD
+            yield PostTransactionRound.DONE_PAYLOAD
+            return
 
         if (
             self.synchronized_data.tx_sender
             == MechRequestStates.MechRequestRound.auto_round_id()
         ):
-            return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
+            yield PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
+            return
 
         if self.synchronized_data.tx_sender == RedeemBondRound.auto_round_id():
-            return PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
+            yield PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
+            return
 
         if self.synchronized_data.tx_sender == DepositDaiRound.auto_round_id():
-            return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
+            yield PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
+            return
 
         if self.synchronized_data.tx_sender == AnswerQuestionsRound.auto_round_id():
-            return PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
+            yield PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
+            return
 
         if self.synchronized_data.tx_sender == RemoveFundingRound.auto_round_id():
-            return PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
+            yield PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
+            return
 
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set
         )
         if not is_approved_question_data_set:
             self.context.logger.info("No approved question data.")
-            return PostTransactionRound.DONE_PAYLOAD
+            yield PostTransactionRound.DONE_PAYLOAD
+            return
 
         data = self.synchronized_data.approved_question_data
         market_id = data.get("id", None)
         if market_id is None:
             self.context.logger.info("No market id.")
-            return PostTransactionRound.DONE_PAYLOAD
+            yield PostTransactionRound.DONE_PAYLOAD
+            return
 
         self.context.logger.info(
             f"Handling settled tx hash {settled_tx_hash}. "
@@ -103,35 +111,32 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         )
 
         if self.synchronized_data.tx_sender != PrepareTransactionRound.auto_round_id():
-            # we only handle market creation txs atm, any other tx, we don't need to take action
             self.context.logger.info(
                 f"No handling required for tx sender with round id {self.synchronized_data.tx_sender}. "
                 f"Handling only required for {PrepareTransactionRound.auto_round_id()}."
             )
-            return PostTransactionRound.DONE_PAYLOAD
+            yield PostTransactionRound.DONE_PAYLOAD
+            return
 
         payload = yield from self._handle_market_creation(market_id, settled_tx_hash)
-        return payload
+        yield payload
 
     def _handle_market_creation(
         self, market_id: str, tx_hash: str
     ) -> Generator[None, None, str]:
-        """Handle market creation tx settlement."""
-        # get fpmm id from the events
         fpmm_id = yield from self._get_fpmm_id(tx_hash)
         if fpmm_id is None:
-            # something went wrong
-            return PostTransactionRound.ERROR_PAYLOAD
+            yield PostTransactionRound.ERROR_PAYLOAD
+            return
 
         self.context.logger.info(f"Got fpmm_id {fpmm_id} for market {market_id}")
 
-        # mark as done on the market approval server
         err = yield from self._mark_market_as_done(market_id, fpmm_id)
         if err is not None:
-            # something went wrong
-            return PostTransactionRound.ERROR_PAYLOAD
+            yield PostTransactionRound.ERROR_PAYLOAD
+            return
 
-        return PostTransactionRound.DONE_PAYLOAD
+        yield PostTransactionRound.DONE_PAYLOAD
 
     def _get_fpmm_id(self, tx_hash: str) -> Generator[None, None, Optional[str]]:
         """Get the fpmm id from the events"""

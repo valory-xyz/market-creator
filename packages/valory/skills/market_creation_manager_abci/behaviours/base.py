@@ -233,8 +233,9 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
                 ContractApiMessage.Performative.STATE.value,
                 response.performative.value,
             )
-            return None
-        return cast(str, response.state.body["condition_id"])
+            yield None
+            return
+        yield cast(str, response.state.body["condition_id"])
 
     def _get_safe_tx_hash(
         self,
@@ -262,11 +263,11 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
                 ContractApiMessage.Performative.STATE.value,
                 response.performative.value,
             )
-            return None
+            yield None
+            return
 
-        # strip "0x" from the response hash
         tx_hash = cast(str, response.state.body.get("tx_hash", ""))[2:]
-        return tx_hash
+        yield tx_hash
 
     def _to_multisend(
         self, transactions: list[dict]
@@ -295,9 +296,9 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
                 ContractApiMessage.Performative.RAW_TRANSACTION.value,
                 response.performative.value,
             )
-            return None
+            yield None
+            return
 
-        # strip "0x" from the response
         multisend_data_str = cast(str, response.raw_transaction.body.get("data", ""))[2:]
         tx_data = bytes.fromhex(multisend_data_str)
         tx_hash = yield from self._get_safe_tx_hash(
