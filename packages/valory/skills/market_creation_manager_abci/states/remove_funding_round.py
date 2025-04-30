@@ -28,6 +28,8 @@ class RemoveFundingRound(CollectSameUntilThresholdRound):
             payload = json.loads(self.most_voted_payload)
             tx_data, market_address = payload["tx"], payload["market"]
 
+            # Note that popping the markets_to_remove_liquidity here
+            # is optimistically assuming that the transaction will be successful.
             markets_to_remove_liquidity = cast(
                 SynchronizedData,
                 self.synchronized_data,

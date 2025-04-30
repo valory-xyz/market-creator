@@ -40,6 +40,7 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
             if self.most_voted_payload == self.REMOVE_FUNDING_DONE_PAYLOAD:
                 return self.synchronized_data, Event.REMOVE_FUNDING_DONE
 
+            # no database update is required
             return self.synchronized_data, Event.DONE
 
         if not self.is_majority_possible(

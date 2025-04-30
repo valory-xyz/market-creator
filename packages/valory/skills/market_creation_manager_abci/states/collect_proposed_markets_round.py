@@ -23,13 +23,13 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
     collection_key = get_name(SynchronizedData.participant_to_selection)
     selection_key = get_name(SynchronizedData.collected_proposed_markets_data)
 
-    def end_block(self) -> Optional[Tuple[SynchronizedData, Event]]:
+    def end_block(self) -> Optional[Tuple[SynchronizedData, Enum]]:
         """Process the end of the block."""
         res = super().end_block()
         if res is None:
             return None
 
-        synced_data, event = cast(Tuple[SynchronizedData, Event], res)
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
         payload = self.most_voted_payload
 
         if event == Event.DONE and payload == self.ERROR_PAYLOAD:

@@ -1,9 +1,9 @@
 # ApproveMarketsRound
+from enum import Enum
 from typing import Optional, Tuple, cast
 from packages.valory.skills.abstract_round_abci.base import OnlyKeeperSendsRound, BaseSynchronizedData
 from packages.valory.skills.market_creation_manager_abci.payloads import ApproveMarketsPayload
 from packages.valory.skills.market_creation_manager_abci.states.base import Event, SynchronizedData
-
 from packages.valory.skills.abstract_round_abci.base import get_name
 
 
@@ -24,13 +24,13 @@ class ApproveMarketsRound(OnlyKeeperSendsRound):
     )
     collection_key = get_name(SynchronizedData.participant_to_selection)
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
         """Process the end of the block."""
         res = super().end_block()
         if res is None:
             return None
 
-        synced_data, event = cast(Tuple[SynchronizedData, Event], res)
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
         payload = cast(ApproveMarketsPayload, self.keeper_payload).content
 
         if event == Event.DONE and payload == self.ERROR_PAYLOAD:

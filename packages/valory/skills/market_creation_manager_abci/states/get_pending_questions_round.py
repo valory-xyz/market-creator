@@ -26,7 +26,7 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
         if res is None:
             return None
 
-        synced_data, event = cast(Tuple[SynchronizedData, Event], res)
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
         payload = self.most_voted_payload
 
         synced_data = synced_data.ensure_property_is_set(
@@ -60,4 +60,4 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
             ),
         )
 
-        return synced_data, event
+        return synced_data, event # type: ignore

@@ -19,20 +19,23 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
     NO_MARKETS_RETRIEVED_PAYLOAD = "NO_MARKETS_RETRIEVED_PAYLOAD"
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]: # pylint: disable=too-many-return-statements
         """Process the end of the block."""
         if self.keeper_payload is None:
             return None
-
-        if self.keeper_payload is None:
+        
+        # Keeper did not send
+        if self.keeper_payload is None: # pragma: no cover
             return self.synchronized_data, Event.DID_NOT_SEND
 
+        # API error
         if (
             cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
             == self.ERROR_PAYLOAD
         ):
             return self.synchronized_data, Event.ERROR
-
+        
+        # No markets available
         if (
             cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
             == self.NO_MARKETS_RETRIEVED_PAYLOAD
@@ -49,6 +52,7 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
                 Event.NO_MARKETS_RETRIEVED,
             )
 
+        # Happy path
         approved_question_data = json.loads(
             cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
         )

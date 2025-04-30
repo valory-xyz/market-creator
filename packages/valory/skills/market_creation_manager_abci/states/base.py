@@ -12,6 +12,7 @@ from packages.valory.skills.transaction_settlement_abci.rounds import (
 
 
 class Event(Enum):
+    """MarketCreationManagerAbciApp Events"""
     NO_MAJORITY = "no_majority"
     DONE = "done"
     NONE = "none"
@@ -45,5 +46,144 @@ DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA = json.dumps(
 
 
 class SynchronizedData(TxSynchronizedData):
-    # ...existing code for SynchronizedData class...
-    pass
+    """
+    Class to represent the synchronized data.
+
+    This data is replicated by the tendermint application.
+    """
+
+    @property
+    def gathered_data(self) -> str:
+        """Get the llm_values."""
+        return cast(str, self.db.get_strict("gathered_data"))
+
+    @property
+    def newsapi_api_retries(self) -> int:
+        """Get the amount of API call retries."""
+        return cast(int, self.db.get("newsapi_api_retries", 0))
+
+    @property
+    def proposed_markets_api_retries(self) -> int:
+        """Get the amount of API call retries."""
+        return cast(int, self.db.get("proposed_markets_api_retries", 0))
+
+    @property
+    def proposed_markets_count(self) -> int:
+        """Get the proposed_markets_count."""
+        return cast(int, self.db.get("proposed_markets_count", 0))
+
+    @property
+    def approved_markets_count(self) -> int:
+        """Get the approved_markets_count."""
+        return cast(int, self.db.get("approved_markets_count", 0))
+
+    @property
+    def approved_markets_timestamp(self) -> int:
+        """Get the approved_markets_count."""
+        return cast(int, self.db.get("approved_markets_timestamp", 0))
+
+    @property
+    def proposed_markets_data(self) -> dict:
+        """Get the proposed_markets_data."""
+        return cast(
+            dict, self.db.get("proposed_markets_data", DEFAULT_PROPOSED_MARKETS_DATA)
+        )
+
+    @property
+    def collected_proposed_markets_data(self) -> str:
+        """Get the collected_proposed_markets_data."""
+        return cast(
+            str,
+            self.db.get(
+                "collected_proposed_markets_data",
+                DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA,
+            ),
+        )
+
+    @property
+    def mech_requests(self) -> List[MechMetadata]:
+        """Get the mech requests."""
+        serialized = self.db.get("mech_requests", "[]")
+        if serialized is None:
+            serialized = "[]"
+        requests = json.loads(serialized)
+        return [MechMetadata(**metadata_item) for metadata_item in requests]
+
+    @property
+    def mech_responses(self) -> List[MechInteractionResponse]:
+        """Get the mech responses."""
+        serialized = self.db.get("mech_responses", "[]")
+        if serialized is None:
+            serialized = "[]"
+        responses = json.loads(serialized)
+        return [MechInteractionResponse(**response_item) for response_item in responses]
+
+    @property
+    def approved_markets_data(self) -> dict:
+        """Get the approved_markets_data."""
+        return cast(dict, self.db.get_strict("approved_markets_data"))
+
+    @property
+    def approved_question_data(self) -> dict:
+        """Get the approved_question_data."""
+        return cast(dict, self.db.get_strict("approved_question_data"))
+
+    @property
+    def is_approved_question_data_set(self) -> bool:
+        """Get the is_approved."""
+        approved_question_data = self.db.get("approved_question_data", None)
+        return approved_question_data is not None
+
+    @property
+    def all_approved_question_data(self) -> dict:
+        """Get the approved_question_data."""
+        return cast(dict, self.db.get_strict("all_approved_question_data"))
+
+    @property
+    def most_voted_tx_hash(self) -> str:
+        """Get the most_voted_tx_hash."""
+        return cast(str, self.db.get_strict("most_voted_tx_hash"))
+
+    @property
+    def most_voted_keeper_address(self) -> str:
+        """Get the most_voted_keeper_address."""
+        return cast(str, self.db.get_strict("most_voted_keeper_address"))
+
+    @property
+    def markets_to_remove_liquidity(self) -> List[Dict[str, Any]]:
+        """Get the markets_to_remove_liquidity."""
+        return cast(
+            List[Dict[str, Any]], self.db.get("markets_to_remove_liquidity", [])
+        )
+
+    @property
+    def market_from_block(self) -> int:
+        """Get the market_from_block."""
+        return cast(int, self.db.get("market_from_block", 0))
+
+    @property
+    def settled_tx_hash(self) -> Optional[str]:
+        """Get the settled_tx_hash."""
+        return cast(str, self.db.get("final_tx_hash", None))
+
+    @property
+    def tx_sender(self) -> str:
+        """Get the round that send the transaction through transaction settlement."""
+        return cast(str, self.db.get_strict("tx_sender"))
+
+    # This is a fix to ensure a given property is always set up on
+    # the SynchronizedData before ResetAndPause
+    def ensure_property_is_set(self, property_name: str) -> "SynchronizedData":
+        """Ensure a property is set."""
+        try:
+            value = self.db.get_strict(property_name)
+        except ValueError:
+            value = getattr(self, property_name)
+
+        return cast(
+            SynchronizedData,
+            self.update(
+                synchronized_data_class=SynchronizedData,
+                **{property_name: value},
+            ),
+        )

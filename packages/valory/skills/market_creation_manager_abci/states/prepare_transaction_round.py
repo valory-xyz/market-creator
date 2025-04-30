@@ -15,8 +15,9 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
     no_majority_event = Event.NO_MAJORITY
     collection_key = "content"
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
         """End block."""
+        # TODO: incomplete 
         if self.threshold_reached and any(
             [val is not None for val in self.most_voted_payload_values]
         ):

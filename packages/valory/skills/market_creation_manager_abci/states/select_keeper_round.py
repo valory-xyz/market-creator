@@ -7,6 +7,7 @@ from packages.valory.skills.abstract_round_abci.base import get_name
 
 class SelectKeeperRound(CollectSameUntilThresholdRound):
     """A round in a which keeper is selected"""
+    
     payload_class = SelectKeeperPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE

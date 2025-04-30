@@ -16,13 +16,13 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     collection_key = get_name(SynchronizedData.participant_to_randomness)
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
         """Process the end of the block."""
         res = super().end_block()
         if res is None:
             return None
 
-        synced_data, event = cast(Tuple[SynchronizedData, Event], res)
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
 
         synced_data = synced_data.ensure_property_is_set(
             get_name(SynchronizedData.approved_markets_count)
