@@ -1,4 +1,5 @@
 # RetrieveApprovedMarketRound
+from enum import Enum
 from typing import Optional, Tuple, cast
 import json
 from packages.valory.skills.abstract_round_abci.base import OnlyKeeperSendsRound, BaseSynchronizedData

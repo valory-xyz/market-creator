@@ -1,4 +1,5 @@
 # A round for generating collecting randomness
+from enum import Enum
 from typing import Optional, Tuple, cast
 from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
 from packages.valory.skills.market_creation_manager_abci.payloads import CollectRandomnessPayload

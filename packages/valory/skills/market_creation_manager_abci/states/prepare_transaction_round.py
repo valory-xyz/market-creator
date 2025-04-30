@@ -1,4 +1,5 @@
 # PrepareTransactionRound
+from enum import Enum
 from typing import Optional, Tuple
 from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
 from packages.valory.skills.market_creation_manager_abci.payloads import PrepareTransactionPayload
