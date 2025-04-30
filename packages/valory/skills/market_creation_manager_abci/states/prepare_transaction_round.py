@@ -18,7 +18,7 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
         """End block."""
-        # TODO: incomplete 
+        # TODO: incomplete implementation
         if self.threshold_reached and any(
             [val is not None for val in self.most_voted_payload_values]
         ):

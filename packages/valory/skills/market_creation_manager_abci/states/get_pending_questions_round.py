@@ -30,6 +30,8 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
         synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
         payload = self.most_voted_payload
 
+        # Fix to ensure properties are present on the SynchronizedData
+        # before ResetAndPause round.
         synced_data = synced_data.ensure_property_is_set(
             get_name(SynchronizedData.approved_markets_count)
         )
@@ -42,7 +44,7 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
         synced_data = synced_data.ensure_property_is_set(
             get_name(SynchronizedData.approved_markets_timestamp)
         )
-
+        # End fix
         if event == Event.DONE and payload == self.ERROR_PAYLOAD:
             return synced_data, Event.ERROR
 

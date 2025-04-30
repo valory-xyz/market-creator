@@ -25,6 +25,8 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
 
         synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
 
+        # Fix to ensure properties are present on the SynchronizedData
+        # before ResetAndPause round.
         synced_data = synced_data.ensure_property_is_set(
             get_name(SynchronizedData.approved_markets_count)
         )
@@ -40,5 +42,9 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
         synced_data = synced_data.ensure_property_is_set(
             get_name(SynchronizedData.mech_responses)
         )
+        
+        # End fix
+
+        return synced_data, event
 
         return synced_data, event
