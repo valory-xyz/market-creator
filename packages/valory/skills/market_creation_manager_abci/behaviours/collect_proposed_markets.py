@@ -30,7 +30,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     _ONE_DAY, 
     FPMM_QUERY
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import CollectProposedMarketsRound
+from packages.valory.skills.market_creation_manager_abci.states.collect_proposed_markets_round import CollectProposedMarketsRound
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectProposedMarketsPayload,
 )

@@ -32,10 +32,10 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     get_callable_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import PostTxPayload
+from packages.valory.skills.market_creation_manager_abci.states.post_transaction_round import PostTransactionRound
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     AnswerQuestionsRound,
     DepositDaiRound,
-    PostTransactionRound,
     PrepareTransactionRound,
     RedeemBondRound,
     RemoveFundingRound,

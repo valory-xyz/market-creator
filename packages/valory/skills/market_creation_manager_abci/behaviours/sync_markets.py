@@ -31,7 +31,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     FPMM_POOL_MEMBERSHIPS_QUERY,
     get_callable_name
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import SyncMarketsRound
+from packages.valory.skills.market_creation_manager_abci.states.sync_markets_round import SyncMarketsRound
 from packages.valory.skills.market_creation_manager_abci.payloads import SyncMarketsPayload
 
 

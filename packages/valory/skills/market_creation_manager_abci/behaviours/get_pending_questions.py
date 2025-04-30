@@ -29,7 +29,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     MarketCreationManagerBaseBehaviour,
     OPEN_FPMM_QUERY
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import GetPendingQuestionsRound
+from packages.valory.skills.market_creation_manager_abci.states.get_pending_questions_round import GetPendingQuestionsRound
 from packages.valory.skills.market_creation_manager_abci.payloads import GetPendingQuestionsPayload
 from packages.valory.skills.mech_interact_abci.states.base import MechMetadata
 

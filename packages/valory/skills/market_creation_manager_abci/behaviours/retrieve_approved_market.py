@@ -24,7 +24,7 @@ from typing import Generator
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import HTTP_OK, HTTP_NO_CONTENT, MAX_RETRIES
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour
-from packages.valory.skills.market_creation_manager_abci.rounds import RetrieveApprovedMarketRound
+from packages.valory.skills.market_creation_manager_abci.states.retrieve_approved_market_round import RetrieveApprovedMarketRound
 from packages.valory.skills.market_creation_manager_abci.payloads import RetrieveApprovedMarketPayload
 
 

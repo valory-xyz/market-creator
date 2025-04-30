@@ -28,7 +28,7 @@ from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, ETHER_VALUE, _ONE_DAY, get_callable_name
-from packages.valory.skills.market_creation_manager_abci.rounds import PrepareTransactionRound
+from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction_round import PrepareTransactionRound
 from packages.valory.skills.market_creation_manager_abci.payloads import PrepareTransactionPayload
 
 

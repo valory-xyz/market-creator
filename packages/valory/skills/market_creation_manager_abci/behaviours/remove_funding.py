@@ -27,7 +27,7 @@ from packages.valory.contracts.fpmm.contract import FPMMContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, ETHER_VALUE, ZERO_HASH, get_callable_name
-from packages.valory.skills.market_creation_manager_abci.rounds import RemoveFundingRound
+from packages.valory.skills.market_creation_manager_abci.states.remove_funding_round import RemoveFundingRound
 from packages.valory.skills.market_creation_manager_abci.payloads import RemoveFundingPayload
 
 

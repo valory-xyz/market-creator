@@ -31,7 +31,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     HTTP_OK,
     _ONE_DAY
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import ApproveMarketsRound
+from packages.valory.skills.market_creation_manager_abci.states.approve_markets_round import ApproveMarketsRound
 from packages.valory.skills.market_creation_manager_abci.payloads import ApproveMarketsPayload
 
 
