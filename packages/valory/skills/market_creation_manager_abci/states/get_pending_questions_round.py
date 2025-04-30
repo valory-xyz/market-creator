@@ -1,3 +1,4 @@
+# GetPendingQuestionsRound
 from typing import Optional, Tuple, cast
 from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
 from packages.valory.skills.market_creation_manager_abci.states.base import Event, SynchronizedData
@@ -7,6 +8,7 @@ from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
+    """GetPendingQuestionsRound"""
     payload_class = GetPendingQuestionsPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
@@ -19,6 +21,7 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
     NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """End block."""
         res = super().end_block()
         if res is None:
             return None

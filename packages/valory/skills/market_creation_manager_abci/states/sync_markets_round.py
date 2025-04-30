@@ -1,3 +1,4 @@
+# SyncMarketsRound
 from typing import Optional, Tuple
 import json
 from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
@@ -8,6 +9,8 @@ from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class SyncMarketsRound(CollectSameUntilThresholdRound):
+    """SyncMarketsRound"""
+
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     NO_UPDATE_PAYLOAD = "NO_UPDATE"
 
@@ -15,6 +18,7 @@ class SyncMarketsRound(CollectSameUntilThresholdRound):
     synchronized_data_class = SynchronizedData
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 return self.synchronized_data, Event.ERROR

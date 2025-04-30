@@ -1,3 +1,4 @@
+# PrepareTransactionRound
 from typing import Optional, Tuple
 from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
 from packages.valory.skills.market_creation_manager_abci.payloads import PrepareTransactionPayload
@@ -7,6 +8,7 @@ from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class PrepareTransactionRound(CollectSameUntilThresholdRound):
+    """PrepareTransactionRound"""
     payload_class = PrepareTransactionPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
@@ -14,6 +16,7 @@ class PrepareTransactionRound(CollectSameUntilThresholdRound):
     collection_key = "content"
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """End block."""
         if self.threshold_reached and any(
             [val is not None for val in self.most_voted_payload_values]
         ):

@@ -1,3 +1,4 @@
+# CollectProposedMarketsRound
 from typing import Optional, Tuple, cast
 from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound
 from packages.valory.skills.market_creation_manager_abci.payloads import CollectProposedMarketsPayload
@@ -7,6 +8,8 @@ from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
+    """CollectProposedMarketsRound"""
+
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
     MAX_APPROVED_MARKETS_REACHED_PAYLOAD = "MAX_APPROVED_MARKETS_REACHED_PAYLOAD"
@@ -21,6 +24,7 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
     selection_key = get_name(SynchronizedData.collected_proposed_markets_data)
 
     def end_block(self) -> Optional[Tuple[SynchronizedData, Event]]:
+        """Process the end of the block."""
         res = super().end_block()
         if res is None:
             return None

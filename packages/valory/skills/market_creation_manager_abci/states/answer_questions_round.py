@@ -1,3 +1,4 @@
+# AnswerQuestionsRound
 from typing import Optional, Tuple
 from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
 from packages.valory.skills.market_creation_manager_abci.payloads import AnswerQuestionsPayload
@@ -5,6 +6,8 @@ from packages.valory.skills.market_creation_manager_abci.states.base import Even
 
 
 class AnswerQuestionsRound(CollectSameUntilThresholdRound):
+    """AnswerQuestionsRound"""
+
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
@@ -12,6 +15,7 @@ class AnswerQuestionsRound(CollectSameUntilThresholdRound):
     synchronized_data_class = SynchronizedData
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
                 return self.synchronized_data, Event.ERROR

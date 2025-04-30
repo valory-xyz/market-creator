@@ -1,3 +1,4 @@
+# ApproveMarketsRound
 from typing import Optional, Tuple, cast
 from packages.valory.skills.abstract_round_abci.base import OnlyKeeperSendsRound, BaseSynchronizedData
 from packages.valory.skills.market_creation_manager_abci.payloads import ApproveMarketsPayload
@@ -7,6 +8,8 @@ from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class ApproveMarketsRound(OnlyKeeperSendsRound):
+    """ApproveMarketsRound"""
+
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
 
@@ -22,6 +25,7 @@ class ApproveMarketsRound(OnlyKeeperSendsRound):
     collection_key = get_name(SynchronizedData.participant_to_selection)
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
         res = super().end_block()
         if res is None:
             return None

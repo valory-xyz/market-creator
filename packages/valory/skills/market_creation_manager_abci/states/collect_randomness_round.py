@@ -1,3 +1,4 @@
+# A round for generating collecting randomness
 from typing import Optional, Tuple, cast
 from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
 from packages.valory.skills.market_creation_manager_abci.payloads import CollectRandomnessPayload
@@ -7,6 +8,7 @@ from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
+    """A round for generating collecting randomness"""
     payload_class = CollectRandomnessPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
@@ -15,6 +17,7 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
         res = super().end_block()
         if res is None:
             return None

@@ -1,3 +1,4 @@
+# RetrieveApprovedMarketRound
 from typing import Optional, Tuple, cast
 import json
 from packages.valory.skills.abstract_round_abci.base import OnlyKeeperSendsRound, BaseSynchronizedData
@@ -7,6 +8,7 @@ from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
+    """RetrieveApprovedMarketRound"""
     payload_class = RetrieveApprovedMarketPayload
     payload_attribute = "content"
     synchronized_data_class = SynchronizedData
@@ -18,6 +20,7 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
     NO_MARKETS_RETRIEVED_PAYLOAD = "NO_MARKETS_RETRIEVED_PAYLOAD"
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """Process the end of the block."""
         if self.keeper_payload is None:
             return None
 
