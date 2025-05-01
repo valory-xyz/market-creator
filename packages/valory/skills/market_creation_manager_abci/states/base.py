@@ -13,6 +13,7 @@ from packages.valory.skills.transaction_settlement_abci.rounds import (
 
 class Event(Enum):
     """MarketCreationManagerAbciApp Events"""
+
     NO_MAJORITY = "no_majority"
     DONE = "done"
     NONE = "none"

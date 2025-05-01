@@ -1,15 +1,24 @@
 # GetPendingQuestionsRound
 from enum import Enum
 from typing import Optional, Tuple, cast
-from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
-from packages.valory.skills.market_creation_manager_abci.states.base import Event, SynchronizedData
-from packages.valory.skills.market_creation_manager_abci.payloads import GetPendingQuestionsPayload
+from packages.valory.skills.abstract_round_abci.base import (
+    CollectSameUntilThresholdRound,
+    BaseSynchronizedData,
+)
+from packages.valory.skills.market_creation_manager_abci.states.base import (
+    Event,
+    SynchronizedData,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    GetPendingQuestionsPayload,
+)
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
     """GetPendingQuestionsRound"""
+
     payload_class = GetPendingQuestionsPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
@@ -63,4 +72,4 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
             ),
         )
 
-        return synced_data, event # type: ignore
+        return synced_data, event  # type: ignore

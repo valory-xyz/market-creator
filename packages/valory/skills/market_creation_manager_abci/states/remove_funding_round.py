@@ -1,9 +1,17 @@
 # RemoveFundingRound
 from typing import Optional, Tuple, cast
 import json
-from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
-from packages.valory.skills.market_creation_manager_abci.payloads import RemoveFundingPayload
-from packages.valory.skills.market_creation_manager_abci.states.base import Event, SynchronizedData
+from packages.valory.skills.abstract_round_abci.base import (
+    CollectSameUntilThresholdRound,
+    BaseSynchronizedData,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    RemoveFundingPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.base import (
+    Event,
+    SynchronizedData,
+)
 from packages.valory.skills.abstract_round_abci.base import get_name
 
 

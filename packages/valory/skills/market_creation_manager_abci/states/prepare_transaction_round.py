@@ -1,15 +1,24 @@
 # PrepareTransactionRound
 from enum import Enum
 from typing import Optional, Tuple
-from packages.valory.skills.abstract_round_abci.base import CollectSameUntilThresholdRound, BaseSynchronizedData
-from packages.valory.skills.market_creation_manager_abci.payloads import PrepareTransactionPayload
-from packages.valory.skills.market_creation_manager_abci.states.base import Event, SynchronizedData
+from packages.valory.skills.abstract_round_abci.base import (
+    CollectSameUntilThresholdRound,
+    BaseSynchronizedData,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    PrepareTransactionPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.base import (
+    Event,
+    SynchronizedData,
+)
 
 from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class PrepareTransactionRound(CollectSameUntilThresholdRound):
     """PrepareTransactionRound"""
+
     payload_class = PrepareTransactionPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE

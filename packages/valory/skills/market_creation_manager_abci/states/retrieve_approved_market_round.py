@@ -2,14 +2,23 @@
 from enum import Enum
 from typing import Optional, Tuple, cast
 import json
-from packages.valory.skills.abstract_round_abci.base import OnlyKeeperSendsRound, BaseSynchronizedData
-from packages.valory.skills.market_creation_manager_abci.payloads import RetrieveApprovedMarketPayload
-from packages.valory.skills.market_creation_manager_abci.states.base import Event, SynchronizedData
+from packages.valory.skills.abstract_round_abci.base import (
+    OnlyKeeperSendsRound,
+    BaseSynchronizedData,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    RetrieveApprovedMarketPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.base import (
+    Event,
+    SynchronizedData,
+)
 from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
     """RetrieveApprovedMarketRound"""
+
     payload_class = RetrieveApprovedMarketPayload
     payload_attribute = "content"
     synchronized_data_class = SynchronizedData
@@ -20,13 +29,17 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
     NO_MARKETS_RETRIEVED_PAYLOAD = "NO_MARKETS_RETRIEVED_PAYLOAD"
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]: # pylint: disable=too-many-return-statements
+    def end_block(
+        self,
+    ) -> Optional[
+        Tuple[BaseSynchronizedData, Enum]
+    ]:  # pylint: disable=too-many-return-statements
         """Process the end of the block."""
         if self.keeper_payload is None:
             return None
-        
+
         # Keeper did not send
-        if self.keeper_payload is None: # pragma: no cover
+        if self.keeper_payload is None:  # pragma: no cover
             return self.synchronized_data, Event.DID_NOT_SEND
 
         # API error
@@ -35,7 +48,7 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
             == self.ERROR_PAYLOAD
         ):
             return self.synchronized_data, Event.ERROR
-        
+
         # No markets available
         if (
             cast(RetrieveApprovedMarketPayload, self.keeper_payload).content
