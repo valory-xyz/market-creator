@@ -26,11 +26,17 @@ from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     MarketCreationManagerBaseBehaviour,
-    ETHER_VALUE
+    ETHER_VALUE,
 )
-from packages.valory.skills.market_creation_manager_abci.states.deposit_dai_round import DepositDaiRound
-from packages.valory.skills.market_creation_manager_abci.payloads import DepositDaiPayload
-from packages.valory.skills.transaction_settlement_abci.payload_tools import hash_payload_to_hex
+from packages.valory.skills.market_creation_manager_abci.states.deposit_dai_round import (
+    DepositDaiRound,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    DepositDaiPayload,
+)
+from packages.valory.skills.transaction_settlement_abci.payload_tools import (
+    hash_payload_to_hex,
+)
 
 
 class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
@@ -59,7 +65,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         if ledger_api_response.performative != LedgerApiMessage.Performative.STATE:
             self.context.logger.error(
                 f"Couldn't get balance. "
-                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "
+                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "  # type: ignore
                 f"received {ledger_api_response.performative.value}."
             )
             yield None
@@ -131,6 +137,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             return
 
         # strip "0x" from the response data
-        data_str = cast(str, response.state.body["data"])[2:]
+        raw_data_str = cast(str, response.state.body["data"])
+        data_str = raw_data_str.removeprefix("0x")
         data = bytes.fromhex(data_str)
         yield data

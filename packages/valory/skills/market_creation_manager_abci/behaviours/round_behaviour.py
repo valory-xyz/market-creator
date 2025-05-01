@@ -25,20 +25,48 @@ from packages.valory.skills.abstract_round_abci.behaviours import (
     AbstractRoundBehaviour,
     BaseBehaviour,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.answer_questions import AnswerQuestionsBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets import ApproveMarketsBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import CollectProposedMarketsBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.deposit_dai import DepositDaiBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.get_pending_questions import GetPendingQuestionsBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.post_transaction import PostTransactionBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_transaction import PrepareTransactionBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.randomness import CollectRandomnessBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_bond import RedeemBondBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.remove_funding import RemoveFundingBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.retrieve_approved_market import RetrieveApprovedMarketBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.select_keeper import SelectKeeperMarketProposalBehaviour
-from packages.valory.skills.market_creation_manager_abci.behaviours.sync_markets import SyncMarketsBehaviour
-from packages.valory.skills.market_creation_manager_abci.rounds import MarketCreationManagerAbciApp
+from packages.valory.skills.market_creation_manager_abci.behaviours.answer_questions import (
+    AnswerQuestionsBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets import (
+    ApproveMarketsBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import (
+    CollectProposedMarketsBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.deposit_dai import (
+    DepositDaiBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.get_pending_questions import (
+    GetPendingQuestionsBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.post_transaction import (
+    PostTransactionBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_transaction import (
+    PrepareTransactionBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.randomness import (
+    CollectRandomnessBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_bond import (
+    RedeemBondBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.remove_funding import (
+    RemoveFundingBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.retrieve_approved_market import (
+    RetrieveApprovedMarketBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.select_keeper import (
+    SelectKeeperMarketProposalBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.sync_markets import (
+    SyncMarketsBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.rounds import (
+    MarketCreationManagerAbciApp,
+)
 
 
 class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):

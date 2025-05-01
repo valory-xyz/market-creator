@@ -23,9 +23,18 @@ from typing import Dict, Generator, Optional, cast
 
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, ETHER_VALUE, MIN_BALANCE_WITHDRAW_REALITIO, get_callable_name
-from packages.valory.skills.market_creation_manager_abci.states.redeem_bond_round import RedeemBondRound
-from packages.valory.skills.market_creation_manager_abci.payloads import RedeemBondPayload
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    MarketCreationManagerBaseBehaviour,
+    ETHER_VALUE,
+    MIN_BALANCE_WITHDRAW_REALITIO,
+    get_callable_name,
+)
+from packages.valory.skills.market_creation_manager_abci.states.redeem_bond_round import (
+    RedeemBondRound,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    RedeemBondPayload,
+)
 
 
 class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):

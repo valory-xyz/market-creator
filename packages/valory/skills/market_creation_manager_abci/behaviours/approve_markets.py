@@ -17,28 +17,35 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the approve markets behaviour."""
+"""This module contains the approve markets behaviour of MarketCreationManagerAbciApp"""
 
 import json
 import random
 import time
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, Type
 
+from packages.valory.skills.abstract_round_abci.base import AbstractRound
 import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
-from packages.valory.skills.market_creation_manager_abci import PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID
+from packages.valory.skills.market_creation_manager_abci import (
+    PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
+)
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     MarketCreationManagerBaseBehaviour,
     HTTP_OK,
-    _ONE_DAY
+    _ONE_DAY,
 )
-from packages.valory.skills.market_creation_manager_abci.states.approve_markets_round import ApproveMarketsRound
-from packages.valory.skills.market_creation_manager_abci.payloads import ApproveMarketsPayload
+from packages.valory.skills.market_creation_manager_abci.states.approve_markets_round import (
+    ApproveMarketsRound,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    ApproveMarketsPayload,
+)
 
 
 class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
     """ApproveMarketsBehaviour"""
 
-    matching_round = ApproveMarketsRound
+    matching_round: Type[AbstractRound] = ApproveMarketsRound
 
     def _i_am_not_sending(self) -> bool:
         """Indicates if the current agent is the sender or not."""

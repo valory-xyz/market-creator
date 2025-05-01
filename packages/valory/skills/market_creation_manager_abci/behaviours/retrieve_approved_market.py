@@ -20,18 +20,29 @@
 """This module contains the retrieve approved market behaviour."""
 
 import json
-from typing import Generator
+from typing import Generator, Type
 
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import HTTP_OK, HTTP_NO_CONTENT, MAX_RETRIES
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour
-from packages.valory.skills.market_creation_manager_abci.states.retrieve_approved_market_round import RetrieveApprovedMarketRound
-from packages.valory.skills.market_creation_manager_abci.payloads import RetrieveApprovedMarketPayload
+from packages.valory.skills.abstract_round_abci.base import AbstractRound
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    HTTP_OK,
+    HTTP_NO_CONTENT,
+    MAX_RETRIES,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    MarketCreationManagerBaseBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.states.retrieve_approved_market_round import (
+    RetrieveApprovedMarketRound,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    RetrieveApprovedMarketPayload,
+)
 
 
 class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
     """RetrieveApprovedMarketBehaviour"""
 
-    matching_round = RetrieveApprovedMarketRound
+    matching_round: Type[AbstractRound] = RetrieveApprovedMarketRound
 
     def _i_am_not_sending(self) -> bool:
         """Indicates if the current agent is the sender or not."""

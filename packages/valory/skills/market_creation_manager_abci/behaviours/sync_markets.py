@@ -29,10 +29,15 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     MarketCreationManagerBaseBehaviour,
     ZERO_ADDRESS,
     FPMM_POOL_MEMBERSHIPS_QUERY,
-    get_callable_name
+    _ONE_DAY,
+    get_callable_name,
 )
-from packages.valory.skills.market_creation_manager_abci.states.sync_markets_round import SyncMarketsRound
-from packages.valory.skills.market_creation_manager_abci.payloads import SyncMarketsPayload
+from packages.valory.skills.market_creation_manager_abci.states.sync_markets_round import (
+    SyncMarketsRound,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    SyncMarketsPayload,
+)
 
 
 class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
@@ -93,7 +98,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             market["address"] = entry["pool"]["id"]
             market["amount"] = sum(map(int, entry["pool"]["outcomeTokenAmounts"]))
             market["opening_timestamp"] = int(entry["pool"]["openingTimestamp"])
-            market["removal_timestamp"] = market["opening_timestamp"] - 86400
+            market["removal_timestamp"] = market["opening_timestamp"] - _ONE_DAY
 
             # The markets created by the agent will only have one condition per market
             condition, *_ = entry["pool"]["conditions"]

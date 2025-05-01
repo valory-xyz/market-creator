@@ -25,15 +25,21 @@ from typing import Any, Dict, Generator, Optional, cast
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    MarketCreationManagerBaseBehaviour, 
-    ANSWER_YES, 
-    ANSWER_NO, 
-    ANSWER_INVALID, 
-    MAX_PREVIOUS
+    MarketCreationManagerBaseBehaviour,
+    ANSWER_YES,
+    ANSWER_NO,
+    ANSWER_INVALID,
+    MAX_PREVIOUS,
 )
-from packages.valory.skills.market_creation_manager_abci.rounds import AnswerQuestionsRound
-from packages.valory.skills.market_creation_manager_abci.payloads import AnswerQuestionsPayload
-from packages.valory.skills.mech_interact_abci.states.base import MechInteractionResponse
+from packages.valory.skills.market_creation_manager_abci.rounds import (
+    AnswerQuestionsRound,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    AnswerQuestionsPayload,
+)
+from packages.valory.skills.mech_interact_abci.states.base import (
+    MechInteractionResponse,
+)
 
 
 class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
@@ -46,9 +52,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         self.context.logger.info("async_act")
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            # collect all yielded payload values and take the last as content
-            payload_values = list(self._get_payload())
-            content = payload_values[-1] if payload_values else None
+            content = yield from self._get_payload()
             payload = AnswerQuestionsPayload(sender=sender, content=content)
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
@@ -150,6 +154,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             del self.shared_state.questions_requested_mech[question_id]
 
         if len(txs) == 0:
+            # something went wrong, respond with ERROR payload for now
             self.context.logger.error(
                 "Couldn't get any txs for questions that we have answers for."
             )
@@ -158,6 +163,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         multisend_tx_str = yield from self._to_multisend(txs)
         if multisend_tx_str is None:
+            # something went wrong, respond with ERROR payload for now
             yield AnswerQuestionsRound.ERROR_PAYLOAD
             return
 
@@ -167,9 +173,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         self, question_id: str, answer: str
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Get an answer tx, yielding contract API responses followed by the tx dict or None."""
-        response = None
-        # yield contract API responses and capture the last one
-        for resp in self.get_contract_api_response(
+        response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.realitio_contract,
             contract_id=str(RealitioContract.contract_id),
@@ -177,11 +181,13 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             question_id=bytes.fromhex(question_id[2:]),
             answer=bytes.fromhex(answer[2:]),
             max_previous=MAX_PREVIOUS,
-        ):
-            yield resp
-            response = resp
+        )
+
         # handle error or missing response
-        if response is None or response.performative != ContractApiMessage.Performative.STATE:
+        if (
+            response is None
+            or response.performative != ContractApiMessage.Performative.STATE
+        ):
             self.context.logger.error(
                 f"Couldn't get submitAnswer transaction. "
                 f"Expected STATE, received {None if response is None else response.performative.value}."

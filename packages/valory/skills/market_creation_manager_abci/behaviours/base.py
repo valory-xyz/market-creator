@@ -25,17 +25,30 @@ from datetime import datetime
 from string import Template
 from typing import Any, Callable, Generator, Optional, cast
 
-from packages.valory.contracts.gnosis_safe.contract import GnosisSafeContract, SafeOperation
-from packages.valory.contracts.conditional_tokens.contract import ConditionalTokensContract
-from packages.valory.contracts.multisend.contract import MultiSendContract, MultiSendOperation
+from packages.valory.contracts.gnosis_safe.contract import (
+    GnosisSafeContract,
+    SafeOperation,
+)
+from packages.valory.contracts.conditional_tokens.contract import (
+    ConditionalTokensContract,
+)
+from packages.valory.contracts.multisend.contract import (
+    MultiSendContract,
+    MultiSendOperation,
+)
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.llm.message import LlmMessage
 from packages.valory.skills.abstract_round_abci.behaviours import BaseBehaviour
 from packages.valory.skills.abstract_round_abci.models import Requests
 from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
-from packages.valory.skills.market_creation_manager_abci.models import MarketCreationManagerParams, SharedState
-from packages.valory.skills.market_creation_manager_abci.rounds import SynchronizedData
-from packages.valory.skills.transaction_settlement_abci.payload_tools import hash_payload_to_hex
+from packages.valory.skills.market_creation_manager_abci.models import (
+    MarketCreationManagerParams,
+    SharedState,
+)
+from packages.valory.skills.market_creation_manager_abci.states.base import SynchronizedData
+from packages.valory.skills.transaction_settlement_abci.payload_tools import (
+    hash_payload_to_hex,
+)
 
 
 # Constants
@@ -215,7 +228,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         oracle_contract: str,
         question_id: str,
         outcome_slot_count: int = 2,
-    ) -> Generator[None, None, str]:
+    ) -> Generator[None, None, Optional[str]]:
         """Calculate question ID."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
@@ -266,7 +279,9 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             yield None
             return
 
-        tx_hash = cast(str, response.state.body.get("tx_hash", ""))[2:]
+        # strip "0x" from the response hash
+        raw_hash = cast(str, response.state.body.get("tx_hash", "").strip())
+        tx_hash = raw_hash.removeprefix("0x")
         yield tx_hash
 
     def _to_multisend(
@@ -299,7 +314,10 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             yield None
             return
 
-        multisend_data_str = cast(str, response.raw_transaction.body.get("data", ""))[2:]
+        # strip "0x" from the response hash
+        raw_multisend_data_str = cast(str, response.raw_transaction.body.get("data", ""))
+        multisend_data_str = raw_multisend_data_str.removeprefix("0x")
+
         tx_data = bytes.fromhex(multisend_data_str)
         tx_hash = yield from self._get_safe_tx_hash(
             self.params.multisend_address,
@@ -307,8 +325,8 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             operation=SafeOperation.DELEGATE_CALL.value,
         )
         if tx_hash is None:
-            return None
-
+            yield None
+            return
         payload_data = hash_payload_to_hex(
             safe_tx_hash=tx_hash,
             ether_value=ETHER_VALUE,
@@ -317,7 +335,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             to_address=self.params.multisend_address,
             data=tx_data,
         )
-        return payload_data
+        yield payload_data
 
     def get_subgraph_result(
         self,
@@ -333,16 +351,17 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             self.context.logger.error(
                 "Could not retrieve response from Omen subgraph. Response was None."
             )
-            return None
+            yield None
+            return
         if response.status_code != HTTP_OK:
             self.context.logger.error(
                 "Could not retrieve response from Omen subgraph. Received status code %s.\n%s",
                 response.status_code,
                 response,
             )
-            return None
-
-        return json.loads(response.body.decode())
+            yield None
+            return
+        yield json.loads(response.body.decode())
 
     def do_llm_request(
         self,
@@ -366,4 +385,4 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         ] = self.get_callback_request()
         # notify caller by propagating potential timeout exception.
         response = yield from self.wait_for_message(timeout=timeout)
-        return response
+        yield response
