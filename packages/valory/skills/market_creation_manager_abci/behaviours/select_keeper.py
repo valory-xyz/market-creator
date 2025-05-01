@@ -23,7 +23,9 @@ from packages.valory.skills.abstract_round_abci.common import SelectKeeperBehavi
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     SelectKeeperPayload,
 )
-from packages.valory.skills.market_creation_manager_abci.states.select_keeper_round import SelectKeeperRound
+from packages.valory.skills.market_creation_manager_abci.states.select_keeper_round import (
+    SelectKeeperRound,
+)
 
 
 class SelectKeeperMarketProposalBehaviour(SelectKeeperBehaviour):

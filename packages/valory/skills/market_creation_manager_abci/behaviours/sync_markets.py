@@ -135,7 +135,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             self.context.logger.info(log_msg)
 
-        return markets_with_funds, 0
+        yield markets_with_funds, 0
 
     def _get_markets_with_funds(
         self,
@@ -145,7 +145,8 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         """Get markets with funds."""
         # no need to query the contract if there are no markets
         if len(market_addresses) == 0:
-            return []
+            yield []
+            return
 
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
@@ -161,5 +162,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
                 f"received {response.performative.value}."
             )
-            return []
-        return cast(List[str], response.state.body["data"])
+            yield []
+            return
+        
+        yield cast(List[str], response.state.body["data"])

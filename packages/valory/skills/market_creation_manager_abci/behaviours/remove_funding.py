@@ -22,13 +22,24 @@
 import json
 from typing import Any, Dict, Generator, List, Optional, Tuple, cast
 
-from packages.valory.contracts.conditional_tokens.contract import ConditionalTokensContract
+from packages.valory.contracts.conditional_tokens.contract import (
+    ConditionalTokensContract,
+)
 from packages.valory.contracts.fpmm.contract import FPMMContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, ETHER_VALUE, ZERO_HASH, get_callable_name
-from packages.valory.skills.market_creation_manager_abci.states.remove_funding_round import RemoveFundingRound
-from packages.valory.skills.market_creation_manager_abci.payloads import RemoveFundingPayload
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    MarketCreationManagerBaseBehaviour,
+    ETHER_VALUE,
+    ZERO_HASH,
+    get_callable_name,
+)
+from packages.valory.skills.market_creation_manager_abci.states.remove_funding_round import (
+    RemoveFundingRound,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    RemoveFundingPayload,
+)
 
 
 class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
@@ -62,12 +73,19 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"ConditionalTokensContract.get_user_holdings unsuccessful! : {response}"
             )
-            return None
+            yield None
+            return
 
         shares = cast(List[int], response.state.body["shares"])
         holdings = cast(List[int], response.state.body["holdings"])
 
         # Shares to burn
+        # https://github.com/protofire/omen-exchange/blob/88dc0149f61cc4aef7981d3acf187c35e6a24ead/app/src/hooks/market_data/useFundingBalance.tsx#L24
+        # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/components/market/market_pooling/scalar_market_pool_liquidity.tsx#L279
+        # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/pages/market_sections/market_pool_liquidity_container.tsx#L123
+        # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/pages/market_sections/market_pool_liquidity_container.tsx#L357
+        # FPMM.balanceOf(ADDRESS) # noqa
+        
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=market,
@@ -79,9 +97,13 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"FPMMContract.get_balance unsuccessful! : {response}"
             )
-            return None
+            yield None
+            return
+        
         amount_to_remove = cast(int, response.state.body["balance"])
-
+        
+        # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/hooks/market_data/useBlockchainMarketMakerData.tsx#L141-L145
+        # FPMM.totalSupply() # noqa
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=market,
@@ -92,7 +114,8 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"FPMMContract.get_total_supply unsuccessful! : {response}"
             )
-            return None
+            yield None
+            return
         total_pool_shares = cast(int, response.state.body["supply"])
         if amount_to_remove == total_pool_shares:
             send_amounts_after_removing_funding = [
@@ -109,7 +132,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             send_amounts_after_removing_funding[i] + shares[i]
             for i in range(len(send_amounts_after_removing_funding))
         )
-        return amount_to_remove, amount_to_merge
+        yield amount_to_remove, amount_to_merge
 
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
@@ -215,9 +238,11 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
                 f"received {response.performative.value}."
             )
-            return None
+            yield None
+            return
 
-        return {
+        # TODO : strip "0x" from the data?
+        yield {
             "to": address,
             "data": response.state.body["data"],
             "value": ETHER_VALUE,
@@ -249,9 +274,10 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
             )
-            return None
+            yield None
+            return
 
-        return {
+        yield {
             "to": self.params.conditional_tokens_contract,
             "data": response.state.body["data"],
             "value": ETHER_VALUE,
@@ -270,8 +296,9 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
             )
-            return None
-        return {
+            yield None
+            return
+        yield {
             "to": self.params.collateral_tokens_contract,
             "data": response.state.body["data"],
             "value": ETHER_VALUE,

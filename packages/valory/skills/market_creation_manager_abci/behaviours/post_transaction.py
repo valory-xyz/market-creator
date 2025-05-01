@@ -32,7 +32,9 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     get_callable_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import PostTxPayload
-from packages.valory.skills.market_creation_manager_abci.states.post_transaction_round import PostTransactionRound
+from packages.valory.skills.market_creation_manager_abci.states.post_transaction_round import (
+    PostTransactionRound,
+)
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     AnswerQuestionsRound,
     DepositDaiRound,
@@ -40,7 +42,9 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     RedeemBondRound,
     RemoveFundingRound,
 )
-from packages.valory.skills.mech_interact_abci.states import request as MechRequestStates
+from packages.valory.skills.mech_interact_abci.states import (
+    request as MechRequestStates,
+)
 
 
 class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
@@ -153,11 +157,12 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"{get_callable_name(FPMMDeterministicFactory.parse_market_creation_event)} unsuccessful!: {response}"
             )
-            return None
+            yield None
+            return
 
         data = cast(Dict[str, Any], response.state.body["data"])
         fpmm_id = cast(str, data["fixed_product_market_maker"])
-        return fpmm_id
+        yield fpmm_id
 
     def _mark_market_as_done(
         self, id_: str, fpmm_id: str
@@ -182,7 +187,8 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"Failed to update market: {http_response.status_code} {http_response}"
             )
-            return str(http_response.body)
+            yield str(http_response.body)
+            return
 
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully updated market, received body {body}")
@@ -200,11 +206,12 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"Failed to update market id: {http_response.status_code} {http_response}"
             )
-            return str(http_response.body)
+            yield str(http_response.body)
+            return
 
         body = json.loads(http_response.body.decode())
         self.context.logger.info(
             f"Successfully updated market id, received body {body}"
         )
 
-        return None
+        yield None

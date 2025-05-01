@@ -20,22 +20,36 @@
 """This module contains the prepare transaction behaviour."""
 
 from datetime import datetime
-from typing import Dict, Generator, Optional, Tuple, cast
+from typing import Dict, Generator, Optional, Tuple, Type, cast
 
-from packages.valory.contracts.conditional_tokens.contract import ConditionalTokensContract
-from packages.valory.contracts.fpmm_deterministic_factory.contract import FPMMDeterministicFactory
+
+from packages.valory.skills.abstract_round_abci.base import AbstractRound
+from packages.valory.contracts.conditional_tokens.contract import (
+    ConditionalTokensContract,
+)
+from packages.valory.contracts.fpmm_deterministic_factory.contract import (
+    FPMMDeterministicFactory,
+)
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import MarketCreationManagerBaseBehaviour, ETHER_VALUE, _ONE_DAY, get_callable_name
-from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction_round import PrepareTransactionRound
-from packages.valory.skills.market_creation_manager_abci.payloads import PrepareTransactionPayload
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    MarketCreationManagerBaseBehaviour,
+    ETHER_VALUE,
+    _ONE_DAY
+)
+from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction_round import (
+    PrepareTransactionRound,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    PrepareTransactionPayload,
+)
 
 
 class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     """PrepareTransactionBehaviour"""
 
-    matching_round = PrepareTransactionRound
+    matching_round: Type[AbstractRound] = PrepareTransactionRound
 
     def _calculate_time_parameters(
         self,
@@ -69,7 +83,8 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             template_id=template_id,
             question_nonce=question_nonce,
         )
-        return cast(str, response.state.body["question_id"])
+        yield cast(str, response.state.body["question_id"])
+        return
 
     def _prepare_ask_question_mstx(
         self,
@@ -96,8 +111,10 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"get_ask_question_tx_data unsuccessful!: {response}"
             )
-            return None
-        return {
+            yield None
+            return
+        
+        yield {
             "to": self.params.realitio_contract,
             "data": response.state.body["data"],
             "value": self.params.realitio_answer_question_bounty,
@@ -122,8 +139,10 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"get_prepare_condition_tx_data unsuccessful!: {response}"
             )
-            return None
-        return {
+            yield None
+            return
+        
+        yield {
             "to": self.params.conditional_tokens_contract,
             "data": response.state.body["data"],
             "value": ETHER_VALUE,
@@ -151,8 +170,10 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"get_prepare_condition_tx_data unsuccessful!: {response}"
             )
-            return None
-        return {
+            yield None
+            return
+    
+        yield {
             "to": self.params.fpmm_deterministic_factory_contract,
             "data": response.state.body["data"],
             "value": ETHER_VALUE,
@@ -173,8 +194,10 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"get_approve_tx_data unsuccessful!: {response}"
             )
-            return None
-        return {
+            yield None
+            return
+        
+        yield {
             "to": self.params.collateral_tokens_contract,
             "data": response.state.body["data"],
             "value": ETHER_VALUE,
