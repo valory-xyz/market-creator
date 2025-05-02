@@ -14,22 +14,27 @@ from hypothesis import strategies as st
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.skills.market_creation_manager_abci.behaviours.base import BaseBehaviour, MarketCreationManagerBaseBehaviour
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    BaseBehaviour,
+    MarketCreationManagerBaseBehaviour,
+)
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     to_content,
     parse_date_timestring,
     get_callable_name,
-
 )
+
 
 # --------------------------------------------------------------------------- #
 # Helpers                                                                     #
 # --------------------------------------------------------------------------- #
 def gen_side_effect(resp):
     """Return a generator object that yields once then returns *resp*."""
+
     def _g(*_a, **_kw):
         yield
         return resp
+
     return _g()
 
 
@@ -104,12 +109,13 @@ def test_to_content_roundtrip(q):
     decoded = json.loads(blob.decode())
     assert decoded["query"] == q
 
+
 @pytest.mark.parametrize(
     "q",
     [
         "",  # empty string
         "simple query",
-        "{\"foo\": \"bar\"}",  # JSON-like
+        '{"foo": "bar"}',  # JSON-like
         "こんにちは",  # unicode
     ],
 )
@@ -122,6 +128,7 @@ def test_to_content_param(q):
 
 def test_get_callable_name():
     """Test get_callable_name for named function and class."""
+
     def foo():
         pass
 
@@ -130,6 +137,7 @@ def test_get_callable_name():
 
     assert get_callable_name(foo) == "foo"
     assert get_callable_name(Bar) == "Bar"
+
 
 @pytest.mark.parametrize(
     "callable_obj, expected",
@@ -141,6 +149,7 @@ def test_get_callable_name():
 def test_get_callable_name_fallbacks(callable_obj, expected):
     """Parametrized get_callable_name for fallback to type name."""
     assert get_callable_name(callable_obj) == expected
+
 
 @pytest.mark.parametrize(
     "ts_str, expected",
@@ -155,6 +164,7 @@ def test_get_callable_name_fallbacks(callable_obj, expected):
 def test_parse_date_timestring_param(ts_str, expected):
     """Parametrized test for parse_date_timestring with valid and invalid formats."""
     assert parse_date_timestring(ts_str) == expected
+
 
 # --------------------------------------------------------------------------- #
 # Properties / last_synced_timestamp                                          #
@@ -171,7 +181,9 @@ def test_last_synced_timestamp(behaviour):
 def test_synchronized_data_property(behaviour):
     """Test synchronized_data property."""
     sentinel = MagicMock()
-    with patch.object(BaseBehaviour, "synchronized_data", new_callable=PropertyMock) as prop:
+    with patch.object(
+        BaseBehaviour, "synchronized_data", new_callable=PropertyMock
+    ) as prop:
         prop.return_value = sentinel
         assert behaviour.synchronized_data is sentinel
 
@@ -209,6 +221,7 @@ def _mock_safe_response(perf: ContractApiMessage.Performative, tx_hash: str = "0
     resp.performative = perf
     resp.state.body = {"tx_hash": tx_hash}
     return resp
+
 
 def _mk_multisend_resp(ok: bool):
     """Helper to build a fake multisend response."""
@@ -294,6 +307,7 @@ def test_do_llm_request(behaviour, side_effect, expect_exception):
         assert isinstance(result, MagicMock)
         assert not isinstance(result, type(expect_exception))
 
+
 # --------------------------------------------------------------------------- #
 # _get_safe_tx_hash                                                           #
 # --------------------------------------------------------------------------- #
@@ -309,9 +323,7 @@ def test_do_llm_request(behaviour, side_effect, expect_exception):
 def test_get_safe_tx_hash_param(behaviour, perf, tx_hash, expected):
     """Parameterized _get_safe_tx_hash to cover strip and error branches."""
     resp = _mock_safe_response(perf, tx_hash=tx_hash)
-    behaviour.get_contract_api_response = MagicMock(
-        side_effect=[gen_side_effect(resp)]
-    )
+    behaviour.get_contract_api_response = MagicMock(side_effect=[gen_side_effect(resp)])
     result = run(behaviour._get_safe_tx_hash("0xTO", b"data"))
     assert result == expected
 
@@ -338,9 +350,19 @@ def _make_multisend_side_effects(behaviour, multi_perf, safe_perf, safe_tx):
         # multisend fails
         (ContractApiMessage.Performative.ERROR, None, None, None),
         # multisend ok, safe fails
-        (ContractApiMessage.Performative.RAW_TRANSACTION, ContractApiMessage.Performative.ERROR, None, None),
+        (
+            ContractApiMessage.Performative.RAW_TRANSACTION,
+            ContractApiMessage.Performative.ERROR,
+            None,
+            None,
+        ),
         # both ok
-        (ContractApiMessage.Performative.RAW_TRANSACTION, ContractApiMessage.Performative.STATE, "0x123", "hexpayload"),
+        (
+            ContractApiMessage.Performative.RAW_TRANSACTION,
+            ContractApiMessage.Performative.STATE,
+            "0x123",
+            "hexpayload",
+        ),
     ],
 )
 def test_to_multisend_param(behaviour, multi_perf, safe_perf, safe_tx, expected):
@@ -361,16 +383,23 @@ def test_to_multisend_param(behaviour, multi_perf, safe_perf, safe_tx, expected)
 @given(
     st.lists(
         st.fixed_dictionaries(
-            {"to": st.from_regex(r"0x[0-9A-Fa-f]{4,}", fullmatch=True), "value": st.integers(min_value=0)}
+            {
+                "to": st.from_regex(r"0x[0-9A-Fa-f]{4,}", fullmatch=True),
+                "value": st.integers(min_value=0),
+            }
         )
     )
 )
 def test_multisend_variable_batches(txs: List[Dict[str, Any]]):
     """Property-based test for _to_multisend with various transaction batches."""
     behaviour = DummyBehaviour()
-    with patch.object(DummyBehaviour, "context", PropertyMock(return_value=dummy_ctx())):
+    with patch.object(
+        DummyBehaviour, "context", PropertyMock(return_value=dummy_ctx())
+    ):
         multisend_resp = _mk_multisend_resp(True)
-        safe_hash_resp = _mock_safe_response(ContractApiMessage.Performative.STATE, "0x1234")
+        safe_hash_resp = _mock_safe_response(
+            ContractApiMessage.Performative.STATE, "0x1234"
+        )
 
         behaviour.get_contract_api_response = MagicMock(
             side_effect=[
@@ -378,7 +407,9 @@ def test_multisend_variable_batches(txs: List[Dict[str, Any]]):
                 gen_side_effect(safe_hash_resp),
             ]
         )
-        behaviour._get_safe_tx_hash = MagicMock(side_effect=[gen_side_effect(safe_hash_resp)])
+        behaviour._get_safe_tx_hash = MagicMock(
+            side_effect=[gen_side_effect(safe_hash_resp)]
+        )
 
         with patch(
             "packages.valory.skills.market_creation_manager_abci.behaviours.base.hash_payload_to_hex",
@@ -397,7 +428,11 @@ def test_multisend_variable_batches(txs: List[Dict[str, Any]]):
 @pytest.mark.parametrize(
     "perf, body, expected",
     [
-        (ContractApiMessage.Performative.STATE, {"condition_id": "0xCONDITION123"}, "0xCONDITION123"),
+        (
+            ContractApiMessage.Performative.STATE,
+            {"condition_id": "0xCONDITION123"},
+            "0xCONDITION123",
+        ),
         (ContractApiMessage.Performative.ERROR, {}, None),
     ],
 )
@@ -406,9 +441,7 @@ def test_calculate_condition_id(behaviour, perf, body, expected):
     resp = MagicMock()
     resp.performative = perf
     resp.state.body = body
-    behaviour.get_contract_api_response = MagicMock(
-        side_effect=[gen_side_effect(resp)]
-    )
+    behaviour.get_contract_api_response = MagicMock(side_effect=[gen_side_effect(resp)])
     # Set the necessary parameters
     behaviour.params.conditional_tokens_contract = "0xCONDITIONAL_TOKENS"
     # Execute generator
@@ -439,6 +472,10 @@ def test_get_ledger_api_response(behaviour, response):
     behaviour.get_ledger_api_response = MagicMock(
         side_effect=[gen_side_effect(response)]
     )
-    args = {"performative": "get_state", "ledger_callable": "get_balance", "account": "0xADDRESS"}
+    args = {
+        "performative": "get_state",
+        "ledger_callable": "get_balance",
+        "account": "0xADDRESS",
+    }
     result = run(behaviour.get_ledger_api_response(**args))
     assert result == response

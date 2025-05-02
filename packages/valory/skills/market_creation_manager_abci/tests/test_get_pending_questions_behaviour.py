@@ -32,9 +32,11 @@ from packages.valory.skills.mech_interact_abci.states.base import MechMetadata
 # --------------------------------------------------------------------------- #
 def gen_side_effect(resp):
     """Return a generator *function* that yields then returns `resp`."""
+
     def _g(*_a, **_kw):
         yield
         return resp
+
     return _g
 
 
@@ -136,9 +138,7 @@ class TestGetPendingQuestionsBehaviour:
         ],
     )
     def test_get_unanswered_questions_empty(self, behaviour, response):
-        behaviour.get_subgraph_result = MagicMock(
-            side_effect=gen_side_effect(response)
-        )
+        behaviour.get_subgraph_result = MagicMock(side_effect=gen_side_effect(response))
         gen = behaviour._get_unanswered_questions()
         # exhaust generator
         result = None
@@ -155,7 +155,9 @@ class TestGetPendingQuestionsBehaviour:
             {"id": "0xM2", "title": "B", "question": {"id": "0xQ2"}},
         ]
         behaviour.get_subgraph_result = MagicMock(
-            side_effect=gen_side_effect({"data": {"fixedProductMarketMakers": questions}})
+            side_effect=gen_side_effect(
+                {"data": {"fixedProductMarketMakers": questions}}
+            )
         )
         gen = behaviour._get_unanswered_questions()
         next(gen)
@@ -208,10 +210,18 @@ class TestGetPendingQuestionsBehaviour:
         [
             (None, [], None, GetPendingQuestionsRound.ERROR_PAYLOAD),
             ([], [], None, GetPendingQuestionsRound.NO_TX_PAYLOAD),
-            ([{"question": {"id": "0xQ1"}, "title": "T"}], [], None,
-             GetPendingQuestionsRound.NO_TX_PAYLOAD),
-            ([{"question": {"id": "0xQ1"}, "title": "T"}], ["0xq1"], None,
-             GetPendingQuestionsRound.NO_TX_PAYLOAD),
+            (
+                [{"question": {"id": "0xQ1"}, "title": "T"}],
+                [],
+                None,
+                GetPendingQuestionsRound.NO_TX_PAYLOAD,
+            ),
+            (
+                [{"question": {"id": "0xQ1"}, "title": "T"}],
+                ["0xq1"],
+                None,
+                GetPendingQuestionsRound.NO_TX_PAYLOAD,
+            ),
         ],
     )
     def test_get_payload_minimal_paths(
@@ -244,13 +254,19 @@ class TestGetPendingQuestionsBehaviour:
             sort_keys=True,
         )
         monkeypatch.setattr(
-            behaviour, "get_payload", MagicMock(side_effect=gen_side_effect(payload_json))
+            behaviour,
+            "get_payload",
+            MagicMock(side_effect=gen_side_effect(payload_json)),
         )
         monkeypatch.setattr(
-            behaviour, "send_a2a_transaction", MagicMock(side_effect=gen_side_effect(None))
+            behaviour,
+            "send_a2a_transaction",
+            MagicMock(side_effect=gen_side_effect(None)),
         )
         monkeypatch.setattr(
-            behaviour, "wait_until_round_end", MagicMock(side_effect=gen_side_effect(None))
+            behaviour,
+            "wait_until_round_end",
+            MagicMock(side_effect=gen_side_effect(None)),
         )
         gen = behaviour.async_act()
         while True:
@@ -263,9 +279,7 @@ class TestGetPendingQuestionsBehaviour:
         behaviour.send_a2a_transaction.assert_called_once()
         args, _ = behaviour.send_a2a_transaction.call_args
         assert isinstance(args[0], GetPendingQuestionsPayload)
-        
-    
-    
+
     # ---------- get_payload SUCCESS path --------------------------------- #
     def test_get_payload_success(self, behaviour, monkeypatch):
         """Payload is created when balance is sufficient and mech requests generated."""
@@ -288,9 +302,13 @@ class TestGetPendingQuestionsBehaviour:
             MagicMock(return_value=eligible),
         )
 
-        big_balance = behaviour.params.realitio_answer_question_bond * 10 * len(eligible)
+        big_balance = (
+            behaviour.params.realitio_answer_question_bond * 10 * len(eligible)
+        )
         monkeypatch.setattr(
-            behaviour, "_get_balance", MagicMock(side_effect=gen_side_effect(big_balance))
+            behaviour,
+            "_get_balance",
+            MagicMock(side_effect=gen_side_effect(big_balance)),
         )
 
         # 🚨 Important: now title is included in question
@@ -309,7 +327,10 @@ class TestGetPendingQuestionsBehaviour:
                 break
 
         assert isinstance(payload, str)
-        assert payload not in (GetPendingQuestionsRound.ERROR_PAYLOAD, GetPendingQuestionsRound.NO_TX_PAYLOAD)
+        assert payload not in (
+            GetPendingQuestionsRound.ERROR_PAYLOAD,
+            GetPendingQuestionsRound.NO_TX_PAYLOAD,
+        )
 
     # ---------- async_act with ERROR_PAYLOAD ----------------------------- #
     def test_async_act_error_payload(self, behaviour, monkeypatch):
@@ -318,12 +339,16 @@ class TestGetPendingQuestionsBehaviour:
         monkeypatch.setattr(
             behaviour,
             "get_payload",
-            MagicMock(side_effect=gen_side_effect(GetPendingQuestionsRound.ERROR_PAYLOAD)),
+            MagicMock(
+                side_effect=gen_side_effect(GetPendingQuestionsRound.ERROR_PAYLOAD)
+            ),
         )
         send_mock = MagicMock(side_effect=gen_side_effect(None))
         monkeypatch.setattr(behaviour, "send_a2a_transaction", send_mock)
         monkeypatch.setattr(
-            behaviour, "wait_until_round_end", MagicMock(side_effect=gen_side_effect(None))
+            behaviour,
+            "wait_until_round_end",
+            MagicMock(side_effect=gen_side_effect(None)),
         )
 
         gen = behaviour.async_act()
