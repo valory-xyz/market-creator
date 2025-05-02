@@ -22,8 +22,6 @@
 from datetime import datetime
 from typing import Dict, Generator, Optional, Tuple, Type, cast
 
-
-from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
@@ -33,16 +31,17 @@ from packages.valory.contracts.fpmm_deterministic_factory.contract import (
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
+from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    MarketCreationManagerBaseBehaviour,
     ETHER_VALUE,
-    _ONE_DAY
-)
-from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction_round import (
-    PrepareTransactionRound,
+    MarketCreationManagerBaseBehaviour,
+    _ONE_DAY,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     PrepareTransactionPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction_round import (
+    PrepareTransactionRound,
 )
 
 
@@ -113,7 +112,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             yield None
             return
-        
+
         yield {
             "to": self.params.realitio_contract,
             "data": response.state.body["data"],
@@ -141,7 +140,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             yield None
             return
-        
+
         yield {
             "to": self.params.conditional_tokens_contract,
             "data": response.state.body["data"],
@@ -172,7 +171,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             yield None
             return
-    
+
         yield {
             "to": self.params.fpmm_deterministic_factory_contract,
             "data": response.state.body["data"],
@@ -196,7 +195,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             )
             yield None
             return
-        
+
         yield {
             "to": self.params.collateral_tokens_contract,
             "data": response.state.body["data"],

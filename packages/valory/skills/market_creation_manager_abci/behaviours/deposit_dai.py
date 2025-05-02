@@ -25,14 +25,14 @@ from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    MarketCreationManagerBaseBehaviour,
     ETHER_VALUE,
-)
-from packages.valory.skills.market_creation_manager_abci.states.deposit_dai_round import (
-    DepositDaiRound,
+    MarketCreationManagerBaseBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     DepositDaiPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.deposit_dai_round import (
+    DepositDaiRound,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,

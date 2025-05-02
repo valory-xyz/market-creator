@@ -1,9 +1,11 @@
 # ApproveMarketsRound
 from enum import Enum
 from typing import Optional, Tuple, cast
+
 from packages.valory.skills.abstract_round_abci.base import (
-    OnlyKeeperSendsRound,
     BaseSynchronizedData,
+    OnlyKeeperSendsRound,
+    get_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     ApproveMarketsPayload,
@@ -12,7 +14,6 @@ from packages.valory.skills.market_creation_manager_abci.states.base import (
     Event,
     SynchronizedData,
 )
-from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class ApproveMarketsRound(OnlyKeeperSendsRound):

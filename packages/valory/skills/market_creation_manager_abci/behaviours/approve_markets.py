@@ -24,21 +24,21 @@ import random
 import time
 from typing import Any, Dict, Generator, Type
 
-from packages.valory.skills.abstract_round_abci.base import AbstractRound
 import packages.valory.skills.market_creation_manager_abci.propose_questions as mech_tool_propose_questions
+from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci import (
     PUBLIC_ID as MARKET_CREATION_MANAGER_PUBLIC_ID,
 )
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    MarketCreationManagerBaseBehaviour,
     HTTP_OK,
+    MarketCreationManagerBaseBehaviour,
     _ONE_DAY,
-)
-from packages.valory.skills.market_creation_manager_abci.states.approve_markets_round import (
-    ApproveMarketsRound,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     ApproveMarketsPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.approve_markets_round import (
+    ApproveMarketsRound,
 )
 
 

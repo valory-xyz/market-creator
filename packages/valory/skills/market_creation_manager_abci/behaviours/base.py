@@ -25,12 +25,12 @@ from datetime import datetime
 from string import Template
 from typing import Any, Callable, Generator, Optional, cast
 
+from packages.valory.contracts.conditional_tokens.contract import (
+    ConditionalTokensContract,
+)
 from packages.valory.contracts.gnosis_safe.contract import (
     GnosisSafeContract,
     SafeOperation,
-)
-from packages.valory.contracts.conditional_tokens.contract import (
-    ConditionalTokensContract,
 )
 from packages.valory.contracts.multisend.contract import (
     MultiSendContract,
@@ -45,7 +45,9 @@ from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
     SharedState,
 )
-from packages.valory.skills.market_creation_manager_abci.states.base import SynchronizedData
+from packages.valory.skills.market_creation_manager_abci.states.base import (
+    SynchronizedData,
+)
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
 )
@@ -315,7 +317,9 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             return
 
         # strip "0x" from the response hash
-        raw_multisend_data_str = cast(str, response.raw_transaction.body.get("data", ""))
+        raw_multisend_data_str = cast(
+            str, response.raw_transaction.body.get("data", "")
+        )
         multisend_data_str = raw_multisend_data_str.removeprefix("0x")
 
         tx_data = bytes.fromhex(multisend_data_str)

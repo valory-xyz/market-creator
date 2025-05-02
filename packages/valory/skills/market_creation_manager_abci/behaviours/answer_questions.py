@@ -25,17 +25,17 @@ from typing import Any, Dict, Generator, Optional, cast
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    MarketCreationManagerBaseBehaviour,
-    ANSWER_YES,
-    ANSWER_NO,
     ANSWER_INVALID,
+    ANSWER_NO,
+    ANSWER_YES,
     MAX_PREVIOUS,
-)
-from packages.valory.skills.market_creation_manager_abci.rounds import (
-    AnswerQuestionsRound,
+    MarketCreationManagerBaseBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     AnswerQuestionsPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.rounds import (
+    AnswerQuestionsRound,
 )
 from packages.valory.skills.mech_interact_abci.states.base import (
     MechInteractionResponse,

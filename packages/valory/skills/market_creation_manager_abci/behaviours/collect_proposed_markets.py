@@ -25,16 +25,16 @@ from typing import Any, Dict, Generator, Type
 
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    MarketCreationManagerBaseBehaviour,
-    HTTP_OK,
-    _ONE_DAY,
     FPMM_QUERY,
-)
-from packages.valory.skills.market_creation_manager_abci.states.collect_proposed_markets_round import (
-    CollectProposedMarketsRound,
+    HTTP_OK,
+    MarketCreationManagerBaseBehaviour,
+    _ONE_DAY,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectProposedMarketsPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.collect_proposed_markets_round import (
+    CollectProposedMarketsRound,
 )
 
 

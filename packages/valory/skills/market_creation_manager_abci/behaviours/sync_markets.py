@@ -26,17 +26,17 @@ from typing import Any, Dict, Generator, List, Tuple, cast
 from packages.valory.contracts.fpmm.contract import FPMMContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    FPMM_POOL_MEMBERSHIPS_QUERY,
     MarketCreationManagerBaseBehaviour,
     ZERO_ADDRESS,
-    FPMM_POOL_MEMBERSHIPS_QUERY,
     _ONE_DAY,
     get_callable_name,
 )
-from packages.valory.skills.market_creation_manager_abci.states.sync_markets_round import (
-    SyncMarketsRound,
-)
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     SyncMarketsPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.sync_markets_round import (
+    SyncMarketsRound,
 )
 
 
@@ -164,5 +164,5 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             yield []
             return
-        
+
         yield cast(List[str], response.state.body["data"])

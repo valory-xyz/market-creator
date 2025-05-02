@@ -20,6 +20,7 @@
 """This package contains the rounds of MarketCreationManagerAbciApp."""
 
 from typing import Any, Dict, Set
+
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
     AbciAppTransitionFunction,
@@ -27,58 +28,58 @@ from packages.valory.skills.abstract_round_abci.base import (
     EventToTimeout,
     get_name,
 )
-from packages.valory.skills.market_creation_manager_abci.states.base import (
-    Event,
-    SynchronizedData,
-)
-from packages.valory.skills.market_creation_manager_abci.states.collect_randomness_round import (
-    CollectRandomnessRound,
-)
 from packages.valory.skills.market_creation_manager_abci.states.answer_questions_round import (
     AnswerQuestionsRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.deposit_dai_round import (
-    DepositDaiRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.post_transaction_round import (
-    PostTransactionRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.sync_markets_round import (
-    SyncMarketsRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.get_pending_questions_round import (
-    GetPendingQuestionsRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.final_states import (
-    FinishedWithDepositDaiRound,
-    FinishedWithoutTxRound,
-    FinishedWithMechRequestRound,
-    FinishedWithAnswerQuestionsRound,
-    FinishedWithGetPendingQuestionsRound,
-    FinishedWithRedeemBondRound,
-    FinishedWithRemoveFundingRound,
-    FinishedMarketCreationManagerRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.select_keeper_round import (
-    SelectKeeperRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.redeem_bond_round import (
-    RedeemBondRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.collect_proposed_markets_round import (
-    CollectProposedMarketsRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.approve_markets_round import (
     ApproveMarketsRound,
 )
-from packages.valory.skills.market_creation_manager_abci.states.retrieve_approved_market_round import (
-    RetrieveApprovedMarketRound,
+from packages.valory.skills.market_creation_manager_abci.states.base import (
+    Event,
+    SynchronizedData,
+)
+from packages.valory.skills.market_creation_manager_abci.states.collect_proposed_markets_round import (
+    CollectProposedMarketsRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.collect_randomness_round import (
+    CollectRandomnessRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.deposit_dai_round import (
+    DepositDaiRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.final_states import (
+    FinishedMarketCreationManagerRound,
+    FinishedWithAnswerQuestionsRound,
+    FinishedWithDepositDaiRound,
+    FinishedWithGetPendingQuestionsRound,
+    FinishedWithMechRequestRound,
+    FinishedWithRedeemBondRound,
+    FinishedWithRemoveFundingRound,
+    FinishedWithoutTxRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.get_pending_questions_round import (
+    GetPendingQuestionsRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.post_transaction_round import (
+    PostTransactionRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction_round import (
     PrepareTransactionRound,
 )
+from packages.valory.skills.market_creation_manager_abci.states.redeem_bond_round import (
+    RedeemBondRound,
+)
 from packages.valory.skills.market_creation_manager_abci.states.remove_funding_round import (
     RemoveFundingRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.retrieve_approved_market_round import (
+    RetrieveApprovedMarketRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.select_keeper_round import (
+    SelectKeeperRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.sync_markets_round import (
+    SyncMarketsRound,
 )
 
 

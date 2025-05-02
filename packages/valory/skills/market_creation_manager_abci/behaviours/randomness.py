@@ -23,11 +23,11 @@ from typing import Type
 
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.abstract_round_abci.common import RandomnessBehaviour
-from packages.valory.skills.market_creation_manager_abci.states.collect_randomness_round import (
-    CollectRandomnessRound,
-)
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectRandomnessPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.collect_randomness_round import (
+    CollectRandomnessRound,
 )
 
 

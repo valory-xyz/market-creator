@@ -1,8 +1,10 @@
 # A round for redeeming Realitio
 from typing import Optional, Tuple
+
 from packages.valory.skills.abstract_round_abci.base import (
-    CollectSameUntilThresholdRound,
     BaseSynchronizedData,
+    CollectSameUntilThresholdRound,
+    get_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     RedeemBondPayload,
@@ -11,7 +13,6 @@ from packages.valory.skills.market_creation_manager_abci.states.base import (
     Event,
     SynchronizedData,
 )
-from packages.valory.skills.abstract_round_abci.base import get_name
 
 
 class RedeemBondRound(CollectSameUntilThresholdRound):

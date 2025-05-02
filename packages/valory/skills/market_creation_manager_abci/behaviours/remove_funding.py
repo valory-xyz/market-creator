@@ -29,16 +29,16 @@ from packages.valory.contracts.fpmm.contract import FPMMContract
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    MarketCreationManagerBaseBehaviour,
     ETHER_VALUE,
+    MarketCreationManagerBaseBehaviour,
     ZERO_HASH,
     get_callable_name,
 )
-from packages.valory.skills.market_creation_manager_abci.states.remove_funding_round import (
-    RemoveFundingRound,
-)
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     RemoveFundingPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.states.remove_funding_round import (
+    RemoveFundingRound,
 )
 
 
@@ -85,7 +85,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/pages/market_sections/market_pool_liquidity_container.tsx#L123
         # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/pages/market_sections/market_pool_liquidity_container.tsx#L357
         # FPMM.balanceOf(ADDRESS) # noqa
-        
+
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=market,
@@ -99,9 +99,9 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             )
             yield None
             return
-        
+
         amount_to_remove = cast(int, response.state.body["balance"])
-        
+
         # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/hooks/market_data/useBlockchainMarketMakerData.tsx#L141-L145
         # FPMM.totalSupply() # noqa
         response = yield from self.get_contract_api_response(

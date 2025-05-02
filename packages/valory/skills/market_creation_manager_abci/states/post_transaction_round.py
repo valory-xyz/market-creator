@@ -1,8 +1,9 @@
 # A round to be run after a transaction has been settled.
 from typing import Optional, Tuple
+
 from packages.valory.skills.abstract_round_abci.base import (
-    CollectSameUntilThresholdRound,
     BaseSynchronizedData,
+    CollectSameUntilThresholdRound,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import PostTxPayload
 from packages.valory.skills.market_creation_manager_abci.states.base import (
