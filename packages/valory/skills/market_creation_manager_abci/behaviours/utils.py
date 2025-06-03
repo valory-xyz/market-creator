@@ -20,6 +20,7 @@
 
 import functools
 import logging
+import time
 from typing import Callable, Generator
 
 from aea.configurations.base import PublicId
@@ -31,29 +32,32 @@ _logger = logging.getLogger(
 )
 
 
-def hacky_retry(func: Callable, n_retries: int = 3) -> Callable:
+def hacky_retry(func: Callable, n_retries: int = 3, base_delay: float = 1.0) -> Callable:
     """Apply a retry strategy to a generator-based request function.
 
     Args:
         func: The input request function that returns a generator.
         n_retries: Maximum number of attempts (initial try + retries).
+        base_delay: Base delay in seconds between retries. Will be exponentially increased.
     Returns:
         The wrapped function with retry support.
     """
     @functools.wraps(func)
     def wrapper_hacky_retry(*args, **kwargs) -> Generator:
         attempts: int = 0
-        while attempts < n_retries:  
+        while attempts < n_retries:
             try:
                 if attempts > 0:
-                    _logger.info(f"Retrying {attempts}/{n_retries-1}...")
+                    delay = base_delay * (2 ** (attempts - 1))  # Exponential backoff
+                    _logger.info(f"Retrying {attempts}/{n_retries-1} after {delay:.1f}s...")
+                    time.sleep(delay)
 
                 gen = func(*args, **kwargs)
                 return (yield from gen)
 
             except (ValueError, ConnectionError) as e:
                 _logger.error("Error occurred while fetching data.", exc_info=True)
-                if attempts == n_retries - 1:  
+                if attempts == n_retries - 1:
                     yield None
                 attempts += 1
             except Exception as e:
