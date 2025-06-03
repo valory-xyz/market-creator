@@ -78,7 +78,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             existing_market_count: Dict[int, int] = defaultdict(int)
 
-            for market in latest_open_markets["fixedProductMarketMakers"]:
+            for market in latest_open_markets.get("fixedProductMarketMakers", []):
                 ts = int(market.get("openingTimestamp"))
                 existing_market_count[ts] += 1
 

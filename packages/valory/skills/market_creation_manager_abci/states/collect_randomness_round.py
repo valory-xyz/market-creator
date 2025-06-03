@@ -55,5 +55,3 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
         # End fix
 
         return synced_data, event
-
-        return synced_data, event
