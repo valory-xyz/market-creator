@@ -40,6 +40,7 @@ from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.llm.message import LlmMessage
 from packages.valory.skills.abstract_round_abci.behaviours import BaseBehaviour
 from packages.valory.skills.abstract_round_abci.models import Requests
+from packages.valory.skills.market_creation_manager_abci.behaviours.utils import hacky_retry
 from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
@@ -341,6 +342,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         )
         yield payload_data
 
+    @hacky_retry
     def get_subgraph_result(
         self,
         query: str,
@@ -352,19 +354,13 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         )
 
         if response is None:
-            self.context.logger.error(
-                "Could not retrieve response from Omen subgraph. Response was None."
-            )
-            yield None
-            return
+            raise ValueError("Could not retrieve response from Omen subgraph. Response was None.")
+            
         if response.status_code != HTTP_OK:
-            self.context.logger.error(
-                "Could not retrieve response from Omen subgraph. Received status code %s.\n%s",
-                response.status_code,
-                response,
+            raise ConnectionError(
+                f"Could not retrieve response from Omen subgraph. Received status code {response.status_code}.\n{response}"
             )
-            yield None
-            return
+
         yield json.loads(response.body.decode())
 
     def do_llm_request(
