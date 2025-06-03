@@ -28,6 +28,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     MarketCreationManagerBaseBehaviour,
 )
+from packages.valory.skills.market_creation_manager_abci.behaviours.utils import strip_0x
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     DepositDaiPayload,
 )
@@ -136,8 +137,6 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             yield None
             return
 
-        # strip "0x" from the response data
-        raw_data_str = cast(str, response.state.body["data"])
-        data_str = raw_data_str.removeprefix("0x")
+        data_str = strip_0x(response.state.body["data"])
         data = bytes.fromhex(data_str)
         yield data

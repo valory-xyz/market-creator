@@ -34,6 +34,7 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     ZERO_HASH,
     get_callable_name,
 )
+from packages.valory.skills.market_creation_manager_abci.behaviours.utils import strip_0x
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     RemoveFundingPayload,
 )
@@ -241,10 +242,11 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             yield None
             return
 
-        # TODO : strip "0x" from the data?
+        data_str = strip_0x(response.state.body["data"])
+        data = bytes.fromhex(data_str)
         yield {
             "to": address,
-            "data": response.state.body["data"],
+            "data": data,
             "value": ETHER_VALUE,
         }
 

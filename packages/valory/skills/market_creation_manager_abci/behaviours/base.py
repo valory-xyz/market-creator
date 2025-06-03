@@ -40,6 +40,7 @@ from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.llm.message import LlmMessage
 from packages.valory.skills.abstract_round_abci.behaviours import BaseBehaviour
 from packages.valory.skills.abstract_round_abci.models import Requests
+from packages.valory.skills.market_creation_manager_abci.behaviours.utils import strip_0x
 from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
@@ -281,9 +282,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             yield None
             return
 
-        # strip "0x" from the response hash
-        raw_hash = cast(str, response.state.body.get("tx_hash", "").strip())
-        tx_hash = raw_hash.removeprefix("0x")
+        tx_hash = strip_0x(response.state.body.get("tx_hash", "").strip())
         yield tx_hash
 
     def _to_multisend(
@@ -316,11 +315,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             yield None
             return
 
-        # strip "0x" from the response hash
-        raw_multisend_data_str = cast(
-            str, response.raw_transaction.body.get("data", "")
-        )
-        multisend_data_str = raw_multisend_data_str.removeprefix("0x")
+        multisend_data_str = strip_0x(response.raw_transaction.body.get("data", ""))
 
         tx_data = bytes.fromhex(multisend_data_str)
         tx_hash = yield from self._get_safe_tx_hash(
