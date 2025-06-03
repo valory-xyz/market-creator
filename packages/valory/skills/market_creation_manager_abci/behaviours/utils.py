@@ -30,14 +30,6 @@ _logger = logging.getLogger(
     f"aea.packages.{PUBLIC_ID.author}.skills.{PUBLIC_ID.name}.behaviours.utils"
 )
 
-class RetriesExceeded(Exception):
-    """Exception to raise when retries are exceeded during data-fetching."""
-
-    def __init__(
-        self, msg="Maximum retries were exceeded while trying to fetch the data!"
-    ):
-        super().__init__(msg)
-
 
 def hacky_retry(func: Callable, n_retries: int = 3) -> Callable:
     """Apply a retry strategy to a generator-based request function.
@@ -60,10 +52,12 @@ def hacky_retry(func: Callable, n_retries: int = 3) -> Callable:
                 return (yield from gen)
 
             except (ValueError, ConnectionError) as e:
-                _logger.error(str(e))
+                _logger.error("Error occurred while fetching data.", exc_info=True)
                 if attempts == n_retries - 1:  
-                    raise RetriesExceeded() from e
+                    yield None
                 attempts += 1
+            except Exception as e:
+                _logger.error("Unexpected error occurred while fetching data.", exc_info=True)
+                yield None
 
     return wrapper_hacky_retry
-
