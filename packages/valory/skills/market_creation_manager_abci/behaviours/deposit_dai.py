@@ -24,8 +24,8 @@ from typing import Generator, Optional, cast
 from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import SAFE_TX_GAS
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
-    ETHER_VALUE,
     MarketCreationManagerBaseBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
@@ -110,7 +110,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         tx_payload_data = hash_payload_to_hex(
             safe_tx_hash=safe_tx_hash,
             ether_value=balance_to_deposit,
-            safe_tx_gas=0,
+            safe_tx_gas=SAFE_TX_GAS,
             to_address=wxdai_address,
             data=tx_data,
         )
