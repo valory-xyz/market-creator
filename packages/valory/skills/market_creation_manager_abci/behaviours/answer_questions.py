@@ -82,6 +82,9 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
             return None
         except json.JSONDecodeError:
+            self.context.logger.error(
+                f"Couldn't parse mech response: {response.result=}"
+            )
             return None
 
     def _get_payload(self) -> Generator[None, None, str]:
