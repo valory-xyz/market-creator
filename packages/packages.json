@@ -1,7 +1,6 @@
 {
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeigjfuahxhb2y4q5ueayry55boaojcryoamwr6fshgayf5s762vpl4",
-        "contract/valory/wxdai/0.1.0": "bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie",
         "contract/valory/fpmm/0.1.0": "bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihmcnruiroelfugdaed6dyupspqufdplj3tilqkzyil3ohwxxigcu",
         "skill/valory/market_maker_abci/0.1.0": "bafybeifqi6rtczogqu6c4l3ruv2lyrjh6ycbcrcewtw3fxd2oy5mox3pce",
@@ -26,7 +25,7 @@
         "contract/valory/realitio_proxy/0.1.0": "bafybeidx37xzjjmapwacedgzhum6grfzhp5vhouz4zu3pvpgdy5pgb2fr4",
         "contract/valory/conditional_tokens/0.1.0": "bafybeibnzmqmeph4cj5vfh3s622mo2o5627vjjwc6bptrhj4dk65mzgvhe",
         "contract/valory/mech/0.1.0": "bafybeidwpijhdwj5abewa44k3tzxuanxykzmgnnffeq7re2rxp7pqbd2ou",
-        "contract/valory/erc20/0.1.0": "bafybeia7a7mfjeok4ywpmejz74msofagagcentsudqxfojadmxlur5qolu",
+        "contract/valory/erc20/0.1.0": "bafybeifyjub3v62r53by76u7cli7oqvg5qukb4e6gaa62z34euqfwnrsvi",
         "contract/valory/delegate/0.1.0": "bafybeiaslboosyvpzccaqgie56wta3aqrdkgfx5vs5ogxu7ebiez67wp6i",
         "connection/valory/ipfs/0.1.0": "bafybeieaq56usnosbwdslmo6i2yvttwpsm6djvawsowq3jt6bkjwhw3tl4",
         "connection/valory/abci/0.1.0": "bafybeicksmavx23ralbdw3ajxv5fq5s4c3wzhbc3zdudefm4jqsgrg72ai",
