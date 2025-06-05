@@ -29,7 +29,7 @@ from packages.valory.contracts.fpmm_deterministic_factory.contract import (
     FPMMDeterministicFactory,
 )
 from packages.valory.contracts.realitio.contract import RealitioContract
-from packages.valory.contracts.wxdai.contract import WxDAIContract
+from packages.valory.contracts.erc20.contract import ERC20
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
@@ -184,7 +184,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.collateral_tokens_contract,
-            contract_id=str(WxDAIContract.contract_id),
+            contract_id=str(ERC20.contract_id),
             contract_callable="get_approve_tx_data",
             guy=self.params.fpmm_deterministic_factory_contract,
             amount=amount,

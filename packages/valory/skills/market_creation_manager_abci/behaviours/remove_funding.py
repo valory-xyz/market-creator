@@ -26,7 +26,7 @@ from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
 from packages.valory.contracts.fpmm.contract import FPMMContract
-from packages.valory.contracts.wxdai.contract import WxDAIContract
+from packages.valory.contracts.erc20.contract import ERC20
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     ETHER_VALUE,
@@ -288,8 +288,8 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.conditional_tokens_contract,
-            contract_id=str(WxDAIContract.contract_id),
-            contract_callable=get_callable_name(WxDAIContract.build_withdraw_tx),
+            contract_id=str(ERC20.contract_id),
+            contract_callable=get_callable_name(ERC20.build_withdraw_tx),
             amount=amount,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
