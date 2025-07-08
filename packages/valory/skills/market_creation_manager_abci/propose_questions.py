@@ -296,7 +296,7 @@ DEFAULT_OPENAI_SETTINGS = {
     "max_tokens": 500,
     "temperature": 0.7,
 }
-DEFAULT_ENGINES = {"propose-question": "gpt-4o-2024-08-06"}
+DEFAULT_ENGINES = {"propose-question": "gpt-4.1-2025-04-14"}
 ALLOWED_TOOLS = ["propose-question"]
 
 

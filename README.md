@@ -90,7 +90,7 @@ export SAFE_CONTRACT_ADDRESS="YOUR_SAFE_ADDRESS"
 export NEWSAPI_ENDPOINT=https://newsapi.org/v2/top-headlines
 export NEWSAPI_API_KEY=YOUR_NEWSAPI_API_KEY
 export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-export ENGINE="gpt-4"
+export ENGINE="gpt-4.1-2025-04-14"
 export MARKET_APPROVAL_SERVER_URL=YOUR_MARKET_APPROVAL_SERVER_URL
 export MARKET_APPROVAL_SERVER_API_KEY=YOUR_MARKET_APPROVAL_SERVER_API_KEY
 
@@ -116,7 +116,7 @@ These are the descriptions of the variables used by the Market Creator service. 
 - `NEWSAPI_ENDPOINT`: [Newsapi](https://newsapi.org/) endpoint to retrieve recent news headlines and summaries.
 - `NEWSAPI_API_KEY`: Your [Newsapi](https://newsapi.org/) API key. You can get one for testing purposes for free.
 - `OPENAI_API_KEY`: Your [OpenAI](https://openai.com/) API key. You can get one for testing purposes for free.
-- `ENGINE`: [OpenAI](https://openai.com/) engine. Default (and recommended) is `gpt-4`.
+- `ENGINE`: [OpenAI](https://openai.com/) engine. Default (and recommended) is `gpt-4.1-2025-04-14`.
 - `MARKET_APPROVAL_SERVER_URL`: Your market approval server URL. It must be publicly accessible. [See below](#launch-the-market-approval-server).
 - `MARKET_APPROVAL_SERVER_API_KEY`: Your market approval server API key. [See below](#launch-the-market-approval-server)
 - `MIN_MARKET_PROPOSAL_INTERVAL_SECONDS`: Number of seconds between market proposals (markets are proposed 5 at a time).

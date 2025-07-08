@@ -61,7 +61,7 @@ DEFAULT_OPENAI_SETTINGS = {
 
 TOOL_TO_ENGINE = {
     # "market-creator": "gpt-3.5-turbo",
-    "market-creator": "gpt-4",
+    "market-creator": "gpt-4.1-2025-04-14",
 }
 
 ALLOWED_TOOLS = list(TOOL_TO_ENGINE.keys())
