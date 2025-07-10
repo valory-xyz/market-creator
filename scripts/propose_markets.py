@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023-2024 Valory AG
+#   Copyright 2023-2025 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ from openai import OpenAI
 
 load_dotenv(dotenv_path=".env")
 
-OPENAI_ENGINE = "gpt-4-0125-preview"
+OPENAI_ENGINE = "gpt-4.1-2025-04-14"
 OPENAI_MAX_TOKENS = 700
 OPENAI_TEMPERATURE = 0.7
 OPENAI_REQUEST_TIMEOUT = 600
@@ -47,7 +47,7 @@ HTTP_OK = 200
 HTTP_NO_CONTENT = 204
 TOP_HEADLINES = "top-headlines"
 ENGINES = {
-    "chat": ["gpt-3.5-turbo", "gpt-4", "gpt-4-0125-preview"],
+    "chat": ["gpt-3.5-turbo", "gpt-4", "gpt-4-0125-preview", "gpt-4.1-2025-04-14"],
 }
 
 MARKET_IDENTIFICATION_PROMPT_ORIGINAL = """Based on the
