@@ -71,7 +71,7 @@ models:
       multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:1}
       ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
       mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x77af31de935740567cf4ff1986d04b2c964a786a}
-      mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4}
+      mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4.1}
       answer_retry_intervals: ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
         1209600]}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
