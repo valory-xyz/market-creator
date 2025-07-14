@@ -219,7 +219,7 @@ models:
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
       mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
-      mech_tool_resolve_market: resolve-market-reasoning-gpt-4
+      mech_tool_resolve_market: resolve-market-reasoning-gpt-4.1
       answer_retry_intervals:
       - 0
       - 86400
