@@ -288,12 +288,17 @@ class OpenAIClientManager:
 
 def count_tokens(text: str, model: str) -> int:
     """Count the number of tokens in a text."""
+    # Workaround since tiktoken does not have support yet for gpt4.1
+    # https://github.com/openai/tiktoken/issues/395
+    if model == "gpt-4.1-2025-04-14":
+        return len(get_encoding("o200k_base").encode(text))
+
     enc = encoding_for_model(model)
     return len(enc.encode(text))
 
 
 DEFAULT_OPENAI_SETTINGS = {
-    "max_tokens": 500,
+    "max_tokens": 4096,
     "temperature": 0.7,
 }
 DEFAULT_ENGINES = {"propose-question": "gpt-4.1-2025-04-14"}

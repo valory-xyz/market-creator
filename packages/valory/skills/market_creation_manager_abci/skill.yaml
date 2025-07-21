@@ -16,7 +16,7 @@ fingerprint:
   handlers.py: bafybeicj2skzmias5pqvbctiidwgioreaabspsppxn5ytl6e356is4lgga
   models.py: bafybeidi4nqk7egjllztjlobogr766e745ixjubrlw67aisbnyih644nau
   payloads.py: bafybeifococfoabmghaniuqivshbnh4ttuqotpol25jnd7h75lo46krcr4
-  propose_questions.py: bafybeie4bmkxpgkgwskln2ov4yuj6wvswcd76fvvasggum5aksvkcbdwom
+  propose_questions.py: bafybeiclbksbzzhs25dton4dlrlnxpfol547sqtq6dm4ubjju664pxfizi
   rounds.py: bafybeiagptxnkns5mu24jx45ysneiqlufi6iuccaovkpz4c5lmwpboj2da
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
 fingerprint_ignore_patterns: []
@@ -279,11 +279,11 @@ dependencies:
   gql:
     version: ==3.5.0
   openai:
-    version: ==1.12.0
+    version: ==1.93.0
   requests:
     version: ==2.28.1
   pydantic:
     version: ==2.9.2
   tiktoken:
-    version: ==0.8.0
+    version: ==0.9.0
 is_abstract: true
