@@ -279,11 +279,11 @@ dependencies:
   gql:
     version: ==3.5.0
   openai:
-    version: ==1.12.0
+    version: ==1.93.0
   requests:
     version: ==2.28.1
   pydantic:
     version: ==2.9.2
   tiktoken:
-    version: ==0.8.0
+    version: ==0.9.0
 is_abstract: true
