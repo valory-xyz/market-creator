@@ -171,6 +171,62 @@ You can access the root address http://server_ip:5000 and examine the different 
 
 For convenience, we provide a template script [run_service.sh](https://github.com/valory-xyz/market-creator/blob/main/run_service.sh) that you can modify and experiment with different values.
 
+## Local Testing Setup
+
+### 1. Essential Credentials
+
+1. **Agent Setup**
+   - You only need a signer key pair and agent address
+   - You can reuse existing trader agent credentials
+   - No need for full service registration
+
+2. **OpenAI Configuration**
+   - Create an OpenAI account
+   - Generate an API key
+   - Fund account with minimum $5
+   - Add key to `run_service.sh`
+
+3. **The Graph Integration**
+   - Generate an API key from The Graph platform
+   - Set `SUBGRAPH_API_KEY` in `run_service.sh`
+
+4. **Market Approval Server**
+   - Generate a server API key
+   - Create its SHA-256 hash:
+     ```bash
+     echo -n "your_api_key_here" | sha256sum
+     ```
+   - Create a file `market_approval_server/server_config.json` with content of 
+   ```json
+    {
+        "proposed_markets": {},
+        "approved_markets": {},
+        "rejected_markets": {},
+        "processed_markets": {},
+        "api_keys": {
+            "7b97e2b52334e1da7a395ae53ebdbd42382fa77f4dac9017569579d58db42d08": "default_user"
+        }
+    }
+   ```
+   - Add hash to `market_approval_server/server_config.json`
+   - Configure server URL in `run_service.sh`:
+     ```bash
+     MARKET_APPROVAL_SERVER_URL=http://host.docker.internal:5000
+     ```
+
+5. **Blockchain Connection**
+   - Create Tenderly account
+   - Generate virtual RPC endpoint
+   - Update `ETHEREUM_LEDGER_RPC` in `run_service.sh`
+
+### 2. Launch Services
+
+1. Start market approval server (see section above)
+2. Launch market maker service
+3. Monitor service operation through logs
+
+Note: Ensure all environment variables in `run_service.sh` are properly set before launching services.
+
 ## For advanced users
 
 The market maker agent is configured to work with the Gnosis chain by default, if you want to use the agent with other chains you can figure out what contracts to use from [here](https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md)
