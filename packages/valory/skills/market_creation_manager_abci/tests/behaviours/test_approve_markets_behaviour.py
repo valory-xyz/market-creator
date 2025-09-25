@@ -20,7 +20,7 @@
 """This module contains the tests for valory/decision_maker_abci's base behaviour."""
 
 from pathlib import Path
-from typing import Any, Dict, Type
+from typing import Any, Dict
 from unittest.mock import MagicMock
 
 import pytest
@@ -40,8 +40,7 @@ PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 class TestApproveMarketsBehaviour(FSMBehaviourBaseCase):
     """Test `ApproveMarketsBehaviour`."""
 
-    behaviour: ApproveMarketsBehaviour
-    behaviour_class = Type[ApproveMarketsBehaviour]
+    behaviour: ApproveMarketsBehaviour  # type: ignore
     path_to_skill = PACKAGE_DIR
     _skill = MagicMock()
 
