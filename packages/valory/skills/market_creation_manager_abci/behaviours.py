@@ -766,11 +766,14 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         self.set_done()
 
     def _is_resolution_date_in_question(self, market: Dict) -> bool:
-        formatted_resolution_date = datetime.fromtimestamp(
-            market["resolution_time"], tz=timezone.utc
-        ).strftime("%B %d, %Y")
-        if formatted_resolution_date in market["question"]:
-            return True
+        dt = datetime.fromtimestamp(market["resolution_time"], tz=timezone.utc)
+        date_formats = [
+            f"{dt.strftime('%B')} {dt.day}, {dt.year}",  # e.g., "September 8, 2024"
+            f"{dt.strftime('%B')} {dt.strftime('%d')}, {dt.year}",  # e.g., "September 08, 2024"
+        ]
+        for formatted_date in date_formats:
+            if formatted_date in market["question"]:
+                return True
         return False
 
     def _propose_and_approve_market(
