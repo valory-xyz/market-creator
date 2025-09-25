@@ -35,6 +35,12 @@ from packages.valory.skills.abstract_round_abci.models import (
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     MarketCreationManagerAbciApp,
 )
+from packages.valory.skills.mech_interact_abci.models import (
+    MechResponseSpecs as BaseMechResponseSpecs,
+)
+
+
+MechResponseSpecs = BaseMechResponseSpecs
 
 
 class SharedState(BaseSharedState):
