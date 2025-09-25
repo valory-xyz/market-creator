@@ -19,7 +19,7 @@ fingerprint:
   propose_questions.py: bafybeiclbksbzzhs25dton4dlrlnxpfol547sqtq6dm4ubjju664pxfizi
   rounds.py: bafybeiagptxnkns5mu24jx45ysneiqlufi6iuccaovkpz4c5lmwpboj2da
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
-  tests/behaviours/test_approve_markets_behaviour.py: bafybeifklkx3l7u5redyzijmxvhgej44y5gf7i3khyehq23cm3hpglg4qu
+  tests/behaviours/test_approve_markets_behaviour.py: bafybeihzhiy7sahavxo25cmh3kqgssl4sfql2mykk7vtyrsoiknnrhy33m
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
