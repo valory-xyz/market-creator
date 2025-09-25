@@ -10,15 +10,16 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeiblor4rncoed7k6crgekj3v5upgfslwh7uli56ajohkiam5zkewpm
+  behaviours.py: bafybeihptqo4pzvs5elugddqdjvsjbattgulbcxswtonocckpvcuvuujyi
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeiachforfqr5yuhz4kwafzhapn2rtnqandhwjthrcwr4ck26jpuegy
-  handlers.py: bafybeicj2skzmias5pqvbctiidwgioreaabspsppxn5ytl6e356is4lgga
-  models.py: bafybeidi4nqk7egjllztjlobogr766e745ixjubrlw67aisbnyih644nau
+  handlers.py: bafybeibephb5rldzk7cyo3nooam6hdzd7zfpjxswj5n4kwuteqfodix7vy
+  models.py: bafybeie53fklu3srk4ul7uozi6hgf4irsqazqs5v5v5rxpxuy7f6xou3xm
   payloads.py: bafybeifococfoabmghaniuqivshbnh4ttuqotpol25jnd7h75lo46krcr4
   propose_questions.py: bafybeiclbksbzzhs25dton4dlrlnxpfol547sqtq6dm4ubjju664pxfizi
   rounds.py: bafybeiagptxnkns5mu24jx45ysneiqlufi6iuccaovkpz4c5lmwpboj2da
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
+  tests/behaviours/test_approve_markets_behaviour.py: bafybeifklkx3l7u5redyzijmxvhgej44y5gf7i3khyehq23cm3hpglg4qu
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
