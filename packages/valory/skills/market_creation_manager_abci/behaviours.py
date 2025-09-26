@@ -25,7 +25,7 @@ import time
 from abc import ABC
 from collections import defaultdict
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from string import Template
 from typing import (
     Any,
@@ -735,16 +735,20 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
                 proposed_markets = mech_tool_output_json["questions"]  # type: ignore
 
+                approved_markets_count = 0
                 if "error" in proposed_markets:
-                    approved_markets_count = 0
                     self.context.logger.error(
                         f"An error occurred interacting with the Mech tool {proposed_markets=}"
                     )
                 else:
                     for market in proposed_markets.values():
+                        if not self._is_resolution_date_in_question(market):
+                            self.context.logger.error(
+                                f"Resolution date wrong or not found in question {market=}"
+                            )
+                            continue
                         yield from self._propose_and_approve_market(market)
-
-                    approved_markets_count = len(proposed_markets)
+                        approved_markets_count += 1
 
             sender = self.context.agent_address
             payload = ApproveMarketsPayload(
@@ -760,6 +764,17 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             yield from self.wait_until_round_end()
 
         self.set_done()
+
+    def _is_resolution_date_in_question(self, market: Dict) -> bool:
+        dt = datetime.fromtimestamp(market["resolution_time"], tz=timezone.utc)
+        date_formats = [
+            f"{dt.strftime('%B')} {dt.day}, {dt.year}",  # e.g., "September 8, 2024"
+            f"{dt.strftime('%B')} {dt.strftime('%d')}, {dt.year}",  # e.g., "September 08, 2024"
+        ]
+        for formatted_date in date_formats:
+            if formatted_date in market["question"]:
+                return True
+        return False
 
     def _propose_and_approve_market(
         self, market: Dict[str, Any]

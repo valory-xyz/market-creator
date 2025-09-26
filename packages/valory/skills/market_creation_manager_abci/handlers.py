@@ -33,6 +33,9 @@ from packages.valory.skills.abstract_round_abci.handlers import (
     ContractApiHandler as BaseContractApiHandler,
 )
 from packages.valory.skills.abstract_round_abci.handlers import (
+    HttpHandler as BaseHttpHandler,
+)
+from packages.valory.skills.abstract_round_abci.handlers import (
     IpfsHandler as BaseIpfsHandler,
 )
 from packages.valory.skills.abstract_round_abci.handlers import (
@@ -47,6 +50,7 @@ from packages.valory.skills.abstract_round_abci.handlers import (
 
 
 ABCIHandler = BaseABCIRoundHandler
+HttpHandler = BaseHttpHandler
 SigningHandler = BaseSigningHandler
 LedgerApiHandler = BaseLedgerApiHandler
 ContractApiHandler = BaseContractApiHandler
