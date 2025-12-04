@@ -42,9 +42,9 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectRandomnessPayload,
     DepositDaiPayload,
     GetPendingQuestionsPayload,
+    MultisigTxPayload,
     PostTxPayload,
     PrepareTransactionPayload,
-    RedeemBondPayload,
     RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
@@ -245,73 +245,24 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
+    none_event = Event.NONE
     collection_key = get_name(SynchronizedData.participant_to_randomness)
     selection_key = ("ignored", get_name(SynchronizedData.most_voted_randomness))
-
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
-        """Process the end of the block."""
-        res = super().end_block()
-        if res is None:
-            return None
-
-        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
-
-        # Fix to ensure properties are present on the SynchronizedData
-        # before ResetAndPause round.
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.approved_markets_count)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.proposed_markets_count)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.proposed_markets_data)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.approved_markets_timestamp)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.mech_responses)
-        )
-        # End fix
-
-        return synced_data, event
 
 
 class RedeemBondRound(CollectSameUntilThresholdRound):
     """A round for redeeming Realitio"""
 
-    ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
-
-    payload_class = RedeemBondPayload
+    payload_class = MultisigTxPayload
     synchronized_data_class = SynchronizedData
-
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
-        """Process the end of the block."""
-        if self.threshold_reached:
-            if self.most_voted_payload == self.ERROR_PAYLOAD:
-                return self.synchronized_data, Event.ERROR
-
-            if self.most_voted_payload == self.NO_TX_PAYLOAD:
-                return self.synchronized_data, Event.NO_TX
-
-            synchronized_data = self.synchronized_data.update(
-                synchronized_data_class=SynchronizedData,
-                **{
-                    get_name(
-                        SynchronizedData.most_voted_tx_hash
-                    ): self.most_voted_payload,
-                    get_name(SynchronizedData.tx_sender): self.round_id,
-                },
-            )
-            return synchronized_data, Event.DONE
-
-        if not self.is_majority_possible(
-            self.collection, self.synchronized_data.nb_participants
-        ):
-            return self.synchronized_data, Event.NO_MAJORITY
-        return None
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+    none_event = Event.NONE
+    collection_key = get_name(SynchronizedData.participant_to_votes)
+    selection_key: Tuple[str, ...] = (
+        get_name(SynchronizedData.tx_sender),
+        get_name(SynchronizedData.most_voted_tx_hash),
+    )
 
 
 class PostTransactionRound(CollectSameUntilThresholdRound):
@@ -327,6 +278,13 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
 
     payload_class = PostTxPayload
     synchronized_data_class = SynchronizedData
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+    none_event = Event.NONE
+    collection_key = get_name(SynchronizedData.participant_to_votes)
+    selection_key: Tuple[str, ...] = (
+        "ignored",
+    )    
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """Process the end of the block."""
@@ -362,37 +320,16 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
 class DepositDaiRound(CollectSameUntilThresholdRound):
     """A round for depositing Dai"""
 
-    ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
-
-    payload_class = DepositDaiPayload
+    payload_class = MultisigTxPayload
     synchronized_data_class = SynchronizedData
-
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
-        """Process the end of the block."""
-        if self.threshold_reached:
-            if self.most_voted_payload == self.ERROR_PAYLOAD:
-                return self.synchronized_data, Event.ERROR
-
-            if self.most_voted_payload == self.NO_TX_PAYLOAD:
-                return self.synchronized_data, Event.NO_TX
-
-            synchronized_data = self.synchronized_data.update(
-                synchronized_data_class=SynchronizedData,
-                **{
-                    get_name(
-                        SynchronizedData.most_voted_tx_hash
-                    ): self.most_voted_payload,
-                    get_name(SynchronizedData.tx_sender): self.round_id,
-                },
-            )
-            return synchronized_data, Event.DONE
-
-        if not self.is_majority_possible(
-            self.collection, self.synchronized_data.nb_participants
-        ):
-            return self.synchronized_data, Event.NO_MAJORITY
-        return None
+    done_event = Event.DONE
+    no_majority_event = Event.NO_MAJORITY
+    none_event = Event.NONE
+    collection_key = get_name(SynchronizedData.participant_to_votes)
+    selection_key: Tuple[str, ...] = (
+        get_name(SynchronizedData.tx_sender),
+        get_name(SynchronizedData.most_voted_tx_hash),
+    ) 
 
 
 class RemoveFundingRound(CollectSameUntilThresholdRound):
@@ -564,6 +501,7 @@ class SelectKeeperRound(CollectSameUntilThresholdRound):
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
+    none_event = Event.NONE
     collection_key = get_name(SynchronizedData.participant_to_selection)
     selection_key = get_name(SynchronizedData.most_voted_keeper_address)
 
@@ -809,9 +747,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     transition_function: AbciAppTransitionFunction = {
         DepositDaiRound: {
             Event.DONE: FinishedWithDepositDaiRound,
-            Event.NO_TX: GetPendingQuestionsRound,
             Event.NO_MAJORITY: GetPendingQuestionsRound,
-            Event.ERROR: GetPendingQuestionsRound,
+            Event.NONE: GetPendingQuestionsRound,
+            Event.ROUND_TIMEOUT: GetPendingQuestionsRound,
         },
         PostTransactionRound: {
             Event.DONE: FinishedWithoutTxRound,
@@ -839,6 +777,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.NONE: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
         SelectKeeperRound: {
@@ -848,9 +787,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         RedeemBondRound: {
             Event.DONE: FinishedWithRedeemBondRound,
-            Event.NO_TX: CollectProposedMarketsRound,
             Event.NO_MAJORITY: CollectProposedMarketsRound,
-            Event.ERROR: CollectProposedMarketsRound,
+            Event.NONE: CollectProposedMarketsRound,
+            Event.ROUND_TIMEOUT: CollectProposedMarketsRound,
         },
         CollectProposedMarketsRound: {
             Event.DONE: ApproveMarketsRound,

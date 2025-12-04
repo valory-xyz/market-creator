@@ -86,8 +86,8 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     CollectProposedMarketsPayload,
     DepositDaiPayload,
     GetPendingQuestionsPayload,
+    MultisigTxPayload,
     PostTxPayload,
-    RedeemBondPayload,
     RemoveFundingPayload,
     SyncMarketsPayload,
 )
@@ -958,9 +958,13 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
     def async_act(self) -> Generator:
         """Implement the act."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            sender = self.context.agent_address
-            content = yield from self.get_payload()
-            payload = RedeemBondPayload(sender=sender, content=content)
+            agent = self.context.agent_address
+            tx_hash = yield from self.get_payload()
+            if tx_hash is None:
+                payload = MultisigTxPayload(sender=agent, tx_submitter=None, tx_hash=None)
+            else:
+                tx_submitter = self.matching_round.auto_round_id()
+                payload = MultisigTxPayload(sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash)
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -985,19 +989,19 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
         self.context.logger.info(f"balance: {balance / 10 ** 18} xDAI")
         return balance
 
-    def get_payload(self) -> Generator[None, None, str]:
+    def get_payload(self) -> Generator[None, None, Optional[str]]:
         """Get the payload."""
         safe_address = self.synchronized_data.safe_contract_address
         balance = yield from self.get_balance(safe_address)
         if balance is None:
-            return RedeemBondRound.ERROR_PAYLOAD
+            return None
 
         if balance <= MIN_BALANCE_WITHDRAW_REALITIO:
-            return RedeemBondRound.NO_TX_PAYLOAD
+            return None
 
         withdraw_tx = yield from self._get_withdraw_tx()
         if withdraw_tx is None:
-            return RedeemBondRound.ERROR_PAYLOAD
+            return None
 
         tx_hash = yield from self._to_multisend(
             transactions=[
@@ -1005,7 +1009,7 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
             ]
         )
         if tx_hash is None:
-            return RedeemBondRound.ERROR_PAYLOAD
+            return None
 
         return tx_hash
 
