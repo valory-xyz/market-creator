@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeideocdsuwurnc33grp6d5awlrylbtikyb7dpoiahrx55ktseiljeu
+agent: valory/market_maker:0.1.0:bafybeihov7id5yogk74npsa5v3xtftvhxlvnuj5zycdd4h7ed36mxrinb4
 number_of_agents: 1
 deployment:
   agent:
@@ -78,12 +78,17 @@ models:
       reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
       reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
       mech_interact_round_timeout_seconds: ${MECH_INTERACT_ROUND_TIMEOUT_SECONDS:int:900}
+      mech_interaction_sleep_time: ${MECH_INTERACTION_SLEEP_TIME:int:10}
+      use_mech_marketplace: ${USE_MECH_MARKETPLACE:bool:false}
+      mech_marketplace_config: ${MECH_MARKETPLACE_CONFIG:dict:{"mech_marketplace_address":"0x0000000000000000000000000000000000000000","priority_mech_address":"0x0000000000000000000000000000000000000000","priority_mech_staking_instance_address":"0x0000000000000000000000000000000000000000","priority_mech_service_id":0,"requester_staking_instance_address":"0x0000000000000000000000000000000000000000","response_timeout":300}}
       service_id: market_maker
+      agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
       setup:
         all_participants: ${ALL_PARTICIPANTS:list:["0x10E867Ac2Fb0Aa156ca81eF440a5cdf373bE1AaC"]}
         safe_contract_address: ${SAFE_CONTRACT_ADDRESS:str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}
         consensus_threshold: ${CONSENSUS_THRESHOLD:int:null}
+      use_acn_for_delivers: ${USE_ACN_FOR_DELIVERS:bool:false}
       share_tm_config_on_startup: ${SHARE_TM_CONFIG_ON_STARTUP:bool:false}
       tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
       tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
@@ -134,7 +139,7 @@ models:
       response_key: ${OMEN_SUBGRAPH_RESPONSE_KEY:str:data:fixedProductMarketMakers}
       response_type: ${OMEN_SUBGRAPH_RESPONSE_TYPE:str:list}
       retries: ${OMEN_SUBGRAPH_RETRIES:int:5}
-      url: ${OMEN_SUBGRAPH_URL:str:https://api.thegraph.com/subgraphs/name/protofire/omen-xdai}
+      url: ${OMEN_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz}
 ---
 public_id: valory/ledger:0.19.0
 type: connection

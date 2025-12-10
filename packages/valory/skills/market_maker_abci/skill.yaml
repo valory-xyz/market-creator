@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: bafybeidajmnltkvswbtn6zay3lxcx5pp2k4ys5jnmjdgutada6hkmay5tu
   composition.py: bafybeibags3bapzxlvsbjsxhlyxpd6ypnvwggu6jijktm4qfe4sn5ugfky
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
-  fsm_specification.yaml: bafybeidos4vf76w3nejitdsrjpxwtz3phjqjv6xng4m5ku7sskgibwc5s4
+  fsm_specification.yaml: bafybeici7gazjvbb2jif7us2jgm46fjija2k6r7iuqnnsaxeuh7qazevki
   handlers.py: bafybeidl5pzel4ui7m3kipu4tavx6blcxd6yy46jaraqqcpjgh2qtprkra
   models.py: bafybeigyrb6tcpebn7gecgnkcerqmbembat4xdg2wvfybwg6op3rsee2sq
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
@@ -26,7 +26,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
 - valory/registration_abci:0.1.0:bafybeie6rd7zlws4rxzkwka5mzhk56mn6clj3ocxbkbgeaiawv2c6b6jtm
 - valory/reset_pause_abci:0.1.0:bafybeian7gymp6x6rn55uaf4u3dgirbzr43xvnsj2ev27stkadikjqz4du
-- valory/market_creation_manager_abci:0.1.0:bafybeidwegwfob4c6znkfpue5vt7ubxtyvtzkrpnyowdbp2x5qitb3kjba
+- valory/market_creation_manager_abci:0.1.0:bafybeicfd45eotx6mg33vekxedheduh6ubr4ndhedolpubwiwfkqkjxycu
 - valory/termination_abci:0.1.0:bafybeiht4uj5j3qqf2hewtzah7vcabb7okkjgi65jb76ddfltvjpk6bzxi
 - valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
 - valory/mech_interact_abci:0.1.0:bafybeicinkpskogfzsdlqak2ky7yux3lftiut4x5t52n2xofj6zbsrkb3m
@@ -179,17 +179,28 @@ models:
       request_timeout: 10.0
       reset_pause_duration: 1800
       mech_interact_round_timeout_seconds: 900
+      mech_interaction_sleep_time: 10
+      use_mech_marketplace: false
+      mech_marketplace_config:
+        mech_marketplace_address: '0x0000000000000000000000000000000000000000'
+        priority_mech_address: '0x0000000000000000000000000000000000000000'
+        priority_mech_staking_instance_address: '0x0000000000000000000000000000000000000000'
+        priority_mech_service_id: 0
+        requester_staking_instance_address: '0x0000000000000000000000000000000000000000'
+        response_timeout: 300
       reset_tendermint_after: 1
       retry_attempts: 400
       retry_timeout: 3
       round_timeout_seconds: 60.0
       service_id: market_creator
+      agent_registry_address: null
       service_registry_address: null
       setup:
         all_participants:
         - '0x0000000000000000000000000000000000000000'
         safe_contract_address: '0x0000000000000000000000000000000000000000'
         consensus_threshold: null
+      use_acn_for_delivers: false
       share_tm_config_on_startup: false
       sleep_time: 1
       tendermint_check_sleep_delay: 3

@@ -10,14 +10,14 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeihptqo4pzvs5elugddqdjvsjbattgulbcxswtonocckpvcuvuujyi
+  behaviours.py: bafybeidpvf22jlezvx6qozabj2mvxk4jadhsfte4xktpo22j2to5gfo25m
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
-  fsm_specification.yaml: bafybeiachforfqr5yuhz4kwafzhapn2rtnqandhwjthrcwr4ck26jpuegy
+  fsm_specification.yaml: bafybeibt27uxkts4qz42dpne6rcy67s442uslpnjrt6h5h325oj2zk2gvm
   handlers.py: bafybeibephb5rldzk7cyo3nooam6hdzd7zfpjxswj5n4kwuteqfodix7vy
   models.py: bafybeie53fklu3srk4ul7uozi6hgf4irsqazqs5v5v5rxpxuy7f6xou3xm
-  payloads.py: bafybeifococfoabmghaniuqivshbnh4ttuqotpol25jnd7h75lo46krcr4
+  payloads.py: bafybeibmwizvkkk4lvnigypo6y52ezytzna3y3pf4fgxkrxrio7mlihy34
   propose_questions.py: bafybeiclbksbzzhs25dton4dlrlnxpfol547sqtq6dm4ubjju664pxfizi
-  rounds.py: bafybeigwwxxtqerwl5pcktdfi5aw5osbhzvfr5ubr4hlphfz7hnjmbo6jm
+  rounds.py: bafybeigjuzee34yfbob7hnikq5ogx4enzvy5u6enfz3vtrt2s2br7jbxbq
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
   tests/behaviours/test_approve_markets_behaviour.py: bafybeihzhiy7sahavxo25cmh3kqgssl4sfql2mykk7vtyrsoiknnrhy33m
 fingerprint_ignore_patterns: []
@@ -265,7 +265,7 @@ models:
       response_key: data
       response_type: list
       retries: 5
-      url: https://api.thegraph.com/subgraphs/name/protofire/omen-xdai
+      url: https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz
     class_name: OmenSubgraph
   requests:
     args: {}

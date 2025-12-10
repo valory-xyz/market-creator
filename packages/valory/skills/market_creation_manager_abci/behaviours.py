@@ -81,10 +81,8 @@ from packages.valory.skills.market_creation_manager_abci.models import (
     SharedState,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
-    AnswerQuestionsPayload,
     ApproveMarketsPayload,
     CollectProposedMarketsPayload,
-    DepositDaiPayload,
     GetPendingQuestionsPayload,
     MultisigTxPayload,
     PostTxPayload,
@@ -101,7 +99,6 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     GetPendingQuestionsRound,
     MarketCreationManagerAbciApp,
     PostTransactionRound,
-    PrepareTransactionPayload,
     PrepareTransactionRound,
     RedeemBondRound,
     RemoveFundingRound,
@@ -860,9 +857,17 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
     def async_act(self) -> Generator:
         """Implement the act."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            sender = self.context.agent_address
-            content = yield from self.get_payload()
-            payload = DepositDaiPayload(sender=sender, content=content)
+            agent = self.context.agent_address
+            tx_hash = yield from self.get_tx_hash()
+            if tx_hash is None:
+                payload = MultisigTxPayload(
+                    sender=agent, tx_submitter=None, tx_hash=None
+                )
+            else:
+                tx_submitter = self.matching_round.auto_round_id()
+                payload = MultisigTxPayload(
+                    sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+                )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -886,18 +891,19 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         self.context.logger.info(f"balance: {balance / 10 ** 18} xDAI")
         return balance
 
-    def get_payload(self) -> Generator[None, None, str]:
-        """Get the payload."""
+    def get_tx_hash(self) -> Generator[None, None, Optional[str]]:
+        """Get the tx_hash."""
         safe_address = self.synchronized_data.safe_contract_address
         balance = yield from self.get_balance(safe_address)
         if balance is None:
-            # something went wrong
-            return DepositDaiRound.ERROR_PAYLOAD
+            self.context.logger.error("[DepositDaiBehaviour] Couldn't get balance.")
+            return None
 
         # check if the balance is below the threshold
         if balance <= self.params.xdai_threshold:
             # not enough balance in the safe
-            return DepositDaiRound.NO_TX_PAYLOAD
+            self.context.logger.info("[DepositDaiBehaviour] Balance below threshold.")
+            return None
 
         # leave xdai threshold in the safe for non-market creation purposes of the safe
         balance_to_deposit = balance - self.params.xdai_threshold
@@ -906,15 +912,19 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         wxdai_address = self.params.collateral_tokens_contract
         tx_data = yield from self._get_deposit_tx(wxdai_address)
         if tx_data is None:
-            # something went wrong
-            return DepositDaiRound.ERROR_PAYLOAD
+            self.context.logger.error(
+                "[DepositDaiBehaviour] _get_deposit_tx() output is None."
+            )
+            return None
 
         safe_tx_hash = yield from self._get_safe_tx_hash(
             to_address=wxdai_address, value=balance_to_deposit, data=tx_data
         )
         if safe_tx_hash is None:
-            # something went wrong
-            return DepositDaiRound.ERROR_PAYLOAD
+            self.context.logger.error(
+                "[DepositDaiBehaviour] _get_safe_tx_hash() output is None."
+            )
+            return None
 
         tx_payload_data = hash_payload_to_hex(
             safe_tx_hash=safe_tx_hash,
@@ -961,10 +971,14 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
             agent = self.context.agent_address
             tx_hash = yield from self.get_payload()
             if tx_hash is None:
-                payload = MultisigTxPayload(sender=agent, tx_submitter=None, tx_hash=None)
+                payload = MultisigTxPayload(
+                    sender=agent, tx_submitter=None, tx_hash=None
+                )
             else:
                 tx_submitter = self.matching_round.auto_round_id()
-                payload = MultisigTxPayload(sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash)
+                payload = MultisigTxPayload(
+                    sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+                )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -1479,6 +1493,7 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
         )
 
         if response.status_code == HTTP_NO_CONTENT:
+            self.context.logger.info("No approved markets to retrieve.")
             return RetrieveApprovedMarketRound.NO_MARKETS_RETRIEVED_PAYLOAD
 
         if response.status_code != HTTP_OK:
@@ -1488,6 +1503,7 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
             )
             retries = 3  # TODO: Make params
             if retries >= MAX_RETRIES:
+                self.context.logger.error(f"Max retries reached ({MAX_RETRIES}).")
                 return RetrieveApprovedMarketRound.MAX_RETRIES_PAYLOAD
             return RetrieveApprovedMarketRound.ERROR_PAYLOAD
 
@@ -1718,10 +1734,17 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             if tx_hash is None:
                 return
 
-            payload = PrepareTransactionPayload(
-                sender=self.context.agent_address,
-                content=tx_hash,
-            )
+            agent = self.context.agent_address
+            if tx_hash is None:
+                payload = MultisigTxPayload(
+                    sender=agent, tx_submitter=None, tx_hash=None
+                )
+            else:
+                tx_submitter = self.matching_round.auto_round_id()
+                payload = MultisigTxPayload(
+                    sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+                )
+
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -2077,9 +2100,17 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
         self.context.logger.info("async_act")
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            sender = self.context.agent_address
-            content = yield from self._get_payload()
-            payload = AnswerQuestionsPayload(sender=sender, content=content)
+            agent = self.context.agent_address
+            tx_hash = yield from self._get_payload()
+            if tx_hash is None:
+                payload = MultisigTxPayload(
+                    sender=agent, tx_submitter=None, tx_hash=None
+                )
+            else:
+                tx_submitter = self.matching_round.auto_round_id()
+                payload = MultisigTxPayload(
+                    sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+                )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()

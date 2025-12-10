@@ -48,13 +48,6 @@ class RetrieveApprovedMarketPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
-class PrepareTransactionPayload(BaseTxPayload):
-    """Represent a transaction payload for the PrepareTransactionRound."""
-
-    content: str
-
-
-@dataclass(frozen=True)
 class SyncMarketsPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 
@@ -63,13 +56,6 @@ class SyncMarketsPayload(BaseTxPayload):
 
 @dataclass(frozen=True)
 class RemoveFundingPayload(BaseTxPayload):
-    """Represent a transaction payload for the PrepareTransactionRound."""
-
-    content: str
-
-
-@dataclass(frozen=True)
-class DepositDaiPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 
     content: str
@@ -101,13 +87,6 @@ class ApproveMarketsPayload(BaseTxPayload):
 @dataclass(frozen=True)
 class GetPendingQuestionsPayload(BaseTxPayload):
     """Represent a transaction payload for the GetPendingQuestionsRound."""
-
-    content: str
-
-
-@dataclass(frozen=True)
-class AnswerQuestionsPayload(BaseTxPayload):
-    """Represent a transaction payload for the AnswerQuestionsRound."""
 
     content: str
 
