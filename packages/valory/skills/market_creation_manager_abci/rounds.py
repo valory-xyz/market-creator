@@ -657,8 +657,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: GetPendingQuestionsRound,
             Event.NONE: GetPendingQuestionsRound,
             Event.ROUND_TIMEOUT: GetPendingQuestionsRound,
-            Event.NO_TX: GetPendingQuestionsRound,
-            Event.ERROR: GetPendingQuestionsRound,
         },
         PostTransactionRound: {
             Event.DONE: FinishedWithoutTxRound,
@@ -682,8 +680,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.NONE: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
-            Event.NO_TX: CollectRandomnessRound,
-            Event.ERROR: CollectRandomnessRound,
         },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
@@ -702,8 +698,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: CollectProposedMarketsRound,
             Event.NONE: CollectProposedMarketsRound,
             Event.ROUND_TIMEOUT: CollectProposedMarketsRound,
-            Event.NO_TX: CollectProposedMarketsRound,
-            Event.ERROR: CollectProposedMarketsRound,
         },
         CollectProposedMarketsRound: {
             Event.DONE: ApproveMarketsRound,
@@ -734,8 +728,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: FinishedWithoutTxRound,
             Event.NONE: FinishedWithoutTxRound,
             Event.ROUND_TIMEOUT: FinishedWithoutTxRound,
-            Event.NO_TX: FinishedWithoutTxRound,
-            Event.ERROR: FinishedWithoutTxRound,
         },
         SyncMarketsRound: {
             Event.DONE: RemoveFundingRound,
