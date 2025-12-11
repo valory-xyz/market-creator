@@ -2194,7 +2194,9 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if len(question_to_answer) == 0:
             # we couldn't get any answers, no tx to be made
-            self.context.logger.warning("[AnswerQuestionsBehaviour] No answers to submit.")
+            self.context.logger.warning(
+                "[AnswerQuestionsBehaviour] No answers to submit."
+            )
             return None
 
         # prepare tx for all the answers

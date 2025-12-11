@@ -229,26 +229,12 @@ class SynchronizedData(TxSynchronizedData):
         """Get the participant_to_tx_prep."""
         return self._get_deserialized("participant_to_tx_prep")
 
-    # This is a fix to ensure a given property is always set up on
-    # the SynchronizedData before ResetAndPause
-    def ensure_property_is_set(self, property_name: str) -> "SynchronizedData":
-        """Ensure a property is set."""
-        try:
-            value = self.db.get_strict(property_name)
-        except ValueError:
-            value = getattr(self, property_name)
-
-        return cast(
-            SynchronizedData,
-            self.update(
-                synchronized_data_class=SynchronizedData,
-                **{property_name: value},
-            ),
-        )
-
 
 class TxPreparationRound(CollectSameUntilThresholdRound):
     """A round for preparing a transaction."""
+
+    ERROR_PAYLOAD = "ERROR_PAYLOAD"
+    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
 
     payload_class = MultisigTxPayload
     synchronized_data_class = SynchronizedData
@@ -260,6 +246,24 @@ class TxPreparationRound(CollectSameUntilThresholdRound):
         get_name(SynchronizedData.most_voted_tx_hash),
     )
     collection_key = get_name(SynchronizedData.participant_to_tx_prep)
+
+    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+        """End block."""
+
+        res = super().end_block()
+        if res is None:
+            return None
+
+        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
+        payload = self.most_voted_payload
+
+        if event == Event.DONE and payload == self.ERROR_PAYLOAD:
+            return synced_data, Event.ERROR
+
+        if event == Event.DONE and payload == self.NO_TX_PAYLOAD:
+            return synced_data, Event.NO_TX
+
+        return synced_data, event  # type: ignore
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
@@ -614,22 +618,6 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
         synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
         payload = self.most_voted_payload
 
-        # Fix to ensure properties are present on the SynchronizedData
-        # before ResetAndPause round.
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.approved_markets_count)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.proposed_markets_count)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.proposed_markets_data)
-        )
-        synced_data = synced_data.ensure_property_is_set(
-            get_name(SynchronizedData.approved_markets_timestamp)
-        )
-        # End fix
-
         if event == Event.DONE and payload == self.ERROR_PAYLOAD:
             return synced_data, Event.ERROR
 
@@ -705,6 +693,8 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: GetPendingQuestionsRound,
             Event.NONE: GetPendingQuestionsRound,
             Event.ROUND_TIMEOUT: GetPendingQuestionsRound,
+            Event.NO_TX: GetPendingQuestionsRound,
+            Event.ERROR: GetPendingQuestionsRound,
         },
         PostTransactionRound: {
             Event.DONE: FinishedWithoutTxRound,
@@ -728,6 +718,8 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: CollectRandomnessRound,
             Event.NONE: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
+            Event.NO_TX: CollectRandomnessRound,
+            Event.ERROR: CollectRandomnessRound,
         },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
@@ -746,6 +738,8 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: CollectProposedMarketsRound,
             Event.NONE: CollectProposedMarketsRound,
             Event.ROUND_TIMEOUT: CollectProposedMarketsRound,
+            Event.NO_TX: CollectProposedMarketsRound,
+            Event.ERROR: CollectProposedMarketsRound,
         },
         CollectProposedMarketsRound: {
             Event.DONE: ApproveMarketsRound,
@@ -776,6 +770,8 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: FinishedWithoutTxRound,
             Event.NONE: FinishedWithoutTxRound,
             Event.ROUND_TIMEOUT: FinishedWithoutTxRound,
+            Event.NO_TX: FinishedWithoutTxRound,
+            Event.ERROR: FinishedWithoutTxRound,
         },
         SyncMarketsRound: {
             Event.DONE: RemoveFundingRound,
@@ -785,10 +781,11 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         RemoveFundingRound: {
             Event.DONE: FinishedWithRemoveFundingRound,
+            Event.NONE: DepositDaiRound,
+            Event.NO_MAJORITY: DepositDaiRound,
+            Event.ROUND_TIMEOUT: DepositDaiRound,
             Event.NO_TX: DepositDaiRound,
-            Event.NO_MAJORITY: GetPendingQuestionsRound,
-            Event.ERROR: GetPendingQuestionsRound,
-            Event.ROUND_TIMEOUT: GetPendingQuestionsRound,
+            Event.ERROR: DepositDaiRound,
         },
         FinishedMarketCreationManagerRound: {},
         FinishedWithAnswerQuestionsRound: {},
