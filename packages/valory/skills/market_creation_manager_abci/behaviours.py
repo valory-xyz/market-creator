@@ -1776,21 +1776,21 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             return PostTransactionRound.DONE_PAYLOAD
 
         if (
-            self.synchronized_data.tx_sender
+            self.synchronized_data.tx_submitter
             == MechRequestStates.MechRequestRound.auto_round_id()
         ):
             return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_sender == RedeemBondRound.auto_round_id():
+        if self.synchronized_data.tx_submitter == RedeemBondRound.auto_round_id():
             return PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_sender == DepositDaiRound.auto_round_id():
+        if self.synchronized_data.tx_submitter == DepositDaiRound.auto_round_id():
             return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_sender == AnswerQuestionsRound.auto_round_id():
+        if self.synchronized_data.tx_submitter == AnswerQuestionsRound.auto_round_id():
             return PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_sender == RemoveFundingRound.auto_round_id():
+        if self.synchronized_data.tx_submitter == RemoveFundingRound.auto_round_id():
             return PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
 
         is_approved_question_data_set = (
@@ -1811,10 +1811,13 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             f"For market with id {market_id}. "
         )
 
-        if self.synchronized_data.tx_sender != PrepareTransactionRound.auto_round_id():
+        if (
+            self.synchronized_data.tx_submitter
+            != PrepareTransactionRound.auto_round_id()
+        ):
             # we only handle market creation txs atm, any other tx, we don't need to take action
             self.context.logger.info(
-                f"No handling required for tx sender with round id {self.synchronized_data.tx_sender}. "
+                f"No handling required for tx sender with round id {self.synchronized_data.tx_submitter}. "
                 f"Handling only required for {PrepareTransactionRound.auto_round_id()}."
             )
             return PostTransactionRound.DONE_PAYLOAD
@@ -2141,7 +2144,7 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         except json.JSONDecodeError:
             return None
 
-    def _get_payload(self) -> Generator[None, None, str]:
+    def _get_payload(self) -> Generator[None, None, Optional[str]]:
         self.context.logger.info("_get_payload")
         self.context.logger.info(
             f"mech_responses = {self.synchronized_data.mech_responses}"
@@ -2191,7 +2194,8 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if len(question_to_answer) == 0:
             # we couldn't get any answers, no tx to be made
-            return AnswerQuestionsRound.NO_TX_PAYLOAD
+            self.context.logger.warning("[AnswerQuestionsBehaviour] No answers to submit.")
+            return None
 
         # prepare tx for all the answers
         txs = []
@@ -2213,14 +2217,17 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         if len(txs) == 0:
             # something went wrong, respond with ERROR payload for now
             self.context.logger.error(
-                "Couldn't get any txs for questions that we have answers for."
+                "[AnswerQuestionsBehaviour] Couldn't get any txs for questions that we have answers for."
             )
-            return AnswerQuestionsRound.ERROR_PAYLOAD
+            return None
 
         multisend_tx_str = yield from self._to_multisend(txs)
         if multisend_tx_str is None:
             # something went wrong, respond with ERROR payload for now
-            return AnswerQuestionsRound.ERROR_PAYLOAD
+            self.context.logger.error(
+                "[AnswerQuestionsBehaviour] multisend_tx_str is None."
+            )
+            return None
         return multisend_tx_str
 
     def _get_answer_tx(

@@ -220,9 +220,9 @@ class SynchronizedData(TxSynchronizedData):
         return cast(str, self.db.get("final_tx_hash", None))
 
     @property
-    def tx_sender(self) -> str:
+    def tx_submitter(self) -> str:
         """Get the round that send the transaction through transaction settlement."""
-        return cast(str, self.db.get_strict("tx_sender"))
+        return cast(str, self.db.get_strict("tx_submitter"))
 
     @property
     def participant_to_tx_prep(self) -> DeserializedCollection:
@@ -256,7 +256,7 @@ class TxPreparationRound(CollectSameUntilThresholdRound):
     none_event = Event.NONE
     no_majority_event = Event.NO_MAJORITY
     selection_key: Tuple[str, ...] = (
-        get_name(SynchronizedData.tx_sender),
+        get_name(SynchronizedData.tx_submitter),
         get_name(SynchronizedData.most_voted_tx_hash),
     )
     collection_key = get_name(SynchronizedData.participant_to_tx_prep)
@@ -275,7 +275,7 @@ class CollectRandomnessRound(CollectSameUntilThresholdRound):
 
 
 class RedeemBondRound(TxPreparationRound):
-    """A round for redeeming Realitio"""
+    """A round for redeeming Realitio bonds."""
 
 
 class PostTransactionRound(CollectSameUntilThresholdRound):
@@ -344,7 +344,7 @@ class RemoveFundingRound(CollectSameUntilThresholdRound):
     no_majority_event = Event.NO_MAJORITY
     none_event = Event.NONE
     selection_key: Tuple[str, ...] = (
-        get_name(SynchronizedData.tx_sender),
+        get_name(SynchronizedData.tx_submitter),
         get_name(SynchronizedData.most_voted_tx_hash),
     )
     collection_key = get_name(SynchronizedData.participant_to_tx_prep)
@@ -379,7 +379,7 @@ class RemoveFundingRound(CollectSameUntilThresholdRound):
                         SynchronizedData.markets_to_remove_liquidity
                     ): markets_to_remove_liquidity,
                     get_name(SynchronizedData.most_voted_tx_hash): tx_data,
-                    get_name(SynchronizedData.tx_sender): self.round_id,
+                    get_name(SynchronizedData.tx_submitter): self.round_id,
                 },
             )
             return synchronized_data, Event.DONE
@@ -402,8 +402,8 @@ class SyncMarketsRound(CollectSameUntilThresholdRound):
     done_event = Event.DONE
     no_majority_event = Event.NO_MAJORITY
     none_event = Event.NONE
-    selection_key: Tuple[str, ...] = ()  # TODO fix
-    collection_key = ""  # TODO fix
+    selection_key: Tuple[str, ...] = ()  # TODO placeholder
+    collection_key = ""  # TODO placeholder
 
     def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """Process the end of the block."""
@@ -526,7 +526,7 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
     payload_attribute = "content"
     done_event = Event.DONE
     fail_event = Event.ERROR
-    payload_key = ""  # TODO fix
+    payload_key = ""  # TODO placeholder
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
@@ -642,7 +642,7 @@ class GetPendingQuestionsRound(CollectSameUntilThresholdRound):
                 synchronized_data_class=SynchronizedData,
                 **{
                     get_name(
-                        SynchronizedData.tx_sender
+                        SynchronizedData.tx_submitter
                     ): MechRequestStates.MechRequestRound.auto_round_id(),
                 },
             ),
