@@ -111,16 +111,6 @@ class SynchronizedData(TxSynchronizedData):
         return cast(str, self.db.get_strict("gathered_data"))
 
     @property
-    def newsapi_api_retries(self) -> int:
-        """Get the amount of API call retries."""
-        return cast(int, self.db.get("newsapi_api_retries", 0))
-
-    @property
-    def proposed_markets_api_retries(self) -> int:
-        """Get the amount of API call retries."""
-        return cast(int, self.db.get("proposed_markets_api_retries", 0))
-
-    @property
     def proposed_markets_count(self) -> int:
         """Get the proposed_markets_count."""
         return cast(int, self.db.get("proposed_markets_count", 0))
@@ -188,11 +178,6 @@ class SynchronizedData(TxSynchronizedData):
         return approved_question_data is not None
 
     @property
-    def all_approved_question_data(self) -> dict:
-        """Get the approved_question_data."""
-        return cast(dict, self.db.get_strict("all_approved_question_data"))
-
-    @property
     def most_voted_tx_hash(self) -> str:
         """Get the most_voted_tx_hash."""
         return cast(str, self.db.get_strict("most_voted_tx_hash"))
@@ -233,9 +218,6 @@ class SynchronizedData(TxSynchronizedData):
 class TxPreparationRound(CollectSameUntilThresholdRound):
     """A round for preparing a transaction."""
 
-    ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    NO_TX_PAYLOAD = "NO_TX_PAYLOAD"
-
     payload_class = MultisigTxPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
@@ -246,24 +228,6 @@ class TxPreparationRound(CollectSameUntilThresholdRound):
         get_name(SynchronizedData.most_voted_tx_hash),
     )
     collection_key = get_name(SynchronizedData.participant_to_tx_prep)
-
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
-        """End block."""
-
-        res = super().end_block()
-        if res is None:
-            return None
-
-        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
-        payload = self.most_voted_payload
-
-        if event == Event.DONE and payload == self.ERROR_PAYLOAD:
-            return synced_data, Event.ERROR
-
-        if event == Event.DONE and payload == self.NO_TX_PAYLOAD:
-            return synced_data, Event.NO_TX
-
-        return synced_data, event  # type: ignore
 
 
 class CollectRandomnessRound(CollectSameUntilThresholdRound):
