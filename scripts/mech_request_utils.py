@@ -37,25 +37,27 @@ MINIMUM_WRITE_FILE_DELAY_SECONDS = 20
 MECH_FROM_BLOCK_RANGE = 50000
 DEFAULT_MECH_REQUESTS_JSON_PATH = "mech_requests.json"
 IPFS_ADDRESS = "https://gateway.autonolas.tech/ipfs/"
-THEGRAPH_ENDPOINT = "https://api.studio.thegraph.com/query/57238/mech/0.0.2"
+THEGRAPH_ENDPOINT = "https://api.subgraph.autonolas.tech/api/proxy/mech"
 THREAD_POOL_EXECUTOR_MAX_WORKERS = 10
 
 REQUESTS_QUERY = """
-query requests_query($sender: Bytes, $id_gt: Bytes) {
+query requests_query($sender: String!, $id_gt: ID!) {
   requests(where: {sender: $sender, id_gt: $id_gt}, orderBy: id, first: 1000) {
     blockNumber
     blockTimestamp
     id
     ipfsHash
     requestId
-    sender
+    sender {
+      id
+    }
     transactionHash
   }
 }
 """
 
 DELIVERS_QUERY = """
-query delivers_query($requestId_in: [BigInt!], $id_gt: Bytes) {
+query delivers_query($requestId_in: [BigInt!], $id_gt: Bytes!) {
   delivers(where: {requestId_in: $requestId_in, id_gt: $id_gt}, orderBy: blockNumber, first: 1000) {
     blockNumber
     blockTimestamp
