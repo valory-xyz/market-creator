@@ -860,14 +860,12 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             agent = self.context.agent_address
             tx_hash = yield from self.get_tx_hash()
             if tx_hash is None:
-                payload = MultisigTxPayload(
-                    sender=agent, tx_submitter=None, tx_hash=None
-                )
+                tx_submitter = None
             else:
                 tx_submitter = self.matching_round.auto_round_id()
-                payload = MultisigTxPayload(
-                    sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
-                )
+            payload = MultisigTxPayload(
+                sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+            )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -971,14 +969,12 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
             agent = self.context.agent_address
             tx_hash = yield from self.get_payload()
             if tx_hash is None:
-                payload = MultisigTxPayload(
-                    sender=agent, tx_submitter=None, tx_hash=None
-                )
+                tx_submitter = None
             else:
                 tx_submitter = self.matching_round.auto_round_id()
-                payload = MultisigTxPayload(
-                    sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
-                )
+            payload = MultisigTxPayload(
+                sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+            )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -1736,14 +1732,12 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
 
             agent = self.context.agent_address
             if tx_hash is None:
-                payload = MultisigTxPayload(
-                    sender=agent, tx_submitter=None, tx_hash=None
-                )
+                tx_submitter = None
             else:
                 tx_submitter = self.matching_round.auto_round_id()
-                payload = MultisigTxPayload(
-                    sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
-                )
+            payload = MultisigTxPayload(
+                sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+            )
 
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
@@ -2106,14 +2100,12 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             agent = self.context.agent_address
             tx_hash = yield from self._get_payload()
             if tx_hash is None:
-                payload = MultisigTxPayload(
-                    sender=agent, tx_submitter=None, tx_hash=None
-                )
+                tx_submitter = None
             else:
                 tx_submitter = self.matching_round.auto_round_id()
-                payload = MultisigTxPayload(
-                    sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
-                )
+            payload = MultisigTxPayload(
+                sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+            )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
