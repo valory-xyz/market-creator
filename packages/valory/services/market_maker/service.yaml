@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeigsmblpougyoegn3lafff7qva6ys7eqjpe53cavhgdbzoizu2wwge
+agent: valory/market_maker:0.1.0:bafybeig2qthynl6ki36ttmw7jrjjpqfvvqhzfczf3jcqbta3i56xbl3axy
 number_of_agents: 1
 deployment:
   agent:
@@ -70,7 +70,7 @@ models:
       multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:1}
       ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
-      mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x77af31de935740567cf4ff1986d04b2c964a786a}
+      mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x601024E27f1C67B28209E24272CED8A31fc8151F}
       mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4}
       answer_retry_intervals: ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
         1209600]}
@@ -79,8 +79,8 @@ models:
       reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
       mech_interact_round_timeout_seconds: ${MECH_INTERACT_ROUND_TIMEOUT_SECONDS:int:900}
       mech_interaction_sleep_time: ${MECH_INTERACTION_SLEEP_TIME:int:10}
-      use_mech_marketplace: ${USE_MECH_MARKETPLACE:bool:false}
-      mech_marketplace_config: ${MECH_MARKETPLACE_CONFIG:dict:{"mech_marketplace_address":"0x0000000000000000000000000000000000000000","priority_mech_address":"0x0000000000000000000000000000000000000000","priority_mech_staking_instance_address":"0x0000000000000000000000000000000000000000","priority_mech_service_id":0,"requester_staking_instance_address":"0x0000000000000000000000000000000000000000","response_timeout":300}}
+      use_mech_marketplace: ${USE_MECH_MARKETPLACE:bool:true}
+      mech_marketplace_config: ${MECH_MARKETPLACE_CONFIG:dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","response_timeout":300}}
       service_id: market_maker
       agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
