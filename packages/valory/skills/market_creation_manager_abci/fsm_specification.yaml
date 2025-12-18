@@ -101,10 +101,11 @@ transition_func:
     (RedeemBondRound, NO_MAJORITY): CollectProposedMarketsRound
     (RedeemBondRound, ROUND_TIMEOUT): CollectProposedMarketsRound
     (RemoveFundingRound, DONE): FinishedWithRemoveFundingRound
-    (RemoveFundingRound, ERROR): GetPendingQuestionsRound
-    (RemoveFundingRound, NO_MAJORITY): GetPendingQuestionsRound
+    (RemoveFundingRound, ERROR): DepositDaiRound
+    (RemoveFundingRound, NONE): DepositDaiRound
+    (RemoveFundingRound, NO_MAJORITY): DepositDaiRound
     (RemoveFundingRound, NO_TX): DepositDaiRound
-    (RemoveFundingRound, ROUND_TIMEOUT): GetPendingQuestionsRound
+    (RemoveFundingRound, ROUND_TIMEOUT): DepositDaiRound
     (RetrieveApprovedMarketRound, DID_NOT_SEND): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, DONE): PrepareTransactionRound
     (RetrieveApprovedMarketRound, ERROR): FinishedWithoutTxRound

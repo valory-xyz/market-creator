@@ -154,10 +154,11 @@ transition_func:
     (RegistrationRound, NO_MAJORITY): RegistrationRound
     (RegistrationStartupRound, DONE): SyncMarketsRound
     (RemoveFundingRound, DONE): RandomnessTransactionSubmissionRound
-    (RemoveFundingRound, ERROR): GetPendingQuestionsRound
-    (RemoveFundingRound, NO_MAJORITY): GetPendingQuestionsRound
+    (RemoveFundingRound, ERROR): DepositDaiRound
+    (RemoveFundingRound, NONE): DepositDaiRound
+    (RemoveFundingRound, NO_MAJORITY): DepositDaiRound
     (RemoveFundingRound, NO_TX): DepositDaiRound
-    (RemoveFundingRound, ROUND_TIMEOUT): GetPendingQuestionsRound
+    (RemoveFundingRound, ROUND_TIMEOUT): DepositDaiRound
     (ResetAndPauseRound, DONE): SyncMarketsRound
     (ResetAndPauseRound, NO_MAJORITY): RegistrationRound
     (ResetAndPauseRound, RESET_AND_PAUSE_TIMEOUT): RegistrationRound
