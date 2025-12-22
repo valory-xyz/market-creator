@@ -27,7 +27,7 @@ contracts:
 - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
 - valory/realitio:0.1.0:bafybeieggqkuslxiuapneygnhkhgatk5jvjbw6p7ltxaab6au466ikxm3e
 - valory/conditional_tokens:0.1.0:bafybeiai7zwtdab2izyitvxph42kwtbvx6n5skm3i6jijd2653xjkoqd24
-- valory/fpmm_deterministic_factory:0.1.0:bafybeidujfpjlmlh56v2xnlqzjuni46qhh4ah5caigdwbkgtdhspzpyznq
+- valory/fpmm_deterministic_factory:0.1.0:bafybeia3lltdvjczp3j3tqtny5nz4tgnb6kuyn3sxgt2rogbpjmph2e7za
 - valory/wxdai:0.1.0:bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie
 - valory/fpmm:0.1.0:bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4
 protocols:
