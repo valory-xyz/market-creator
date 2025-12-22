@@ -1470,13 +1470,13 @@ test = ["pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)"]
 
 [[package]]
 name = "eth-utils"
-version = "2.3.2"
+version = "2.2.0"
 description = "eth-utils: Common utility functions for python code that interacts with Ethereum"
 optional = false
-python-versions = "<4,>=3.7"
+python-versions = ">=3.7,<4"
 files = [
-    {file = "eth_utils-2.3.2-py3-none-any.whl", hash = "sha256:4470be372674a25b8440b69cb35bda634a079876930853814ea307248c3d198b"},
-    {file = "eth_utils-2.3.2.tar.gz", hash = "sha256:1986d704b29202386c9bc4b27b948a134320c11c8104c45ca367e4663ae7d10e"},
+    {file = "eth-utils-2.2.0.tar.gz", hash = "sha256:7f1a9e10400ee332432a778c321f446abaedb8f538df550e7c9964f446f7e265"},
+    {file = "eth_utils-2.2.0-py3-none-any.whl", hash = "sha256:d6e107d522f83adff31237a95bdcc329ac0819a3ac698fe43c8a56fd80813eab"},
 ]
 
 [package.dependencies]
@@ -1486,10 +1486,10 @@ eth-typing = ">=3.0.0"
 toolz = {version = ">0.8.2", markers = "implementation_name == \"pypy\""}
 
 [package.extras]
-dev = ["black (>=23)", "build (>=0.9.0)", "bumpversion (>=0.5.3)", "eth-hash[pycryptodome]", "flake8 (==3.8.3)", "hypothesis (>=4.43.0)", "ipython", "isort (>=5.11.0)", "mypy (==0.991)", "pydocstyle (>=5.0.0)", "pytest (>=7.0.0)", "pytest-watch (>=4.1.0)", "pytest-xdist (>=2.4.0)", "sphinx (>=5.0.0)", "sphinx-rtd-theme (>=1.0.0)", "towncrier (>=21,<22)", "tox (>=4.0.0)", "twine", "types-setuptools", "wheel"]
-docs = ["sphinx (>=5.0.0)", "sphinx-rtd-theme (>=1.0.0)", "towncrier (>=21,<22)"]
-lint = ["black (>=23)", "flake8 (==3.8.3)", "isort (>=5.11.0)", "mypy (==0.991)", "pydocstyle (>=5.0.0)", "types-setuptools"]
-test = ["hypothesis (>=4.43.0)", "mypy (==0.991)", "pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)", "types-setuptools"]
+dev = ["black (>=23)", "build (>=0.9.0)", "bumpversion (>=0.5.3)", "eth-hash[pycryptodome]", "flake8 (==3.8.3)", "hypothesis (>=4.43.0)", "ipython", "isort (>=5.11.0)", "mypy (==0.971)", "pydocstyle (>=5.0.0)", "pytest (>=7.0.0)", "pytest-watch (>=4.1.0)", "pytest-xdist (>=2.4.0)", "sphinx (>=5.0.0)", "sphinx-rtd-theme (>=1.0.0)", "towncrier (>=21,<22)", "tox (>=4.0.0)", "twine", "types-setuptools", "wheel"]
+doc = ["sphinx (>=5.0.0)", "sphinx-rtd-theme (>=1.0.0)", "towncrier (>=21,<22)"]
+lint = ["black (>=23)", "flake8 (==3.8.3)", "isort (>=5.11.0)", "mypy (==0.971)", "pydocstyle (>=5.0.0)", "types-setuptools"]
+test = ["hypothesis (>=4.43.0)", "mypy (==0.971)", "pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)", "types-setuptools"]
 
 [[package]]
 name = "exceptiongroup"
@@ -4595,4 +4595,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.9"
-content-hash = "328b08a258948d998e99b8e23bb7fc3975da5cd9ae3460fc67688d3c1e5b9e56"
+content-hash = "5b939059df15cf1726caad7638a92ddbcd467caeb566e5b0eeadb86e28f2fb32"

@@ -21,4 +21,6 @@ dependencies:
     version: ==0.19.11
   web3:
     version: <7,>=6.0.0
+  eth-utils:
+    version: ==2.2.0    
 contracts: []
