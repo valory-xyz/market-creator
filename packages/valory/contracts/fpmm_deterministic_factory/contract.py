@@ -21,13 +21,17 @@
 import logging
 import math
 import random
-from typing import Any
+from typing import Any, List, Optional, Sequence, Union
 
 from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-from web3.types import BlockIdentifier
+from eth_utils import event_abi_to_log_topic
+from web3._utils.events import get_event_data
+from web3.contract import Contract as W3Contract
+from web3.eth import Eth
+from web3.types import ABIEvent, BlockIdentifier, FilterParams, LogReceipt, _Hash32
 
 
 DEFAULT_MARKET_FEE = 2.0
@@ -37,6 +41,28 @@ PUBLIC_ID = PublicId.from_str("valory/fpmm_deterministic_factory:0.1.0")
 _logger = logging.getLogger(
     f"aea.packages.{PUBLIC_ID.author}.contracts.{PUBLIC_ID.name}.contract"
 )
+
+
+def get_logs(
+    eth: Eth,
+    contract_instance: W3Contract,
+    event_abi: ABIEvent,
+    topics: List[Optional[Union[_Hash32, Sequence[_Hash32]]]],
+    from_block: BlockIdentifier = "earliest",
+    to_block: BlockIdentifier = "latest",
+) -> List[LogReceipt]:
+    """Helper method to extract the events."""
+    event_topic = event_abi_to_log_topic(event_abi)
+    topics.insert(0, event_topic)
+
+    filter_params: FilterParams = {
+        "fromBlock": from_block,
+        "toBlock": to_block,
+        "address": contract_instance.address,
+        "topics": topics,
+    }
+
+    return eth.get_logs(filter_params)
 
 
 class FPMMDeterministicFactory(Contract):
@@ -180,31 +206,32 @@ class FPMMDeterministicFactory(Contract):
         to_block: BlockIdentifier = "latest",
     ) -> JSONLike:
         """Get market creation"""
+        eth = ledger_api.api.eth
         contract_instance = cls.get_instance(
             ledger_api=ledger_api, contract_address=contract_address
         )
-        entries = (
-            contract_instance.events.FixedProductMarketMakerCreation()
-            .create_filter(
-                fromBlock=from_block,
-                toBlock=to_block,
-                argument_filters={"creator": creator_address},
-            )
-            .get_all_entries()
-        )
-        events = list(
-            dict(
-                tx_hash=entry.transactionHash.hex(),
-                block_number=entry.blockNumber,
-                condition_ids=entry["args"]["conditionIds"],
-                collateral_token=entry["args"]["collateralToken"],
-                conditional_tokens=entry["args"]["conditionalTokens"],
-                fixed_product_market_maker=entry["args"]["fixedProductMarketMaker"],
-                fee=entry["args"]["fee"],
-            )
+        event_abi = contract_instance.events.FixedProductMarketMakerCreation().abi
+        topics: List[Union[Any, Sequence[Any], None]] = [
+            "0x" + creator_address.lower()[2:].rjust(64, "0"),
+        ]
+
+        logs = get_logs(eth, contract_instance, event_abi, topics, from_block, to_block)
+
+        entries = [get_event_data(eth.codec, event_abi, log) for log in logs]
+        events = [
+            {
+                "tx_hash": entry["transactionHash"].hex(),
+                "block_number": entry["blockNumber"],
+                "condition_ids": entry["args"]["conditionIds"],
+                "collateral_token": entry["args"]["collateralToken"],
+                "conditional_tokens": entry["args"]["conditionalTokens"],
+                "fixed_product_market_maker": entry["args"]["fixedProductMarketMaker"],
+                "fee": entry["args"]["fee"],
+            }
             for entry in entries
-        )
-        return dict(data=events)
+        ]
+
+        return {"data": events}
 
     @classmethod
     def parse_market_creation_event(
