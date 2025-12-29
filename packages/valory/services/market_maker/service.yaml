@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeig2qthynl6ki36ttmw7jrjjpqfvvqhzfczf3jcqbta3i56xbl3axy
+agent: valory/market_maker:0.1.0:bafybeidhas7zkj4czdfm5pwgbu3xw2k7e65bkmo32egs64c7k24jl5zpja
 number_of_agents: 1
 deployment:
   agent:
@@ -58,7 +58,7 @@ models:
       min_market_proposal_interval_seconds: ${MIN_MARKET_PROPOSAL_INTERVAL_SECONDS:int:7200}
       news_sources: ${NEWS_SOURCES:list:["bbc-news","bbc-sport","abc-news","cnn","reuters","usa-today","breitbart-news","the-verge","techradar"]}
       event_offset_start_days: ${EVENT_OFFSET_START_DAYS:int:4}
-      event_offset_end_days: ${EVENT_OFFSET_END_DAYS:int:7}
+      event_offset_end_days: ${EVENT_OFFSET_END_DAYS:int:8}
       market_proposal_round_timeout_seconds_per_day: ${MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY:int:45}
       max_markets_per_story: ${MAX_MARKETS_PER_STORY:int:1}
       realitio_contract: ${REALITIO_CONTRACT:str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
@@ -77,7 +77,7 @@ models:
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
       reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
       reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
-      mech_interact_round_timeout_seconds: ${MECH_INTERACT_ROUND_TIMEOUT_SECONDS:int:900}
+      mech_interact_round_timeout_seconds: ${MECH_INTERACT_ROUND_TIMEOUT_SECONDS:int:1200}
       mech_interaction_sleep_time: ${MECH_INTERACTION_SLEEP_TIME:int:10}
       use_mech_marketplace: ${USE_MECH_MARKETPLACE:bool:true}
       mech_marketplace_config: ${MECH_MARKETPLACE_CONFIG:dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","response_timeout":300}}
@@ -85,8 +85,8 @@ models:
       agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
       setup:
-        all_participants: ${ALL_PARTICIPANTS:list:["0x10E867Ac2Fb0Aa156ca81eF440a5cdf373bE1AaC"]}
-        safe_contract_address: ${SAFE_CONTRACT_ADDRESS:str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}
+        all_participants: ${ALL_PARTICIPANTS:list:["0x0000000000000000000000000000000000000000"]}
+        safe_contract_address: ${SAFE_CONTRACT_ADDRESS:str:0x0000000000000000000000000000000000000000}
         consensus_threshold: ${CONSENSUS_THRESHOLD:int:null}
       use_acn_for_delivers: ${USE_ACN_FOR_DELIVERS:bool:false}
       share_tm_config_on_startup: ${SHARE_TM_CONFIG_ON_STARTUP:bool:false}

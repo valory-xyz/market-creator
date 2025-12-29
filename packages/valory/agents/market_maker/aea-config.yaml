@@ -56,9 +56,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeieteucm3rudnnbesnu53wbv3ojnhrwqbvfrsqwvhg6ksgriqyl67i
 - valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
-- valory/market_maker_abci:0.1.0:bafybeibxiwohjvzs463xplp6quylgqc57vzmagifkclnv37wxs56itapgm
+- valory/market_maker_abci:0.1.0:bafybeiap3johpqdek2xdali2yr4ncgohc3sdm2ojduubz7olweikx7tafq
 - valory/registration_abci:0.1.0:bafybeie6rd7zlws4rxzkwka5mzhk56mn6clj3ocxbkbgeaiawv2c6b6jtm
-- valory/market_creation_manager_abci:0.1.0:bafybeihzyckxrervnkzlersz2b6ygyumeggva2ifua3l5dbyzvhodwjtei
+- valory/market_creation_manager_abci:0.1.0:bafybeie2fvnobw7rdewpcm5scu6ah7y6mqv67fx4u463l6lnr7v44uljou
 - valory/reset_pause_abci:0.1.0:bafybeian7gymp6x6rn55uaf4u3dgirbzr43xvnsj2ev27stkadikjqz4du
 - valory/termination_abci:0.1.0:bafybeiht4uj5j3qqf2hewtzah7vcabb7okkjgi65jb76ddfltvjpk6bzxi
 - valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
@@ -196,9 +196,9 @@ models:
       min_market_proposal_interval_seconds: ${int:7200}
       news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","reuters","usa-today","breitbart-news","the-verge","techradar"]}
       event_offset_start_days: ${int:4}
-      event_offset_end_days: ${int:7}
+      event_offset_end_days: ${int:8}
       market_proposal_round_timeout_seconds_per_day: ${int:45}
-      max_markets_per_story: ${int:5}
+      max_markets_per_story: ${int:1}
       realitio_contract: ${str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
       realitio_oracle_proxy_contract: ${str:0xab16d643ba051c11962da645f74632d3130c81e2}
       conditional_tokens_contract: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
@@ -211,7 +211,7 @@ models:
       on_chain_service_id: ${int:null}
       reset_tendermint_after: ${int:1}
       reset_pause_duration: ${int:1800}
-      mech_interact_round_timeout_seconds: ${int:900}
+      mech_interact_round_timeout_seconds: ${int:1200}
       mech_interaction_sleep_time: ${int:10}
       use_mech_marketplace: ${bool:true}
       mech_marketplace_config: ${dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","response_timeout":300}}
@@ -219,8 +219,8 @@ models:
       agent_registry_address: ${str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
       service_registry_address: ${str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
       setup:
-        all_participants: ${list:["0x10E867Ac2Fb0Aa156ca81eF440a5cdf373bE1AaC"]}
-        safe_contract_address: ${str:0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec}
+        all_participants: ${list:["0x0000000000000000000000000000000000000000"]}
+        safe_contract_address: ${str:0x0000000000000000000000000000000000000000}
         consensus_threshold: ${int:null}
       use_acn_for_delivers: ${bool:false}
       share_tm_config_on_startup: ${bool:false}
