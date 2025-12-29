@@ -1,6 +1,6 @@
 {
     "dev": {
-        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeidujfpjlmlh56v2xnlqzjuni46qhh4ah5caigdwbkgtdhspzpyznq",
+        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeifo5kputtx6ccbfgyngbif4iclv2avy5hvp6k3qbqjpwvhazw3jte",
         "contract/valory/wxdai/0.1.0": "bafybeidalocwbhmbto6ii6adldtpcughtdt6j3v4tv36utevjk2wrdyqie",
         "contract/valory/fpmm/0.1.0": "bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeie2fvnobw7rdewpcm5scu6ah7y6mqv67fx4u463l6lnr7v44uljou",
