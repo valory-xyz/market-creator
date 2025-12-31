@@ -45,6 +45,7 @@ import packages.valory.skills.mech_interact_abci.states.request as MechRequestSt
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
+from packages.valory.contracts.erc20.contract import ERC20
 from packages.valory.contracts.fpmm.contract import FPMMContract
 from packages.valory.contracts.fpmm_deterministic_factory.contract import (
     FPMMDeterministicFactory,
@@ -58,7 +59,6 @@ from packages.valory.contracts.multisend.contract import (
     MultiSendOperation,
 )
 from packages.valory.contracts.realitio.contract import RealitioContract
-from packages.valory.contracts.wxdai.contract import WxDAIContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.protocols.llm.message import LlmMessage
@@ -940,21 +940,19 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         """This function returns the encoded FPMMContract.removeFunds() function call."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            contract_id=str(WxDAIContract.contract_id),
-            contract_callable="build_deposit_tx",
+            contract_id=str(ERC20.contract_id),
+            contract_callable=get_callable_name(ERC20.build_deposit_tx),
             contract_address=wxdai_address,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
-                f"Couldn't get tx data for WxDAIContract.build_deposit_tx. "
+                f"Couldn't get tx data for ERC20.build_deposit_tx. "
                 f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
                 f"received {response.performative.value}."
             )
             return None
 
-        # strip "0x" from the response data
-        data_str = cast(str, response.state.body["data"])[2:]
-        data = bytes.fromhex(data_str)
+        data = cast(bytes, response.state.body["data"])
         return data
 
 
@@ -1037,6 +1035,8 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
                 f"RealitioContract.build_withdraw_tx unsuccessful! : {response}"
             )
             return None
+
+        # data_hex = "0x" + response.state.body["data"].hex()
         return {
             "to": self.params.realitio_contract,
             "data": response.state.body["data"],
@@ -1399,8 +1399,8 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.conditional_tokens_contract,
-            contract_id=str(WxDAIContract.contract_id),
-            contract_callable=get_callable_name(WxDAIContract.build_withdraw_tx),
+            contract_id=str(ERC20.contract_id),
+            contract_callable=get_callable_name(ERC20.build_withdraw_tx),
             amount=amount,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
@@ -1408,9 +1408,11 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
                 f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
             )
             return None
+
+        data_hex = "0x" + cast(bytes, response.state.body["data"]).hex()
         return {
             "to": self.params.collateral_tokens_contract,
-            "data": response.state.body["data"],
+            "data": data_hex,
             "value": ETHER_VALUE,
         }
 
@@ -1641,19 +1643,19 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.collateral_tokens_contract,
-            contract_id=str(WxDAIContract.contract_id),
-            contract_callable="get_approve_tx_data",
-            guy=self.params.fpmm_deterministic_factory_contract,
+            contract_id=str(ERC20.contract_id),
+            contract_callable=get_callable_name(ERC20.build_approval_tx),
+            spender=self.params.fpmm_deterministic_factory_contract,
             amount=amount,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.warning(
-                f"get_approve_tx_data unsuccessful!: {response}"
-            )
+            self.context.logger.warning(f"build_approval_tx unsuccessful!: {response}")
             return None
+
+        data_hex = "0x" + cast(bytes, response.state.body["data"]).hex()
         return {
             "to": self.params.collateral_tokens_contract,
-            "data": response.state.body["data"],
+            "data": data_hex,
             "value": ETHER_VALUE,
         }
 

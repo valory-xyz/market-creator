@@ -2,7 +2,7 @@ token_id-"component_id"
 100-"contract/valory/conditional_tokens/0.1.0" 
 101-"contract/valory/fpmm_deterministic_factory/0.1.0"
 102-"contract/valory/realtio/0.1.0"
-103-"contract/valory/wxdai/0.1.0"
+103-"contract/valory/wxdai/0.1.0"  # Deprecated
 104-"contract/valory/fpmm/0.1.0"
 105-"skill/valory/market_creation_manager_abci/0.1.0"
 106-"skill/valory/market_maker_abci/0.1.0"
