@@ -1035,8 +1035,6 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
                 f"RealitioContract.build_withdraw_tx unsuccessful! : {response}"
             )
             return None
-
-        # data_hex = "0x" + response.state.body["data"].hex()
         return {
             "to": self.params.realitio_contract,
             "data": response.state.body["data"],
@@ -1408,11 +1406,9 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
                 f"ConditionalTokensContract.build_merge_positions_tx unsuccessful! : {response}"
             )
             return None
-
-        data_hex = "0x" + cast(bytes, response.state.body["data"]).hex()
         return {
             "to": self.params.collateral_tokens_contract,
-            "data": data_hex,
+            "data": response.state.body["data"],
             "value": ETHER_VALUE,
         }
 
@@ -1651,11 +1647,9 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(f"build_approval_tx unsuccessful!: {response}")
             return None
-
-        data_hex = "0x" + cast(bytes, response.state.body["data"]).hex()
         return {
             "to": self.params.collateral_tokens_contract,
-            "data": data_hex,
+            "data": response.state.body["data"],
             "value": ETHER_VALUE,
         }
 

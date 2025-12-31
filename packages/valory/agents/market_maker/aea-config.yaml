@@ -55,9 +55,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeieteucm3rudnnbesnu53wbv3ojnhrwqbvfrsqwvhg6ksgriqyl67i
 - valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
-- valory/market_maker_abci:0.1.0:bafybeifdqxrn2sam4etcsvbh5clcs3wkmaytoioa643k56myprzazp3g6i
+- valory/market_maker_abci:0.1.0:bafybeicliu2hapm7mramskand6ir4nbaowygxlu2cupai4cpbhzo7tanbe
 - valory/registration_abci:0.1.0:bafybeie6rd7zlws4rxzkwka5mzhk56mn6clj3ocxbkbgeaiawv2c6b6jtm
-- valory/market_creation_manager_abci:0.1.0:bafybeifisxfygqiylxg2l6h6tnwmjnrppmcqrwahxgz5jm2rlfdocevrci
+- valory/market_creation_manager_abci:0.1.0:bafybeignislbwlgjgttvwy2cnunlmhthkyphclikffgrriwsaf65xzcjnm
 - valory/reset_pause_abci:0.1.0:bafybeian7gymp6x6rn55uaf4u3dgirbzr43xvnsj2ev27stkadikjqz4du
 - valory/termination_abci:0.1.0:bafybeiht4uj5j3qqf2hewtzah7vcabb7okkjgi65jb76ddfltvjpk6bzxi
 - valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
