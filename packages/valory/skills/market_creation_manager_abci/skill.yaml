@@ -2,11 +2,12 @@ name: market_creation_manager_abci
 author: valory
 version: 0.1.0
 type: skill
-description: The market_creation_manager_abci contains the required business logic
+description:
+  The market_creation_manager_abci contains the required business logic
   to generate questions for prediction markets, and generate transactions to create
   them and retrieve liquidity from them.
 license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: ">=1.0.0, <2.0.0"
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
@@ -23,21 +24,21 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
-- valory/gnosis_safe:0.1.0:bafybeihqefvhxbdocjphrcz33txmbgembl35qtcc7nusdvymrh4o3sp5um
-- valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
-- valory/realitio:0.1.0:bafybeieggqkuslxiuapneygnhkhgatk5jvjbw6p7ltxaab6au466ikxm3e
-- valory/conditional_tokens:0.1.0:bafybeiai7zwtdab2izyitvxph42kwtbvx6n5skm3i6jijd2653xjkoqd24
-- valory/fpmm_deterministic_factory:0.1.0:bafybeifo5kputtx6ccbfgyngbif4iclv2avy5hvp6k3qbqjpwvhazw3jte
-- valory/erc20:0.1.0:bafybeifaep43unfegellngvqln7v5tsbmpb6vvkzc7k7ta7b5yyym3rr74
-- valory/fpmm:0.1.0:bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4
+  - valory/gnosis_safe:0.1.0:bafybeihqefvhxbdocjphrcz33txmbgembl35qtcc7nusdvymrh4o3sp5um
+  - valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
+  - valory/realitio:0.1.0:bafybeieggqkuslxiuapneygnhkhgatk5jvjbw6p7ltxaab6au466ikxm3e
+  - valory/conditional_tokens:0.1.0:bafybeiai7zwtdab2izyitvxph42kwtbvx6n5skm3i6jijd2653xjkoqd24
+  - valory/fpmm_deterministic_factory:0.1.0:bafybeifo5kputtx6ccbfgyngbif4iclv2avy5hvp6k3qbqjpwvhazw3jte
+  - valory/erc20:0.1.0:bafybeifaep43unfegellngvqln7v5tsbmpb6vvkzc7k7ta7b5yyym3rr74
+  - valory/fpmm:0.1.0:bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4
 protocols:
-- valory/llm:1.0.0:bafybeihj2orqapokafg7co3wlogwgf6cckaaj2bz3nuv4rm3opkoyhrlp4
-- valory/contract_api:1.0.0:bafybeid247uig2ekykdumh7ewhp2cdq7rchaeqjj6e7urx35zfpdl5zrn4
-- valory/ledger_api:1.0.0:bafybeihmqzcbj6t7vxz2aehd5726ofnzsfjs5cwlf42ro4tn6i34cbfrc4
+  - valory/llm:1.0.0:bafybeihj2orqapokafg7co3wlogwgf6cckaaj2bz3nuv4rm3opkoyhrlp4
+  - valory/contract_api:1.0.0:bafybeid247uig2ekykdumh7ewhp2cdq7rchaeqjj6e7urx35zfpdl5zrn4
+  - valory/ledger_api:1.0.0:bafybeihmqzcbj6t7vxz2aehd5726ofnzsfjs5cwlf42ro4tn6i34cbfrc4
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
-- valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
-- valory/mech_interact_abci:0.1.0:bafybeicinkpskogfzsdlqak2ky7yux3lftiut4x5t52n2xofj6zbsrkb3m
+  - valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
+  - valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
+  - valory/mech_interact_abci:0.1.0:bafybeicinkpskogfzsdlqak2ky7yux3lftiut4x5t52n2xofj6zbsrkb3m
 behaviours:
   main:
     args: {}
@@ -109,54 +110,54 @@ models:
       google_engine_id: google_engine_id
       openai_api_key: openai_api_key
       topics:
-      - business
-      - cryptocurrency
-      - politics
-      - science
-      - technology
-      - trending
-      - fashion
-      - social
-      - health
-      - sustainability
-      - internet
-      - travel
-      - food
-      - pets
-      - animals
-      - curiosities
-      - music
-      - economy
-      - arts
-      - entertainment
-      - weather
-      - sports
-      - finance
-      - international
+        - business
+        - cryptocurrency
+        - politics
+        - science
+        - technology
+        - trending
+        - fashion
+        - social
+        - health
+        - sustainability
+        - internet
+        - travel
+        - food
+        - pets
+        - animals
+        - curiosities
+        - music
+        - economy
+        - arts
+        - entertainment
+        - weather
+        - sports
+        - finance
+        - international
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 1
       min_market_proposal_interval_seconds: 7200
       news_sources:
-      - bbc-news
-      - bbc-sport
-      - abc-news
-      - cnn
-      - reuters
-      - usa-today
-      - breitbart-news
-      - the-verge
-      - techradar
+        - bbc-news
+        - bbc-sport
+        - abc-news
+        - cnn
+        - reuters
+        - usa-today
+        - breitbart-news
+        - the-verge
+        - techradar
       event_offset_start_days: 4
       event_offset_end_days: 8
       market_proposal_round_timeout_seconds_per_day: 45
       max_markets_per_story: 1
-      realitio_contract: '0x0000000000000000000000000000000000000000'
-      realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
-      conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
-      fpmm_deterministic_factory_contract: '0x0000000000000000000000000000000000000000'
-      collateral_tokens_contract: '0x0000000000000000000000000000000000000000'
-      arbitrator_contract: '0x0000000000000000000000000000000000000000'
+      realitio_contract: "0x0000000000000000000000000000000000000000"
+      realitio_oracle_proxy_contract: "0x0000000000000000000000000000000000000000"
+      conditional_tokens_contract: "0x0000000000000000000000000000000000000000"
+      fpmm_deterministic_factory_contract: "0x0000000000000000000000000000000000000000"
+      collateral_tokens_contract: "0x0000000000000000000000000000000000000000"
+      arbitrator_contract: "0x0000000000000000000000000000000000000000"
       cleanup_history_depth: 1
       cleanup_history_depth_current: null
       drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
@@ -165,26 +166,26 @@ models:
         chain_id: chain-c4daS1
         consensus_params:
           block:
-            max_bytes: '22020096'
-            max_gas: '-1'
-            time_iota_ms: '1000'
+            max_bytes: "22020096"
+            max_gas: "-1"
+            time_iota_ms: "1000"
           evidence:
-            max_age_duration: '172800000000000'
-            max_age_num_blocks: '100000'
-            max_bytes: '1048576'
+            max_age_duration: "172800000000000"
+            max_age_num_blocks: "100000"
+            max_bytes: "1048576"
           validator:
             pub_key_types:
-            - ed25519
+              - ed25519
           version: {}
-        genesis_time: '2022-05-20T16:00:21.735122717Z'
-        voting_power: '10'
+        genesis_time: "2022-05-20T16:00:21.735122717Z"
+        voting_power: "10"
       history_check_timeout: 1205
       ipfs_domain_name: null
       keeper_allowed_retries: 3
       keeper_timeout: 30.0
       max_attempts: 10
       max_healthcheck: 120
-      multisend_address: '0x0000000000000000000000000000000000000000'
+      multisend_address: "0x0000000000000000000000000000000000000000"
       multisend_batch_size: 5
       ipfs_address: https://gateway.autonolas.tech/ipfs/
       on_chain_service_id: null
@@ -200,9 +201,9 @@ models:
       service_registry_address: null
       setup:
         all_participants:
-        - '0x0000000000000000000000000000000000000000'
+          - "0x0000000000000000000000000000000000000000"
         consensus_threshold: null
-        safe_contract_address: '0x0000000000000000000000000000000000000000'
+        safe_contract_address: "0x0000000000000000000000000000000000000000"
       share_tm_config_on_startup: false
       sleep_time: 1
       tendermint_check_sleep_delay: 3
@@ -222,14 +223,14 @@ models:
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
-      mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
-      mech_tool_resolve_market: resolve-market-reasoning-gpt-4
+      mech_contract_address: "0x77af31de935740567cf4ff1986d04b2c964a786a"
+      mech_tool_resolve_market: resolve-market-reasoning-gpt-4.1
       answer_retry_intervals:
-      - 0
-      - 86400
-      - 259200
-      - 604800
-      - 1209600
+        - 0
+        - 86400
+        - 259200
+        - 604800
+        - 1209600
       service_endpoint_base: https://dummy_service.autonolas.tech/
     class_name: MarketCreationManagerParams
   randomness_api:
@@ -253,7 +254,7 @@ models:
       response_key: result
       response_type: str
       retries: 5
-      url: ''
+      url: ""
     class_name: MechResponseSpecs
   omen_subgraph:
     args:
@@ -285,7 +286,7 @@ dependencies:
   openai:
     version: ==1.93.0
   requests:
-    version: '>=2.28.1, <2.31.2'
+    version: ">=2.28.1, <2.31.2"
   pydantic:
     version: ==2.11.9
   tiktoken:
