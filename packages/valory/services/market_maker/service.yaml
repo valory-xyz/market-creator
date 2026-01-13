@@ -2,12 +2,12 @@ name: market_maker
 author: valory
 version: 0.1.0
 description: The market maker service.
-aea_version: ">=1.0.0, <2.0.0"
+aea_version: '>=1.0.0, <2.0.0'
 license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeie5vb2j5kuapril7vtrguc6vrgcjdff2sfw6blwcqyioldcuttf6m
+agent: valory/market_maker:0.1.0:bafybeiec7zu6f47tuswdx7k43b4kj75wnllkiyi6qfdzq3mtkin3tfvoqe
 number_of_agents: 1
 deployment:
   agent:
@@ -23,8 +23,7 @@ models:
       log_dir: /logs
   params:
     args:
-      market_identification_prompt:
-        ${MARKET_IDENTIFICATION_PROMPT:str:Based on the
+      market_identification_prompt: ${MARKET_IDENTIFICATION_PROMPT:str:Based on the
         following news snippets under INPUT, formulate 5 prediction market questions
         with clear, objective\noutcomes that can be verified on a specific date and
         leave no room for interpretation or subjectivity.\nAvoid incorporating questions
@@ -73,8 +72,7 @@ models:
       ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
       mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x601024E27f1C67B28209E24272CED8A31fc8151F}
       mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4.1}
-      answer_retry_intervals:
-        ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
+      answer_retry_intervals: ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
         1209600]}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
       reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
@@ -165,13 +163,13 @@ public_id: valory/p2p_libp2p_client:0.1.0
 type: connection
 config:
   nodes:
-    - uri: ${ACN_URI:str:acn.staging.autonolas.tech:9005}
-      public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
-cert_requests:
-  - identifier: acn
-    ledger_id: ethereum
-    message_format: "{public_key}"
-    not_after: "2023-01-01"
-    not_before: "2022-01-01"
+  - uri: ${ACN_URI:str:acn.staging.autonolas.tech:9005}
     public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
-    save_path: .certs/acn_cosmos_11000.txt
+cert_requests:
+- identifier: acn
+  ledger_id: ethereum
+  message_format: '{public_key}'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
+  public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
+  save_path: .certs/acn_cosmos_11000.txt
