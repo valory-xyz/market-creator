@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeie5vb2j5kuapril7vtrguc6vrgcjdff2sfw6blwcqyioldcuttf6m
+agent: valory/market_maker:0.1.0:bafybeiec7zu6f47tuswdx7k43b4kj75wnllkiyi6qfdzq3mtkin3tfvoqe
 number_of_agents: 1
 deployment:
   agent:
@@ -71,7 +71,7 @@ models:
       multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:1}
       ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
       mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x601024E27f1C67B28209E24272CED8A31fc8151F}
-      mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4}
+      mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4.1}
       answer_retry_intervals: ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
         1209600]}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}

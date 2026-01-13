@@ -55,9 +55,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeieteucm3rudnnbesnu53wbv3ojnhrwqbvfrsqwvhg6ksgriqyl67i
 - valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
-- valory/market_maker_abci:0.1.0:bafybeicliu2hapm7mramskand6ir4nbaowygxlu2cupai4cpbhzo7tanbe
+- valory/market_maker_abci:0.1.0:bafybeifnbxfpd35ts4syjxequyj2evpzzafq43ib6rcizhcyihbrifv42i
 - valory/registration_abci:0.1.0:bafybeie6rd7zlws4rxzkwka5mzhk56mn6clj3ocxbkbgeaiawv2c6b6jtm
-- valory/market_creation_manager_abci:0.1.0:bafybeignislbwlgjgttvwy2cnunlmhthkyphclikffgrriwsaf65xzcjnm
+- valory/market_creation_manager_abci:0.1.0:bafybeicddiw27hp36wugn5muyvoeuu6d24s3ndkzteuuwjwamepipfccci
 - valory/reset_pause_abci:0.1.0:bafybeian7gymp6x6rn55uaf4u3dgirbzr43xvnsj2ev27stkadikjqz4du
 - valory/termination_abci:0.1.0:bafybeiht4uj5j3qqf2hewtzah7vcabb7okkjgi65jb76ddfltvjpk6bzxi
 - valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
@@ -248,7 +248,7 @@ models:
       google_engine_id: ${str:google_engine_id}
       openai_api_key: ${str:openai_api_key}
       mech_contract_address: ${str:0x601024E27f1C67B28209E24272CED8A31fc8151F}
-      mech_tool_resolve_market: ${str:resolve-market-reasoning-gpt-4}
+      mech_tool_resolve_market: ${str:resolve-market-reasoning-gpt-4.1}
       answer_retry_intervals: ${list:[0, 86400, 259200, 604800, 1209600]}
       service_endpoint_base: ${str:https://dummy_service.autonolas.tech/}
   randomness_api:
