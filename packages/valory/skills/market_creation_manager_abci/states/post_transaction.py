@@ -19,9 +19,8 @@
 
 """This module contains the PostTransactionRound of the MarketCreationManagerAbciApp."""
 
-from typing import Optional, Tuple, cast
+from typing import Optional, Tuple
 
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.skills.abstract_round_abci.base import (
     BaseSynchronizedData,
     CollectSameUntilThresholdRound,
