@@ -19,8 +19,7 @@
 
 """This module contains the SelectKeeperMarketProposalBehaviour of the 'market_creation_manager_abci' skill."""
 
-from valory.skills.abstract_round_abci.common import SelectKeeperBehaviour
-
+from packages.valory.skills.abstract_round_abci.common import SelectKeeperBehaviour
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     SelectKeeperPayload,
 )
