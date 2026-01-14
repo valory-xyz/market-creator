@@ -10,7 +10,22 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeibkyjt4covc4yhd22aw7kav45zozk3exdv344emt3lilln64soaxm
-  behaviours.py: bafybeibyeztahmd4useemfiptttemusylc2u4syerdjosy2gozukbruq2i
+  behaviours/__init__.py: bafybeifp3hykazw2qx32t2lg2mwehcyjdekq3tywde26pm77imco45xz3a
+  behaviours/answer_questions.py: bafybeibt67fm6oclbimgz6wwc4mlsuu6hirrjxtmljxl3sk4if4w6s42d4
+  behaviours/approve_markets.py: bafybeidhss62y6pybyit4fqq2ygkccr7jlv6ty2yg6cq3yehqy7xmendhe
+  behaviours/base.py: bafybeihsmqdvlg6ws7z5ay5u3tcoksv7nhzp6tls6bntqnrttmxz2dlcm4
+  behaviours/collect_proposed_markets.py: bafybeiajsbb6sihmhqmf736zp7lx4ql64hge3yzu76hl2rl5hptdnbidpa
+  behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
+  behaviours/deposit_dai.py: bafybeih5ojhuxqrpbnetygytfn4tetdous5wy6pgmltr4zesyfnfxyheae
+  behaviours/get_pending_questions.py: bafybeih4jjyc2ikrduvqslivv62wmuosplajrbbgdq5yeo6u4bjvmbgmci
+  behaviours/post_transaction.py: bafybeifspt73zt3l6ecfevwbvuknal5qddwbymppyyxxu2qyt43u4bxo6q
+  behaviours/prepare_transaction.py: bafybeiehhru5ijxcdrokkcgbwosuy754q7ldl4djf5zaktiuryjvdozg3a
+  behaviours/redeem_bond.py: bafybeibn5pxcykhfrjkm6nezc7unalao5pzhfqxa6ix2ichcorkyovrg3i
+  behaviours/remove_funding.py: bafybeigaaw7fsdgatlyqyzr53wtf3lxpv77ytdu7sdwcwstygancvy6dqe
+  behaviours/retrieve_approved_market.py: bafybeihxci57sai2spcv7qgqcljjyhofgo32j3ajpnyuwufpwivaoltl4y
+  behaviours/round_behaviour.py: bafybeigwwisgnfwdvnn65agwkhgfesnplhty4qltk2lf4if5wmdldt7tw4
+  behaviours/select_keeper.py: bafybeidjuh7c4sxmumhswdh5qifswf6ffihiqrfojh3lsi5koz5m5ywgqa
+  behaviours/sync_markets.py: bafybeifygtfq6yixg3d2ggmiqagxqjjakpnktwqzjseoh7oihljqsz25om
   dialogues.py: bafybeicmaufkl7vdomnfciv7lw4536ssld7x4uemdapuhsyvfpd4ncibza
   fsm_specification.yaml: bafybeifzony6p4wmvbzntfge7s75tsh3bqmtoaxfxwjtujxtocpknrydue
   handlers.py: bafybeibephb5rldzk7cyo3nooam6hdzd7zfpjxswj5n4kwuteqfodix7vy
@@ -35,7 +50,7 @@ fingerprint:
   states/select_keeper.py: bafybeicag5feasxynp65toviurqfx62lklmfky7cln5sv6onubesppsd5e
   states/sync_markets.py: bafybeibuqnfsvlk67ra2n3pa2yhfiyjzxrbqnxamyj5d4vgmexzqo3jn3m
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
-  tests/behaviours/test_approve_markets_behaviour.py: bafybeihzhiy7sahavxo25cmh3kqgssl4sfql2mykk7vtyrsoiknnrhy33m
+  tests/behaviours/test_approve_markets_behaviour.py: bafybeigcrnzu3g5uoallrezyzxxahwqml6pnb3o2jlfpq6c5lxolaryqxq
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
