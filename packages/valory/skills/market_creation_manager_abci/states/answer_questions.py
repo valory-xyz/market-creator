@@ -19,7 +19,9 @@
 
 """This module contains the AnswerQuestionsRound of the MarketCreationManagerAbciApp."""
 
-from packages.valory.skills.market_creation_manager_abci.states.base import TxPreparationRound
+from packages.valory.skills.market_creation_manager_abci.states.base import (
+    TxPreparationRound,
+)
 
 
 class AnswerQuestionsRound(TxPreparationRound):

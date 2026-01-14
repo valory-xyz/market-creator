@@ -21,6 +21,7 @@
 
 import json
 from typing import Optional, Tuple
+
 from packages.valory.skills.abstract_round_abci.base import (
     BaseSynchronizedData,
     CollectSameUntilThresholdRound,

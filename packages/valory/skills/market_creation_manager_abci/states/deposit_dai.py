@@ -19,7 +19,9 @@
 
 """This module contains the DepositDaiRound of the MarketCreationManagerAbciApp."""
 
-from packages.valory.skills.market_creation_manager_abci.states.base import TxPreparationRound
+from packages.valory.skills.market_creation_manager_abci.states.base import (
+    TxPreparationRound,
+)
 
 
 class DepositDaiRound(TxPreparationRound):

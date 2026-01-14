@@ -21,6 +21,7 @@
 
 from enum import Enum
 from typing import Optional, Tuple, cast
+
 from packages.valory.skills.abstract_round_abci.base import (
     CollectSameUntilThresholdRound,
     get_name,
@@ -32,6 +33,7 @@ from packages.valory.skills.market_creation_manager_abci.states.base import (
     Event,
     SynchronizedData,
 )
+
 
 class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
     """CollectProposedMarketsRound"""

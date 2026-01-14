@@ -32,7 +32,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
 )
 from packages.valory.skills.market_creation_manager_abci.states.base import (
     Event,
-    SynchronizedData
+    SynchronizedData,
 )
 
 
