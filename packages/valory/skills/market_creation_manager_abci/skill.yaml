@@ -25,7 +25,7 @@ fingerprint:
   states/collect_proposed_markets.py: bafybeiaopaehmme7wwlkok74dzshayg4x5hhvub5njlruphuryuyejyd6m
   states/collect_randomness.py: bafybeifkdchmeidte5vfqqpeeomyaxlel4irxtrho6xxelexu5vds4vx54
   states/deposit_dai.py: bafybeicc27nq6hyj6hyzgfxuru2nghgt65s33xr6aohwgr3nixc5jdrxzu
-  states/final_states.py: bafybeihy4jcoup3dxlbkq74qg4pwmlnktztbs4ydon6fzbcemkmihxgar4
+  states/final_states.py: bafybeiblf6zqphc3qi7r27oeaqc7phwefyzdi2x3j3oye44zmk2gpacpty
   states/get_pending_questions.py: bafybeidonk3bpnvkbptg6curfjpmcdiok3cxq6cpwy7kassv5bctsdwmfy
   states/post_transaction.py: bafybeieikls27b2drusdhkxykmcib63xt2gktamv2sny7o7psksvlct2cq
   states/prepare_transaction.py: bafybeibemmt3jm7hsoqjeisikakllokjhgi2yqpozj4foqpfyqa4rv2qza

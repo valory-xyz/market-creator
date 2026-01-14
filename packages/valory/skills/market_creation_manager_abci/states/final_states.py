@@ -28,15 +28,15 @@ class FinishedMarketCreationManagerRound(DegenerateRound):
 
 
 class FinishedWithRemoveFundingRound(DegenerateRound):
-    """FinishedMarketCreationManagerRound"""
+    """FinishedWithRemoveFundingRound"""
 
 
 class FinishedWithDepositDaiRound(DegenerateRound):
-    """FinishedMarketCreationManagerRound"""
+    """FinishedWithDepositDaiRound"""
 
 
 class FinishedWithRedeemBondRound(DegenerateRound):
-    """FinishedMarketCreationManagerRound"""
+    """FinishedWithRedeemBondRound"""
 
 
 class FinishedWithoutTxRound(DegenerateRound):
