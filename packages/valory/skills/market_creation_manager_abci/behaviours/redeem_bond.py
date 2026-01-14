@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2026 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This module contains the RedeemBondBehaviour of the 'market_creation_manager_abci' skill."""
+
+from typing import Dict, Generator, Optional, cast
+
+from packages.valory.contracts.realitio.contract import RealitioContract
+from packages.valory.protocols.contract_api import ContractApiMessage
+from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    ETHER_VALUE,
+    MarketCreationManagerBaseBehaviour,
+    get_callable_name,
+)
+from packages.valory.skills.market_creation_manager_abci.payloads import (
+    MultisigTxPayload,
+)
+from packages.valory.skills.market_creation_manager_abci.rounds import RedeemBondRound
+
+
+MIN_BALANCE_WITHDRAW_REALITIO = 100000000000000000  # 0.1 DAI
+
+
+class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
+    """RedeemBondBehaviour"""
+
+    matching_round = RedeemBondRound
+
+    def async_act(self) -> Generator:
+        """Implement the act."""
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            agent = self.context.agent_address
+            tx_hash = yield from self.get_payload()
+            if tx_hash is None:
+                tx_submitter = None
+            else:
+                tx_submitter = self.matching_round.auto_round_id()
+            payload = MultisigTxPayload(
+                sender=agent, tx_submitter=tx_submitter, tx_hash=tx_hash
+            )
+        with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+            yield from self.send_a2a_transaction(payload)
+            yield from self.wait_until_round_end()
+        self.set_done()
+
+    def get_balance(self, address: str) -> Generator[None, None, Optional[int]]:
+        """Get the balance of the provided address"""
+        safe_address = self.synchronized_data.safe_contract_address
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.realitio_contract,
+            contract_id=str(RealitioContract.contract_id),
+            contract_callable="balance_of",
+            address=safe_address,
+        )
+
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(f"balance_of unsuccessful!: {response}")
+            return None
+
+        balance = cast(int, response.state.body["data"])
+        self.context.logger.info(f"balance: {balance / 10 ** 18} xDAI")
+        return balance
+
+    def get_payload(self) -> Generator[None, None, Optional[str]]:
+        """Get the payload."""
+        safe_address = self.synchronized_data.safe_contract_address
+        balance = yield from self.get_balance(safe_address)
+        if balance is None:
+            return None
+
+        if balance <= MIN_BALANCE_WITHDRAW_REALITIO:
+            return None
+
+        withdraw_tx = yield from self._get_withdraw_tx()
+        if withdraw_tx is None:
+            return None
+
+        tx_hash = yield from self._to_multisend(
+            transactions=[
+                withdraw_tx,
+            ]
+        )
+        if tx_hash is None:
+            return None
+
+        return tx_hash
+
+    def _get_withdraw_tx(self) -> Generator[None, None, Optional[Dict]]:
+        """Prepare a withdraw tx"""
+        self.context.logger.info("Starting RealitioContract.build_withdraw_tx")
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,
+            contract_address=self.params.realitio_contract,
+            contract_id=str(RealitioContract.contract_id),
+            contract_callable=get_callable_name(RealitioContract.build_withdraw_tx),
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"RealitioContract.build_withdraw_tx unsuccessful! : {response}"
+            )
+            return None
+        return {
+            "to": self.params.realitio_contract,
+            "data": response.state.body["data"],
+            "value": ETHER_VALUE,
+        }
