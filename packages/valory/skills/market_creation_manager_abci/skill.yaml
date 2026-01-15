@@ -16,7 +16,7 @@ fingerprint:
   behaviours/base.py: bafybeihsmqdvlg6ws7z5ay5u3tcoksv7nhzp6tls6bntqnrttmxz2dlcm4
   behaviours/collect_proposed_markets.py: bafybeiajsbb6sihmhqmf736zp7lx4ql64hge3yzu76hl2rl5hptdnbidpa
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
-  behaviours/deposit_dai.py: bafybeih5ojhuxqrpbnetygytfn4tetdous5wy6pgmltr4zesyfnfxyheae
+  behaviours/deposit_dai.py: bafybeihrdjayjniicyo23u2gdxjj4ythp6o33z4fyjonciob4uibjb6mhi
   behaviours/get_pending_questions.py: bafybeih4jjyc2ikrduvqslivv62wmuosplajrbbgdq5yeo6u4bjvmbgmci
   behaviours/post_transaction.py: bafybeifspt73zt3l6ecfevwbvuknal5qddwbymppyyxxu2qyt43u4bxo6q
   behaviours/prepare_transaction.py: bafybeiehhru5ijxcdrokkcgbwosuy754q7ldl4djf5zaktiuryjvdozg3a
@@ -249,7 +249,7 @@ models:
       use_termination: false
       use_slashing: false
       slash_cooldown_hours: 3
-      xdai_threshold: 1000000000000000000
+      xdai_threshold: 3000000000000000000
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
