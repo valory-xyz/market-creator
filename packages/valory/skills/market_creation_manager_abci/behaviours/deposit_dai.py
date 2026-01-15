@@ -95,7 +95,6 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         # leave xdai threshold in the safe for non-market creation purposes of the safe
         balance_to_deposit = balance - self.params.xdai_threshold
 
-        # in case there is balance in the safe, fully deposit it to the wxDAI contract
         wxdai_address = self.params.collateral_tokens_contract
         tx_data = yield from self._get_deposit_tx(wxdai_address)
         if tx_data is None:

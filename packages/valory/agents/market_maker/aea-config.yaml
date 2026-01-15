@@ -55,9 +55,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeieteucm3rudnnbesnu53wbv3ojnhrwqbvfrsqwvhg6ksgriqyl67i
 - valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
-- valory/market_maker_abci:0.1.0:bafybeihzwj2qynhqy4hbni3n5pezrsi623t4jxtar7qxcb6ypuolovt2ci
+- valory/market_maker_abci:0.1.0:bafybeifzbijm5jpjaveygwry3j2jbfkl6syphph63l7soxqhm62kyyrf34
 - valory/registration_abci:0.1.0:bafybeie6rd7zlws4rxzkwka5mzhk56mn6clj3ocxbkbgeaiawv2c6b6jtm
-- valory/market_creation_manager_abci:0.1.0:bafybeid6kl2dwwwa3ptoudbceb4kkbydznyy5wpu32knxbxg23m6gysaxy
+- valory/market_creation_manager_abci:0.1.0:bafybeid5luthbwjszx2gjtlqo2pqhir4ohzr5zh7urwy4ddporsnt2ozii
 - valory/reset_pause_abci:0.1.0:bafybeian7gymp6x6rn55uaf4u3dgirbzr43xvnsj2ev27stkadikjqz4du
 - valory/termination_abci:0.1.0:bafybeiht4uj5j3qqf2hewtzah7vcabb7okkjgi65jb76ddfltvjpk6bzxi
 - valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
@@ -241,7 +241,7 @@ models:
       slash_threshold_amount: ${int:10000000000000000}
       light_slash_unit_amount: ${int:5000000000000000}
       serious_slash_unit_amount: ${int:8000000000000000}
-      xdai_threshold: ${int:1000000000000000000}
+      xdai_threshold: ${int:3000000000000000000}
       serper_api_key: ${str:serper_api_key}
       subgraph_api_key: ${str:subgraph_api_key}
       google_api_key: ${str:google_api_key}
