@@ -239,7 +239,8 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 question_id=question_id,
             )
             self.context.logger.info(f"Calculated {condition_id=}")
-
+            if condition_id is None:
+                return
             create_fpmm_tx = yield from self._prepare_create_fpmm_mstx(
                 condition_id=condition_id,
                 initial_funds=self.params.initial_funds,

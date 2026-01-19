@@ -87,7 +87,7 @@ def parse_date_timestring(string: str) -> Optional[datetime]:
 
 def get_callable_name(method: Callable) -> str:
     """Return callable name."""
-    return getattr(method, "__name__")  # noqa: B009
+    return getattr(method, "__name__")
 
 
 class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
@@ -127,7 +127,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         oracle_contract: str,
         question_id: str,
         outcome_slot_count: int = 2,
-    ) -> Generator[None, None, str]:
+    ) -> Generator[None, None, Optional[str]]:
         """Calculate question ID."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
@@ -138,6 +138,13 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             question_id=question_id,
             outcome_slot_count=outcome_slot_count,
         )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.error(
+                "Couldn't calculate condition id. Expected response performative "
+                f"{ContractApiMessage.Performative.STATE.value}, "
+                f"received {response.performative.value}: {response}."
+            )
+            return None
         return cast(str, response.state.body["condition_id"])
 
     def _get_safe_tx_hash(
@@ -150,7 +157,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
     ) -> Generator[None, None, Optional[str]]:
         """Prepares and returns the safe tx hash."""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.synchronized_data.safe_contract_address,  # the safe contract address
             contract_id=str(GnosisSafeContract.contract_id),
             contract_callable="get_raw_safe_transaction_hash",
@@ -163,7 +170,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
                 f"Couldn't get safe hash. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "
                 f"received {response.performative.value}."
             )
             return None
@@ -196,7 +203,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         if response.performative != ContractApiMessage.Performative.RAW_TRANSACTION:
             self.context.logger.error(
                 f"Couldn't compile the multisend tx. "
-                f"Expected performative {ContractApiMessage.Performative.RAW_TRANSACTION.value}, "  # type: ignore
+                f"Expected performative {ContractApiMessage.Performative.RAW_TRANSACTION.value}, "
                 f"received {response.performative.value}."
             )
             return None
@@ -232,7 +239,12 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             **self.context.omen_subgraph.get_spec(),
         )
 
-        if response is None or response.status_code != HTTP_OK:
+        if response is None:
+            self.context.logger.error(
+                "Could not retrieve response from Omen subgraph. Response was None."
+            )
+            return None
+        if response.status_code != HTTP_OK:
             self.context.logger.error(
                 f"Could not retrieve response from Omen subgraph."
                 f"Received status code {response.status_code}.\n{response}"
