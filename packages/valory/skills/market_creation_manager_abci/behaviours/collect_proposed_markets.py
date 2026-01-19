@@ -226,7 +226,16 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             # TODO return error instead?
             return {"approved_markets": {}}
 
-        body = json.loads(http_response.body.decode())
+        try:
+            body = json.loads(http_response.body.decode())
+        except json.JSONDecodeError:
+            self.context.logger.error("Invalid JSON response received.")
+            return {"approved_markets": {}}
+
+        if "approved_markets" not in body:
+            self.context.logger.error("Missing 'approved_markets' key in response.")
+            return {"approved_markets": {}}
+
         self.context.logger.info(
             f"Successfully collected approved markets, received body {body}"
         )

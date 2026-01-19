@@ -135,7 +135,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
                 f"Couldn't get tx data for ERC20.build_deposit_tx. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
+                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "
                 f"received {response.performative.value}."
             )
             return None
