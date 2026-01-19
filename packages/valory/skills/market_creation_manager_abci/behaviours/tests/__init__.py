@@ -16,20 +16,3 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-"""This module contains the select keeper behaviour."""
-
-from packages.valory.skills.abstract_round_abci.common import SelectKeeperBehaviour
-from packages.valory.skills.market_creation_manager_abci.payloads import (
-    SelectKeeperPayload,
-)
-from packages.valory.skills.market_creation_manager_abci.states.select_keeper_round import (
-    SelectKeeperRound,
-)
-
-
-class SelectKeeperMarketProposalBehaviour(SelectKeeperBehaviour):
-    """Select the keeper agent."""
-
-    matching_round = SelectKeeperRound
-    payload_class = SelectKeeperPayload
