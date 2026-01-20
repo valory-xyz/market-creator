@@ -119,8 +119,8 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             # something went wrong
             self.context.logger.error(
                 f"Couldn't get balance for account {account}. "
-                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "  # type: ignore
-                f"Received {ledger_api_response.performative.value}."  # type: ignore
+                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "
+                f"Received {ledger_api_response.performative.value}."
             )
             return None
         balance = cast(int, ledger_api_response.state.body.get("get_balance_result"))
@@ -206,9 +206,8 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         )
         bond_required = self.params.realitio_answer_question_bond * max_num_questions
 
-        # TODO uncomment
         if balance < bond_required:
-            # not enough balance to close the questions
+            # Not enough balance to close questions
             self.context.logger.info(
                 f"Not enough balance to close {max_num_questions} questions. "
                 f"Balance {balance}, required {bond_required}"

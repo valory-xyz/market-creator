@@ -196,7 +196,12 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             answer=bytes.fromhex(answer[2:]),
             max_previous=MAX_PREVIOUS,
         )
-        if response.performative != ContractApiMessage.Performative.STATE:
+
+        # Handle error or missing response
+        if (
+            response is None
+            or response.performative != ContractApiMessage.Performative.STATE
+        ):
             self.context.logger.error(
                 f"Couldn't get submitAnswer transaction. "
                 f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
