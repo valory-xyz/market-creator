@@ -87,7 +87,7 @@ def parse_date_timestring(string: str) -> Optional[datetime]:
 
 def get_callable_name(method: Callable) -> str:
     """Return callable name."""
-    return getattr(method, "__name__")
+    return getattr(method, "__name__")  # noqa: B009
 
 
 class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):

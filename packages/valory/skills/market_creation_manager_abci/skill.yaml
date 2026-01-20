@@ -13,7 +13,7 @@ fingerprint:
   behaviours/__init__.py: bafybeifp3hykazw2qx32t2lg2mwehcyjdekq3tywde26pm77imco45xz3a
   behaviours/answer_questions.py: bafybeiapmqwo6kkbyr5pigcj4nbwtzg5obd4g4tm6f57qdgfnqyrrwlu74
   behaviours/approve_markets.py: bafybeidhss62y6pybyit4fqq2ygkccr7jlv6ty2yg6cq3yehqy7xmendhe
-  behaviours/base.py: bafybeidynuj3vfs5lblpbsnaxxulefl4pgtmuyb2ooaagugccatmr67vou
+  behaviours/base.py: bafybeiglerd5twytib2mleqdqgtw3mhan4s3crue5nsxnkbonbkxtzlzgi
   behaviours/collect_proposed_markets.py: bafybeihjglbnwzd2a4pd4wa4ah3zjlf3szif4njqrrkm6np7wwn4vumb5y
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
   behaviours/deposit_dai.py: bafybeiafjjmgrvyzfpfrpao4dmznwbw44inj22c4toppva77ddmuk5ukwe
