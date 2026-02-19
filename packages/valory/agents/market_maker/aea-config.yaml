@@ -94,9 +94,9 @@ logging_config:
 skill_exception_policy: stop_and_exit
 dependencies:
   open-aea-ledger-cosmos:
-    version: ==1.65.0
+    version: ==2.0.8
   open-aea-ledger-ethereum:
-    version: ==1.65.0
+    version: ==2.0.8
   open-aea-test-autonomy:
     version: ==0.19.11
   gql:
