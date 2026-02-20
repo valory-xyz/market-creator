@@ -10,7 +10,7 @@ Market Creator (or Market Maker) is an autonomous service that interacts with ne
 6. Remove liquidity of markets whose closing date is <= 1 day.
 7. Repeat.
 
-The Market Creator service is an [agent service](https://docs.autonolas.network/open-autonomy/get_started/what_is_an_agent_service/) (or autonomous service) based on the [Open Autonomy framework](https://docs.autonolas.network/open-autonomy/). Below we show you how to prepare your environment, how to prepare the agent keys, and how to configure and run the service.
+The Market Creator service is an [agent service](https://stack.olas.network/open-autonomy/get_started/what_is_an_agent_service/) (or autonomous service) based on the [Open Autonomy framework](https://stack.olas.network/open-autonomy/). Below we show you how to prepare your environment, how to prepare the agent keys, and how to configure and run the service.
 
 ## Prepare the environment
 
@@ -54,8 +54,8 @@ First, prepare the `keys.json` file with the Gnosis keypair of your agent. (Repl
     EOF
 
 Next, prepare the [Safe](https://safe.global/). The trader agent runs as part of a **trader service**, 
-which is an [autonomous service](https://docs.autonolas.network/open-autonomy/get_started/what_is_an_agent_service/) 
-represented on-chain in the [Autonolas Protocol](https://docs.autonolas.network/protocol/) by a [Safe](https://safe.global/) multisig. Follow the next steps to obtain a **Safe address** corresponding to your agent address:
+which is an [autonomous service](https://stack.olas.network/open-autonomy/get_started/what_is_an_agent_service/) 
+represented on-chain in the [Autonolas Protocol](https://stack.olas.network/protocol/) by a [Safe](https://safe.global/) multisig. Follow the next steps to obtain a **Safe address** corresponding to your agent address:
 
 1. Visit https://registry.olas.network/gnosis/services/mint and connect to the Gnosis network. We recommend connecting using a wallet with a Gnosis EOA account that you own.
 2. Fill in the following fields:
@@ -235,4 +235,4 @@ You can explore the [`service.yaml`](https://github.com/valory-xyz/market-creato
 
 The Safe of the service holds the collateral token used to provide the initial liquidity to the markets created. By default the service uses `WxDAI` as collateral. This is configured through the environment variable `COLLATERAL_TOKEN_CONTRACT`, which points to the address of the collateral token to be used for market. The default is [WxDAI](https://gnosisscan.io/address/0xe91d153e0b41518a2ce8dd3d7944fa863463a97d).
 
-Finally, if you are experienced with the [Open Autonomy](https://docs.autonolas.network/) framework, you can also modify the internal business logic of the service yourself.
+Finally, if you are experienced with the [Open Autonomy](https://stack.olas.network/) framework, you can also modify the internal business logic of the service yourself.
