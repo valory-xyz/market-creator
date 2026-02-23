@@ -5,7 +5,7 @@ type: skill
 description: The market_maker_abci composes several FSM apps to generate the overall
   business logic of the market_maker agent.
 license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeibn5i47enoott67jc54iihzwb6bxiuts4dzplu2lufh4w4r6emkty
