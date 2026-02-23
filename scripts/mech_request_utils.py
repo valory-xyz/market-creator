@@ -263,7 +263,7 @@ def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
 
 
 def _find_duplicate_delivers(
-    mech_requests: Dict[str, Any]
+    mech_requests: Dict[str, Any],
 ) -> Dict[str, List[Dict[str, Any]]]:
     requests_with_duplicate_deliver_ids = defaultdict(list)
 

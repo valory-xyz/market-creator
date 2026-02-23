@@ -74,9 +74,9 @@ class SharedState(BaseSharedState):
         MarketCreatorAbciApp.event_to_timeout[
             MarketCreationManagerEvent.ROUND_TIMEOUT
         ] = self.context.params.round_timeout_seconds
-        MarketCreatorAbciApp.event_to_timeout[
-            TSEvent.ROUND_TIMEOUT
-        ] = self.context.params.round_timeout_seconds
+        MarketCreatorAbciApp.event_to_timeout[TSEvent.ROUND_TIMEOUT] = (
+            self.context.params.round_timeout_seconds
+        )
 
         # The MARKET_PROPOSAL_ROUND_TIMEOUT must be computed based on the "market_proposal_round_timeout_seconds_per_day" parameter.
         # This parameter represents the maximum timeout it takes to execute the LLM query + proposing the received questions to the
@@ -96,27 +96,27 @@ class SharedState(BaseSharedState):
             + MARGIN
         )
 
-        MarketCreatorAbciApp.event_to_timeout[
-            ResetPauseEvent.ROUND_TIMEOUT
-        ] = self.context.params.round_timeout_seconds
+        MarketCreatorAbciApp.event_to_timeout[ResetPauseEvent.ROUND_TIMEOUT] = (
+            self.context.params.round_timeout_seconds
+        )
         MarketCreatorAbciApp.event_to_timeout[TSEvent.RESET_TIMEOUT] = (
             self.context.params.round_timeout_seconds * MULTIPLIER
         )
-        MarketCreatorAbciApp.event_to_timeout[
-            TSEvent.VALIDATE_TIMEOUT
-        ] = self.context.params.validate_timeout
-        MarketCreatorAbciApp.event_to_timeout[
-            TSEvent.FINALIZE_TIMEOUT
-        ] = self.context.params.finalize_timeout
-        MarketCreatorAbciApp.event_to_timeout[
-            TSEvent.CHECK_TIMEOUT
-        ] = self.context.params.history_check_timeout
+        MarketCreatorAbciApp.event_to_timeout[TSEvent.VALIDATE_TIMEOUT] = (
+            self.context.params.validate_timeout
+        )
+        MarketCreatorAbciApp.event_to_timeout[TSEvent.FINALIZE_TIMEOUT] = (
+            self.context.params.finalize_timeout
+        )
+        MarketCreatorAbciApp.event_to_timeout[TSEvent.CHECK_TIMEOUT] = (
+            self.context.params.history_check_timeout
+        )
         MarketCreatorAbciApp.event_to_timeout[
             ResetPauseEvent.RESET_AND_PAUSE_TIMEOUT
         ] = (self.context.params.reset_pause_duration + MARGIN)
-        MarketCreatorAbciApp.event_to_timeout[
-            MechInteractEvent.ROUND_TIMEOUT
-        ] = self.context.params.mech_interact_round_timeout_seconds
+        MarketCreatorAbciApp.event_to_timeout[MechInteractEvent.ROUND_TIMEOUT] = (
+            self.context.params.mech_interact_round_timeout_seconds
+        )
 
 
 class Params(

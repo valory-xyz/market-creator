@@ -14,14 +14,14 @@ fingerprint:
   behaviours/answer_questions.py: bafybeiapmqwo6kkbyr5pigcj4nbwtzg5obd4g4tm6f57qdgfnqyrrwlu74
   behaviours/approve_markets.py: bafybeidhss62y6pybyit4fqq2ygkccr7jlv6ty2yg6cq3yehqy7xmendhe
   behaviours/base.py: bafybeiglerd5twytib2mleqdqgtw3mhan4s3crue5nsxnkbonbkxtzlzgi
-  behaviours/collect_proposed_markets.py: bafybeihjglbnwzd2a4pd4wa4ah3zjlf3szif4njqrrkm6np7wwn4vumb5y
+  behaviours/collect_proposed_markets.py: bafybeid3xx46q4f2h2q22phier2fauxawqlwdgxnld3ymmghd7xma4j75y
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
   behaviours/deposit_dai.py: bafybeiafjjmgrvyzfpfrpao4dmznwbw44inj22c4toppva77ddmuk5ukwe
   behaviours/get_pending_questions.py: bafybeigr5vuvlijfqbgviwl5imgs6u4cf5vvahawxq5x5eaje3atoinuoi
   behaviours/post_transaction.py: bafybeifspt73zt3l6ecfevwbvuknal5qddwbymppyyxxu2qyt43u4bxo6q
   behaviours/prepare_transaction.py: bafybeidhnucs233wsddhk3qvi7tmjk7fgxu3cm5edzk2d3cly35atblq5a
   behaviours/redeem_bond.py: bafybeibn5pxcykhfrjkm6nezc7unalao5pzhfqxa6ix2ichcorkyovrg3i
-  behaviours/remove_funding.py: bafybeigaaw7fsdgatlyqyzr53wtf3lxpv77ytdu7sdwcwstygancvy6dqe
+  behaviours/remove_funding.py: bafybeib4kycfbuy3yjsjwnhcldvl3wzxuho2gabqkoz2u7ezqfsxlt43ti
   behaviours/retrieve_approved_market.py: bafybeihxci57sai2spcv7qgqcljjyhofgo32j3ajpnyuwufpwivaoltl4y
   behaviours/round_behaviour.py: bafybeigwwisgnfwdvnn65agwkhgfesnplhty4qltk2lf4if5wmdldt7tw4
   behaviours/select_keeper.py: bafybeiadkoyybfqxc2wsrkjk3hta5yrmp5cf6h44cru3k6pchmmuiwr3by
@@ -54,21 +54,21 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
-- valory/gnosis_safe:0.1.0:bafybeihqefvhxbdocjphrcz33txmbgembl35qtcc7nusdvymrh4o3sp5um
-- valory/multisend:0.1.0:bafybeig5byt5urg2d2bsecufxe5ql7f4mezg3mekfleeh32nmuusx66p4y
-- valory/realitio:0.1.0:bafybeieggqkuslxiuapneygnhkhgatk5jvjbw6p7ltxaab6au466ikxm3e
-- valory/conditional_tokens:0.1.0:bafybeiai7zwtdab2izyitvxph42kwtbvx6n5skm3i6jijd2653xjkoqd24
-- valory/fpmm_deterministic_factory:0.1.0:bafybeifo5kputtx6ccbfgyngbif4iclv2avy5hvp6k3qbqjpwvhazw3jte
-- valory/erc20:0.1.0:bafybeifaep43unfegellngvqln7v5tsbmpb6vvkzc7k7ta7b5yyym3rr74
+- valory/gnosis_safe:0.1.0:bafybeia3ictpeosrza3tkxa7ad2io5txutcs44jgrqoqgdxhrjdu2fy4qy
+- valory/multisend:0.1.0:bafybeidjdgi2kyexajirj3cnpzgse4y5u664b2blztt4flv6i7knlecyr4
+- valory/realitio:0.1.0:bafybeihe53hnzcaopijg7ngg2ackkb2mu6iqpvxdjxpnvdzaqckq4txtea
+- valory/conditional_tokens:0.1.0:bafybeihg4vo2qxpdioopj2oudhbbql4yfgiadr7px3x73e5zxsouziijwy
+- valory/fpmm_deterministic_factory:0.1.0:bafybeiefvpt5dzdjeqs2pr6hr53xyrsaskw4venk2pl2zdtm2sw5ovb53a
+- valory/erc20:0.1.0:bafybeidrjq5rf6ay2okyy3eoseeafzl7bmngcbs7nhohbifdephc77tbke
 - valory/fpmm:0.1.0:bafybeiai2ruj27nnglvn7yc5atojyojo3fkmofw6wrjgz2ybps2uwdizx4
 protocols:
 - valory/llm:1.0.0:bafybeihj2orqapokafg7co3wlogwgf6cckaaj2bz3nuv4rm3opkoyhrlp4
-- valory/contract_api:1.0.0:bafybeid247uig2ekykdumh7ewhp2cdq7rchaeqjj6e7urx35zfpdl5zrn4
-- valory/ledger_api:1.0.0:bafybeihmqzcbj6t7vxz2aehd5726ofnzsfjs5cwlf42ro4tn6i34cbfrc4
+- valory/contract_api:1.0.0:bafybeigl7mxuyxngk4gztgygeccbgdfrllx73kwbvvkjvtkfw6ionyd56q
+- valory/ledger_api:1.0.0:bafybeig7yk77pmebqcb33jbavodcslmltitz2uolq6s5arklvsvu5bvp7y
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
-- valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
-- valory/mech_interact_abci:0.1.0:bafybeicinkpskogfzsdlqak2ky7yux3lftiut4x5t52n2xofj6zbsrkb3m
+- valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
+- valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
+- valory/mech_interact_abci:0.1.0:bafybeig6klxwz6pzl4tym5cxl25i5yvcxbdypyhszvoozgp5pkndi3yc24
 behaviours:
   main:
     args: {}

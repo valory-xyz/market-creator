@@ -188,9 +188,9 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 content_data = {}
                 content_data.update(latest_open_markets)
                 content_data.update(approved_markets)
-                content_data[
-                    "required_markets_to_approve_per_opening_ts"
-                ] = required_markets_to_approve_per_opening_ts
+                content_data["required_markets_to_approve_per_opening_ts"] = (
+                    required_markets_to_approve_per_opening_ts
+                )
                 content_data["timestamp"] = current_timestamp
                 content = json.dumps(content_data, sort_keys=True)
 

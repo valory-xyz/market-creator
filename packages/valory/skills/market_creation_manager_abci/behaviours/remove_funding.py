@@ -119,9 +119,11 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
             ]
         else:
             send_amounts_after_removing_funding = [
-                int(h * amount_to_remove / total_pool_shares)
-                if total_pool_shares > 0
-                else 0
+                (
+                    int(h * amount_to_remove / total_pool_shares)
+                    if total_pool_shares > 0
+                    else 0
+                )
                 for h in holdings
             ]
         amount_to_merge = min(
