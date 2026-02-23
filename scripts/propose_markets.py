@@ -223,7 +223,7 @@ class MarketProposalBehaviourMock:  # pylint: disable=too-few-public-methods
             "DataGatheringBehaviour" + self.synchronized_data.most_voted_randomness, 2
         )  # nosec
         k = min(10, len(news_sources))
-        sources = random.sample(news_sources, k)
+        sources = random.sample(news_sources, k)  # nosec: B311
 
         parameters = {
             "sources": ",".join(sources),
@@ -277,9 +277,7 @@ class MarketProposalBehaviourMock:  # pylint: disable=too-few-public-methods
             )
         )
 
-    def _get_response(
-        self, prompt_template: str, prompt_values: Dict[str, str]
-    ):  # pylint: disable=no-self-use
+    def _get_response(self, prompt_template: str, prompt_values: Dict[str, str]):
         """Get response from openai."""
 
         # Format the prompt using input variables and prompt_values
@@ -321,7 +319,7 @@ def main() -> None:
     mp_behaviour._gather_data()  # pylint: disable=protected-access
     news_articles = mp_behaviour.synchronized_data.gathered_data
     k = min(40, len(news_articles))
-    selected_news_articles = random.sample(news_articles, k)
+    selected_news_articles = random.sample(news_articles, k)  # nosec: B311
     mp_behaviour._get_llm_response(  # pylint: disable=protected-access
         "30 July 2024", selected_news_articles
     )

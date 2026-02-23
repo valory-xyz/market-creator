@@ -123,7 +123,9 @@ def run(  # pylint: disable=too-many-locals
             "to": to_date,
         }
 
-        response = requests.get(newsapi_url, params=params, headers=newsapi_headers)
+        response = requests.get(
+            newsapi_url, params=params, headers=newsapi_headers, timeout=60
+        )
         data = response.json()
 
         print(data)

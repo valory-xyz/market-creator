@@ -56,7 +56,7 @@ if __name__ == "__main__":
     url = args.url.rstrip("/")
     target_date = args.date
 
-    data = requests.get(url).json()
+    data = requests.get(url, timeout=60).json()
 
     url_parts = url.split("/")
     key_from_url = url_parts[-1]
