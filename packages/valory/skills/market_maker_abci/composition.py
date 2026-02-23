@@ -22,6 +22,7 @@
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
 import packages.valory.skills.mech_interact_abci.rounds as MechInteractAbci
 import packages.valory.skills.mech_interact_abci.states.final_states as MechFinalStates
+import packages.valory.skills.mech_interact_abci.states.mech_version as MechVersionStates
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 import packages.valory.skills.mech_interact_abci.states.response as MechResponseStates
 import packages.valory.skills.transaction_settlement_abci.rounds as TransactionSettlementAbci
@@ -55,7 +56,10 @@ abci_app_transition_mapping: AbciAppTransitionMapping = {
     MarketCreationManagerAbci.FinishedWithRedeemBondRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithRemoveFundingRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound: MechRequestStates.MechRequestRound,
+    MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound: MechVersionStates.MechVersionDetectionRound,
+    MechFinalStates.FinishedMechLegacyDetectedRound: MechRequestStates.MechRequestRound,
+    MechFinalStates.FinishedMechInformationRound: MechRequestStates.MechRequestRound,
+    MechFinalStates.FailedMechInformationRound: MechVersionStates.MechVersionDetectionRound,
     MechFinalStates.FinishedMechRequestRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MechFinalStates.FinishedMechResponseRound: MarketCreationManagerAbci.AnswerQuestionsRound,
     MechFinalStates.FinishedMechRequestSkipRound: MarketCreationManagerAbci.CollectRandomnessRound,
