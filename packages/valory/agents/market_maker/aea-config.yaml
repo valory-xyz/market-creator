@@ -283,7 +283,7 @@ models:
       error_index: ${int:0}
       error_type: ${str:dict}
       retries: ${int:5}
-      url: ${str:https://api.subgraph.autonolas.tech/api/proxy/marketplace-gnosis}
+      url: ${str:https://subgraph.staging.autonolas.tech/subgraphs/name/marketplace-gnosis-v0_7_0}
   randomness_api:
     args:
       method: ${str:GET}
