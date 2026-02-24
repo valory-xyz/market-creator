@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022-2024 Valory AG
+#   Copyright 2022-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     url = args.url.rstrip("/")
     target_date = args.date
 
-    data = requests.get(url).json()
+    data = requests.get(url, timeout=60).json()
 
     url_parts = url.split("/")
     key_from_url = url_parts[-1]

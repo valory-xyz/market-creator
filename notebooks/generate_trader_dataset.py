@@ -66,7 +66,9 @@ def _get_abi(address: str) -> List:
     contract_abi_url = (
         "https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}"
     )
-    response = requests.get(contract_abi_url.format(contract_address=address)).json()
+    response = requests.get(
+        contract_abi_url.format(contract_address=address), timeout=60
+    ).json()
 
     if "result" in response:
         result = response["result"]

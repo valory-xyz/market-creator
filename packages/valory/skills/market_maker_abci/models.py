@@ -43,6 +43,12 @@ from packages.valory.skills.mech_interact_abci.models import (
     MechResponseSpecs as BaseMechResponseSpecs,
 )
 from packages.valory.skills.mech_interact_abci.models import (
+    MechToolsSpecs as BaseMechToolsSpecs,
+)
+from packages.valory.skills.mech_interact_abci.models import (
+    MechsSubgraph as BaseMechsSubgraph,
+)
+from packages.valory.skills.mech_interact_abci.models import (
     Params as MechInteractAbciParams,
 )
 from packages.valory.skills.mech_interact_abci.rounds import Event as MechInteractEvent
@@ -61,6 +67,8 @@ BenchmarkTool = BaseBenchmarkTool
 RandomnessApi = MarketCreationManagerRandomnessApi
 OmenSubgraph = BaseOmenSubgraph
 MechInteractParams = MechInteractAbciParams
+MechToolsSpecs = BaseMechToolsSpecs
+MechsSubgraph = BaseMechsSubgraph
 
 
 class SharedState(BaseSharedState):

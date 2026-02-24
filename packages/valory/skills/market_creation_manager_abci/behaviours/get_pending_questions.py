@@ -165,7 +165,9 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             len(eligible_questions_id), self.params.multisend_batch_size
         )
         random.seed(self.last_synced_timestamp)
-        random_questions_id = random.sample(eligible_questions_id, num_questions)
+        random_questions_id = random.sample(
+            eligible_questions_id, num_questions
+        )  # nosec: B311
 
         self.context.logger.info(
             f"Chosen {len(random_questions_id)} eligible questions to answer."

@@ -366,7 +366,7 @@ def scrape_url(serper_api_key: str, url: str) -> Optional[dict]:
 
     payload = json.dumps({"url": url})
     try:
-        response = requests.post(serper_url, headers=headers, data=payload)
+        response = requests.post(serper_url, headers=headers, data=payload, timeout=60)
         response.raise_for_status()
         scraped_data = response.json()
         print(f"Successfully scraped URL: {url}")
@@ -420,7 +420,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 counter_callback,
             )
 
-        latest_questions = random.sample(
+        latest_questions = random.sample(  # nosec: B311
             latest_questions, min(MAX_LATEST_QUESTIONS, len(latest_questions))
         )
         latest_questions_string = "\n".join(latest_questions)
@@ -441,7 +441,9 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
             f"{len(articles)} articles collected from {len(news_sources)} news sources\n"
         )
 
-        articles = random.sample(articles, min(MAX_ARTICLES, len(articles)))
+        articles = random.sample(
+            articles, min(MAX_ARTICLES, len(articles))
+        )  # nosec: B311
 
         articles_string = ""
         for i, article in enumerate(articles, start=0):
