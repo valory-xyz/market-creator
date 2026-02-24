@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2024-2025 Valory AG
+#   Copyright 2024-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -207,7 +207,7 @@ def _populate_missing_delivers(endpoint_id: str, mech_requests: Dict[str, Any]) 
 
 
 def _populate_event_ipfs_contents(event: Dict[str, Any], url: str) -> None:
-    response = requests.get(url)
+    response = requests.get(url, timeout=60)
     response.raise_for_status()  # Raise an exception for HTTP error responses
     event["ipfsContents"] = response.json()
 
@@ -263,7 +263,7 @@ def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
 
 
 def _find_duplicate_delivers(
-    mech_requests: Dict[str, Any]
+    mech_requests: Dict[str, Any],
 ) -> Dict[str, List[Dict[str, Any]]]:
     requests_with_duplicate_deliver_ids = defaultdict(list)
 

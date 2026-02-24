@@ -39,7 +39,7 @@ ENDPOINTS = [
 
 def _fetch_data(endpoint_url: str) -> Optional[Dict[str, Any]]:
     for retry_count in range(MAX_RETRIES):
-        response = requests.get(endpoint_url)
+        response = requests.get(endpoint_url, timeout=60)
         if response.status_code == 200:
             return response.json()
         print(

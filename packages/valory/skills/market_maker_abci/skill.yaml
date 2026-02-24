@@ -5,31 +5,31 @@ type: skill
 description: The market_maker_abci composes several FSM apps to generate the overall
   business logic of the market_maker agent.
 license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeibn5i47enoott67jc54iihzwb6bxiuts4dzplu2lufh4w4r6emkty
   behaviours.py: bafybeiazqmufskxjvsc7pscagkukyhiw2jhk52qhatqcn7d43inxmb3ovi
-  composition.py: bafybeibags3bapzxlvsbjsxhlyxpd6ypnvwggu6jijktm4qfe4sn5ugfky
+  composition.py: bafybeidbthjjb5wec2xvi2e6oepxu6ofos37mhu4kkanlrk2qcbvn6fa3m
   dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
   fsm_specification.yaml: bafybeihtabbvgmughyc5qhg3n3ysr6xsuuxqrdjwsbu36mnsq6bqrmblwa
   handlers.py: bafybeidl5pzel4ui7m3kipu4tavx6blcxd6yy46jaraqqcpjgh2qtprkra
-  models.py: bafybeigyrb6tcpebn7gecgnkcerqmbembat4xdg2wvfybwg6op3rsee2sq
+  models.py: bafybeibz4ro56s3ovkls3lctqgye7qb5wrflml4j6louqrholq2boj4asm
   tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
 fingerprint_ignore_patterns: []
 connections:
-- valory/http_server:0.22.0:bafybeic3jpkum7g6qo6x6vdrmvvhj7vqw7ec2op72uc3yfhmnlp5hn3joy
+- valory/http_server:0.22.0:bafybeigyjwg6nfwmdkwzt7i56n4zv3oj6hii2mkkgstuaztyunscjifdee
 contracts: []
 protocols:
-- valory/http:1.0.0:bafybeih4azmfwtamdbkhztkm4xitep3gx6tfdnoz6tvllmaqnhu3klejfa
+- valory/http:1.0.0:bafybeia4tq7ycivm3dnekelrnlzdwb4qnrjdykk6gf5tizq6djr66adotm
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeifsuf7sh5vlugnqinbqe2f7vnssuqyxcrzqgotohhwqewyjeibneu
-- valory/registration_abci:0.1.0:bafybeie6rd7zlws4rxzkwka5mzhk56mn6clj3ocxbkbgeaiawv2c6b6jtm
-- valory/reset_pause_abci:0.1.0:bafybeian7gymp6x6rn55uaf4u3dgirbzr43xvnsj2ev27stkadikjqz4du
-- valory/market_creation_manager_abci:0.1.0:bafybeibzixsxhycvv3xq25v6iz6mnuay5jr7kpq4gzj2l6jd7eznvsnfwa
-- valory/termination_abci:0.1.0:bafybeiht4uj5j3qqf2hewtzah7vcabb7okkjgi65jb76ddfltvjpk6bzxi
-- valory/transaction_settlement_abci:0.1.0:bafybeiem4qoc2pdpxoingjqp3qnrdjwho67pd6amy7o3xjr5mpdrepctve
-- valory/mech_interact_abci:0.1.0:bafybeicinkpskogfzsdlqak2ky7yux3lftiut4x5t52n2xofj6zbsrkb3m
+- valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
+- valory/registration_abci:0.1.0:bafybeie3dfore53bxvbokqiarzuwulzlyt4vz5mifb4t3gxl6drwkblfha
+- valory/reset_pause_abci:0.1.0:bafybeicffwijiecbqc6z22nowir2fgwwqzwu6vokzuwgd5wa3zxromxevm
+- valory/market_creation_manager_abci:0.1.0:bafybeifhay5gpwoq3wpmlmkecod3bq4y6dem6mdtitfadbntefqm2ntvya
+- valory/termination_abci:0.1.0:bafybeiaylk6haefa2xex55krizafzwo2v5tpkcoflw5hiwaqm3qxice23m
+- valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
+- valory/mech_interact_abci:0.1.0:bafybeiffz7arijdfjko47rqrkcs5eobyj4vmal5pmiuhopmot24qrigwdy
 behaviours:
   main:
     args: {}
@@ -188,6 +188,7 @@ models:
         priority_mech_service_id: 0
         requester_staking_instance_address: '0x0000000000000000000000000000000000000000'
         response_timeout: 300
+        use_dynamic_mech_selection: false
       reset_tendermint_after: 1
       retry_attempts: 400
       retry_timeout: 3
@@ -236,6 +237,18 @@ models:
       - 604800
       - 1209600
       service_endpoint_base: https://dummy_service.autonolas.tech/
+      irrelevant_tools:
+      - openai-text-davinci-002
+      - openai-text-davinci-003
+      - openai-gpt-3.5-turbo
+      - openai-gpt-4
+      - stabilityai-stable-diffusion-v1-5
+      - stabilityai-stable-diffusion-xl-beta-v2-2-2
+      - stabilityai-stable-diffusion-512-v2-1
+      - stabilityai-stable-diffusion-768-v2-1
+      ignored_mechs: []
+      penalize_mech_time_window: 1800
+      mech_wrapped_native_token_address: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
     class_name: Params
   randomness_api:
     args:
@@ -272,6 +285,34 @@ models:
       retries: 5
       url: https://api.thegraph.com/subgraphs/name/protofire/omen-xdai
     class_name: OmenSubgraph
+  mech_tools:
+    args:
+      api_id: mech_tools
+      headers:
+        Content-Type: application/json
+      method: GET
+      parameters: {}
+      response_key: tools
+      response_type: list
+      retries: 5
+      url: ''
+    class_name: MechToolsSpecs
+  mechs_subgraph:
+    args:
+      api_id: mechs
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data:meches
+      response_type: list
+      error_key: errors
+      error_index: 0
+      error_type: dict
+      retries: 5
+      url: https://api.subgraph.autonolas.tech/api/proxy/marketplace-base
+      delivery_rate_cap: 10000000000000000
+    class_name: MechsSubgraph
   requests:
     args: {}
     class_name: Requests
@@ -286,5 +327,5 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.19.11
+    version: ==0.21.8
 is_abstract: false

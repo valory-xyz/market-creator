@@ -145,8 +145,8 @@ class FPMMContract(Contract):
         """Build removeFunding tx."""
         instance = cls.get_instance(ledger_api, contract_address)
         # remove everything
-        data = instance.encodeABI(
-            fn_name="removeFunding",
+        data = instance.encode_abi(
+            abi_element_identifier="removeFunding",
             args=[
                 amount_to_remove,
             ],

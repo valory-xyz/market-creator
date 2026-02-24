@@ -31,7 +31,7 @@ from eth_utils import event_abi_to_log_topic
 from web3._utils.events import get_event_data
 from web3.contract import Contract as W3Contract
 from web3.eth import Eth
-from web3.types import ABIEvent, BlockIdentifier, FilterParams, LogReceipt, _Hash32
+from web3.types import BlockIdentifier, FilterParams, LogReceipt, _Hash32
 
 
 DEFAULT_MARKET_FEE = 2.0
@@ -46,7 +46,7 @@ _logger = logging.getLogger(
 def get_logs(
     eth: Eth,
     contract_instance: W3Contract,
-    event_abi: ABIEvent,
+    event_abi: Any,
     topics: List[Optional[Union[_Hash32, Sequence[_Hash32]]]],
     from_block: BlockIdentifier = "earliest",
     to_block: BlockIdentifier = "latest",
@@ -191,8 +191,8 @@ class FPMMDeterministicFactory(Contract):
         contract_instance = cls.get_instance(
             ledger_api=ledger_api, contract_address=contract_address
         )
-        data = contract_instance.encodeABI(
-            fn_name="create2FixedProductMarketMaker", kwargs=kwargs
+        data = contract_instance.encode_abi(
+            abi_element_identifier="create2FixedProductMarketMaker", kwargs=kwargs
         )
         return {"data": bytes.fromhex(data[2:]), "value": initial_funds}
 
@@ -220,7 +220,7 @@ class FPMMDeterministicFactory(Contract):
         entries = [get_event_data(eth.codec, event_abi, log) for log in logs]
         events = [
             {
-                "tx_hash": entry["transactionHash"].hex(),
+                "tx_hash": entry["transactionHash"].to_0x_hex(),
                 "block_number": entry["blockNumber"],
                 "condition_ids": entry["args"]["conditionIds"],
                 "collateral_token": entry["args"]["collateralToken"],

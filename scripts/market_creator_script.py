@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023-2025 Valory AG
+#   Copyright 2023-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -123,7 +123,9 @@ def run(  # pylint: disable=too-many-locals
             "to": to_date,
         }
 
-        response = requests.get(newsapi_url, params=params, headers=newsapi_headers)
+        response = requests.get(
+            newsapi_url, params=params, headers=newsapi_headers, timeout=60
+        )
         data = response.json()
 
         print(data)
