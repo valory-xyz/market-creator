@@ -19,7 +19,7 @@ jobs:
           python-version: ${{ matrix.python-versions }}
       - uses: addnab/docker-run-action@v3
         with:
-            image: valory/open-autonomy-user:0.19.9
+            image: valory/open-autonomy-user:0.21.8
             options: -v ${{ github.workspace }}:/work
             run: |
               echo "Pushing Packages"
@@ -44,7 +44,7 @@ jobs:
       - name: Set up tag and vars
         uses: addnab/docker-run-action@v3
         with:
-            image: valory/open-autonomy-user:0.19.9
+            image: valory/open-autonomy-user:0.21.8
             options: -v ${{ github.workspace }}:/work
             run: |
               echo "Setting Tag Images"
@@ -68,7 +68,7 @@ jobs:
       - uses: addnab/docker-run-action@v3
         name: Build Images
         with:
-            image: valory/open-autonomy-user:0.19.9
+            image: valory/open-autonomy-user:0.21.8
             options: -v ${{ github.workspace }}:/work
             shell: bash
             run: |
@@ -79,8 +79,8 @@ jobs:
               autonomy init --reset --author $AUTHOR --ipfs --remote
               autonomy fetch $AUTHOR/$SERVICE --service --local || exit 1
               cd $SERVICE || exit 1
-              autonomy build-image || exit 1
-              autonomy build-image --version $VERSION || exit 1
+              autonomy build-image -e open-autonomy==0.21.8 || exit 1
+              autonomy build-image -e open-autonomy==0.21.8 --version $VERSION || exit 1
 
       - name: Docker login
         run: |
