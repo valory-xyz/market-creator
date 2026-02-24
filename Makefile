@@ -79,3 +79,12 @@ common-checks-1:
 	tox -p -e check-hash -e check-packages -e check-doc-hashes
 
 v := $(shell pip -V | grep virtualenvs)
+
+.PHONY: run-agent
+run-agent:
+	mkdir -p ./logs && \
+	bash -c 'TIMESTAMP=$$(date +%d-%m-%y_%H-%M); \
+	LOG_FILE="./logs/agent_log_$$TIMESTAMP.log"; \
+	LATEST_LOG_FILE="./logs/agent_log_latest.log"; \
+	echo "Running agent and logging to $$LOG_FILE"; \
+	bash run_agent.sh 2>&1 | tee $$LOG_FILE $$LATEST_LOG_FILE'

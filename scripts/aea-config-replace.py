@@ -45,6 +45,7 @@ PATH_TO_VAR = {
     "models/params/args/store_path": "STORE_PATH",
     "models/benchmark_tool/args/log_dir": "BENCHMARKS_DIR",
     "models/params/args/reset_tendermint_after": "RESET_TENDERMINT_AFTER",
+    "models/params/args/reset_pause_duration": "RESET_PAUSE_DURATION",
     # News API
     "models/params/args/newsapi_endpoint": "NEWSAPI_ENDPOINT",
     "models/params/args/newsapi_api_key": "NEWSAPI_API_KEY",
@@ -58,14 +59,15 @@ PATH_TO_VAR = {
     # Market parameters
     "models/params/args/max_proposed_markets": "MAX_PROPOSED_MARKETS",
     "models/params/args/min_market_proposal_interval_seconds": "MIN_MARKET_PROPOSAL_INTERVAL_SECONDS",
-    "models/params/args/topics": "TOPICS",
     "models/params/args/market_fee": "MARKET_FEE",
     "models/params/args/initial_funds": "INITIAL_FUNDS",
     "models/params/args/market_timeout": "MARKET_TIMEOUT",
-    "models/params/args/market_identification_prompt": "MARKET_IDENTIFICATION_PROMPT",
     # Subgraph
     "models/omen_subgraph/args/url": "OMEN_SUBGRAPH_URL",
     "models/mechs_subgraph/args/url": "MECHS_SUBGRAPH_URL",
+    "models/params/args/subgraph_api_key": "SUBGRAPH_API_KEY",
+    # Serper
+    "models/params/args/serper_api_key": "SERPER_API_KEY",
 }
 
 CONFIG_REGEX = r"\${.*?:(.*)}"
