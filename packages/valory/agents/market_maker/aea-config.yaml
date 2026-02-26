@@ -30,7 +30,7 @@ contracts:
 - valory/mech:0.1.0:bafybeibzaxri2yru6l2nwgr2vdctkczqthalel2g4wojz2whohr3sznil4
 - valory/nvm_balance_tracker_token:0.1.0:bafybeiapcxwvr4hshevutwzs7vv3eza6ueosnj2wt2fb7yjwvl6e73mmqq
 - valory/nvm_balance_tracker_native:0.1.0:bafybeicu32o3rpp2ouacssybsgnhabojzwem2s6eh7lqunq2fkcxi2kmmy
-- valory/erc20:0.1.0:bafybeidrjq5rf6ay2okyy3eoseeafzl7bmngcbs7nhohbifdephc77tbke
+- valory/erc20:0.1.0:bafybeih7bmq64cdhyyvfxuknm7vy5pefn75zisg5gdvr75rbwvefqb6dp4
 - valory/agent_registry:0.1.0:bafybeictjtktyj2nq4hqkzslnyp2b4rflgt6fjqigs5qwpzbt2tnynmaxi
 - valory/nft_sales:0.1.0:bafybeiaaiwiobwrdvx6xie2657a2utldusemlnwpxysuoofcp3l5meruam
 - valory/transfer_nft_condition:0.1.0:bafybeigndjs5mthj42yq3aw3u4c2l3gakove2uoj2jvurnr36qcbaigjni
@@ -55,13 +55,13 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeic5wohfvzro366vaxvm6q7qx6ck5dx2rycfu2bve2pkbwf7o263sq
 - valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
-- valory/market_maker_abci:0.1.0:bafybeidh3yzaneac6adtmc2mj4n4ah35mxd64bcstq2mszosgceqiuhoxi
+- valory/market_maker_abci:0.1.0:bafybeidkss3ciabqyd3mmugyvtxzv77z5q7y35vp5qkailv7nbn3uogboy
 - valory/registration_abci:0.1.0:bafybeie3dfore53bxvbokqiarzuwulzlyt4vz5mifb4t3gxl6drwkblfha
-- valory/market_creation_manager_abci:0.1.0:bafybeih64zcrfdquy7vjt4dsjobxrbvjpjjdnvezkru4hjkvno7gfaul6m
+- valory/market_creation_manager_abci:0.1.0:bafybeial6img5vikrzidt5274ljtqbh5q36gnnuqmzy5r3yun3bq2hpf34
 - valory/reset_pause_abci:0.1.0:bafybeicffwijiecbqc6z22nowir2fgwwqzwu6vokzuwgd5wa3zxromxevm
 - valory/termination_abci:0.1.0:bafybeiaylk6haefa2xex55krizafzwo2v5tpkcoflw5hiwaqm3qxice23m
 - valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
-- valory/mech_interact_abci:0.1.0:bafybeiep43uc55y6df6rjwpntaqewwxovyghi2iaxemmpk43uw6ayj3ax4
+- valory/mech_interact_abci:0.1.0:bafybeigy44slchxksmn2e3l5q435hvkhfljaukwc7q2ga2anv5ng7b44ga
 default_ledger: ethereum
 required_ledgers:
 - ethereum

@@ -59,7 +59,7 @@ contracts:
 - valory/realitio:0.1.0:bafybeihe53hnzcaopijg7ngg2ackkb2mu6iqpvxdjxpnvdzaqckq4txtea
 - valory/conditional_tokens:0.1.0:bafybeihg4vo2qxpdioopj2oudhbbql4yfgiadr7px3x73e5zxsouziijwy
 - valory/fpmm_deterministic_factory:0.1.0:bafybeihan3rhrsmjsc6qwecghuuhfthpovk7pfdrut4jgcxjqhw6nazvfu
-- valory/erc20:0.1.0:bafybeidrjq5rf6ay2okyy3eoseeafzl7bmngcbs7nhohbifdephc77tbke
+- valory/erc20:0.1.0:bafybeih7bmq64cdhyyvfxuknm7vy5pefn75zisg5gdvr75rbwvefqb6dp4
 - valory/fpmm:0.1.0:bafybeiapogqxunq7x4pmoyjr7dlskbiswcwr2wftqj7bifgxhnw5g355si
 protocols:
 - valory/llm:1.0.0:bafybeiardrklsughnm6tdnc3seqderlnq5nj4xolgnk42crr3kxexjlrfe
@@ -68,7 +68,7 @@ protocols:
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
 - valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
-- valory/mech_interact_abci:0.1.0:bafybeiep43uc55y6df6rjwpntaqewwxovyghi2iaxemmpk43uw6ayj3ax4
+- valory/mech_interact_abci:0.1.0:bafybeigy44slchxksmn2e3l5q435hvkhfljaukwc7q2ga2anv5ng7b44ga
 behaviours:
   main:
     args: {}
