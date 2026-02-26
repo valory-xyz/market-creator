@@ -25,7 +25,7 @@ from typing import Dict, Generator, Optional, Tuple, Type, cast
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
-from packages.valory.contracts.erc20.contract import ERC20
+from packages.valory.contracts.erc20.contract import ERC20TokenContract
 from packages.valory.contracts.fpmm_deterministic_factory.contract import (
     FPMMDeterministicFactory,
 )
@@ -178,8 +178,8 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.collateral_tokens_contract,
-            contract_id=str(ERC20.contract_id),
-            contract_callable=get_callable_name(ERC20.build_approval_tx),
+            contract_id=str(ERC20TokenContract.contract_id),
+            contract_callable=get_callable_name(ERC20TokenContract.build_approval_tx),
             spender=self.params.fpmm_deterministic_factory_contract,
             amount=amount,
         )
