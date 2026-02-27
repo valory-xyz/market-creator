@@ -21,7 +21,7 @@
 
 from typing import Generator, Optional, cast
 
-from packages.valory.contracts.erc20.contract import ERC20
+from packages.valory.contracts.erc20.contract import ERC20TokenContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
@@ -128,8 +128,8 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         """This function returns the encoded FPMMContract.removeFunds() function call."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            contract_id=str(ERC20.contract_id),
-            contract_callable=get_callable_name(ERC20.build_deposit_tx),
+            contract_id=str(ERC20TokenContract.contract_id),
+            contract_callable=get_callable_name(ERC20TokenContract.build_deposit_tx),
             contract_address=wxdai_address,
         )
         if response.performative != ContractApiMessage.Performative.STATE:

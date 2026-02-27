@@ -23,7 +23,7 @@ packages/valory/contracts/gnosis_safe_proxy_factory
 packages/valory/contracts/ierc1155
 packages/valory/contracts/lock_payment_condition
 packages/valory/contracts/mech
-packages/valory/contracts/mech_marketplace
+packages/valory/contracts/agent_mech
 packages/valory/contracts/mech_marketplace_legacy
 packages/valory/contracts/mech_mm
 packages/valory/contracts/multisend

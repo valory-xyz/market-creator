@@ -16,12 +16,12 @@ fingerprint:
   behaviours/base.py: bafybeiglerd5twytib2mleqdqgtw3mhan4s3crue5nsxnkbonbkxtzlzgi
   behaviours/collect_proposed_markets.py: bafybeid3xx46q4f2h2q22phier2fauxawqlwdgxnld3ymmghd7xma4j75y
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
-  behaviours/deposit_dai.py: bafybeiafjjmgrvyzfpfrpao4dmznwbw44inj22c4toppva77ddmuk5ukwe
+  behaviours/deposit_dai.py: bafybeib5ksc57w67nrv3tn6pqezad4javgbid7byupwdoicsabyj5ncqpm
   behaviours/get_pending_questions.py: bafybeic4v5snltwxtz4lxzdfrchlzmwoy7mqd4enminnsznqz4nrnwfh3e
   behaviours/post_transaction.py: bafybeifspt73zt3l6ecfevwbvuknal5qddwbymppyyxxu2qyt43u4bxo6q
-  behaviours/prepare_transaction.py: bafybeidhnucs233wsddhk3qvi7tmjk7fgxu3cm5edzk2d3cly35atblq5a
+  behaviours/prepare_transaction.py: bafybeifrkcun3hnknao62sl5qdovjoowqvxeui6netrms2dl63soh4owhe
   behaviours/redeem_bond.py: bafybeibn5pxcykhfrjkm6nezc7unalao5pzhfqxa6ix2ichcorkyovrg3i
-  behaviours/remove_funding.py: bafybeib4kycfbuy3yjsjwnhcldvl3wzxuho2gabqkoz2u7ezqfsxlt43ti
+  behaviours/remove_funding.py: bafybeichqdsrgdcursd5wrf326csobaaqddkmgfnrlitd54spb46y5wiea
   behaviours/retrieve_approved_market.py: bafybeihxci57sai2spcv7qgqcljjyhofgo32j3ajpnyuwufpwivaoltl4y
   behaviours/round_behaviour.py: bafybeigwwisgnfwdvnn65agwkhgfesnplhty4qltk2lf4if5wmdldt7tw4
   behaviours/select_keeper.py: bafybeiadkoyybfqxc2wsrkjk3hta5yrmp5cf6h44cru3k6pchmmuiwr3by
@@ -59,7 +59,7 @@ contracts:
 - valory/realitio:0.1.0:bafybeihe53hnzcaopijg7ngg2ackkb2mu6iqpvxdjxpnvdzaqckq4txtea
 - valory/conditional_tokens:0.1.0:bafybeihg4vo2qxpdioopj2oudhbbql4yfgiadr7px3x73e5zxsouziijwy
 - valory/fpmm_deterministic_factory:0.1.0:bafybeihan3rhrsmjsc6qwecghuuhfthpovk7pfdrut4jgcxjqhw6nazvfu
-- valory/erc20:0.1.0:bafybeidrjq5rf6ay2okyy3eoseeafzl7bmngcbs7nhohbifdephc77tbke
+- valory/erc20:0.1.0:bafybeig3avtl5ffku556ipvuviiat5p2psfw46fa2ieofcc4eculxe3vde
 - valory/fpmm:0.1.0:bafybeiapogqxunq7x4pmoyjr7dlskbiswcwr2wftqj7bifgxhnw5g355si
 protocols:
 - valory/llm:1.0.0:bafybeiardrklsughnm6tdnc3seqderlnq5nj4xolgnk42crr3kxexjlrfe
@@ -68,7 +68,7 @@ protocols:
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
 - valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
-- valory/mech_interact_abci:0.1.0:bafybeiffz7arijdfjko47rqrkcs5eobyj4vmal5pmiuhopmot24qrigwdy
+- valory/mech_interact_abci:0.1.0:bafybeienj5jzbq2x5hpedqwpa46rmprcdc42536zjyxkmsemjs3jjhl5oe
 behaviours:
   main:
     args: {}

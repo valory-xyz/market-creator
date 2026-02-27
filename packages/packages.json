@@ -2,10 +2,10 @@
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeihan3rhrsmjsc6qwecghuuhfthpovk7pfdrut4jgcxjqhw6nazvfu",
         "contract/valory/fpmm/0.1.0": "bafybeiapogqxunq7x4pmoyjr7dlskbiswcwr2wftqj7bifgxhnw5g355si",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeifhay5gpwoq3wpmlmkecod3bq4y6dem6mdtitfadbntefqm2ntvya",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeib2num4tbq4zf3cmv4q5lnns7cmm32st2w7nmzavlx3rz4ethgjcy",
-        "agent/valory/market_maker/0.1.0": "bafybeihy5plsbs7e3747sieycnacrannyuqhvu76ccrz25ipzfxjdfofs4",
-        "service/valory/market_maker/0.1.0": "bafybeic77w4kz6spx7f2idq3ozejfo577yjdneoyaxzix277lbgp35x7s4"
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeibjr5br7eydo3glyyig44d6c2styieixevkaehdhyc6dmjoazg254",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeibr7uohicbdkexcxim3j6yr5rquoz2bawuujmb64vyutsu5i446f4",
+        "agent/valory/market_maker/0.1.0": "bafybeiatgximd6o3kp3yedf5rz632zeskjjgys35wlowuiafznjcon24pm",
+        "service/valory/market_maker/0.1.0": "bafybeidqoj4555czyx3vjmbz25ydsunyuxzd5kkjqspn7glrxnrtps6weu"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeigl7mxuyxngk4gztgygeccbgdfrllx73kwbvvkjvtkfw6ionyd56q",
@@ -22,12 +22,9 @@
         "contract/valory/service_registry/0.1.0": "bafybeibzuktplryzlfhdyahcbldfh5dz6pnvukigzbejeuvlvv24774lpi",
         "contract/valory/gnosis_safe/0.1.0": "bafybeia3ictpeosrza3tkxa7ad2io5txutcs44jgrqoqgdxhrjdu2fy4qy",
         "contract/valory/multisend/0.1.0": "bafybeidjdgi2kyexajirj3cnpzgse4y5u664b2blztt4flv6i7knlecyr4",
-        "contract/valory/agent_registry/0.1.0": "bafybeigl7bqvjyvryxuugpx6ogn4n6d2hryebup3x4hxhfirpjm6kjw4vq",
         "contract/valory/mech_marketplace_legacy/0.1.0": "bafybeigh3o7kxyaulnvcbld2h6cmae6ma6yei2xram2hqifcftn5f3bw7q",
-        "contract/valory/mech_marketplace/0.1.0": "bafybeibbxutph6qbaldnq3o5kiaqgubc6jhgxappf33u2t7udnwajhmbf4",
         "contract/valory/mech/0.1.0": "bafybeibzaxri2yru6l2nwgr2vdctkczqthalel2g4wojz2whohr3sznil4",
         "contract/valory/mech_mm/0.1.0": "bafybeielrjtejohqcom5donjmrjd7r2jb2ub3pbcxbhyap4exkbfg7ppoi",
-        "contract/valory/erc20/0.1.0": "bafybeidrjq5rf6ay2okyy3eoseeafzl7bmngcbs7nhohbifdephc77tbke",
         "contract/valory/ierc1155/0.1.0": "bafybeid5whskodle54bifmwjzkaqfmkzngqga6jtmbhvlzigel2f5mghda",
         "contract/valory/nvm_balance_tracker_token/0.1.0": "bafybeiapcxwvr4hshevutwzs7vv3eza6ueosnj2wt2fb7yjwvl6e73mmqq",
         "contract/valory/nvm_balance_tracker_native/0.1.0": "bafybeicu32o3rpp2ouacssybsgnhabojzwem2s6eh7lqunq2fkcxi2kmmy",
@@ -41,6 +38,9 @@
         "contract/valory/realitio/0.1.0": "bafybeihe53hnzcaopijg7ngg2ackkb2mu6iqpvxdjxpnvdzaqckq4txtea",
         "contract/valory/realitio_proxy/0.1.0": "bafybeibsink25xdxk2yt7tx2aaznmqaidxs22gknb5alqnkhlqahazlydm",
         "contract/valory/conditional_tokens/0.1.0": "bafybeihg4vo2qxpdioopj2oudhbbql4yfgiadr7px3x73e5zxsouziijwy",
+        "contract/valory/agent_mech/0.1.0": "bafybeibvtxsxeuymbmxyyn7rj46m3skylupr7qib5eptqluklz4apr77iq",
+        "contract/valory/agent_registry/0.1.0": "bafybeiekiqeq5usfbwbpgi35phy44kdxehf3mi7ucnl2kjv2zqc5s5eto4",
+        "contract/valory/erc20/0.1.0": "bafybeig3avtl5ffku556ipvuviiat5p2psfw46fa2ieofcc4eculxe3vde",
         "connection/valory/p2p_libp2p_client/0.1.0": "bafybeigg3kzkywemiswrgjhb7hei5qsysxcsx36c6weyewtirctbmleowm",
         "connection/valory/ledger/0.19.0": "bafybeigiipjmtjdivz2wd54c7bmbqxbayk5b5st7wcrsvsnqkfc2f2rbaa",
         "connection/valory/http_client/0.23.0": "bafybeigwzn4hkry3wy7nf2myk3h3pl5xrqkvvxp2ppdbwwffa4c2s2bkwy",
@@ -54,6 +54,6 @@
         "skill/valory/registration_abci/0.1.0": "bafybeie3dfore53bxvbokqiarzuwulzlyt4vz5mifb4t3gxl6drwkblfha",
         "skill/valory/reset_pause_abci/0.1.0": "bafybeicffwijiecbqc6z22nowir2fgwwqzwu6vokzuwgd5wa3zxromxevm",
         "skill/valory/termination_abci/0.1.0": "bafybeiaylk6haefa2xex55krizafzwo2v5tpkcoflw5hiwaqm3qxice23m",
-        "skill/valory/mech_interact_abci/0.1.0": "bafybeiffz7arijdfjko47rqrkcs5eobyj4vmal5pmiuhopmot24qrigwdy"
+        "skill/valory/mech_interact_abci/0.1.0": "bafybeienj5jzbq2x5hpedqwpa46rmprcdc42536zjyxkmsemjs3jjhl5oe"
     }
 }
