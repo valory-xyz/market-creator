@@ -19,16 +19,32 @@
 
 """Script for retrieving Omen markets."""
 
+import argparse
+from collections import defaultdict
 import json
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, List
 
+from dotenv import load_dotenv
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from tqdm import tqdm
+
+
+load_dotenv()
+
+
+answer_mapping = defaultdict(
+    lambda: "Unknown",
+    {
+        "0x0000000000000000000000000000000000000000000000000000000000000000": "Yes",
+        "0x0000000000000000000000000000000000000000000000000000000000000001": "No",
+        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff": "Invalid",
+    },
+)
 
 
 TEXT_ALIGNMENT = 30
@@ -100,22 +116,26 @@ class MarketState(Enum):
     CLOSED = 5
     UNKNOWN = 6
 
+    def __str__(self) -> str:
+        """Prints the market status."""
+        return self.name.capitalize()
 
-def _get_market_state(market: Dict[str, Any]) -> MarketState:
+
+def get_market_state(market: Dict[str, Any]) -> MarketState:
     try:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         market_status = MarketState.CLOSED
-        if market["currentAnswer"] is None and now >= datetime.utcfromtimestamp(
-            float(market.get("openingTimestamp", 0))
+        if market["currentAnswer"] is None and now >= datetime.fromtimestamp(
+            float(market.get("openingTimestamp", 0)), tz=timezone.utc
         ):
             market_status = MarketState.PENDING
         elif market["currentAnswer"] is None:
             market_status = MarketState.OPEN
         elif market["isPendingArbitration"]:
             market_status = MarketState.ARBITRATING
-        elif now < datetime.utcfromtimestamp(
-            float(market.get("answerFinalizedTimestamp", 0))
+        elif now < datetime.fromtimestamp(
+            float(market.get("answerFinalizedTimestamp", 0)), tz=timezone.utc
         ):
             market_status = MarketState.FINALIZING
 
@@ -161,7 +181,7 @@ def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
         desc=f"{'Fetching trades':>{TEXT_ALIGNMENT}}",
         miniters=1,
     ):
-        state = _get_market_state(fpmm)
+        state = get_market_state(fpmm)
 
         if state is not MarketState.CLOSED:
             continue
@@ -207,16 +227,61 @@ def _write_db_to_file(fpmms: Dict[str, Any], force_write: bool = False) -> None:
         last_write_time = now
 
 
-def get_fpmms(creator: str) -> Dict[str, Any]:
-    """Get Fixed Product Market Makers."""
+def get_fpmms(creators: List[str], populate_trades: bool = False) -> Dict[str, Any]:
+    """Get Fixed Product Market Makers for one or more creators.
+    
+    Args:
+        creators: List of creator addresses
+        populate_trades: Whether to fetch buy trades for the markets
+        
+    Returns:
+        Dictionary of FPMMs indexed by ID
+    """
+    # Load existing database
     fpmms = {}
-    try:
-        with open(FPMMS_JSON_PATH, "r", encoding="UTF-8") as json_file:
-            existing_data = json.load(json_file)
-            fpmms = existing_data.get("fixedProductMarketMakers", {})
-    except FileNotFoundError:
-        pass  # File doesn't exist yet, so there are no existing requests
+    # try:
+    #     with open(FPMMS_JSON_PATH, "r", encoding="UTF-8") as json_file:
+    #         existing_data = json.load(json_file)
+    #         fpmms = existing_data.get("fixedProductMarketMakers", {})
+    # except FileNotFoundError:
+    #     pass  # File doesn't exist yet, so there are no existing requests
 
-    _populate_missing_fpmms(creator.lower(), fpmms)
-    _populate_missing_buy_trades(fpmms)
+    # Fetch FPMMs for each creator
+    for creator in creators:
+        _populate_missing_fpmms(creator.lower(), fpmms)
+    
+    # Optionally fetch trades
+    if populate_trades:
+        _populate_missing_buy_trades(fpmms)
+    
     return fpmms
+
+
+def main() -> None:
+    """Main entry point for command-line execution."""
+    
+    parser = argparse.ArgumentParser(
+        description="Fetch Fixed Product Market Makers from the Omen subgraph."
+    )
+    parser.add_argument(
+        "creators",
+        type=str,
+        nargs="+",
+        help="One or more creator addresses to filter FPMMs"
+    )
+    parser.add_argument(
+        "--no-trades",
+        action="store_true",
+        help="Skip fetching buy trades (faster execution)"
+    )
+
+    args = parser.parse_args()
+
+    print(f"Fetching FPMMs for {len(args.creators)} creator(s)...")
+    fpmms = get_fpmms(args.creators, populate_trades=not args.no_trades)
+    print(f"\nTotal FPMMs in database: {len(fpmms)}")
+    print(f"Results written to: {FPMMS_JSON_PATH}")
+
+
+if __name__ == "__main__":
+    main()
