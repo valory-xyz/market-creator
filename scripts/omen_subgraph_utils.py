@@ -50,15 +50,18 @@ answer_mapping = defaultdict(
 TEXT_ALIGNMENT = 30
 MINIMUM_WRITE_FILE_DELAY_SECONDS = 20
 FPMMS_JSON_PATH = "fpmms.json"
+INVALID_ANSWER_HEX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+INVALID_ANSWER = "Invalid"
+NA_ANSWER = "N/A"
 THEGRAPH_ENDPOINT = os.getenv(
     "OMEN_SUBGRAPH_URL", "https://api.thegraph.com/subgraphs/name/protofire/omen-xdai"
 )
 
 FPMMS_QUERY = """
-query fpmms_query($creator: Bytes, $id_gt: ID) {
+query fpmms_query($creator: Bytes, $creationTimestamp_gt: BigInt) {
     fixedProductMarketMakers(
-        where: {creator: $creator, id_gt: $id_gt}
-        orderBy: id
+        where: {creator: $creator, creationTimestamp_gt: $creationTimestamp_gt}
+        orderBy: creationTimestamp
         orderDirection: asc
         first: 1000
     ) {
@@ -122,6 +125,7 @@ class MarketState(Enum):
 
 
 def get_market_state(market: Dict[str, Any]) -> MarketState:
+    """Get market state"""
     try:
         now = datetime.now(timezone.utc)
 
@@ -144,32 +148,19 @@ def get_market_state(market: Dict[str, Any]) -> MarketState:
         return MarketState.UNKNOWN
 
 
-def _populate_missing_fpmms(creator: str, fpmms: Dict[str, Any]) -> None:
-    print(f"{'Fetching fpmms...':>{TEXT_ALIGNMENT}}")
+def get_market_current_answer(market: dict) -> str:
+    """Get market current answer"""
+    current_answer = market.get("currentAnswer", "")
+    
+    if not current_answer:
+        return NA_ANSWER
+    
+    if current_answer.lower() == INVALID_ANSWER_HEX.lower():
+        return INVALID_ANSWER
 
-    transport = RequestsHTTPTransport(url=THEGRAPH_ENDPOINT)
-    client = Client(transport=transport, fetch_schema_from_transport=True)
-
-    id_gt = "0x00"
-    while True:
-        variables = {
-            "creator": creator,
-            "id_gt": id_gt,
-        }
-        response = client.execute(gql(FPMMS_QUERY), variable_values=variables)
-        items = response.get("fixedProductMarketMakers", [])
-
-        if not items:
-            break
-
-        for fpmm in items:
-            if fpmm["id"] not in fpmms:
-                fpmms[fpmm["id"]] = fpmm
-
-        id_gt = items[-1]["id"]
-        _write_db_to_file(fpmms)
-
-    _write_db_to_file(fpmms, True)
+    answer_index = int(current_answer, 16)
+    outcomes = market.get("question", {}).get("outcomes", [])
+    return outcomes[answer_index]
 
 
 def _populate_missing_buy_trades(fpmms: Dict[str, Any]) -> None:
@@ -227,61 +218,62 @@ def _write_db_to_file(fpmms: Dict[str, Any], force_write: bool = False) -> None:
         last_write_time = now
 
 
-def get_fpmms(creators: List[str], populate_trades: bool = False) -> Dict[str, Any]:
-    """Get Fixed Product Market Makers for one or more creators.
-    
-    Args:
-        creators: List of creator addresses
-        populate_trades: Whether to fetch buy trades for the markets
-        
-    Returns:
-        Dictionary of FPMMs indexed by ID
-    """
-    # Load existing database
+def get_fpmms(creator: str) -> dict:
+    """Get Fixed Product Market Makers for one or more creators."""
+
     fpmms = {}
-    # try:
-    #     with open(FPMMS_JSON_PATH, "r", encoding="UTF-8") as json_file:
-    #         existing_data = json.load(json_file)
-    #         fpmms = existing_data.get("fixedProductMarketMakers", {})
-    # except FileNotFoundError:
-    #     pass  # File doesn't exist yet, so there are no existing requests
 
-    # Fetch FPMMs for each creator
-    for creator in creators:
-        _populate_missing_fpmms(creator.lower(), fpmms)
+    print(f"Fetching fpmms for creator {creator}...")
+
+    transport = RequestsHTTPTransport(url=THEGRAPH_ENDPOINT)
+    client = Client(transport=transport, fetch_schema_from_transport=True)
+
+    creation_timestamp_gt = 0
+    while True:
+        variables = {
+            "creator": creator,
+            "creationTimestamp_gt": creation_timestamp_gt,
+        }
+        response = client.execute(gql(FPMMS_QUERY), variable_values=variables)
+        items = response.get("fixedProductMarketMakers", [])
+
+        if not items:
+            break
+
+        for fpmm in items:
+            if fpmm["id"] not in fpmms:
+                fpmms[fpmm["id"]] = fpmm
+
+        creation_timestamp_gt = items[-1]["creationTimestamp"]
     
-    # Optionally fetch trades
-    if populate_trades:
-        _populate_missing_buy_trades(fpmms)
+    return {"fixedProductMarketMakers": fpmms}
+
+
+# def main() -> None:
+#     """Main entry point for command-line execution."""
     
-    return fpmms
+#     parser = argparse.ArgumentParser(
+#         description="Fetch Fixed Product Market Makers from the Omen subgraph."
+#     )
+#     parser.add_argument(
+#         "creators",
+#         type=str,
+#         nargs="+",
+#         help="One or more creator addresses to filter FPMMs"
+#     )
+#     parser.add_argument(
+#         "--no-trades",
+#         action="store_true",
+#         help="Skip fetching buy trades (faster execution)"
+#     )
+
+#     args = parser.parse_args()
+
+#     print(f"Fetching FPMMs for {len(args.creators)} creator(s)...")
+#     fpmms = get_fpmms(args.creators, populate_trades=not args.no_trades)
+#     print(f"\nTotal FPMMs in database: {len(fpmms)}")
+#     print(f"Results written to: {FPMMS_JSON_PATH}")
 
 
-def main() -> None:
-    """Main entry point for command-line execution."""
-    
-    parser = argparse.ArgumentParser(
-        description="Fetch Fixed Product Market Makers from the Omen subgraph."
-    )
-    parser.add_argument(
-        "creators",
-        type=str,
-        nargs="+",
-        help="One or more creator addresses to filter FPMMs"
-    )
-    parser.add_argument(
-        "--no-trades",
-        action="store_true",
-        help="Skip fetching buy trades (faster execution)"
-    )
-
-    args = parser.parse_args()
-
-    print(f"Fetching FPMMs for {len(args.creators)} creator(s)...")
-    fpmms = get_fpmms(args.creators, populate_trades=not args.no_trades)
-    print(f"\nTotal FPMMs in database: {len(fpmms)}")
-    print(f"Results written to: {FPMMS_JSON_PATH}")
-
-
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
