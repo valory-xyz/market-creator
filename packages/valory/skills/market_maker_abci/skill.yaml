@@ -32,10 +32,10 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
 - valory/registration_abci:0.1.0:bafybeie3dfore53bxvbokqiarzuwulzlyt4vz5mifb4t3gxl6drwkblfha
 - valory/reset_pause_abci:0.1.0:bafybeicffwijiecbqc6z22nowir2fgwwqzwu6vokzuwgd5wa3zxromxevm
-- valory/market_creation_manager_abci:0.1.0:bafybeifngacetzle576sqjxu4azyaqqlipnnuoaqs3wwwx754v3737ladi
+- valory/market_creation_manager_abci:0.1.0:bafybeibffhpyo7xmi3jgmjc65dquqb4nda7fwpnksle3mptnkzj3t3ubmy
 - valory/termination_abci:0.1.0:bafybeiaylk6haefa2xex55krizafzwo2v5tpkcoflw5hiwaqm3qxice23m
 - valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
-- valory/mech_interact_abci:0.1.0:bafybeienj5jzbq2x5hpedqwpa46rmprcdc42536zjyxkmsemjs3jjhl5oe
+- valory/mech_interact_abci:0.1.0:bafybeifmewonamynusdi3sz5qenlr3f7mu67sic33aub5uzc2w3mpqsyqa
 behaviours:
   main:
     args: {}
@@ -255,6 +255,7 @@ models:
       ignored_mechs: []
       penalize_mech_time_window: 1800
       mech_wrapped_native_token_address: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
+      deliveries_lookback_days: 30
     class_name: Params
   randomness_api:
     args:
@@ -316,7 +317,7 @@ models:
       error_index: 0
       error_type: dict
       retries: 5
-      url: https://subgraph.staging.autonolas.tech/subgraphs/name/marketplace-gnosis-v0_7_0
+      url: https://api.subgraph.autonolas.tech/api/proxy/marketplace-gnosis
       delivery_rate_cap: 10000000000000000
     class_name: MechsSubgraph
   requests:

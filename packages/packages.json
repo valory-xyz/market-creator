@@ -1,11 +1,11 @@
 {
     "dev": {
-        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeih35oxsgppial3ocgdzarji65r443fqzp7znufwfrv6ckhgc7mxaa",
-        "contract/valory/fpmm/0.1.0": "bafybeihcfugx2oivtbhamiogcg2w45abxlqbwqkxlzi5spfwtlsl7vvlty",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeifngacetzle576sqjxu4azyaqqlipnnuoaqs3wwwx754v3737ladi",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeiaq7srhelgomthz7aoriiceqhb7kihbtsps6wr4jrmgdswaorx6cm",
-        "agent/valory/market_maker/0.1.0": "bafybeigbd3pki3iv7fhnhg6x24v4vvoelw3dqifcx7king74ms72wkdl2e",
-        "service/valory/market_maker/0.1.0": "bafybeicgamrtitx3gj4m6fadvvoetpcvtvsqbarjqz33272i3lpytqmk7m"
+        "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeihan3rhrsmjsc6qwecghuuhfthpovk7pfdrut4jgcxjqhw6nazvfu",
+        "contract/valory/fpmm/0.1.0": "bafybeiapogqxunq7x4pmoyjr7dlskbiswcwr2wftqj7bifgxhnw5g355si",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeibffhpyo7xmi3jgmjc65dquqb4nda7fwpnksle3mptnkzj3t3ubmy",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeidqq4qts7ckqqstyu7kdymbiauishwxvf54lnisvbogcs646rm3pi",
+        "agent/valory/market_maker/0.1.0": "bafybeihm7ehl4vultbiuhbnhtyysgrwlrcqjjo3rcczkvisrhtbl7ajfgq",
+        "service/valory/market_maker/0.1.0": "bafybeicsqqgx5waagiaqtdnkag3awo2gcyyyt2et655cft6fbwyya4bpay"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeigl7mxuyxngk4gztgygeccbgdfrllx73kwbvvkjvtkfw6ionyd56q",
@@ -54,6 +54,6 @@
         "skill/valory/registration_abci/0.1.0": "bafybeie3dfore53bxvbokqiarzuwulzlyt4vz5mifb4t3gxl6drwkblfha",
         "skill/valory/reset_pause_abci/0.1.0": "bafybeicffwijiecbqc6z22nowir2fgwwqzwu6vokzuwgd5wa3zxromxevm",
         "skill/valory/termination_abci/0.1.0": "bafybeiaylk6haefa2xex55krizafzwo2v5tpkcoflw5hiwaqm3qxice23m",
-        "skill/valory/mech_interact_abci/0.1.0": "bafybeienj5jzbq2x5hpedqwpa46rmprcdc42536zjyxkmsemjs3jjhl5oe"
+        "skill/valory/mech_interact_abci/0.1.0": "bafybeifmewonamynusdi3sz5qenlr3f7mu67sic33aub5uzc2w3mpqsyqa"
     }
 }
