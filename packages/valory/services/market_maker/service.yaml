@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeiatgximd6o3kp3yedf5rz632zeskjjgys35wlowuiafznjcon24pm
+agent: valory/market_maker:0.1.0:bafybeihm7ehl4vultbiuhbnhtyysgrwlrcqjjo3rcczkvisrhtbl7ajfgq
 number_of_agents: 1
 deployment:
   agent:
@@ -126,6 +126,7 @@ models:
       - stabilityai-stable-diffusion-768-v2-1
       ignored_mechs: []
       penalize_mech_time_window: 1800
+      deliveries_lookback_days: ${DELIVERIES_LOOKBACK_DAYS:int:30}
   randomness_api:
     args:
       method: ${RANDOMNESS_API_METHOD:str:GET}
