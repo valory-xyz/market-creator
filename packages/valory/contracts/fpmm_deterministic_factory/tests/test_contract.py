@@ -123,7 +123,7 @@ class TestGetCreateFpmmTx:
                 contract_address="0xfactory",
                 condition_id="0xcondition",
                 conditional_tokens="0xctokens",
-                collateral_token="0xcollateral",
+                collateral_token="0xcollateral",  # nosec - placeholder address, not secret
                 initial_funds=100.0,
                 market_fee=2.0,
             )
@@ -146,7 +146,7 @@ class TestGetCreateFpmmTx:
                 contract_address="0xfactory",
                 condition_id="0xcondition",
                 conditional_tokens="0xctokens",
-                collateral_token="0xcollateral",
+                collateral_token="0xcollateral",  # nosec - placeholder address, not secret
                 initial_funds=100.0,
             )
 
@@ -171,7 +171,7 @@ class TestGetCreateFpmmTxData:
                 contract_address="0xfactory",
                 condition_id="0xcondition",
                 conditional_tokens="0xctokens",
-                collateral_token="0xcollateral",
+                collateral_token="0xcollateral",  # nosec - placeholder address, not secret
                 initial_funds=100.0,
                 market_fee=2.0,
             )
