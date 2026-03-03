@@ -411,3 +411,117 @@ class TestHttpHandlerGetHealth:
             assert body["period"] == 10
             assert body["rounds"] is not None
             assert "CurrentRound" in body["rounds"]
+
+class TestHttpHandlerSynchronizedData:
+    """Test HttpHandler.synchronized_data property."""
+
+    def test_synchronized_data_returns_synchronized_data_with_correct_db(
+        self,
+    ) -> None:
+        """Test synchronized_data property returns SynchronizedData with correct db."""
+        from packages.valory.skills.market_creation_manager_abci.rounds import (
+            SynchronizedData,
+        )
+
+        handler = _make_http_handler()
+
+        # Mock the state and round_sequence
+        mock_db = {"key": "value"}
+        latest_sync_data = MagicMock()
+        latest_sync_data.db = mock_db
+
+        round_sequence = MagicMock()
+        round_sequence.latest_synchronized_data = latest_sync_data
+
+        handler.context.state.round_sequence = round_sequence
+
+        # Call the property without mocking it
+        result = handler.synchronized_data
+
+        # Assert it returns a SynchronizedData instance with the correct db
+        assert isinstance(result, SynchronizedData)
+        assert result.db == mock_db
+
+
+class TestHttpHandlerHandleInvalidDialogue:
+    """Test HttpHandler.handle method with invalid dialogue."""
+
+    def test_handle_invalid_dialogue_logs_and_returns(self) -> None:
+        """Test handle method when http_dialogues.update returns None."""
+        from packages.valory.connections.http_server.connection import (
+            PUBLIC_ID as HTTP_SERVER_PUBLIC_ID,
+        )
+        from packages.valory.protocols.http import HttpMessage
+
+        handler = _make_http_handler()
+
+        # Create a valid HTTP request message
+        http_msg = MagicMock(spec=HttpMessage)
+        http_msg.performative = HttpMessage.Performative.REQUEST
+        http_msg.sender = str(HTTP_SERVER_PUBLIC_ID.without_hash())
+        http_msg.url = "http://localhost:8080/healthcheck"
+        http_msg.method = "get"
+        http_msg.version = "1.1"
+        http_msg.headers = "Host: localhost"
+        http_msg.body = b""
+
+        # Mock http_dialogues to return None (invalid dialogue)
+        http_dialogues = MagicMock()
+        http_dialogues.update.return_value = None
+
+        handler.context.http_dialogues = http_dialogues
+
+        # Call handle with the message
+        handler.handle(http_msg)
+
+        # Verify that http_dialogues.update was called
+        http_dialogues.update.assert_called_once_with(http_msg)
+
+        # Verify that logger.info was called with the invalid message info
+        handler.context.logger.info.assert_called_once()
+        call_args = handler.context.logger.info.call_args
+        assert "invalid http message" in call_args[0][0].lower()
+        assert "unidentified dialogue" in call_args[0][0].lower()
+
+    def test_handle_valid_message_calls_handler(self) -> None:
+        """Test handle method successfully calls the handler function on lines 207-214."""
+        from packages.valory.connections.http_server.connection import (
+            PUBLIC_ID as HTTP_SERVER_PUBLIC_ID,
+        )
+        from packages.valory.protocols.http import HttpMessage
+
+        handler = _make_http_handler()
+
+        # Create a valid HTTP request message for healthcheck
+        http_msg = MagicMock(spec=HttpMessage)
+        http_msg.performative = HttpMessage.Performative.REQUEST
+        http_msg.sender = str(HTTP_SERVER_PUBLIC_ID.without_hash())
+        http_msg.url = "http://localhost:8080/healthcheck"
+        http_msg.method = "get"
+        http_msg.version = "1.1"
+        http_msg.headers = "Host: localhost"
+        http_msg.body = b""
+
+        # Mock the dialogue
+        http_dialogue = MagicMock()
+        http_dialogues = MagicMock()
+        http_dialogues.update.return_value = http_dialogue
+
+        handler.context.http_dialogues = http_dialogues
+
+        # Mock _get_handler to return a mock function
+        mock_handler_func = MagicMock()
+        with patch.object(handler, "_get_handler", return_value=(mock_handler_func, {})):
+            handler.handle(http_msg)
+
+            # Verify that http_dialogues.update was called
+            http_dialogues.update.assert_called_once_with(http_msg)
+
+            # Verify that the handler was called with the message and dialogue
+            # This verifies line 214 is executed
+            mock_handler_func.assert_called_once_with(http_msg, http_dialogue)
+
+            # Verify logging was done (lines 207-213)
+            assert handler.context.logger.info.call_count == 1
+            call_args = handler.context.logger.info.call_args
+            assert "Received http request" in call_args[0][0]
