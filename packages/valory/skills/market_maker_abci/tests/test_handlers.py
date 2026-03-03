@@ -412,6 +412,7 @@ class TestHttpHandlerGetHealth:
             assert body["rounds"] is not None
             assert "CurrentRound" in body["rounds"]
 
+
 class TestHttpHandlerSynchronizedData:
     """Test HttpHandler.synchronized_data property."""
 
@@ -511,7 +512,9 @@ class TestHttpHandlerHandleInvalidDialogue:
 
         # Mock _get_handler to return a mock function
         mock_handler_func = MagicMock()
-        with patch.object(handler, "_get_handler", return_value=(mock_handler_func, {})):
+        with patch.object(
+            handler, "_get_handler", return_value=(mock_handler_func, {})
+        ):
             handler.handle(http_msg)
 
             # Verify that http_dialogues.update was called
