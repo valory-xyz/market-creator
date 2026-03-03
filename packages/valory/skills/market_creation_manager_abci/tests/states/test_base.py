@@ -108,151 +108,208 @@ class TestSynchronizedData:
         """Create a SynchronizedData instance."""
         return SynchronizedData(db=mocked_db)
 
-    def test_gathered_data(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_gathered_data(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test gathered_data property."""
         mocked_db.get_strict.return_value = "some_data"
         assert sync_data.gathered_data == "some_data"
         mocked_db.get_strict.assert_called_once_with("gathered_data")
 
-    def test_proposed_markets_count(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_proposed_markets_count(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test proposed_markets_count property."""
         mocked_db.get.return_value = 5
         assert sync_data.proposed_markets_count == 5
         mocked_db.get.assert_called_once_with("proposed_markets_count", 0)
 
-    def test_proposed_markets_count_default(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_proposed_markets_count_default(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test proposed_markets_count default."""
         mocked_db.get.return_value = 0
         assert sync_data.proposed_markets_count == 0
 
-    def test_approved_markets_count(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_approved_markets_count(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test approved_markets_count property."""
         mocked_db.get.return_value = 3
         assert sync_data.approved_markets_count == 3
         mocked_db.get.assert_called_once_with("approved_markets_count", 0)
 
-    def test_approved_markets_timestamp(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_approved_markets_timestamp(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test approved_markets_timestamp property."""
         mocked_db.get.return_value = 1700000000
         assert sync_data.approved_markets_timestamp == 1700000000
         mocked_db.get.assert_called_once_with("approved_markets_timestamp", 0)
 
-    def test_proposed_markets_data(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_proposed_markets_data(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test proposed_markets_data property."""
         mock_data = {"proposed_markets": [{"q": "test?"}], "timestamp": 123}
         mocked_db.get.return_value = mock_data
         assert sync_data.proposed_markets_data == mock_data
 
-    def test_proposed_markets_data_default(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_proposed_markets_data_default(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test proposed_markets_data returns default."""
         mocked_db.get.return_value = DEFAULT_PROPOSED_MARKETS_DATA
         assert sync_data.proposed_markets_data == DEFAULT_PROPOSED_MARKETS_DATA
 
-    def test_collected_proposed_markets_data(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_collected_proposed_markets_data(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test collected_proposed_markets_data property."""
         mock_val = '{"proposed_markets": [{"q": "test?"}]}'
         mocked_db.get.return_value = mock_val
         assert sync_data.collected_proposed_markets_data == mock_val
 
-    def test_collected_proposed_markets_data_default(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_collected_proposed_markets_data_default(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test collected_proposed_markets_data returns default."""
         mocked_db.get.return_value = DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA
-        assert sync_data.collected_proposed_markets_data == DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA
+        assert (
+            sync_data.collected_proposed_markets_data
+            == DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA
+        )
 
-    def test_mech_requests_empty(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_mech_requests_empty(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test mech_requests with empty list."""
         mocked_db.get.return_value = "[]"
         assert sync_data.mech_requests == []
 
-    def test_mech_requests_none_fallback(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_mech_requests_none_fallback(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test mech_requests with None serialized value."""
         mocked_db.get.return_value = None
         assert sync_data.mech_requests == []
 
-    def test_mech_responses_empty(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_mech_responses_empty(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test mech_responses with empty list."""
         mocked_db.get.return_value = "[]"
         assert sync_data.mech_responses == []
 
-    def test_mech_responses_none_fallback(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_mech_responses_none_fallback(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test mech_responses with None serialized value."""
         mocked_db.get.return_value = None
         assert sync_data.mech_responses == []
 
-    def test_approved_markets_data(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_approved_markets_data(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test approved_markets_data property."""
         mock_data = {"markets": ["m1"]}
         mocked_db.get_strict.return_value = mock_data
         assert sync_data.approved_markets_data == mock_data
         mocked_db.get_strict.assert_called_once_with("approved_markets_data")
 
-    def test_approved_question_data(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_approved_question_data(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test approved_question_data property."""
         mock_data = {"question": "test?"}
         mocked_db.get_strict.return_value = mock_data
         assert sync_data.approved_question_data == mock_data
         mocked_db.get_strict.assert_called_once_with("approved_question_data")
 
-    def test_is_approved_question_data_set_true(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_is_approved_question_data_set_true(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test is_approved_question_data_set when data is set."""
         mocked_db.get.return_value = {"question": "test?"}
         assert sync_data.is_approved_question_data_set is True
 
-    def test_is_approved_question_data_set_false(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_is_approved_question_data_set_false(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test is_approved_question_data_set when data is not set."""
         mocked_db.get.return_value = None
         assert sync_data.is_approved_question_data_set is False
 
-    def test_most_voted_tx_hash(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_most_voted_tx_hash(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test most_voted_tx_hash property."""
         mocked_db.get_strict.return_value = "0xabc123"
         assert sync_data.most_voted_tx_hash == "0xabc123"
         mocked_db.get_strict.assert_called_once_with("most_voted_tx_hash")
 
-    def test_most_voted_keeper_address(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_most_voted_keeper_address(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test most_voted_keeper_address property."""
         mocked_db.get_strict.return_value = "0xkeeper"
         assert sync_data.most_voted_keeper_address == "0xkeeper"
         mocked_db.get_strict.assert_called_once_with("most_voted_keeper_address")
 
-    def test_markets_to_remove_liquidity(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_markets_to_remove_liquidity(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test markets_to_remove_liquidity property."""
         markets = [{"address": "0x1"}, {"address": "0x2"}]
         mocked_db.get.return_value = markets
         assert sync_data.markets_to_remove_liquidity == markets
 
-    def test_markets_to_remove_liquidity_default(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_markets_to_remove_liquidity_default(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test markets_to_remove_liquidity default."""
         mocked_db.get.return_value = []
         assert sync_data.markets_to_remove_liquidity == []
 
-    def test_market_from_block(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_market_from_block(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test market_from_block property."""
         mocked_db.get.return_value = 12345
         assert sync_data.market_from_block == 12345
 
-    def test_market_from_block_default(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_market_from_block_default(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test market_from_block default."""
         mocked_db.get.return_value = 0
         assert sync_data.market_from_block == 0
 
-    def test_settled_tx_hash(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_settled_tx_hash(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test settled_tx_hash property."""
         mocked_db.get.return_value = "0xfinal"
         assert sync_data.settled_tx_hash == "0xfinal"
 
-    def test_settled_tx_hash_none(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_settled_tx_hash_none(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test settled_tx_hash when None."""
         mocked_db.get.return_value = None
         assert sync_data.settled_tx_hash is None
 
-    def test_tx_submitter(self, sync_data: SynchronizedData, mocked_db: MagicMock) -> None:
+    def test_tx_submitter(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
         """Test tx_submitter property."""
         mocked_db.get_strict.return_value = "some_round_id"
         assert sync_data.tx_submitter == "some_round_id"
         mocked_db.get_strict.assert_called_once_with("tx_submitter")
 
-    @patch("packages.valory.skills.market_creation_manager_abci.states.base.CollectionRound.deserialize_collection")
+    @patch(
+        "packages.valory.skills.market_creation_manager_abci.states.base.CollectionRound.deserialize_collection"
+    )
     def test_participant_to_tx_prep(
         self,
         mock_deserialize: MagicMock,

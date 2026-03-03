@@ -71,7 +71,11 @@ SENDER = "sender_address"
         ),
         (
             ApproveMarketsPayload,
-            {"content": '{"approved": true}', "approved_markets_count": 3, "timestamp": 1000000},
+            {
+                "content": '{"approved": true}',
+                "approved_markets_count": 3,
+                "timestamp": 1000000,
+            },
         ),
         (
             GetPendingQuestionsPayload,
@@ -83,9 +87,7 @@ SENDER = "sender_address"
         ),
     ],
 )
-def test_payload_construction_and_attributes(
-    payload_class, payload_kwargs
-) -> None:
+def test_payload_construction_and_attributes(payload_class, payload_kwargs) -> None:
     """Test payload construction, attributes, and serialization roundtrip."""
     payload = payload_class(sender=SENDER, **payload_kwargs)
 

@@ -44,7 +44,10 @@ class TestConstants:
 
     def test_contract_id(self) -> None:
         """Test contract_id."""
-        assert str(FPMMDeterministicFactory.contract_id) == "valory/fpmm_deterministic_factory:0.1.0"
+        assert (
+            str(FPMMDeterministicFactory.contract_id)
+            == "valory/fpmm_deterministic_factory:0.1.0"
+        )
 
 
 class TestGetLogs:
@@ -118,7 +121,7 @@ class TestGetCreateFpmmTx:
         with patch.object(
             FPMMDeterministicFactory, "get_instance", return_value=mock_instance
         ):
-            result = FPMMDeterministicFactory.get_create_fpmm_tx(
+            _ = FPMMDeterministicFactory.get_create_fpmm_tx(
                 ledger_api=mock_ledger_api,
                 contract_address="0xfactory",
                 condition_id="0xcondition",
@@ -192,7 +195,11 @@ class TestGetMarketCreationEvents:
 
         # Mock event abi
         mock_event = MagicMock()
-        mock_event.abi = {"name": "FixedProductMarketMakerCreation", "type": "event", "inputs": []}
+        mock_event.abi = {
+            "name": "FixedProductMarketMakerCreation",
+            "type": "event",
+            "inputs": [],
+        }
         mock_instance.events.FixedProductMarketMakerCreation.return_value = mock_event
 
         with patch.object(

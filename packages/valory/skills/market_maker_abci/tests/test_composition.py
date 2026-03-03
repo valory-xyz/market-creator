@@ -109,54 +109,42 @@ class TestAbciAppTransitionMapping:
     def test_mech_legacy_detected(self) -> None:
         """Test FinishedMechLegacyDetectedRound maps to MechRequestRound."""
         assert (
-            abci_app_transition_mapping[
-                MechFinalStates.FinishedMechLegacyDetectedRound
-            ]
+            abci_app_transition_mapping[MechFinalStates.FinishedMechLegacyDetectedRound]
             == MechRequestStates.MechRequestRound
         )
 
     def test_mech_information_finished(self) -> None:
         """Test FinishedMechInformationRound maps to MechRequestRound."""
         assert (
-            abci_app_transition_mapping[
-                MechFinalStates.FinishedMechInformationRound
-            ]
+            abci_app_transition_mapping[MechFinalStates.FinishedMechInformationRound]
             == MechRequestStates.MechRequestRound
         )
 
     def test_mech_information_failed(self) -> None:
         """Test FailedMechInformationRound maps to MechVersionDetection."""
         assert (
-            abci_app_transition_mapping[
-                MechFinalStates.FailedMechInformationRound
-            ]
+            abci_app_transition_mapping[MechFinalStates.FailedMechInformationRound]
             == MechVersionStates.MechVersionDetectionRound
         )
 
     def test_mech_request_finished(self) -> None:
         """Test FinishedMechRequestRound maps to TransactionSettlement."""
         assert (
-            abci_app_transition_mapping[
-                MechFinalStates.FinishedMechRequestRound
-            ]
+            abci_app_transition_mapping[MechFinalStates.FinishedMechRequestRound]
             == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
         )
 
     def test_mech_response_finished(self) -> None:
         """Test FinishedMechResponseRound maps to AnswerQuestionsRound."""
         assert (
-            abci_app_transition_mapping[
-                MechFinalStates.FinishedMechResponseRound
-            ]
+            abci_app_transition_mapping[MechFinalStates.FinishedMechResponseRound]
             == MarketCreationManagerAbci.AnswerQuestionsRound
         )
 
     def test_mech_request_skip_finished(self) -> None:
         """Test FinishedMechRequestSkipRound maps to CollectRandomnessRound."""
         assert (
-            abci_app_transition_mapping[
-                MechFinalStates.FinishedMechRequestSkipRound
-            ]
+            abci_app_transition_mapping[MechFinalStates.FinishedMechRequestSkipRound]
             == MarketCreationManagerAbci.CollectRandomnessRound
         )
 

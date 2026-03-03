@@ -22,7 +22,6 @@
 from unittest.mock import MagicMock
 
 import pytest
-
 from aea.configurations.data_types import PublicId
 
 from packages.valory.protocols.llm import LlmMessage

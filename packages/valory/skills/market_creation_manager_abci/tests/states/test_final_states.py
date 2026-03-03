@@ -28,9 +28,9 @@ from packages.valory.skills.market_creation_manager_abci.states.final_states imp
     FinishedWithDepositDaiRound,
     FinishedWithGetPendingQuestionsRound,
     FinishedWithMechRequestRound,
-    FinishedWithoutTxRound,
     FinishedWithRedeemBondRound,
     FinishedWithRemoveFundingRound,
+    FinishedWithoutTxRound,
 )
 
 

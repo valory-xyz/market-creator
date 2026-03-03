@@ -78,11 +78,24 @@ class TestPostTransactionRound:
         """Test all payload constants."""
         assert PostTransactionRound.DONE_PAYLOAD == "DONE_PAYLOAD"
         assert PostTransactionRound.ERROR_PAYLOAD == "ERROR_PAYLOAD"
-        assert PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD == "MECH_REQUEST_DONE_PAYLOAD"
-        assert PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD == "REDEEM_BOND_DONE_PAYLOAD"
-        assert PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD == "DEPOSIT_DAI_DONE_PAYLOAD"
-        assert PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD == "ANSWER_QUESTION_DONE_PAYLOAD"
-        assert PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD == "REMOVE_FUNDING_DONE_PAYLOAD"
+        assert (
+            PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
+            == "MECH_REQUEST_DONE_PAYLOAD"
+        )
+        assert (
+            PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD == "REDEEM_BOND_DONE_PAYLOAD"
+        )
+        assert (
+            PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD == "DEPOSIT_DAI_DONE_PAYLOAD"
+        )
+        assert (
+            PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
+            == "ANSWER_QUESTION_DONE_PAYLOAD"
+        )
+        assert (
+            PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
+            == "REMOVE_FUNDING_DONE_PAYLOAD"
+        )
 
 
 class TestPostTransactionRoundEndBlock:
@@ -94,9 +107,7 @@ class TestPostTransactionRoundEndBlock:
         context = MagicMock()
         synced_data = MagicMock(spec=SynchronizedData)
         synced_data.nb_participants = 4
-        return PostTransactionRound(
-            synchronized_data=synced_data, context=context
-        )
+        return PostTransactionRound(synchronized_data=synced_data, context=context)
 
     @pytest.mark.parametrize(
         "payload,expected_event",

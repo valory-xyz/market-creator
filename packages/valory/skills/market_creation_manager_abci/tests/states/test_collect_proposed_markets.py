@@ -48,7 +48,9 @@ class TestCollectProposedMarketsRound:
 
     def test_payload_class(self) -> None:
         """Test payload class."""
-        assert CollectProposedMarketsRound.payload_class == CollectProposedMarketsPayload
+        assert (
+            CollectProposedMarketsRound.payload_class == CollectProposedMarketsPayload
+        )
 
     def test_synchronized_data_class(self) -> None:
         """Test synchronized data class."""
@@ -118,7 +120,10 @@ class TestCollectProposedMarketsRoundEndBlock:
         [
             ("ERROR_PAYLOAD", Event.ERROR),
             ("MAX_RETRIES_PAYLOAD", Event.MAX_RETRIES_REACHED),
-            ("MAX_APPROVED_MARKETS_REACHED_PAYLOAD", Event.MAX_APPROVED_MARKETS_REACHED),
+            (
+                "MAX_APPROVED_MARKETS_REACHED_PAYLOAD",
+                Event.MAX_APPROVED_MARKETS_REACHED,
+            ),
             ("SKIP_MARKET_APPROVAL_PAYLOAD", Event.SKIP_MARKET_APPROVAL),
         ],
     )

@@ -92,9 +92,7 @@ class TestGetPendingQuestionsRoundEndBlock:
         """Set up round."""
         context = MagicMock()
         synced_data = MagicMock(spec=SynchronizedData)
-        return GetPendingQuestionsRound(
-            synchronized_data=synced_data, context=context
-        )
+        return GetPendingQuestionsRound(synchronized_data=synced_data, context=context)
 
     def test_end_block_returns_none_when_parent_returns_none(
         self, setup_round: GetPendingQuestionsRound

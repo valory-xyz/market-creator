@@ -20,7 +20,7 @@
 """Tests for the RetrieveApprovedMarketRound."""
 
 import json
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -46,7 +46,9 @@ class TestRetrieveApprovedMarketRound:
 
     def test_payload_class(self) -> None:
         """Test payload class."""
-        assert RetrieveApprovedMarketRound.payload_class == RetrieveApprovedMarketPayload
+        assert (
+            RetrieveApprovedMarketRound.payload_class == RetrieveApprovedMarketPayload
+        )
 
     def test_synchronized_data_class(self) -> None:
         """Test synchronized data class."""
@@ -114,7 +116,9 @@ class TestRetrieveApprovedMarketRoundEndBlock:
     ) -> None:
         """Test NO_MARKETS_RETRIEVED payload."""
         keeper_payload = MagicMock(spec=RetrieveApprovedMarketPayload)
-        keeper_payload.content = RetrieveApprovedMarketRound.NO_MARKETS_RETRIEVED_PAYLOAD
+        keeper_payload.content = (
+            RetrieveApprovedMarketRound.NO_MARKETS_RETRIEVED_PAYLOAD
+        )
         setup_round.keeper_payload = keeper_payload
         updated_data = MagicMock(spec=SynchronizedData)
         setup_round.synchronized_data.update.return_value = updated_data

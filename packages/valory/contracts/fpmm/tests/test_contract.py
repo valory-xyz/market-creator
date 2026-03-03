@@ -72,9 +72,7 @@ class TestFPMMContractNotImplemented:
     def test_get_state_raises(self) -> None:
         """Test get_state raises NotImplementedError."""
         with pytest.raises(NotImplementedError):
-            FPMMContract.get_state(
-                ledger_api=MagicMock(), contract_address="0x1234"
-            )
+            FPMMContract.get_state(ledger_api=MagicMock(), contract_address="0x1234")
 
 
 class TestFPMMContractGetBalance:

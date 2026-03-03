@@ -55,24 +55,24 @@ fingerprint:
   tests/conftest.py: bafybeidss3pebq2xlilvn5bhhgajnmwdfjlas4cgxqabjiabgdz35bm4cy
   tests/states/__init__.py: bafybeia5upph3nlp3opku7erao46kkvbsddderrgmwfrcustzobnq2h44e
   tests/states/test_answer_questions.py: bafybeiaixkrstcdtmo5ljrwecnywzfx7b2x2fd4v7axdwar2vdmmcgzlim
-  tests/states/test_approve_markets.py: bafybeibmjwyuhyk6s2yic6espwhqjerdtnb3pnsv5ep54we62y7hrlyquy
-  tests/states/test_base.py: bafybeiguwkhvtupzrthwuicdisubgqoyzobkaeiaydmkomsiywfczahgfy
-  tests/states/test_collect_proposed_markets.py: bafybeiaa37nipcthzw674dbhhrj3tn2kh4lozkbdj6moc5jjlahmxyya7u
+  tests/states/test_approve_markets.py: bafybeih4v3ml2gizo356a6z4tqwrdmfnxkqgs6tmhlzzvpb45fypoedhlu
+  tests/states/test_base.py: bafybeiecyf3oj6gbgnmzbdbpa3v4deo5aka6nlix42lumc7kx56wv2dniq
+  tests/states/test_collect_proposed_markets.py: bafybeiegx53b4vktvw35r2tqfzhi462vcagydiii36oqd5jilggoi374v4
   tests/states/test_collect_randomness.py: bafybeidw6o2xxpb2ouv5xl3vhu2itomfbe27ktj4re4jl6vgneqqeauqae
   tests/states/test_deposit_dai.py: bafybeihkdn3rkaojtvjf4iiuhxevlgqqc7luokkc33ufcoshdd4tdxw2ea
-  tests/states/test_final_states.py: bafybeicsndor54e33diwd6mhwe5ajejj5wqbcw6ek6mdxf2uwbouguajcm
-  tests/states/test_get_pending_questions.py: bafybeibyqbopcdncpk5c5rh3vqk2vwpu7m2bb4sepuitdisayz6d4k4wki
-  tests/states/test_post_transaction.py: bafybeif6h6yht25md3uanwuutdvlpehgfs3ng5hwaeifui3lk3o2v7bosy
+  tests/states/test_final_states.py: bafybeif2cu4f5kzqgyvxmtiahr2y6jihlov6goztkpw2nz3bvvnbhttipa
+  tests/states/test_get_pending_questions.py: bafybeiaiihezlwh5lg2wa3bdqkrl3jlvhnmwwyzjrfk53vnhngqc725b4y
+  tests/states/test_post_transaction.py: bafybeigpcfa74tu2kfxsdy7owk4l3vd3b7mvfjwrhzgq75v63bp45oxm64
   tests/states/test_prepare_transaction.py: bafybeidph6bz67zs4nsjcxkyl5n6stwww6aaej33mn4g25wbraygpwahhm
   tests/states/test_redeem_bond.py: bafybeieuta7by3nacsoohgmg654tk5e6ixiski4n3s44jqgy4zyltnuelq
-  tests/states/test_remove_funding.py: bafybeih5kifvwnhgghvmadpctsu4e2y3t5cep7zzynqs3hww5aj3qwyhgi
-  tests/states/test_retrieve_approved_market.py: bafybeihthmirx7bbjp7so655ttxqqv4klhqdwlgzk3r2rzhsvsvo4zn2su
+  tests/states/test_remove_funding.py: bafybeieoei3oogpf7u4bixslnf7au4elzqfbdczao27u3jisvhws6fywvu
+  tests/states/test_retrieve_approved_market.py: bafybeieoajxombos5qvn3cahddtacaip6a47baqnkurfavxefjpk36gxom
   tests/states/test_select_keeper.py: bafybeig3mmzfnujfncysgxnhqxshyr457hlowdhlpjrwqwigoy53ipzceq
-  tests/states/test_sync_markets.py: bafybeihesbpm7g5bmkyekqr5sy72ifaiih4obslb5qqxmn5inmbds7kshe
-  tests/test_dialogues.py: bafybeial27de4k6us76q6o3nr6obxxuiqyfxtolw3bo5y23ex76bkubklu
-  tests/test_handlers.py: bafybeibygllwfneaji6hrvyg5g7ysjnvs2zjfa6lpivwp2dnljepghonxy
-  tests/test_payloads.py: bafybeiap3sbwkx2xl7tsmzer5hax7dwxy3woe3tznnstxfjyhfof4bpnra
-  tests/test_rounds.py: bafybeiatq5efrjb272jnxvkpw6b3rpwplyedqcz5valk7hbuf46qdy7lde
+  tests/states/test_sync_markets.py: bafybeictckwttpeivfjtfd2rdcnr2tymcskzkkuv2iv5k7hp5mmwfuewde
+  tests/test_dialogues.py: bafybeicnp36mq6uerue4ag62gwbu5zu5ofq3sokzur2hrzmu7knu76vg5y
+  tests/test_handlers.py: bafybeiha3b5gk3itmszfwx7d7zscmslbnnp7mbhqrljiogudbjh4qlwu5i
+  tests/test_payloads.py: bafybeia3d7tqokbuhs5wephxxpyjg3s6rivjdui7frapbp557p7tv7sdaq
+  tests/test_rounds.py: bafybeid6t4vfyclwbmw3rkcgimcsb4pnjf7jiilkqhqpn6j5c7cf5oaqga
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
@@ -80,9 +80,9 @@ contracts:
 - valory/multisend:0.1.0:bafybeidjdgi2kyexajirj3cnpzgse4y5u664b2blztt4flv6i7knlecyr4
 - valory/realitio:0.1.0:bafybeihe53hnzcaopijg7ngg2ackkb2mu6iqpvxdjxpnvdzaqckq4txtea
 - valory/conditional_tokens:0.1.0:bafybeihg4vo2qxpdioopj2oudhbbql4yfgiadr7px3x73e5zxsouziijwy
-- valory/fpmm_deterministic_factory:0.1.0:bafybeiftd5h7cnw65mhvkszz3tgilwqg66iymtcgfjoxc43xb6gdpeyzly
+- valory/fpmm_deterministic_factory:0.1.0:bafybeih35oxsgppial3ocgdzarji65r443fqzp7znufwfrv6ckhgc7mxaa
 - valory/erc20:0.1.0:bafybeig3avtl5ffku556ipvuviiat5p2psfw46fa2ieofcc4eculxe3vde
-- valory/fpmm:0.1.0:bafybeieqkkxw7pklazj272awjnnfzisocv5s25slxxathqromoykwx2cry
+- valory/fpmm:0.1.0:bafybeihcfugx2oivtbhamiogcg2w45abxlqbwqkxlzi5spfwtlsl7vvlty
 protocols:
 - valory/llm:1.0.0:bafybeiardrklsughnm6tdnc3seqderlnq5nj4xolgnk42crr3kxexjlrfe
 - valory/contract_api:1.0.0:bafybeigl7mxuyxngk4gztgygeccbgdfrllx73kwbvvkjvtkfw6ionyd56q

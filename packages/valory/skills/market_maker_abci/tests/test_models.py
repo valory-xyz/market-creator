@@ -21,8 +21,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
 )
@@ -37,9 +35,9 @@ from packages.valory.skills.market_creation_manager_abci.models import (
     SharedState as BaseSharedState,
 )
 from packages.valory.skills.market_maker_abci.models import (
+    BenchmarkTool,
     MARGIN,
     MULTIPLIER,
-    BenchmarkTool,
     MechResponseSpecs,
     OmenSubgraph,
     Params,
@@ -161,7 +159,8 @@ class TestSharedState:
             MarketCreatorAbciApp.event_to_timeout[ResetPauseEvent.ROUND_TIMEOUT] == 30
         )
         assert (
-            MarketCreatorAbciApp.event_to_timeout[TSEvent.RESET_TIMEOUT] == 30 * MULTIPLIER
+            MarketCreatorAbciApp.event_to_timeout[TSEvent.RESET_TIMEOUT]
+            == 30 * MULTIPLIER
         )
         assert MarketCreatorAbciApp.event_to_timeout[TSEvent.VALIDATE_TIMEOUT] == 60
         assert MarketCreatorAbciApp.event_to_timeout[TSEvent.FINALIZE_TIMEOUT] == 90
@@ -173,8 +172,7 @@ class TestSharedState:
             == 10 + MARGIN
         )
         assert (
-            MarketCreatorAbciApp.event_to_timeout[MechInteractEvent.ROUND_TIMEOUT]
-            == 60
+            MarketCreatorAbciApp.event_to_timeout[MechInteractEvent.ROUND_TIMEOUT] == 60
         )
 
 

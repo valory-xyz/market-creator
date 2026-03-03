@@ -20,24 +20,6 @@
 """Tests for the dialogues of the MarketCreationManagerAbciApp."""
 
 import packages.valory.skills.market_creation_manager_abci.dialogues as dialogues_mod  # noqa: F401
-from packages.valory.skills.market_creation_manager_abci.dialogues import (
-    AbciDialogue,
-    AbciDialogues,
-    ContractApiDialogue,
-    ContractApiDialogues,
-    HttpDialogue,
-    HttpDialogues,
-    IpfsDialogue,
-    IpfsDialogues,
-    LedgerApiDialogue,
-    LedgerApiDialogues,
-    LlmDialogue,
-    LlmDialogues,
-    SigningDialogue,
-    SigningDialogues,
-    TendermintDialogue,
-    TendermintDialogues,
-)
 from packages.valory.skills.abstract_round_abci.dialogues import (
     AbciDialogue as BaseAbciDialogue,
 )
@@ -79,6 +61,24 @@ from packages.valory.skills.abstract_round_abci.dialogues import (
 )
 from packages.valory.skills.abstract_round_abci.dialogues import (
     TendermintDialogues as BaseTendermintDialogues,
+)
+from packages.valory.skills.market_creation_manager_abci.dialogues import (
+    AbciDialogue,
+    AbciDialogues,
+    ContractApiDialogue,
+    ContractApiDialogues,
+    HttpDialogue,
+    HttpDialogues,
+    IpfsDialogue,
+    IpfsDialogues,
+    LedgerApiDialogue,
+    LedgerApiDialogues,
+    LlmDialogue,
+    LlmDialogues,
+    SigningDialogue,
+    SigningDialogues,
+    TendermintDialogue,
+    TendermintDialogues,
 )
 
 

@@ -179,7 +179,9 @@ class TestHttpHandler:
         """Test URL regex matches 127.0.0.1."""
         assert re.match(handler.handler_url_regex, "http://127.0.0.1:8000/healthcheck")
 
-    def test_handler_url_regex_matches_custom_hostname(self, handler: HttpHandler) -> None:
+    def test_handler_url_regex_matches_custom_hostname(
+        self, handler: HttpHandler
+    ) -> None:
         """Test URL regex matches the custom hostname."""
         assert re.match(
             handler.handler_url_regex,
@@ -217,7 +219,9 @@ class TestHttpHandlerGetHandler:
         fn, kwargs = handler._get_handler("http://localhost:8080/healthcheck", "post")
         assert fn == handler._handle_bad_request
 
-    def test_get_handler_unmatched_route_returns_bad_request(self, handler: HttpHandler) -> None:
+    def test_get_handler_unmatched_route_returns_bad_request(
+        self, handler: HttpHandler
+    ) -> None:
         """Test _get_handler returns bad_request for matched base URL, unmatched route."""
         fn, kwargs = handler._get_handler("http://localhost:8080/unknown_path", "get")
         assert fn == handler._handle_bad_request

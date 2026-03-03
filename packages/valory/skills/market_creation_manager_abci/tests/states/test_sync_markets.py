@@ -81,13 +81,9 @@ class TestSyncMarketsRoundEndBlock:
         context = MagicMock()
         synced_data = MagicMock(spec=SynchronizedData)
         synced_data.nb_participants = 4
-        return SyncMarketsRound(
-            synchronized_data=synced_data, context=context
-        )
+        return SyncMarketsRound(synchronized_data=synced_data, context=context)
 
-    def test_end_block_threshold_error(
-        self, setup_round: SyncMarketsRound
-    ) -> None:
+    def test_end_block_threshold_error(self, setup_round: SyncMarketsRound) -> None:
         """Test error payload returns ERROR event."""
         with patch.object(
             type(setup_round),
@@ -106,9 +102,7 @@ class TestSyncMarketsRoundEndBlock:
                 _, event = result
                 assert event == Event.ERROR
 
-    def test_end_block_threshold_no_update(
-        self, setup_round: SyncMarketsRound
-    ) -> None:
+    def test_end_block_threshold_no_update(self, setup_round: SyncMarketsRound) -> None:
         """Test NO_UPDATE payload returns DONE event."""
         with patch.object(
             type(setup_round),
@@ -131,10 +125,12 @@ class TestSyncMarketsRoundEndBlock:
         self, setup_round: SyncMarketsRound
     ) -> None:
         """Test happy path parses JSON and updates data."""
-        payload = json.dumps({
-            "markets": [{"address": "0x1"}],
-            "from_block": 12345,
-        })
+        payload = json.dumps(
+            {
+                "markets": [{"address": "0x1"}],
+                "from_block": 12345,
+            }
+        )
         updated_data = MagicMock(spec=SynchronizedData)
         setup_round.synchronized_data.update.return_value = updated_data
 

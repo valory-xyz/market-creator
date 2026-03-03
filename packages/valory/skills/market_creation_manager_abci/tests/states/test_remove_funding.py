@@ -99,9 +99,7 @@ class TestRemoveFundingRoundEndBlock:
             {"address": "0x1", "data": "a"},
             {"address": "0x2", "data": "b"},
         ]
-        return RemoveFundingRound(
-            synchronized_data=synced_data, context=context
-        )
+        return RemoveFundingRound(synchronized_data=synced_data, context=context)
 
     def test_end_block_threshold_error_payload(
         self, setup_round: RemoveFundingRound

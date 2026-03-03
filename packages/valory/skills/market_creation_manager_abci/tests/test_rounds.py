@@ -519,7 +519,10 @@ class TestDbPostConditions:
         final_round: type,
     ) -> None:
         """Test post conditions containing most_voted_tx_hash."""
-        assert get_name(SynchronizedData.most_voted_tx_hash) in abci_app.db_post_conditions[final_round]
+        assert (
+            get_name(SynchronizedData.most_voted_tx_hash)
+            in abci_app.db_post_conditions[final_round]
+        )
 
     @pytest.mark.parametrize(
         "final_round",

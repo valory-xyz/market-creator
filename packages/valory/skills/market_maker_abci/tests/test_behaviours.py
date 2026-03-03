@@ -19,9 +19,7 @@
 
 """Tests for the market_maker_abci behaviours."""
 
-from packages.valory.skills.abstract_round_abci.behaviours import (
-    AbstractRoundBehaviour,
-)
+from packages.valory.skills.abstract_round_abci.behaviours import AbstractRoundBehaviour
 from packages.valory.skills.market_creation_manager_abci.behaviours.round_behaviour import (
     MarketCreationManagerRoundBehaviour,
 )

@@ -85,9 +85,7 @@ class TestApproveMarketsRoundEndBlock:
         self, setup_round: ApproveMarketsRound
     ) -> None:
         """Test that end_block returns None when parent returns None."""
-        with patch.object(
-            OnlyKeeperSendsRound, "end_block", return_value=None
-        ):
+        with patch.object(OnlyKeeperSendsRound, "end_block", return_value=None):
             result = setup_round.end_block()
             assert result is None
 
