@@ -228,6 +228,24 @@ Create test files for each of the 14 behaviours in `packages/valory/skills/marke
 3. Verify no tests require network access or external APIs — all external calls must be mocked
 4. Run `pytest tests/ -m "not integration" --co` to ensure all tests are discovered
 
+## Pre-Push Checklist
+
+**Before pushing**, the following commands must be run so that CI linters don't fail:
+
+```bash
+# 1. Auto-format code (import sorting + black)
+tox -e isort
+tox -e black
+
+# 2. Lock package hashes (updates hashes.csv after any file changes)
+autonomy packages lock
+
+# 3. Verify code checks pass
+tomte check-code
+```
+
+**Important**: Ignore files that are not relevant for this work (e.g. local files, notebooks, scripts, debug files that are not going to be committed to the repository). Only stage and commit test files, config files (`tox.ini`, `.coveragerc`, `conftest.py`), and the workflow YAML.
+
 ## Decisions
 
 - **`--cov` targets**: 4 dev packages explicitly (not `operate` or `packages`)
