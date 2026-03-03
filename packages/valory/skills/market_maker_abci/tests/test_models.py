@@ -137,7 +137,7 @@ class TestSharedState:
         context.params.mech_interact_round_timeout_seconds = 60
 
         state = SharedState.__new__(SharedState)
-        state.context = context
+        state._context = context
         state._skill_context = context
 
         with patch.object(BaseSharedState, "setup"):

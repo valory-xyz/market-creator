@@ -22,7 +22,7 @@
 import json
 import re
 from datetime import datetime
-from unittest.mock import MagicMock, PropertyMock, call, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
@@ -60,6 +60,19 @@ from packages.valory.skills.market_maker_abci.handlers import (
     SigningHandler,
     TendermintHandler,
 )
+
+
+def _make_http_handler(
+    endpoint: str = "http://localhost:8080/api",
+) -> HttpHandler:
+    """Create an HttpHandler with a mocked context, bypassing property restrictions."""
+    context = MagicMock()
+    context.params.service_endpoint_base = endpoint
+    handler = HttpHandler.__new__(HttpHandler)
+    handler._context = context
+    handler._skill_context = context
+    handler.setup()
+    return handler
 
 
 class TestHandlerAliases:
@@ -136,13 +149,7 @@ class TestHttpHandler:
     @pytest.fixture
     def handler(self) -> HttpHandler:
         """Create an HttpHandler instance for testing."""
-        context = MagicMock()
-        context.params.service_endpoint_base = "http://myservice.example.com:8080/api"
-        handler = HttpHandler.__new__(HttpHandler)
-        handler._skill_context = context
-        handler.context = context
-        handler.setup()
-        return handler
+        return _make_http_handler("http://myservice.example.com:8080/api")
 
     def test_setup_creates_handler_url_regex(self, handler: HttpHandler) -> None:
         """Test that setup creates handler_url_regex."""
@@ -186,13 +193,7 @@ class TestHttpHandlerGetHandler:
     @pytest.fixture
     def handler(self) -> HttpHandler:
         """Create an HttpHandler instance for testing."""
-        context = MagicMock()
-        context.params.service_endpoint_base = "http://localhost:8080/api"
-        handler = HttpHandler.__new__(HttpHandler)
-        handler._skill_context = context
-        handler.context = context
-        handler.setup()
-        return handler
+        return _make_http_handler("http://localhost:8080/api")
 
     def test_get_handler_health_get(self, handler: HttpHandler) -> None:
         """Test _get_handler matches healthcheck for GET."""
@@ -228,13 +229,7 @@ class TestHttpHandlerHandle:
     @pytest.fixture
     def handler(self) -> HttpHandler:
         """Create an HttpHandler instance for testing."""
-        context = MagicMock()
-        context.params.service_endpoint_base = "http://localhost:8080/api"
-        handler = HttpHandler.__new__(HttpHandler)
-        handler._skill_context = context
-        handler.context = context
-        handler.setup()
-        return handler
+        return _make_http_handler("http://localhost:8080/api")
 
     def test_handle_non_request_calls_super(self, handler: HttpHandler) -> None:
         """Test that non-REQUEST performative calls super."""
@@ -250,9 +245,6 @@ class TestHttpHandlerHandle:
 
     def test_handle_wrong_sender_calls_super(self, handler: HttpHandler) -> None:
         """Test that wrong sender calls super."""
-        from packages.valory.connections.http_server.connection import (
-            PUBLIC_ID as HTTP_SERVER_PUBLIC_ID,
-        )
         from packages.valory.protocols.http import HttpMessage
 
         msg = MagicMock(spec=HttpMessage)
@@ -286,12 +278,7 @@ class TestHttpHandlerBadRequest:
 
     def test_bad_request_sends_400(self) -> None:
         """Test bad request sends 400 response."""
-        context = MagicMock()
-        context.params.service_endpoint_base = "http://localhost:8080/api"
-        handler = HttpHandler.__new__(HttpHandler)
-        handler._skill_context = context
-        handler.context = context
-        handler.setup()
+        handler = _make_http_handler()
 
         http_msg = MagicMock()
         http_msg.version = "1.1"
@@ -306,7 +293,7 @@ class TestHttpHandlerBadRequest:
         http_dialogue.reply.assert_called_once()
         call_kwargs = http_dialogue.reply.call_args
         assert call_kwargs.kwargs["status_code"] == 400
-        context.outbox.put_message.assert_called_once()
+        handler.context.outbox.put_message.assert_called_once()
 
 
 class TestHttpHandlerSendOkResponse:
@@ -314,12 +301,7 @@ class TestHttpHandlerSendOkResponse:
 
     def test_send_ok_response(self) -> None:
         """Test OK response sends 200 with JSON data."""
-        context = MagicMock()
-        context.params.service_endpoint_base = "http://localhost:8080/api"
-        handler = HttpHandler.__new__(HttpHandler)
-        handler._skill_context = context
-        handler.context = context
-        handler.setup()
+        handler = _make_http_handler()
 
         http_msg = MagicMock()
         http_msg.version = "1.1"
@@ -336,7 +318,7 @@ class TestHttpHandlerSendOkResponse:
         call_kwargs = http_dialogue.reply.call_args
         assert call_kwargs.kwargs["status_code"] == 200
         assert call_kwargs.kwargs["body"] == json.dumps(data).encode("utf-8")
-        context.outbox.put_message.assert_called_once()
+        handler.context.outbox.put_message.assert_called_once()
 
 
 class TestHttpHandlerGetHealth:
@@ -344,12 +326,9 @@ class TestHttpHandlerGetHealth:
 
     def test_health_no_last_transition(self) -> None:
         """Test health response when no last transition timestamp."""
-        context = MagicMock()
-        context.params.service_endpoint_base = "http://localhost:8080/api"
-        handler = HttpHandler.__new__(HttpHandler)
-        handler._skill_context = context
-        handler.context = context
-        handler.setup()
+        handler = _make_http_handler()
+        context = handler.context
+        context.params.reset_pause_duration = 60
 
         # Mock state
         round_sequence = MagicMock()
@@ -385,13 +364,9 @@ class TestHttpHandlerGetHealth:
 
     def test_health_with_last_transition(self) -> None:
         """Test health response when last transition exists."""
-        context = MagicMock()
-        context.params.service_endpoint_base = "http://localhost:8080/api"
+        handler = _make_http_handler()
+        context = handler.context
         context.params.reset_pause_duration = 60
-        handler = HttpHandler.__new__(HttpHandler)
-        handler._skill_context = context
-        handler.context = context
-        handler.setup()
 
         # Mock state
         round_sequence = MagicMock()
@@ -407,8 +382,6 @@ class TestHttpHandlerGetHealth:
         round_sequence._abci_app.current_round = current_round
         round_sequence._abci_app._previous_rounds = [prev_round_1]
 
-        context.state.round_sequence = round_sequence
-        context.state = MagicMock()
         context.state.round_sequence = round_sequence
 
         with patch.object(

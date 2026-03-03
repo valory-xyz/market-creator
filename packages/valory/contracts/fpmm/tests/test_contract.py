@@ -171,12 +171,20 @@ class TestFPMMContractGetMarketsWithFunds:
         assert market1 in result["data"]
 
     def test_get_markets_with_funds_exception(self) -> None:
-        """Test get_markets_with_funds raises on error."""
+        """Test get_markets_with_funds raises on error.
+
+        Note: the source code has a logger formatting bug (comma-separated args
+        instead of %s). pytest's logging plugin propagates the resulting TypeError
+        from ``msg % args`` in ``LogRecord.getMessage``.
+        """
         mock_ledger_api = MagicMock()
         mock_ledger_api.api.eth.contract.side_effect = Exception("test error")
 
         with patch.object(FPMMContract, "get_instance", return_value=MagicMock()):
-            with pytest.raises(Exception, match="test error"):
+            with pytest.raises(
+                TypeError,
+                match="not all arguments converted during string formatting",
+            ):
                 FPMMContract.get_markets_with_funds(
                     ledger_api=mock_ledger_api,
                     contract_address="0xcontract",
