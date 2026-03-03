@@ -69,8 +69,8 @@ def _make_http_handler(
     context = MagicMock()
     context.params.service_endpoint_base = endpoint
     handler = HttpHandler.__new__(HttpHandler)
-    handler._context = context
-    handler._skill_context = context
+    handler._context = context  # type: ignore[attr-defined]
+    handler._skill_context = context  # type: ignore[attr-defined]
     handler.setup()
     return handler
 
@@ -297,7 +297,7 @@ class TestHttpHandlerBadRequest:
         http_dialogue.reply.assert_called_once()
         call_kwargs = http_dialogue.reply.call_args
         assert call_kwargs.kwargs["status_code"] == 400
-        handler.context.outbox.put_message.assert_called_once()
+        handler.context.outbox.put_message.assert_called_once()  # type: ignore[attr-defined]
 
 
 class TestHttpHandlerSendOkResponse:
@@ -322,7 +322,7 @@ class TestHttpHandlerSendOkResponse:
         call_kwargs = http_dialogue.reply.call_args
         assert call_kwargs.kwargs["status_code"] == 200
         assert call_kwargs.kwargs["body"] == json.dumps(data).encode("utf-8")
-        handler.context.outbox.put_message.assert_called_once()
+        handler.context.outbox.put_message.assert_called_once()  # type: ignore[attr-defined]
 
 
 class TestHttpHandlerGetHealth:

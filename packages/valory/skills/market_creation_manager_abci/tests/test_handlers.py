@@ -81,7 +81,7 @@ def test_handler_aliases() -> None:
         (IpfsHandler, BaseIpfsHandler),
     ],
 )
-def test_handler_isinstance(handler_cls, base_handler_cls) -> None:
+def test_handler_isinstance(handler_cls: type, base_handler_cls: type) -> None:
     """Test that handler aliases are the same class as their base."""
     assert handler_cls is base_handler_cls
 

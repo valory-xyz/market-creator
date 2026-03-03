@@ -121,7 +121,7 @@ class TestRetrieveApprovedMarketRoundEndBlock:
         )
         setup_round.keeper_payload = keeper_payload
         updated_data = MagicMock(spec=SynchronizedData)
-        setup_round.synchronized_data.update.return_value = updated_data
+        setup_round.synchronized_data.update.return_value = updated_data  # type: ignore[attr-defined]
 
         result = setup_round.end_block()
         assert result is not None
@@ -137,10 +137,10 @@ class TestRetrieveApprovedMarketRoundEndBlock:
         keeper_payload.content = json.dumps(approved_data)
         setup_round.keeper_payload = keeper_payload
         updated_data = MagicMock(spec=SynchronizedData)
-        setup_round.synchronized_data.update.return_value = updated_data
+        setup_round.synchronized_data.update.return_value = updated_data  # type: ignore[attr-defined]
 
         result = setup_round.end_block()
         assert result is not None
         result_data, event = result
         assert event == Event.DONE
-        setup_round.synchronized_data.update.assert_called_once()
+        setup_round.synchronized_data.update.assert_called_once()  # type: ignore[attr-defined]

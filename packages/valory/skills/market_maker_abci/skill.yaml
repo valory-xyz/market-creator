@@ -20,8 +20,8 @@ fingerprint:
   tests/test_behaviours.py: bafybeiaww7je4u5uyyl44ybdi57dpangy4syxcgxuepdiolqeqb4yfpk24
   tests/test_composition.py: bafybeigoesxkksviprpkf6jaoqayr7rqccucfzfqdclz2lqyb6slxmfrnm
   tests/test_dialogues.py: bafybeih7xzdqcg6yjtqhb2aydthhnqgcyjaaar6hqbzcl23ubg5po6qft4
-  tests/test_handlers.py: bafybeia4l5hanmn2fp6ollq7qf3smmweczlooc4osnq3lscy66v7jsy3hi
-  tests/test_models.py: bafybeieoisp63xhyjltu7hbg652jovgdafbhua2tfxc4a2dxfrxozhryg4
+  tests/test_handlers.py: bafybeia3km7nomevne3hgx477ax2efmuvufafpiksyggogn5qkaec526p4
+  tests/test_models.py: bafybeicusdrnxaxinf73mjv4y4okrxctvc2u46cnmc2qfyegm2ndx672ne
 fingerprint_ignore_patterns: []
 connections:
 - valory/http_server:0.22.0:bafybeigyjwg6nfwmdkwzt7i56n4zv3oj6hii2mkkgstuaztyunscjifdee
@@ -32,7 +32,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
 - valory/registration_abci:0.1.0:bafybeie3dfore53bxvbokqiarzuwulzlyt4vz5mifb4t3gxl6drwkblfha
 - valory/reset_pause_abci:0.1.0:bafybeicffwijiecbqc6z22nowir2fgwwqzwu6vokzuwgd5wa3zxromxevm
-- valory/market_creation_manager_abci:0.1.0:bafybeicyy2kdg4ovoquc57vqxupgbbuvo6um4gqwtyjopx3iwxp5sy6qry
+- valory/market_creation_manager_abci:0.1.0:bafybeifngacetzle576sqjxu4azyaqqlipnnuoaqs3wwwx754v3737ladi
 - valory/termination_abci:0.1.0:bafybeiaylk6haefa2xex55krizafzwo2v5tpkcoflw5hiwaqm3qxice23m
 - valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
 - valory/mech_interact_abci:0.1.0:bafybeienj5jzbq2x5hpedqwpa46rmprcdc42536zjyxkmsemjs3jjhl5oe

@@ -149,7 +149,7 @@ class TestRemoveFundingRoundEndBlock:
         """Test happy path with JSON payload updates data."""
         payload_data = json.dumps({"tx": "0xabc", "market": "0x1"})
         updated_data = MagicMock(spec=SynchronizedData)
-        setup_round.synchronized_data.update.return_value = updated_data
+        setup_round.synchronized_data.update.return_value = updated_data  # type: ignore[attr-defined]
 
         with patch.object(
             type(setup_round),
@@ -168,7 +168,7 @@ class TestRemoveFundingRoundEndBlock:
                 result_data, event = result
                 assert event == Event.DONE
                 # The update should have been called with the remaining market
-                setup_round.synchronized_data.update.assert_called_once()
+                setup_round.synchronized_data.update.assert_called_once()  # type: ignore[attr-defined]
 
     def test_end_block_no_threshold_no_majority(
         self, setup_round: RemoveFundingRound

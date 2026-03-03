@@ -135,8 +135,8 @@ class TestSharedState:
         context.params.mech_interact_round_timeout_seconds = 60
 
         state = SharedState.__new__(SharedState)
-        state._context = context
-        state._skill_context = context
+        state._context = context  # type: ignore[attr-defined]
+        state._skill_context = context  # type: ignore[attr-defined]
 
         with patch.object(BaseSharedState, "setup"):
             state.setup()

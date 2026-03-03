@@ -132,7 +132,7 @@ class TestSyncMarketsRoundEndBlock:
             }
         )
         updated_data = MagicMock(spec=SynchronizedData)
-        setup_round.synchronized_data.update.return_value = updated_data
+        setup_round.synchronized_data.update.return_value = updated_data  # type: ignore[attr-defined]
 
         with patch.object(
             type(setup_round),
@@ -151,7 +151,7 @@ class TestSyncMarketsRoundEndBlock:
                 result_data, event = result
                 assert event == Event.DONE
                 # update should have been called with markets and from_block
-                setup_round.synchronized_data.update.assert_called_once()
+                setup_round.synchronized_data.update.assert_called_once()  # type: ignore[attr-defined]
 
     def test_end_block_no_threshold_no_majority(
         self, setup_round: SyncMarketsRound

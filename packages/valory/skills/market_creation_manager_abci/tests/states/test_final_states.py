@@ -47,7 +47,7 @@ ALL_FINAL_STATES = [
 
 
 @pytest.mark.parametrize("final_state_cls", ALL_FINAL_STATES)
-def test_final_state_is_degenerate_round(final_state_cls) -> None:
+def test_final_state_is_degenerate_round(final_state_cls: type) -> None:
     """Test that each final state is a subclass of DegenerateRound."""
     assert issubclass(final_state_cls, DegenerateRound)
 
@@ -58,6 +58,6 @@ def test_all_final_states_count() -> None:
 
 
 @pytest.mark.parametrize("final_state_cls", ALL_FINAL_STATES)
-def test_final_state_has_docstring(final_state_cls) -> None:
+def test_final_state_has_docstring(final_state_cls: type) -> None:
     """Test that each final state has a docstring."""
     assert final_state_cls.__doc__ is not None

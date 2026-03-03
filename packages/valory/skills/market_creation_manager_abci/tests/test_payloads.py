@@ -87,7 +87,9 @@ SENDER = "sender_address"
         ),
     ],
 )
-def test_payload_construction_and_attributes(payload_class, payload_kwargs) -> None:
+def test_payload_construction_and_attributes(
+    payload_class: type, payload_kwargs: dict
+) -> None:
     """Test payload construction, attributes, and serialization roundtrip."""
     payload = payload_class(sender=SENDER, **payload_kwargs)
 
@@ -102,7 +104,7 @@ def test_payload_construction_and_attributes(payload_class, payload_kwargs) -> N
     assert payload.data == payload_kwargs
 
     # Verify JSON serialization roundtrip
-    assert payload_class.from_json(payload.json) == payload
+    assert payload_class.from_json(payload.json) == payload  # type: ignore[attr-defined]
 
 
 def test_multisig_tx_payload_defaults() -> None:
