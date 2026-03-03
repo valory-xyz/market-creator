@@ -80,9 +80,9 @@ contracts:
 - valory/multisend:0.1.0:bafybeidjdgi2kyexajirj3cnpzgse4y5u664b2blztt4flv6i7knlecyr4
 - valory/realitio:0.1.0:bafybeihe53hnzcaopijg7ngg2ackkb2mu6iqpvxdjxpnvdzaqckq4txtea
 - valory/conditional_tokens:0.1.0:bafybeihg4vo2qxpdioopj2oudhbbql4yfgiadr7px3x73e5zxsouziijwy
-- valory/fpmm_deterministic_factory:0.1.0:bafybeig3garsmaaxqyiup7q4yan2pxwfnen4oxmiul6srlr6do42hntmqu
+- valory/fpmm_deterministic_factory:0.1.0:bafybeiftd5h7cnw65mhvkszz3tgilwqg66iymtcgfjoxc43xb6gdpeyzly
 - valory/erc20:0.1.0:bafybeig3avtl5ffku556ipvuviiat5p2psfw46fa2ieofcc4eculxe3vde
-- valory/fpmm:0.1.0:bafybeib5drxg2y4fovfrao7xxgx3acbkxtvvzqiitwsxqns62nal35tcam
+- valory/fpmm:0.1.0:bafybeieqkkxw7pklazj272awjnnfzisocv5s25slxxathqromoykwx2cry
 protocols:
 - valory/llm:1.0.0:bafybeiardrklsughnm6tdnc3seqderlnq5nj4xolgnk42crr3kxexjlrfe
 - valory/contract_api:1.0.0:bafybeigl7mxuyxngk4gztgygeccbgdfrllx73kwbvvkjvtkfw6ionyd56q

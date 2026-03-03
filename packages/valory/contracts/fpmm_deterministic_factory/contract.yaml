@@ -10,7 +10,7 @@ fingerprint:
   build/FPMMDeterministicFactory.json: bafybeic3vlqb4m4lk4nps5alt4a6ewvq2dcyotoj6qdvte3pzdcq3g4xdi
   contract.py: bafybeigfy73bxbnokql3oxlynbt7dlmr7hvhmwol7kyoxu2xrhg2a7ljcu
   tests/__init__.py: bafybeidrj7b47olsrpjawrm43u4csgcp2odzro77ndkoz24ioj276l5piu
-  tests/test_contract.py: bafybeifley26yu7nah6efcsjdnm7xuttvjvj5ur35a5i4o7563lgbnrklm
+  tests/test_contract.py: bafybeib7cd2bi2c3nzzg4bn5f2mnipkvpkr5uxnidjxzi5z2rac2m66wuu
 fingerprint_ignore_patterns: []
 class_name: FPMMDeterministicFactory
 contract_interface_paths:
