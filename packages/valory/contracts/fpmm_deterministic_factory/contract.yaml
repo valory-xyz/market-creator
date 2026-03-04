@@ -9,6 +9,8 @@ fingerprint:
   __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
   build/FPMMDeterministicFactory.json: bafybeic3vlqb4m4lk4nps5alt4a6ewvq2dcyotoj6qdvte3pzdcq3g4xdi
   contract.py: bafybeigfy73bxbnokql3oxlynbt7dlmr7hvhmwol7kyoxu2xrhg2a7ljcu
+  tests/__init__.py: bafybeidrj7b47olsrpjawrm43u4csgcp2odzro77ndkoz24ioj276l5piu
+  tests/test_contract.py: bafybeihmj7jkg27darntiedeimlwambrsuzhaqqctb622wonty6xmeusoq
 fingerprint_ignore_patterns: []
 class_name: FPMMDeterministicFactory
 contract_interface_paths:
