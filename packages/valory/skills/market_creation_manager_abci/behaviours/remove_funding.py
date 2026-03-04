@@ -25,7 +25,7 @@ from typing import Any, Dict, Generator, List, Optional, Tuple, cast
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
-from packages.valory.contracts.erc20.contract import ERC20
+from packages.valory.contracts.erc20.contract import ERC20TokenContract
 from packages.valory.contracts.fpmm.contract import FPMMContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
@@ -278,8 +278,8 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,
             contract_address=self.params.conditional_tokens_contract,
-            contract_id=str(ERC20.contract_id),
-            contract_callable=get_callable_name(ERC20.build_withdraw_tx),
+            contract_id=str(ERC20TokenContract.contract_id),
+            contract_callable=get_callable_name(ERC20TokenContract.build_withdraw_tx),
             amount=amount,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
