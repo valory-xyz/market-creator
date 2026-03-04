@@ -176,16 +176,23 @@ class TestFPMMContractGetMarketsWithFunds:
         from ``msg % args`` in ``LogRecord.getMessage``.
         """
         mock_ledger_api = MagicMock()
-        mock_ledger_api.api.eth.contract.side_effect = Exception("test error")
+        mock_contract = MagicMock()
 
-        with patch.object(FPMMContract, "get_instance", return_value=MagicMock()):
+        # Mock eth.contract to return the mock_contract
+        mock_ledger_api.api.eth.contract.return_value = mock_contract
+
+        # Make codec.encode raise an exception to trigger the except block
+        mock_ledger_api.api.codec.encode.side_effect = Exception("encoding error")
+
+        with patch.object(FPMMContract, "get_instance", return_value=mock_contract):
+            # The exception that gets raised will be a TypeError due to the logger
+            # formatting bug, not the original encoding error
             with pytest.raises(
-                TypeError,
-                match="not all arguments converted during string formatting",
+                TypeError, match="not all arguments converted during string formatting"
             ):
                 FPMMContract.get_markets_with_funds(
                     ledger_api=mock_ledger_api,
-                    contract_address="0xcontract",
-                    markets=["0xmarket1"],
+                    contract_address="0xfpmm",
+                    markets=["0x1234"],
                     safe_address="0xsafe",
                 )

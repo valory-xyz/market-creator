@@ -69,7 +69,7 @@ fingerprint:
   tests/states/test_retrieve_approved_market.py: bafybeic6neyvs3nu4vmsrzlc623yefbgacpc7ofis2qw57e5g2c7bdufii
   tests/states/test_select_keeper.py: bafybeig3mmzfnujfncysgxnhqxshyr457hlowdhlpjrwqwigoy53ipzceq
   tests/states/test_sync_markets.py: bafybeiamd47774ud26jd5fywoaiqnxugqern53khdxcdrdvgcon4zp5sry
-  tests/test_dialogues.py: bafybeicnp36mq6uerue4ag62gwbu5zu5ofq3sokzur2hrzmu7knu76vg5y
+  tests/test_dialogues.py: bafybeiesmzycauqtuv6wixghbidu44lvnptijvosysz6ifr2d5qvwk35nm
   tests/test_handlers.py: bafybeibobdd3b7vweme7y7oki45afnbi5vmcb77wjgbir3duzxtppet4fa
   tests/test_payloads.py: bafybeiexnbtpk634z75sazx2kjnd2kcyqdin6g7tutba6znqoepnom4fwi
   tests/test_rounds.py: bafybeid6t4vfyclwbmw3rkcgimcsb4pnjf7jiilkqhqpn6j5c7cf5oaqga
@@ -82,7 +82,7 @@ contracts:
 - valory/conditional_tokens:0.1.0:bafybeihg4vo2qxpdioopj2oudhbbql4yfgiadr7px3x73e5zxsouziijwy
 - valory/fpmm_deterministic_factory:0.1.0:bafybeih35oxsgppial3ocgdzarji65r443fqzp7znufwfrv6ckhgc7mxaa
 - valory/erc20:0.1.0:bafybeig3avtl5ffku556ipvuviiat5p2psfw46fa2ieofcc4eculxe3vde
-- valory/fpmm:0.1.0:bafybeihcfugx2oivtbhamiogcg2w45abxlqbwqkxlzi5spfwtlsl7vvlty
+- valory/fpmm:0.1.0:bafybeidxfqxp5sh3hafq2jtij56aosj3i25o4rz3lfz4dwhfbmzemyt7ki
 protocols:
 - valory/llm:1.0.0:bafybeiardrklsughnm6tdnc3seqderlnq5nj4xolgnk42crr3kxexjlrfe
 - valory/contract_api:1.0.0:bafybeigl7mxuyxngk4gztgygeccbgdfrllx73kwbvvkjvtkfw6ionyd56q
