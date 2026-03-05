@@ -26,6 +26,7 @@ import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import timedelta
+import traceback
 from typing import Any, Dict, List
 
 import requests
@@ -72,32 +73,54 @@ query delivers_query($requestId_in: [BigInt!], $id_gt: Bytes!) {
 }
 """
 
-MM_REQUESTS_QUERY = LEGACY_REQUESTS_QUERY
+MARKETPLACE_REQUESTS_QUERY = """
+query requests_query($sender: String!, $id_gt: ID!) {
+  requests(where: {sender: $sender, id_gt: $id_gt}, orderBy: id, first: 1000) {
+    blockNumber
+    blockTimestamp
+    id
+    sender {
+      id
+    }
+    transactionHash
+    parsedRequest {
+      hash
+      id
+    }
+  }
+}
+"""
 
-MM_DELIVERS_QUERY = """
-query delivers_query($requestId_in: [Bytes!], $id_gt: ID!) {
+MARKETPLACE_DELIVERS_QUERY = """
+query delivers_query($requestId_in: [Bytes!], $id_gt: Bytes!) {
   delivers(where: {requestId_in: $requestId_in, id_gt: $id_gt}, orderBy: blockNumber, first: 1000) {
     blockNumber
     blockTimestamp
     id
-    ipfsHash
     requestId
     sender
     transactionHash
+    request {
+      parsedRequest {
+        hash
+        id
+      }
+    }
   }
 }
 """
 
 graph_endpoints_data = {
-    "legacy": {
-        "url": "https://api.subgraph.autonolas.tech/api/proxy/mech",
-        "requests_query": LEGACY_REQUESTS_QUERY,
-        "delivers_query": LEGACY_DELIVERS_QUERY,
-    },
+    # Endpoint no longer needed - marketplace contains legacy + marketplace
+    # "legacy": {
+    #     "url": "https://api.subgraph.autonolas.tech/api/proxy/mech",
+    #     "requests_query": LEGACY_REQUESTS_QUERY,
+    #     "delivers_query": LEGACY_DELIVERS_QUERY,
+    # },
     "marketplace": {
-        "url": "https://api.studio.thegraph.com/query/1716136/olas-gnosis-mech-marketplace/version/latest",
-        "requests_query": MM_REQUESTS_QUERY,
-        "delivers_query": MM_DELIVERS_QUERY,
+        "url": "https://api.subgraph.autonolas.tech/api/proxy/marketplace-gnosis",
+        "requests_query": MARKETPLACE_REQUESTS_QUERY,
+        "delivers_query": MARKETPLACE_DELIVERS_QUERY,
     },
 }
 
@@ -130,8 +153,6 @@ def _populate_missing_requests(
             if mech_request["id"] not in mech_requests:
                 mech_request["endpointId"] = endpoint_id
                 mech_requests[mech_request["id"]] = mech_request
-            elif "endpointId" not in mech_requests[mech_request["id"]]:
-                mech_requests[mech_request["id"]]["endpointId"] = "legacy"
 
         id_gt = items[-1]["id"]
         _write_mech_events_to_file(mech_requests)
@@ -167,7 +188,7 @@ def _populate_missing_delivers(endpoint_id: str, mech_requests: Dict[str, Any]) 
         for mech_request in picked_requests:
             del pending_mech_requests[mech_request["id"]]
 
-        requestsId_in = [mech_request["requestId"] for mech_request in picked_requests]
+        requestsId_in = [mech_request["parsedRequest"]["id"] for mech_request in picked_requests]
 
         mech_delivers = []
         id_gt = "0x00"
@@ -194,7 +215,7 @@ def _populate_missing_delivers(endpoint_id: str, mech_requests: Dict[str, Any]) 
         # smallest blockNumber such that >= request's blockNumber
         for mech_request in picked_requests:
             for deliver in mech_delivers:
-                if deliver["requestId"] == mech_request["requestId"] and int(
+                if deliver["requestId"] == mech_request["parsedRequest"]["id"] and int(
                     deliver["blockNumber"]
                 ) >= int(mech_request["blockNumber"]):
                     mech_request["deliver"] = deliver
@@ -220,11 +241,8 @@ def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
 
     for _, mech_request in mech_requests.items():
         if "ipfsContents" not in mech_request:
-            ipfs_hash = mech_request["ipfsHash"]
-            if mech_request["endpointId"] == "legacy":
-                url = f"{IPFS_ADDRESS}{ipfs_hash}/metadata.json"
-            else:  # marketplace
-                url = f"{IPFS_ADDRESS}{CID_V1_PREFIX}{ipfs_hash[2:]}/metadata.json"
+            ipfs_hash = mech_request["parsedRequest"]["hash"]
+            url = f"{IPFS_ADDRESS}{ipfs_hash}/metadata.json"
             pending_events.append((mech_request, url))
 
         if "deliver" in mech_request:
@@ -232,11 +250,10 @@ def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
             if "ipfsContents" not in deliver:
                 ipfs_hash = deliver["ipfsHash"]
                 request_id = deliver["requestId"]
-                if mech_request["endpointId"] == "legacy":
-                    url = f"{IPFS_ADDRESS}{ipfs_hash}/{request_id}"
-                else:  # marketplace
-                    url = f"{IPFS_ADDRESS}{CID_V1_PREFIX}{ipfs_hash[2:]}/{int(request_id, 16)}"
-
+                url = f"{IPFS_ADDRESS}{ipfs_hash}/{int(request_id, 16)}"
+                print(url)
+                import sys
+                sys.exit(1)
                 pending_events.append((deliver, url))
 
     with ThreadPoolExecutor(max_workers=THREAD_POOL_EXECUTOR_MAX_WORKERS) as executor:
@@ -365,6 +382,7 @@ def get_mech_requests(
             _populate_missing_ipfs_contents(mech_requests)
     except Exception as e:  # pylint: disable=broad-except
         print(f"An error occurred while updating mech requests: {e}")
+        traceback.print_exc() 
 
     end_time = time.time()
     elapsed_time = end_time - start_time
