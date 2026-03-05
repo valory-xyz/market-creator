@@ -4,9 +4,12 @@
 
 - ✅ Branch: `test/unit-test-coverage`
 - ✅ Main coverage command: `tox -e unit-tests-coverage`
-- ✅ Current test result: **426 passed**
-- 🟡 Phase 1 scope: **functionally complete**
-- 🔴 Remaining for strict 100% on Phase 1: **2 lines**
+- ✅ Phase 1 test result: **426 passed**
+- ✅ Phase 2 M1 test result: **40 passed** (all import issues resolved)
+- ✅ Phase 1 scope: **functionally complete**
+- ✅ Phase 2 M1 scope: **✅ COMPLETE**
+- 🔴 Remaining for strict 100% on Phase 1: **2 lines** (edge cases)
+- 🟡 Phase 2 M2-M4: **PENDING** (6 files, ~91 tests estimated)
 
 ---
 
@@ -31,7 +34,11 @@
 | 1.14 Contract `fpmm` | ✅ Done | Implemented and passing |
 | Full suite execution | ✅ Done | `426 passed` |
 | Strict 100% for Phase 1 | 🟡 Near-complete | 2 edge lines remain |
-| 2. Behaviour deep tests (follow-up phase) | ⏳ Pending | Next major block |
+| 2.1 Base behaviour tests (M1) | ✅ Done | `test_base.py`: 12 tests passed |
+| 2.2 PrepareTransaction tests (M1) | ✅ Done | `test_prepare_transaction.py`: 9 tests passed |
+| 2.3 AnswerQuestions tests (M1) | ✅ Done | `test_answer_questions.py`: 19 tests passed |
+| Phase 2 M1 suite execution | ✅ Done | **40 tests passed** (import issues resolved) |
+| 2. Behaviour deep tests M2-M4 | 🟡 In Progress | 11 medium/low priority behaviours remaining |
 
 ---
 
@@ -79,11 +86,15 @@
 | `packages/valory/contracts/fpmm/tests/__init__.py` | 20 | 🟢 |
 | `packages/valory/contracts/fpmm_deterministic_factory/tests/__init__.py` | 20 | 🟢 |
 
-### Phase 2 — Added files (currently in PR)
+### Phase 2 — Added files (M1 Complete)
 
-| File | Lines | Size | Note |
+| File | Lines | Size | Status |
 |---|---:|---|---|
-| `packages/valory/skills/market_creation_manager_abci/tests/behaviours/__init__.py` | 20 | 🟢 | Scaffolding file |
+| `packages/valory/skills/market_creation_manager_abci/tests/behaviours/__init__.py` | 20 | 🟢 | ✅ Created |
+| `packages/valory/skills/market_creation_manager_abci/tests/behaviours/conftest.py` | 77 | 🧪 | ✅ Created - Shared fixtures |
+| `packages/valory/skills/market_creation_manager_abci/tests/behaviours/test_base.py` | 175 | 📄 | ✅ Created - 12 tests passing |
+| `packages/valory/skills/market_creation_manager_abci/tests/behaviours/test_prepare_transaction.py` | 132 | 🧪 | ✅ Created - 9 tests passing |
+| `packages/valory/skills/market_creation_manager_abci/tests/behaviours/test_answer_questions.py` | 196 | 📄 | ✅ Created - 19 tests passing |
 
 > 📝 Most large tests are concentrated in FSM/handlers/state-base (`test_rounds.py`, market maker `test_handlers.py`, and states `test_base.py`).
 
@@ -108,12 +119,14 @@
 
 ---
 
-## Next Actions
+## Current Actions (Phase 2 M1 Complete)
 
-1. ⏭️ Add ultra-targeted tests for the 2 remaining uncovered lines.
-2. ⏭️ Re-run `tox -e unit-tests-coverage`.
-3. ⏭️ If both lines are hit, mark Phase 1 as ✅ strict 100%.
-4. ⏭️ Start Phase 2 (behaviour deep coverage files).
+1. ✅ Phase 2 M1: Base, PrepareTransaction, AnswerQuestions behaviour tests created + passing
+2. ✅ Fixed transitive import issue (`openai` dependency) by avoiding direct behaviour imports
+3. ⏭️ Phase 2 M2: Create 6 medium-priority behaviour test files
+4. ⏭️ Phase 2 M3: Create 4 low-priority behaviour test files  
+5. ⏭️ Phase 2 M4: Create remaining behaviour test files
+6. ⏭️ Final: `tox -e unit-tests-coverage` report with Phase 1 + Phase 2 combined
 
 ---
 
@@ -129,20 +142,20 @@
 
 | Behaviour | Planned test file | Priority | Focus |
 |---|---|---|---|
-| `base.py` | `tests/behaviours/test_base.py` | 🔴 High | Shared helpers, tx hash prep, multisend building, query helpers |
-| `prepare_transaction.py` | `tests/behaviours/test_prepare_transaction.py` | 🔴 High | Multi-contract tx assembly and branch selection |
-| `answer_questions.py` | `tests/behaviours/test_answer_questions.py` | 🔴 High | Mech responses, question parsing, tx payload building |
-| `collect_proposed_markets.py` | `tests/behaviours/test_collect_proposed_markets.py` | 🟡 Medium | Subgraph fetch + transformation + payload generation |
-| `approve_markets.py` | `tests/behaviours/test_approve_markets_behaviour.py` | 🟡 Medium | Approval gating, retries, keeper payload outcomes |
-| `get_pending_questions.py` | `tests/behaviours/test_get_pending_questions.py` | 🟡 Medium | Query pagination/filtering and no-result handling |
-| `post_transaction.py` | `tests/behaviours/test_post_transaction.py` | 🟡 Medium | Settled tx processing, event extraction branches |
-| `remove_funding.py` | `tests/behaviours/test_remove_funding.py` | 🟡 Medium | Liquidity removal + token redemption flow |
-| `sync_markets.py` | `tests/behaviours/test_sync_markets.py` | 🟡 Medium | Sync windows, from-block updates, empty deltas |
-| `retrieve_approved_market.py` | `tests/behaviours/test_retrieve_approved_market.py` | 🟢 Low | Response parsing and fallback paths |
-| `deposit_dai.py` | `tests/behaviours/test_deposit_dai.py` | 🟢 Low | Tx request scaffolding and basic branch checks |
-| `redeem_bond.py` | `tests/behaviours/test_redeem_bond.py` | 🟢 Low | Bond redemption tx branch handling |
-| `select_keeper.py` | `tests/behaviours/test_select_keeper.py` | 🟢 Low | Keeper selection wrapper behaviour |
-| `collect_randomness.py` | `tests/behaviours/test_collect_randomness.py` | 🟢 Low | Wrapper/forwarding behaviour |
+| `base.py` | `tests/behaviours/test_base.py` | ✅ M1 Done | Shared helpers, tx hash prep, multisend building, query helpers |
+| `prepare_transaction.py` | `tests/behaviours/test_prepare_transaction.py` | ✅ M1 Done | Multi-contract tx assembly and branch selection |
+| `answer_questions.py` | `tests/behaviours/test_answer_questions.py` | ✅ M1 Done | Mech responses, question parsing, tx payload building |
+| `collect_proposed_markets.py` | `tests/behaviours/test_collect_proposed_markets.py` | 🟡 M2 Next | Subgraph fetch + transformation + payload generation |
+| `approve_markets.py` | `tests/behaviours/test_approve_markets_behaviour.py` | 🟡 M2 Next | Approval gating, retries, keeper payload outcomes |
+| `get_pending_questions.py` | `tests/behaviours/test_get_pending_questions.py` | 🟡 M2 Next | Query pagination/filtering and no-result handling |
+| `post_transaction.py` | `tests/behaviours/test_post_transaction.py` | 🟡 M2 Next | Settled tx processing, event extraction branches |
+| `remove_funding.py` | `tests/behaviours/test_remove_funding.py` | 🟡 M2 Next | Liquidity removal + token redemption flow |
+| `sync_markets.py` | `tests/behaviours/test_sync_markets.py` | 🟡 M2 Next | Sync windows, from-block updates, empty deltas |
+| `retrieve_approved_market.py` | `tests/behaviours/test_retrieve_approved_market.py` | 🟢 M3 Later | Response parsing and fallback paths |
+| `deposit_dai.py` | `tests/behaviours/test_deposit_dai.py` | 🟢 M3 Later | Tx request scaffolding and basic branch checks |
+| `redeem_bond.py` | `tests/behaviours/test_redeem_bond.py` | 🟢 M3 Later | Bond redemption tx branch handling |
+| `select_keeper.py` | `tests/behaviours/test_select_keeper.py` | 🟢 M4 Last | Keeper selection wrapper behaviour |
+| `collect_randomness.py` | `tests/behaviours/test_collect_randomness.py` | 🟢 M4 Last | Wrapper/forwarding behaviour |
 
 ### Test Strategy (per behaviour)
 
@@ -170,12 +183,12 @@ For each behaviour file:
 
 ### Execution Milestones
 
-| Milestone | Deliverable | Exit Criteria |
-|---|---|---|
-| M1 | High-priority behaviours (`base`, `prepare_transaction`, `answer_questions`) | All new tests pass locally |
-| M2 | Medium-priority behaviours (6 files) | Coverage increases and no flaky tests |
-| M3 | Low-priority behaviours (5 files) | Complete Phase 2 file set in place |
-| M4 | Consolidation | `tox -e unit-tests-coverage` green and stable |
+| Milestone | Deliverable | Status | Exit Criteria |
+|---|---|---|---|
+| M1 | High-priority behaviours (`base`, `prepare_transaction`, `answer_questions`) | ✅ Complete | ✅ All 40 tests passing, import issues resolved |
+| M2 | Medium-priority behaviours (6 files) | 🟡 In Progress | Target: 42 tests, coverage increases |
+| M3 | Low-priority behaviours (4 files) | 🔴 Pending | Target: 28 tests, complete Phase 2 file set |
+| M4 | Remaining behaviours (~3-4 files) | 🔴 Pending | Target: 21 tests, `tox -e unit-tests-coverage` stable |
 
 ### Verification Commands (Phase 2)
 

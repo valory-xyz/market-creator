@@ -470,17 +470,17 @@ class TestHttpHandlerHandleInvalidDialogue:
         http_dialogues = MagicMock()
         http_dialogues.update.return_value = None
 
-        handler.context.http_dialogues = http_dialogues
+        handler.context.http_dialogues = http_dialogues  # type: ignore
 
         # Call handle with the message
         handler.handle(http_msg)
 
         # Verify that http_dialogues.update was called
-        http_dialogues.update.assert_called_once_with(http_msg)
+        http_dialogues.update.assert_called_once_with(http_msg)  # type: ignore
 
         # Verify that logger.info was called with the invalid message info
-        handler.context.logger.info.assert_called_once()
-        call_args = handler.context.logger.info.call_args
+        handler.context.logger.info.assert_called_once()  # type: ignore
+        call_args = handler.context.logger.info.call_args  # type: ignore
         assert "invalid http message" in call_args[0][0].lower()
         assert "unidentified dialogue" in call_args[0][0].lower()
 
@@ -508,7 +508,7 @@ class TestHttpHandlerHandleInvalidDialogue:
         http_dialogues = MagicMock()
         http_dialogues.update.return_value = http_dialogue
 
-        handler.context.http_dialogues = http_dialogues
+        handler.context.http_dialogues = http_dialogues  # type: ignore
 
         # Mock _get_handler to return a mock function
         mock_handler_func = MagicMock()
@@ -525,6 +525,6 @@ class TestHttpHandlerHandleInvalidDialogue:
             mock_handler_func.assert_called_once_with(http_msg, http_dialogue)
 
             # Verify logging was done (lines 207-213)
-            assert handler.context.logger.info.call_count == 1
-            call_args = handler.context.logger.info.call_args
+            assert handler.context.logger.info.call_count == 1  # type: ignore
+            call_args = handler.context.logger.info.call_args  # type: ignore
             assert "Received http request" in call_args[0][0]
