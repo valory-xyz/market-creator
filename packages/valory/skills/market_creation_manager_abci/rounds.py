@@ -100,6 +100,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             - done: 20.
             - api error: 0.
             - no majority: 1.
+            - none: 1.
             - deposit dai done: 2.
             - mech request done: 15.
             - answer question done: 4.
@@ -109,6 +110,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             - done: 18.
             - no tx: 4.
             - no majority: 4.
+            - none: 4.
             - api error: 4.
             - round timeout: 4.
         3. AnswerQuestionsRound
@@ -137,6 +139,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             - max retries reached: 9.
             - skip market approval: 9.
             - no majority: 9.
+            - none: 9.
             - round timeout: 9.
             - api error: 9.
         8. ApproveMarketsRound
@@ -146,8 +149,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             - api error: 9.
         9. RetrieveApprovedMarketRound
             - done: 10.
-            - no majority: 20.
-            - none: 20.
             - round timeout: 20.
             - did not send: 20.
             - api error: 20.
@@ -160,6 +161,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         11. SyncMarketsRound
             - done: 12.
             - no majority: 0.
+            - none: 0.
             - api error: 0.
             - round timeout: 0.
         12. RemoveFundingRound
@@ -181,7 +183,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
     Final states: {FinishedMarketCreationManagerRound, FinishedWithAnswerQuestionsRound, FinishedWithDepositDaiRound, FinishedWithGetPendingQuestionsRound, FinishedWithMechRequestRound, FinishedWithRedeemBondRound, FinishedWithRemoveFundingRound, FinishedWithoutTxRound}
 
     Timeouts:
-
+        round timeout: 180.0
     """
 
     initial_round_cls: AppState = CollectRandomnessRound
@@ -204,6 +206,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.DONE: FinishedWithoutTxRound,
             Event.ERROR: DepositDaiRound,
             Event.NO_MAJORITY: PostTransactionRound,
+            Event.NONE: PostTransactionRound,
             Event.DEPOSIT_DAI_DONE: GetPendingQuestionsRound,
             Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
             Event.ANSWER_QUESTION_DONE: CollectRandomnessRound,
@@ -214,6 +217,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.DONE: FinishedWithGetPendingQuestionsRound,
             Event.NO_TX: CollectRandomnessRound,
             Event.NO_MAJORITY: CollectRandomnessRound,
+            Event.NONE: CollectRandomnessRound,
             Event.ERROR: CollectRandomnessRound,
             Event.ROUND_TIMEOUT: CollectRandomnessRound,
         },
@@ -247,6 +251,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
             Event.SKIP_MARKET_APPROVAL: RetrieveApprovedMarketRound,
             Event.NO_MAJORITY: RetrieveApprovedMarketRound,
+            Event.NONE: RetrieveApprovedMarketRound,
             Event.ROUND_TIMEOUT: RetrieveApprovedMarketRound,
             Event.ERROR: RetrieveApprovedMarketRound,
         },
@@ -258,8 +263,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         RetrieveApprovedMarketRound: {
             Event.DONE: PrepareTransactionRound,
-            Event.NO_MAJORITY: FinishedWithoutTxRound,
-            Event.NONE: FinishedWithoutTxRound,
             Event.ROUND_TIMEOUT: FinishedWithoutTxRound,
             Event.DID_NOT_SEND: FinishedWithoutTxRound,
             Event.ERROR: FinishedWithoutTxRound,
@@ -274,6 +277,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         SyncMarketsRound: {
             Event.DONE: RemoveFundingRound,
             Event.NO_MAJORITY: DepositDaiRound,
+            Event.NONE: DepositDaiRound,
             Event.ERROR: DepositDaiRound,
             Event.ROUND_TIMEOUT: DepositDaiRound,
         },
@@ -304,8 +308,8 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithRedeemBondRound,
         FinishedWithoutTxRound,
     }
-    event_to_timeout: EventToTimeout = {
-        # MARKET_PROPOSAL_ROUND_TIMEOUT must be computed on the chained app.
+    event_to_timeout: Dict[Event, float] = {
+        Event.ROUND_TIMEOUT: 180.0,
     }
     cross_period_persisted_keys: Set[str] = {
         get_name(SynchronizedData.proposed_markets_count),
