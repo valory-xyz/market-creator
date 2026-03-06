@@ -24,8 +24,10 @@
 
 import argparse
 import bisect
+from enum import Enum
 import json
 import os
+from re import U
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -47,12 +49,25 @@ sys.path.insert(0, os.path.expanduser(f"{trader_quickstart_path}/scripts"))
 
 import trades  # noqa: E402
 from mech_request_utils import get_mech_requests  # noqa: E402
-from trades import INVALID_ANSWER, MarketState, TradeResult  # noqa: E402
+from trades import INVALID_ANSWER, MarketState  # noqa: E402
 
 
 RPC = env_file_vars.get("RPC")
 SERVICE_REGISTRY_ADDRESS = "0x9338b5153AE39BB89f50468E608eD9d764B755fD"
 DATASET_PREFIX = "trader_dataset_"
+
+
+class TradeResult(Enum):
+    """TradeResult"""
+
+    WIN = "win"
+    LOSE = "lose"
+    INVALID = "invalid"
+    UNKNOWN = "unknown"
+
+    def __str__(self) -> str:
+        """Prints the market status."""
+        return self.name.capitalize()
 
 
 def _get_contract(address: str) -> Any:
@@ -92,13 +107,16 @@ def _populate_mech_requests(
 
     # Sort mech requests by timestamp
     dumped_mech_requests = list(mech_requests.values())
+    # Filter out mech requests with None blockTimestamp
+    dumped_mech_requests = [r for r in dumped_mech_requests if r.get("blockTimestamp") is not None]
     sorted_mech_requests = sorted(
         dumped_mech_requests, key=lambda x: int(x["blockTimestamp"])
     )
     timestamps = [int(x["blockTimestamp"]) for x in sorted_mech_requests]
 
     # TODO shallow copy for efficiency, be careful
-    outstanding_mech_requests = mech_requests.copy()
+    # Filter out requests with None blockTimestamp
+    outstanding_mech_requests = {k: v for k, v in mech_requests.items() if v.get("blockTimestamp") is not None}
 
     for trade in fpmm_trades:
         creation_timestamp = int(trade["creationTimestamp"])
@@ -153,6 +171,7 @@ def _populate_market_states(fpmm_trades: Dict[str, Any]) -> None:
         if state == MarketState.CLOSED:
             outcome_index = int(trade["outcomeIndex"])
             current_answer = int(fpmm["currentAnswer"], 16)
+
             if current_answer == INVALID_ANSWER:
                 trade["result"] = TradeResult.INVALID.value
             elif current_answer == outcome_index:
