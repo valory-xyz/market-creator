@@ -84,7 +84,105 @@ from packages.valory.skills.market_creation_manager_abci.states.sync_markets imp
 
 
 class MarketCreationManagerAbciApp(AbciApp[Event]):
-    """MarketCreationManagerAbciApp"""
+    """MarketCreationManagerAbciApp
+
+    Initial round: CollectRandomnessRound
+
+    Initial states: {AnswerQuestionsRound, CollectRandomnessRound, DepositDaiRound, GetPendingQuestionsRound, PostTransactionRound, SyncMarketsRound}
+
+    Transition states:
+        0. DepositDaiRound
+            - done: 17.
+            - no majority: 2.
+            - none: 2.
+            - round timeout: 2.
+        1. PostTransactionRound
+            - done: 20.
+            - api error: 0.
+            - no majority: 1.
+            - deposit dai done: 2.
+            - mech request done: 15.
+            - answer question done: 4.
+            - redeem bond done: 7.
+            - remove funding done: 0.
+        2. GetPendingQuestionsRound
+            - done: 18.
+            - no tx: 4.
+            - no majority: 4.
+            - api error: 4.
+            - round timeout: 4.
+        3. AnswerQuestionsRound
+            - done: 14.
+            - no majority: 4.
+            - none: 4.
+            - round timeout: 4.
+        4. CollectRandomnessRound
+            - done: 5.
+            - no majority: 4.
+            - none: 4.
+            - round timeout: 4.
+        5. SelectKeeperRound
+            - done: 6.
+            - no majority: 4.
+            - none: 4.
+            - round timeout: 4.
+        6. RedeemBondRound
+            - done: 19.
+            - no majority: 7.
+            - none: 7.
+            - round timeout: 7.
+        7. CollectProposedMarketsRound
+            - done: 8.
+            - max approved markets reached: 9.
+            - max retries reached: 9.
+            - skip market approval: 9.
+            - no majority: 9.
+            - round timeout: 9.
+            - api error: 9.
+        8. ApproveMarketsRound
+            - done: 9.
+            - round timeout: 9.
+            - max retries reached: 9.
+            - api error: 9.
+        9. RetrieveApprovedMarketRound
+            - done: 10.
+            - no majority: 20.
+            - none: 20.
+            - round timeout: 20.
+            - did not send: 20.
+            - api error: 20.
+            - no markets retrieved: 20.
+        10. PrepareTransactionRound
+            - done: 13.
+            - no majority: 20.
+            - none: 20.
+            - round timeout: 20.
+        11. SyncMarketsRound
+            - done: 12.
+            - no majority: 0.
+            - api error: 0.
+            - round timeout: 0.
+        12. RemoveFundingRound
+            - done: 16.
+            - none: 0.
+            - no majority: 0.
+            - round timeout: 0.
+            - no tx: 0.
+            - api error: 0.
+        13. FinishedMarketCreationManagerRound
+        14. FinishedWithAnswerQuestionsRound
+        15. FinishedWithMechRequestRound
+        16. FinishedWithRemoveFundingRound
+        17. FinishedWithDepositDaiRound
+        18. FinishedWithGetPendingQuestionsRound
+        19. FinishedWithRedeemBondRound
+        20. FinishedWithoutTxRound
+
+    Final states: {FinishedMarketCreationManagerRound, FinishedWithAnswerQuestionsRound, FinishedWithDepositDaiRound, FinishedWithGetPendingQuestionsRound, FinishedWithMechRequestRound, FinishedWithRedeemBondRound, FinishedWithRemoveFundingRound, FinishedWithoutTxRound}
+
+    Timeouts:
+
+    """
 
     initial_round_cls: AppState = CollectRandomnessRound
     initial_states: Set[AppState] = {
