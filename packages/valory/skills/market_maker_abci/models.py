@@ -56,7 +56,6 @@ from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEv
 from packages.valory.skills.termination_abci.models import TerminationParams
 from packages.valory.skills.transaction_settlement_abci.rounds import Event as TSEvent
 
-
 MARGIN = 5
 MULTIPLIER = 2
 

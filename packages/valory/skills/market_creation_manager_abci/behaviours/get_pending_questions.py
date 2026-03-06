@@ -37,9 +37,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 )
 from packages.valory.skills.mech_interact_abci.states.base import MechMetadata
 
-
-OPEN_FPMM_QUERY = Template(
-    """{
+OPEN_FPMM_QUERY = Template("""{
     fixedProductMarketMakers(
         where: {
             creator: "$creator"
@@ -67,8 +65,7 @@ OPEN_FPMM_QUERY = Template(
         title
         timeout
     }
-    }"""
-)
+    }""")
 
 
 class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):

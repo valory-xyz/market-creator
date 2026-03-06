@@ -68,7 +68,6 @@ from packages.valory.skills.market_creation_manager_abci.dialogues import (
     LlmDialogues as BaseLlmDialogues,
 )
 
-
 AbciDialogue = BaseAbciDialogue
 AbciDialogues = BaseAbciDialogues
 

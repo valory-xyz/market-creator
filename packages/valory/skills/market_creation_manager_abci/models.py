@@ -24,7 +24,10 @@ from typing import Any, Dict, List, Set, Type
 from aea.skills.base import SkillContext
 
 from packages.valory.skills.abstract_round_abci.base import AbciApp
-from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
+from packages.valory.skills.abstract_round_abci.models import (
+    ApiSpecs,
+    BaseParams,
+)
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
 )
@@ -38,7 +41,6 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 from packages.valory.skills.mech_interact_abci.models import (
     MechResponseSpecs as BaseMechResponseSpecs,
 )
-
 
 MechResponseSpecs = BaseMechResponseSpecs
 

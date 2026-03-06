@@ -28,7 +28,6 @@ from typing import Any, Dict, Optional, Tuple
 import requests
 from openai import OpenAI
 
-
 client: Optional[OpenAI] = None
 
 

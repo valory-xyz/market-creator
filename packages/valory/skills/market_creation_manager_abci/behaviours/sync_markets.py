@@ -37,9 +37,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import SyncMarketsRound
 
-
-FPMM_POOL_MEMBERSHIPS_QUERY = Template(
-    """  {
+FPMM_POOL_MEMBERSHIPS_QUERY = Template("""  {
     fpmmPoolMemberships(
       where: {funder: "$creator", amount_gt: "0"}
       first: 1000
@@ -61,8 +59,7 @@ FPMM_POOL_MEMBERSHIPS_QUERY = Template(
         outcomeTokenAmounts
       }
     }
-  }"""
-)
+  }""")
 
 
 class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):

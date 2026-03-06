@@ -49,7 +49,6 @@ from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
 )
 
-
 HTTP_OK = 200
 HTTP_NO_CONTENT = 204
 MAX_RETRIES = 3

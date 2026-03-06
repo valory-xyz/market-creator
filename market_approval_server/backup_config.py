@@ -26,7 +26,6 @@ from typing import Any, Dict, Optional
 
 import requests
 
-
 MAX_RETRIES = 3
 RETRY_DELAY_SECONDS = 10
 ENDPOINTS = [

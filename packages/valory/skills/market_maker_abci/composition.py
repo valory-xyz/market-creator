@@ -48,7 +48,6 @@ from packages.valory.skills.termination_abci.rounds import (
     TerminationAbciApp,
 )
 
-
 abci_app_transition_mapping: AbciAppTransitionMapping = {
     FinishedRegistrationRound: MarketCreationManagerAbci.SyncMarketsRound,
     MarketCreationManagerAbci.FinishedWithoutTxRound: ResetAndPauseRound,

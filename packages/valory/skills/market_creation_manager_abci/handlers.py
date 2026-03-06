@@ -19,7 +19,6 @@
 
 """This module contains the handlers for the skill of MarketCreationManagerAbciApp."""
 
-
 from typing import Optional
 
 from aea.configurations.data_types import PublicId
@@ -28,7 +27,9 @@ from packages.valory.protocols.llm import LlmMessage
 from packages.valory.skills.abstract_round_abci.handlers import (
     ABCIRoundHandler as BaseABCIRoundHandler,
 )
-from packages.valory.skills.abstract_round_abci.handlers import AbstractResponseHandler
+from packages.valory.skills.abstract_round_abci.handlers import (
+    AbstractResponseHandler,
+)
 from packages.valory.skills.abstract_round_abci.handlers import (
     ContractApiHandler as BaseContractApiHandler,
 )
@@ -47,7 +48,6 @@ from packages.valory.skills.abstract_round_abci.handlers import (
 from packages.valory.skills.abstract_round_abci.handlers import (
     TendermintHandler as BaseTendermintHandler,
 )
-
 
 ABCIHandler = BaseABCIRoundHandler
 HttpHandler = BaseHttpHandler

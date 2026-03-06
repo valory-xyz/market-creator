@@ -29,7 +29,6 @@ import requests
 from dotenv import load_dotenv
 from openai import OpenAI
 
-
 load_dotenv(dotenv_path=".env")
 
 OPENAI_ENGINE = "gpt-4.1-2025-04-14"

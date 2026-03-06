@@ -32,7 +32,6 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.approve_mark
     ApproveMarketsBehaviour,
 )
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 

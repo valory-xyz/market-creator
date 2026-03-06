@@ -37,9 +37,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     CollectProposedMarketsRound,
 )
 
-
-FPMM_QUERY = Template(
-    """{
+FPMM_QUERY = Template("""{
     fixedProductMarketMakers(
         where: {
             creator: "$creator"
@@ -63,8 +61,7 @@ FPMM_QUERY = Template(
         title
         timeout
     }
-    }"""
-)
+    }""")
 
 
 class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):

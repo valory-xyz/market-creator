@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the class to connect to a Gnosis FPMMDeterministicFactory contract."""
+
 import logging
 import math
 import random
@@ -32,7 +33,6 @@ from web3._utils.events import get_event_data
 from web3.contract import Contract as W3Contract
 from web3.eth import Eth
 from web3.types import BlockIdentifier, FilterParams, LogReceipt, _Hash32
-
 
 DEFAULT_MARKET_FEE = 2.0
 

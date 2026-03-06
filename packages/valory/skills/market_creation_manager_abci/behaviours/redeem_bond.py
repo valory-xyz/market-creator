@@ -33,7 +33,6 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import RedeemBondRound
 
-
 MIN_BALANCE_WITHDRAW_REALITIO = 100000000000000000  # 0.1 DAI
 
 

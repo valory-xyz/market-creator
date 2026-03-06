@@ -40,7 +40,6 @@ from openai import OpenAI
 from pydantic import BaseModel
 from tiktoken import encoding_for_model
 
-
 NEWSAPI_TOP_HEADLINES_URL = "https://newsapi.org/v2/top-headlines"
 NEWSAPI_DEFAULT_NEWS_SOURCES = [
     "bbc-news",
