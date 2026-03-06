@@ -9,7 +9,7 @@ license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
-  __init__.py: bafybeigpb2bwmrshrgjlgyoem7wbnilxrlarhf6aa3mftzlll2oqspdn4a
+  __init__.py: bafybeihiyq6pmvff63y34vwsvawazkh3lw5io3lpsl5ihksvjs5thgylbm
   behaviours/__init__.py: bafybeifp3hykazw2qx32t2lg2mwehcyjdekq3tywde26pm77imco45xz3a
   behaviours/answer_questions.py: bafybeigju4ds3clnx2pto3lupfsivv36vzb5es3qggdk5kfokcpmlh5xsi
   behaviours/approve_markets.py: bafybeidhss62y6pybyit4fqq2ygkccr7jlv6ty2yg6cq3yehqy7xmendhe
@@ -26,12 +26,12 @@ fingerprint:
   behaviours/round_behaviour.py: bafybeigwwisgnfwdvnn65agwkhgfesnplhty4qltk2lf4if5wmdldt7tw4
   behaviours/select_keeper.py: bafybeiadkoyybfqxc2wsrkjk3hta5yrmp5cf6h44cru3k6pchmmuiwr3by
   behaviours/sync_markets.py: bafybeidyd5snc2fob7ndydcwcj2ifbfdyjhhdlyxer5ruhx6qjmsem3o24
-  dialogues.py: bafybeigkrvmaxliz2hrgibwdgaxn5l5tf2isfowfgwla76k62hjz63vv6e
+  dialogues.py: bafybeihyo3rpbqexb64ekch3m6f366zadmqi2ecu7yx3djnullheouodxm
   fsm_specification.yaml: bafybeifzony6p4wmvbzntfge7s75tsh3bqmtoaxfxwjtujxtocpknrydue
-  handlers.py: bafybeiaqgh2j2qpqixqqalxsv37e4fpy5nqixbghosbz6xh7qyxvqs63ie
-  models.py: bafybeid44ttfodbfhvrfzvfos4bu7zw2wzvwzrbfr6vekfeo5evudstg3i
-  payloads.py: bafybeibmwizvkkk4lvnigypo6y52ezytzna3y3pf4fgxkrxrio7mlihy34
-  propose_questions.py: bafybeic4lwdhslp2xmcdgqjd2jpqnxtc7yasyki2v3b2sf6h6o63sdaks4
+  handlers.py: bafybeif32yidw4nehg5javlj6w5pkxqrpwoqxsh2ssat44aqnzggwltkm4
+  models.py: bafybeihcdih54cyijglouqgtdgy5jgrbk73zkbrgtzjcnjc2i27ean2jke
+  payloads.py: bafybeib2457bcuhb7kfy47jgwcstt7tzyevxx2oxfjgbzhl35cmrbp6b7m
+  propose_questions.py: bafybeihzd2xdirdqqtx2t373xi6rgzqz3ygzwovkhak4tl2ol3lzwwwt2u
   rounds.py: bafybeifaqife2afc6oruh2oa7pyfm3bpl3d4ebv3bcjjkiq4cusvfphc2u
   states/__init__.py: bafybeibogw3ljdly5zf2zesfdltrxc4ncw67imtys6srp7w5by2u5ajhhu
   states/answer_questions.py: bafybeiecaz7ft745bluxy2x3obaw3elpguplsedp3j4hsbh7yahovi3xrm
@@ -50,7 +50,7 @@ fingerprint:
   states/select_keeper.py: bafybeicag5feasxynp65toviurqfx62lklmfky7cln5sv6onubesppsd5e
   states/sync_markets.py: bafybeibuqnfsvlk67ra2n3pa2yhfiyjzxrbqnxamyj5d4vgmexzqo3jn3m
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
-  tests/behaviours/test_approve_markets_behaviour.py: bafybeihptkpmg6uuddtq65xnnxwmm6zh3l6ti7ahvu252awv3f4lpzecxe
+  tests/behaviours/test_approve_markets_behaviour.py: bafybeiearpx2gtm2w5zm7egee2j2ims35epzqld4jng7trh7jeld76ewwq
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
@@ -58,9 +58,9 @@ contracts:
 - valory/multisend:0.1.0:bafybeiaf3hapi3prgpjeugwhq64k7lqelo6kibhol5rkajt7id3knomp5q
 - valory/realitio:0.1.0:bafybeib3uqrp3pfzcawwr46zkzirtep5mrke34bs4i2n5mwjjoor6oypvu
 - valory/conditional_tokens:0.1.0:bafybeibg7arx2wjzcush3auzwrpoened5lfeulda5nlfxq6d2qkedk3tmi
-- valory/fpmm_deterministic_factory:0.1.0:bafybeifvb5yz3g74a73znlemtegvwdmfhripo73gns4dtpklmgpoiqjzfq
+- valory/fpmm_deterministic_factory:0.1.0:bafybeiahiowfbyvij6dk2rynwke3mctyvrrmaodjqtmlmgsslamjkai5g4
 - valory/erc20:0.1.0:bafybeifnavtn55w7t3j6de34nc7o3pxmoydoc5u6flocfaflqzurvpch2m
-- valory/fpmm:0.1.0:bafybeicwztskzrqrhxwjdmzchh6ibs4vu2damxp2brnfegjx5lni3nezym
+- valory/fpmm:0.1.0:bafybeie7th7p4o5whmcbwdhxghuze622a6kj7dd6pddytd6cylpllqyt3q
 protocols:
 - valory/llm:1.0.0:bafybeiardrklsughnm6tdnc3seqderlnq5nj4xolgnk42crr3kxexjlrfe
 - valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la

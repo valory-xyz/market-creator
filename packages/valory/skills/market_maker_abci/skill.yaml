@@ -8,14 +8,14 @@ license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
-  __init__.py: bafybeiczsbwfbjux534m37vha645bqsexbc7in5o7hmdv47x67usiaxwye
-  behaviours.py: bafybeiazqmufskxjvsc7pscagkukyhiw2jhk52qhatqcn7d43inxmb3ovi
-  composition.py: bafybeigakxtmgtstyuev5anwup6zcuh5sazwpm2pv5uv7dejlujzsxu6pq
-  dialogues.py: bafybeibt25d6knek4rtslznsjtsy3nsz7jgr3otsamgod2k37pp3dof2iy
+  __init__.py: bafybeicr7qsikxguag7ozqdriirxxmqbhuxidbgpqjv5galsjmxrr5gbwu
+  behaviours.py: bafybeihxzbxszlpm2u6rsbya3tkp6in537a3mapqrcmct236qzvwuffxre
+  composition.py: bafybeibm64axlg4teclskdjtgkzzs5ukgcyvrl2nxwakbaofb7bgsi4fxi
+  dialogues.py: bafybeicuditmewgo3w7pcju22rtkzkrmjfxpcqpyils33fy7uzcbontd5m
   fsm_specification.yaml: bafybeihtabbvgmughyc5qhg3n3ysr6xsuuxqrdjwsbu36mnsq6bqrmblwa
-  handlers.py: bafybeidyff6sy54a6y4lfowrus2hrlhzpde6oplfltkl3c2c6pboeh4aiy
-  models.py: bafybeiaowgxbxxk4lipdkjxsfvg22uc22kg5rocj3mxtvfgmsrrbjd6nm4
-  tests/__init__.py: bafybeiakbwx24k4dnmzvulrsvtmev3mijxtfucvs3ps6argtayjqkkzqrq
+  handlers.py: bafybeihotna3axotvc6k4zn2e7mmikkislhacybtcfibtmkumokxhaxszy
+  models.py: bafybeif53q2rzxh23fj5wt2mv5ewu3mmvilxfbxwonlzl3jtqmxhjw3zmi
+  tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
 fingerprint_ignore_patterns: []
 connections:
 - valory/http_server:0.22.0:bafybeid4oqsfkqo36lryoecymjnq4whme3tgupqfq6m4l7lbr5r4yxtswu
@@ -26,7 +26,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeicehi2yqab3lldm7qzoqev3tmqrdk275sbtcabneyorhmzft76z7m
 - valory/registration_abci:0.1.0:bafybeihjgfzqvuymqgku6mwqih7hlvqwr2tmdjrip3m6unt5l4e55bshkm
 - valory/reset_pause_abci:0.1.0:bafybeih6bjalcohxytg6hj3doy5dhkxonrxpqgcnclyf6tnmuyfbom2usy
-- valory/market_creation_manager_abci:0.1.0:bafybeiejkifeeo5bnqhn7gr2dynrxpi566zim6wif246ocnls3uzo4bpmq
+- valory/market_creation_manager_abci:0.1.0:bafybeihwsffhlidijxsqjnjsqz2w2as6z53q5rgxv3wtw4junagefjodxu
 - valory/termination_abci:0.1.0:bafybeiarjw4hhu2vf56yxqb4jh3kmk4hfxvqahygn6scc3rfnlogjkwwpe
 - valory/transaction_settlement_abci:0.1.0:bafybeigivknq755rbnelrdemaz3vm4x7jkofvaskm34uh36pbbg6uiquo4
 - valory/mech_interact_abci:0.1.0:bafybeigqq2vnnwqelllo2rb2wq3v6adkstkv47atcr6ieqxstvkkxm3toy
