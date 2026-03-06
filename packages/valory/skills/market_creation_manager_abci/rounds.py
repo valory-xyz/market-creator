@@ -25,7 +25,6 @@ from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
     AbciAppTransitionFunction,
     AppState,
-    EventToTimeout,
     get_name,
 )
 from packages.valory.skills.market_creation_manager_abci.states.answer_questions import (
