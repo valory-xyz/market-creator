@@ -45,7 +45,7 @@ class OpenAIClientManager:
             client = OpenAI(api_key=self.api_key)
         return client
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         """__exit__"""
         global client  # pylint: disable=global-statement
         if client is not None:
@@ -92,10 +92,11 @@ TOPICS = '["business","science","technology","politics","arts","weather"]'
 
 
 def run(  # pylint: disable=too-many-locals
-    **kwargs,
+    **kwargs: Any,
 ) -> Tuple[str, Optional[Dict[str, Any]]]:
     """Run the task"""
     with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+        assert client is not None
         newsapi_api_key = kwargs["api_keys"]["newsapi"]
         max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
         temperature = kwargs.get("temperature", DEFAULT_OPENAI_SETTINGS["temperature"])
@@ -118,8 +119,8 @@ def run(  # pylint: disable=too-many-locals
             "q": "arts OR business OR finance OR cryptocurrency OR politics OR science OR technology OR sports OR weather OR entertainment",
             "language": "en",
             "sortBy": "popularity",
-            "from": from_date,
-            "to": to_date,
+            "from": str(from_date),
+            "to": str(to_date),
         }
 
         response = requests.get(
@@ -152,7 +153,7 @@ def run(  # pylint: disable=too-many-locals
         moderation_result = client.moderations.create(input=market_creation_prompt)
 
         if moderation_result["results"][0]["flagged"]:
-            return "Moderation flagged the prompt as in violation of terms."
+            return "Moderation flagged the prompt as in violation of terms.", None
 
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},

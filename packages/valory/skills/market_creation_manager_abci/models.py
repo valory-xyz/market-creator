@@ -24,10 +24,7 @@ from typing import Any, Dict, List, Set, Type
 from aea.skills.base import SkillContext
 
 from packages.valory.skills.abstract_round_abci.base import AbciApp
-from packages.valory.skills.abstract_round_abci.models import (
-    ApiSpecs,
-    BaseParams,
-)
+from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
 )

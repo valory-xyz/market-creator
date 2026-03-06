@@ -32,9 +32,7 @@ from packages.valory.connections.http_server.connection import (
     PUBLIC_ID as HTTP_SERVER_PUBLIC_ID,
 )
 from packages.valory.protocols.http import HttpMessage
-from packages.valory.skills.abstract_round_abci.handlers import (
-    ABCIRoundHandler,
-)
+from packages.valory.skills.abstract_round_abci.handlers import ABCIRoundHandler
 from packages.valory.skills.abstract_round_abci.handlers import (
     ContractApiHandler as BaseContractApiHandler,
 )
