@@ -166,7 +166,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return []
 
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=ZERO_ADDRESS,  # NOT USED!
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_markets_with_funds),

@@ -105,7 +105,7 @@ class RedeemBondBehaviour(MarketCreationManagerBaseBehaviour):
         """Prepare a withdraw tx"""
         self.context.logger.info("Starting RealitioContract.build_withdraw_tx")
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.realitio_contract,
             contract_id=str(RealitioContract.contract_id),
             contract_callable=get_callable_name(RealitioContract.build_withdraw_tx),

@@ -108,7 +108,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
         """Get the balance of an account"""
         ledger_api_response = yield from self.get_ledger_api_response(
-            performative=LedgerApiMessage.Performative.GET_STATE,
+            performative=LedgerApiMessage.Performative.GET_STATE,  # type: ignore
             ledger_callable="get_balance",
             account=account,
         )
@@ -116,7 +116,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             # something went wrong
             self.context.logger.error(
                 f"Couldn't get balance for account {account}. "
-                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "
+                f"Expected response performative {LedgerApiMessage.Performative.STATE}, "
                 f"Received {ledger_api_response.performative.value}."
             )
             return None
