@@ -29,7 +29,6 @@ import requests
 from dotenv import load_dotenv
 from openai import OpenAI
 
-
 load_dotenv(dotenv_path=".env")
 
 OPENAI_ENGINE = "gpt-4.1-2025-04-14"
@@ -116,7 +115,7 @@ class OpenAIClientManager:
             client = OpenAI(api_key=self.api_key)
         return client
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         """__exit__"""
         global client  # pylint: disable=global-statement
         if client is not None:
@@ -127,7 +126,7 @@ class OpenAIClientManager:
 class Context:  # pylint: disable=too-few-public-methods
     """Mock class Context"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """__init__"""
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(
@@ -145,9 +144,18 @@ class Context:  # pylint: disable=too-few-public-methods
 class Params:  # pylint: disable=too-few-public-methods
     """Mock class Params"""
 
+    news_sources: List[str]
+    newsapi_api_key: Optional[str]
+    newsapi_endpoint: str
+    topics: List[str]
+    market_identification_prompt: str
+
 
 class SynchronizedData:  # pylint: disable=too-few-public-methods
     """Mock class SynchronizedData"""
+
+    most_voted_randomness: str
+    gathered_data: Any
 
 
 class DataGatheringRound:  # pylint: disable=too-few-public-methods
@@ -166,7 +174,7 @@ class MarketProposalBehaviourMock:  # pylint: disable=too-few-public-methods
     synchronized_data = SynchronizedData()
     context = Context()
 
-    def __init__(self):
+    def __init__(self) -> None:
         """__init__"""
         self.synchronized_data.most_voted_randomness = "".join(
             [str(random.randint(0, 9)) for _ in range(74)]  # nosec
@@ -277,7 +285,9 @@ class MarketProposalBehaviourMock:  # pylint: disable=too-few-public-methods
             )
         )
 
-    def _get_response(self, prompt_template: str, prompt_values: Dict[str, str]):
+    def _get_response(
+        self, prompt_template: str, prompt_values: Dict[str, str]
+    ) -> Optional[str]:
         """Get response from openai."""
 
         # Format the prompt using input variables and prompt_values
@@ -290,7 +300,8 @@ class MarketProposalBehaviourMock:  # pylint: disable=too-few-public-methods
 
         # Call the OpenAI API
         if engine in ENGINES["chat"]:
-            with OpenAIClientManager(OPENAI_API_KEY):
+            with OpenAIClientManager(OPENAI_API_KEY or ""):
+                assert client is not None
                 # Call the OpenAI API
                 messages = [
                     {"role": "system", "content": "You are a helpful assistant."},

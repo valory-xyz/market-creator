@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2023 Valory AG
+#   Copyright 2021-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'price_estimation_abci' skill."""
-
 
 import json
 import re
@@ -61,7 +60,6 @@ from packages.valory.skills.market_creation_manager_abci.handlers import (
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import SynchronizedData
 from packages.valory.skills.market_maker_abci.models import SharedState
-
 
 MarketCreatorABCIRoundHandler = ABCIRoundHandler
 SigningHandler = BaseSigningHandler

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2025 Valory AG
+#   Copyright 2025-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.approve_mark
     ApproveMarketsBehaviour,
 )
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 
@@ -44,7 +43,7 @@ class TestApproveMarketsBehaviour(FSMBehaviourBaseCase):
     path_to_skill = PACKAGE_DIR
     _skill = MagicMock()
 
-    def setup(self, **kwargs: Any) -> None:
+    def setup_method(self, **kwargs: Any) -> None:
         """Setup."""
         self.round_sequence_mock = MagicMock()
         context_mock = MagicMock(params=MagicMock())

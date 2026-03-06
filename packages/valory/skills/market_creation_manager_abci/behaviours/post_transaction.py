@@ -140,7 +140,7 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_fpmm_id(self, tx_hash: str) -> Generator[None, None, Optional[str]]:
         """Get the fpmm id from the events"""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.fpmm_deterministic_factory_contract,
             tx_hash=tx_hash,
             contract_id=str(FPMMDeterministicFactory.contract_id),

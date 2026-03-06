@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023-2024 Valory AG
+#   Copyright 2023-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -55,7 +55,6 @@ from packages.valory.skills.mech_interact_abci.rounds import Event as MechIntera
 from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEvent
 from packages.valory.skills.termination_abci.models import TerminationParams
 from packages.valory.skills.transaction_settlement_abci.rounds import Event as TSEvent
-
 
 MARGIN = 5
 MULTIPLIER = 2

@@ -23,12 +23,13 @@
 import argparse
 import csv
 from datetime import datetime
+from typing import Any, List
 
 import requests
 
 
 # Function to filter markets based on resolution_time within the specified day
-def _filter_markets_by_date(markets, date):
+def _filter_markets_by_date(markets: Any, date: str) -> List[list]:  # type: ignore[type-arg]
     output = []
     for market_id, market_data in markets.items():
         resolution_time = datetime.utcfromtimestamp(

@@ -37,9 +37,7 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import SyncMarketsRound
 
-
-FPMM_POOL_MEMBERSHIPS_QUERY = Template(
-    """  {
+FPMM_POOL_MEMBERSHIPS_QUERY = Template("""  {
     fpmmPoolMemberships(
       where: {funder: "$creator", amount_gt: "0"}
       first: 1000
@@ -61,8 +59,7 @@ FPMM_POOL_MEMBERSHIPS_QUERY = Template(
         outcomeTokenAmounts
       }
     }
-  }"""
-)
+  }""")
 
 
 class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
@@ -169,7 +166,7 @@ class SyncMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return []
 
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=ZERO_ADDRESS,  # NOT USED!
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_markets_with_funds),

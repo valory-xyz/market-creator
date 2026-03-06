@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2024 Valory AG
+#   Copyright 2024-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ from typing import Any, Dict
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from tqdm import tqdm
-
 
 TEXT_ALIGNMENT = 30
 MINIMUM_WRITE_FILE_DELAY_SECONDS = 20

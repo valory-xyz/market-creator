@@ -48,7 +48,6 @@ CLI Usage:
         curl -X DELETE -H "Authorization: YOUR_API_KEY" -k http://127.0.0.1:5000/clear_all
 """
 
-
 import hashlib
 import logging
 import os
@@ -62,7 +61,6 @@ from typing import Any, Dict, Optional, Tuple
 
 from flask import Flask, Response, json, jsonify, render_template, request
 from flask_cors import CORS
-
 
 app = Flask(__name__)
 CORS(app)

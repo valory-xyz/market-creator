@@ -33,7 +33,6 @@ from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from tqdm import tqdm
 
-
 TEXT_ALIGNMENT = 30
 MINIMUM_WRITE_FILE_DELAY_SECONDS = 20
 MECH_FROM_BLOCK_RANGE = 50000

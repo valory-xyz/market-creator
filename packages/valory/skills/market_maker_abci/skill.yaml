@@ -8,28 +8,28 @@ license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
-  __init__.py: bafybeibn5i47enoott67jc54iihzwb6bxiuts4dzplu2lufh4w4r6emkty
-  behaviours.py: bafybeiazqmufskxjvsc7pscagkukyhiw2jhk52qhatqcn7d43inxmb3ovi
-  composition.py: bafybeidbthjjb5wec2xvi2e6oepxu6ofos37mhu4kkanlrk2qcbvn6fa3m
-  dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
-  fsm_specification.yaml: bafybeihtabbvgmughyc5qhg3n3ysr6xsuuxqrdjwsbu36mnsq6bqrmblwa
-  handlers.py: bafybeidl5pzel4ui7m3kipu4tavx6blcxd6yy46jaraqqcpjgh2qtprkra
-  models.py: bafybeibz4ro56s3ovkls3lctqgye7qb5wrflml4j6louqrholq2boj4asm
-  tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
+  __init__.py: bafybeicr7qsikxguag7ozqdriirxxmqbhuxidbgpqjv5galsjmxrr5gbwu
+  behaviours.py: bafybeihxzbxszlpm2u6rsbya3tkp6in537a3mapqrcmct236qzvwuffxre
+  composition.py: bafybeibm64axlg4teclskdjtgkzzs5ukgcyvrl2nxwakbaofb7bgsi4fxi
+  dialogues.py: bafybeicuditmewgo3w7pcju22rtkzkrmjfxpcqpyils33fy7uzcbontd5m
+  fsm_specification.yaml: bafybeicd2wpgltu4ivsxpazyzazibh7h524x5qbboxgmxtjs5ddblc2bae
+  handlers.py: bafybeib36vtg2ng4mel67liodkku7v6rkjelehsdnw2x7fazq44hfp356u
+  models.py: bafybeif53q2rzxh23fj5wt2mv5ewu3mmvilxfbxwonlzl3jtqmxhjw3zmi
+  tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
 fingerprint_ignore_patterns: []
 connections:
-- valory/http_server:0.22.0:bafybeigyjwg6nfwmdkwzt7i56n4zv3oj6hii2mkkgstuaztyunscjifdee
+- valory/http_server:0.22.0:bafybeid4oqsfkqo36lryoecymjnq4whme3tgupqfq6m4l7lbr5r4yxtswu
 contracts: []
 protocols:
-- valory/http:1.0.0:bafybeia4tq7ycivm3dnekelrnlzdwb4qnrjdykk6gf5tizq6djr66adotm
+- valory/http:1.0.0:bafybeidxkp3vga7t6x2pbt2tpkgyaxa5bgpdgryao54py7w3yxyzr7neoy
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
-- valory/registration_abci:0.1.0:bafybeie3dfore53bxvbokqiarzuwulzlyt4vz5mifb4t3gxl6drwkblfha
-- valory/reset_pause_abci:0.1.0:bafybeicffwijiecbqc6z22nowir2fgwwqzwu6vokzuwgd5wa3zxromxevm
-- valory/market_creation_manager_abci:0.1.0:bafybeibffhpyo7xmi3jgmjc65dquqb4nda7fwpnksle3mptnkzj3t3ubmy
-- valory/termination_abci:0.1.0:bafybeiaylk6haefa2xex55krizafzwo2v5tpkcoflw5hiwaqm3qxice23m
-- valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
-- valory/mech_interact_abci:0.1.0:bafybeifmewonamynusdi3sz5qenlr3f7mu67sic33aub5uzc2w3mpqsyqa
+- valory/abstract_round_abci:0.1.0:bafybeicehi2yqab3lldm7qzoqev3tmqrdk275sbtcabneyorhmzft76z7m
+- valory/registration_abci:0.1.0:bafybeihjgfzqvuymqgku6mwqih7hlvqwr2tmdjrip3m6unt5l4e55bshkm
+- valory/reset_pause_abci:0.1.0:bafybeih6bjalcohxytg6hj3doy5dhkxonrxpqgcnclyf6tnmuyfbom2usy
+- valory/market_creation_manager_abci:0.1.0:bafybeidd7d5pdjtm37ajic6exzbzx4itr45rh2rfq4g3gomjxdy6oc4zsu
+- valory/termination_abci:0.1.0:bafybeiarjw4hhu2vf56yxqb4jh3kmk4hfxvqahygn6scc3rfnlogjkwwpe
+- valory/transaction_settlement_abci:0.1.0:bafybeigivknq755rbnelrdemaz3vm4x7jkofvaskm34uh36pbbg6uiquo4
+- valory/mech_interact_abci:0.1.0:bafybeigqq2vnnwqelllo2rb2wq3v6adkstkv47atcr6ieqxstvkkxm3toy
 behaviours:
   main:
     args: {}
@@ -328,5 +328,5 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.21.8
+    version: ==0.21.12rc4
 is_abstract: false
