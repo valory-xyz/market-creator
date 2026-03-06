@@ -30,7 +30,7 @@ fingerprint:
   fsm_specification.yaml: bafybeifzony6p4wmvbzntfge7s75tsh3bqmtoaxfxwjtujxtocpknrydue
   handlers.py: bafybeif32yidw4nehg5javlj6w5pkxqrpwoqxsh2ssat44aqnzggwltkm4
   models.py: bafybeihcdih54cyijglouqgtdgy5jgrbk73zkbrgtzjcnjc2i27ean2jke
-  payloads.py: bafybeib2457bcuhb7kfy47jgwcstt7tzyevxx2oxfjgbzhl35cmrbp6b7m
+  payloads.py: bafybeibbvv2rpzrs77vl45eac7bjownr3abrms3pg7orqpqzob2pglwqhm
   propose_questions.py: bafybeihzd2xdirdqqtx2t373xi6rgzqz3ygzwovkhak4tl2ol3lzwwwt2u
   rounds.py: bafybeifaqife2afc6oruh2oa7pyfm3bpl3d4ebv3bcjjkiq4cusvfphc2u
   states/__init__.py: bafybeibogw3ljdly5zf2zesfdltrxc4ncw67imtys6srp7w5by2u5ajhhu
@@ -58,9 +58,9 @@ contracts:
 - valory/multisend:0.1.0:bafybeiaf3hapi3prgpjeugwhq64k7lqelo6kibhol5rkajt7id3knomp5q
 - valory/realitio:0.1.0:bafybeib3uqrp3pfzcawwr46zkzirtep5mrke34bs4i2n5mwjjoor6oypvu
 - valory/conditional_tokens:0.1.0:bafybeibg7arx2wjzcush3auzwrpoened5lfeulda5nlfxq6d2qkedk3tmi
-- valory/fpmm_deterministic_factory:0.1.0:bafybeiahiowfbyvij6dk2rynwke3mctyvrrmaodjqtmlmgsslamjkai5g4
+- valory/fpmm_deterministic_factory:0.1.0:bafybeidgyw4slgznnnps7nktsd6lvp2qbjufjdwt3wgzr4h2zdjdkzsumq
 - valory/erc20:0.1.0:bafybeifnavtn55w7t3j6de34nc7o3pxmoydoc5u6flocfaflqzurvpch2m
-- valory/fpmm:0.1.0:bafybeie7th7p4o5whmcbwdhxghuze622a6kj7dd6pddytd6cylpllqyt3q
+- valory/fpmm:0.1.0:bafybeifls6teefw3ip6nbpphwwmenxpa5ncon5dvmhi7gwzew5xjjehrre
 protocols:
 - valory/llm:1.0.0:bafybeiardrklsughnm6tdnc3seqderlnq5nj4xolgnk42crr3kxexjlrfe
 - valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la

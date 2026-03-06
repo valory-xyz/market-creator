@@ -6,7 +6,7 @@ description: Gnosis FPMMDeterministicFactory contract
 license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
-  __init__.py: bafybeicqln5tyudb5bzg27wale3xjvuliat6ipn6hntg5pqtnllex4pyre
+  __init__.py: bafybeictqlopm3a4gpjwglmeoiuqxlczz227afw6oo2e2rhhfnukzfup5q
   build/FPMMDeterministicFactory.json: bafybeic3vlqb4m4lk4nps5alt4a6ewvq2dcyotoj6qdvte3pzdcq3g4xdi
   contract.py: bafybeifpursr7rnqtypaylbgoos3md7fzr2ehv2h3vwtvtucyird2txc34
 fingerprint_ignore_patterns: []
