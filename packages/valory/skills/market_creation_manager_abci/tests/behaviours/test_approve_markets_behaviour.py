@@ -43,7 +43,7 @@ class TestApproveMarketsBehaviour(FSMBehaviourBaseCase):
     path_to_skill = PACKAGE_DIR
     _skill = MagicMock()
 
-    def setup(self, **kwargs: Any) -> None:
+    def setup_method(self, **kwargs: Any) -> None:
         """Setup."""
         self.round_sequence_mock = MagicMock()
         context_mock = MagicMock(params=MagicMock())

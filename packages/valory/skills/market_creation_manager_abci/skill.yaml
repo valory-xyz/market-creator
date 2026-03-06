@@ -50,7 +50,7 @@ fingerprint:
   states/select_keeper.py: bafybeicag5feasxynp65toviurqfx62lklmfky7cln5sv6onubesppsd5e
   states/sync_markets.py: bafybeibuqnfsvlk67ra2n3pa2yhfiyjzxrbqnxamyj5d4vgmexzqo3jn3m
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
-  tests/behaviours/test_approve_markets_behaviour.py: bafybeiearpx2gtm2w5zm7egee2j2ims35epzqld4jng7trh7jeld76ewwq
+  tests/behaviours/test_approve_markets_behaviour.py: bafybeigahs4kshphl45rula3mfvolzk7ov6v6oqnposdzzsrwy7ficv7gy
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
