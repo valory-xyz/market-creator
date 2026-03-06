@@ -37,7 +37,7 @@ from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from openai import OpenAI
 from pydantic import BaseModel
-from tiktoken import encoding_for_model
+from tiktoken import encoding_for_model, get_encoding
 
 NEWSAPI_TOP_HEADLINES_URL = "https://newsapi.org/v2/top-headlines"
 NEWSAPI_DEFAULT_NEWS_SOURCES = [
@@ -215,9 +215,9 @@ class KeyChain:
         return self.services[service_name][index]
 
 
-def with_key_rotation(func: Callable):  # noqa
+def with_key_rotation(func: Callable) -> Callable:  # noqa
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> MechResponse:
+    def wrapper(*args: Any, **kwargs: Any) -> MechResponse:
         # this is expected to be a KeyChain object,
         # although it is not explicitly typed as such
         api_keys = kwargs["api_keys"]
@@ -277,7 +277,7 @@ class OpenAIClientManager:
             client = OpenAI(api_key=self.api_key)
         return client
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         global client
         if client is not None:
             client.close()
@@ -377,7 +377,7 @@ def scrape_url(serper_api_key: str, url: str) -> Optional[dict]:
 
 # TODO
 @with_key_rotation
-def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
+def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
     """Run the task"""
     try:
         counter_callback = kwargs.get("counter_callback", None)
@@ -453,6 +453,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
 
         # First call to LLM
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+            assert client is not None
             max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
             temperature = kwargs.get(
                 "temperature", DEFAULT_OPENAI_SETTINGS["temperature"]
@@ -480,7 +481,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt},
             ]
-            response = client.chat.completions.create(
+            response = client.chat.completions.create(  # type: ignore[call-overload]
                 model=model,
                 messages=messages,
                 temperature=temperature,
@@ -523,6 +524,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
 
         # Second call to LLM
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+            assert client is not None
             max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
             temperature = kwargs.get(
                 "temperature", DEFAULT_OPENAI_SETTINGS["temperature"]
@@ -551,7 +553,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt},
             ]
-            response = client.chat.completions.create(
+            response = client.chat.completions.create(  # type: ignore[call-overload]
                 model=model,
                 messages=messages,
                 temperature=temperature,
