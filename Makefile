@@ -28,7 +28,7 @@ clean-pyc:
 
 .PHONY: clean-test
 clean-test:
-	rm -fr .tox -qq/
+	rm -fr .tox/
 	rm -f .coverage
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 	rm -fr coverage.xml
