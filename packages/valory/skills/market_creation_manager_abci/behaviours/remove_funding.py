@@ -56,7 +56,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         """Calculate amount to burn."""
 
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
             contract_id=str(ConditionalTokensContract.contract_id),
             contract_callable=get_callable_name(
@@ -86,7 +86,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         # FPMM.balanceOf(ADDRESS) # noqa
 
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=market,
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_balance),
@@ -102,7 +102,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
         # https://github.com/protofire/omen-exchange/blob/4313d01c93aa79638d6394521adf3b9aad0e6f56/app/src/hooks/market_data/useBlockchainMarketMakerData.tsx#L141-L145
         # FPMM.totalSupply() # noqa
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=market,
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_total_supply),
@@ -249,7 +249,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
             contract_id=str(ConditionalTokensContract.contract_id),
             contract_callable=get_callable_name(
@@ -276,7 +276,7 @@ class RemoveFundingBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_withdraw_tx(self, amount: int) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
             contract_id=str(ERC20TokenContract.contract_id),
             contract_callable=get_callable_name(ERC20TokenContract.build_withdraw_tx),

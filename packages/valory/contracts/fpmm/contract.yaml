@@ -6,7 +6,7 @@ description: Gnosis FixedProductMarketMaker contract
 license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
-  __init__.py: bafybeieeus2bbbexmthy4pnsdtgen4flxzk3ao5ekjbocvmrkhhszffbgu
+  __init__.py: bafybeictqlopm3a4gpjwglmeoiuqxlczz227afw6oo2e2rhhfnukzfup5q
   build/FPMM.json: bafybeidvvevt5hderny4jme6oml4srnm3jf2gwht2hxcxjixjeygejyrvy
   contract.py: bafybeidvmtoinirife5466vm4rdf3hr5quffb4ag3ynqgzn7xffooemg5a
   tests/__init__.py: bafybeigrnl4bgjh5xbdpvikvf6d5cjmxisntlwmkn2ugwtahk7yspkeiwa

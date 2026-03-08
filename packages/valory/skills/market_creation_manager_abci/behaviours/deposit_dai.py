@@ -63,7 +63,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
     def get_balance(self, address: str) -> Generator[None, None, Optional[int]]:
         """Get the balance of the provided address"""
         ledger_api_response = yield from self.get_ledger_api_response(
-            performative=LedgerApiMessage.Performative.GET_STATE,
+            performative=LedgerApiMessage.Performative.GET_STATE,  # type: ignore
             ledger_callable="get_balance",
             account=address,
         )
@@ -135,7 +135,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
                 f"Couldn't get tx data for ERC20.build_deposit_tx. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "
+                f"Expected response performative {ContractApiMessage.Performative.STATE}, "
                 f"received {response.performative.value}."
             )
             return None

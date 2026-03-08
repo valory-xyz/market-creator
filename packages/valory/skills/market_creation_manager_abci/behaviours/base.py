@@ -49,7 +49,6 @@ from packages.valory.skills.transaction_settlement_abci.payload_tools import (
     hash_payload_to_hex,
 )
 
-
 HTTP_OK = 200
 HTTP_NO_CONTENT = 204
 MAX_RETRIES = 3
@@ -130,7 +129,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
     ) -> Generator[None, None, Optional[str]]:
         """Calculate question ID."""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
             contract_id=str(ConditionalTokensContract.contract_id),
             contract_callable="calculate_condition_id",
@@ -141,7 +140,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
                 "Couldn't calculate condition id. Expected response performative "
-                f"{ContractApiMessage.Performative.STATE.value}, "
+                f"{ContractApiMessage.Performative.STATE}, "
                 f"received {response.performative.value}: {response}."
             )
             return None
@@ -157,7 +156,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
     ) -> Generator[None, None, Optional[str]]:
         """Prepares and returns the safe tx hash."""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.synchronized_data.safe_contract_address,  # the safe contract address
             contract_id=str(GnosisSafeContract.contract_id),
             contract_callable="get_raw_safe_transaction_hash",
@@ -170,7 +169,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
                 f"Couldn't get safe hash. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "
+                f"Expected response performative {ContractApiMessage.Performative.STATE}, "
                 f"received {response.performative.value}."
             )
             return None
@@ -203,7 +202,7 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
         if response.performative != ContractApiMessage.Performative.RAW_TRANSACTION:
             self.context.logger.error(
                 f"Couldn't compile the multisend tx. "
-                f"Expected performative {ContractApiMessage.Performative.RAW_TRANSACTION.value}, "
+                f"Expected performative {ContractApiMessage.Performative.RAW_TRANSACTION}, "
                 f"received {response.performative.value}."
             )
             return None

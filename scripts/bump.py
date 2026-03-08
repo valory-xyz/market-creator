@@ -43,7 +43,6 @@ from aea.package_manager.v1 import PackageManagerV1
 
 from autonomy.cli.helpers.ipfs_hash import load_configuration
 
-
 BUMP_BRANCH = "chore/bump"
 PIPFILE = Path.cwd() / "Pipfile"
 PYPROJECT_TOML = Path.cwd() / "pyproject.toml"
@@ -56,6 +55,7 @@ VERISON_RE = re.compile(r"(__version__|version)( )?=( )?\"(?P<version>[0-9a-z\.]
 
 OPEN_AEA_REPO = "valory-xyz/open-aea"
 OPEN_AUTONOMY_REPO = "valory-xyz/open-autonomy"
+TIMEOUT = 30.0
 
 DEPENDENCY_SPECS = {
     "open-aea": {
@@ -119,9 +119,9 @@ def make_git_request(url: str) -> requests.Response:
     """Make git request"""
     auth = os.environ.get("GITHUB_AUTH")
     if auth is None:
-        return requests.get(url=url, timeout=60)
+        return requests.get(url=url, timeout=TIMEOUT)
     return requests.get(
-        url=url, headers={"Authorization": f"Bearer {auth}"}, timeout=60
+        url=url, headers={"Authorization": f"Bearer {auth}"}, timeout=TIMEOUT
     )
 
 
