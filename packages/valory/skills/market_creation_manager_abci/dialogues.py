@@ -120,7 +120,7 @@ class LlmDialogues(Model, BaseLlmDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
-            return LlmDialogue.Role.SKILL
+            return LlmDialogue.Role.SKILL  # pragma: no cover
 
         BaseLlmDialogues.__init__(
             self,

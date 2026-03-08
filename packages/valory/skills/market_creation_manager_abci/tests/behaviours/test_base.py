@@ -22,7 +22,7 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
@@ -280,3 +280,334 @@ class TestToContentEdgeCases:
         query = "123456789"
         content = to_content(query)
         assert isinstance(content, bytes)
+
+
+def _make_gen(return_value):
+    """Create a no-yield generator returning the given value."""
+
+    def gen(*args, **kwargs):
+        return return_value
+        yield  # noqa: unreachable - makes this a generator function
+
+    return gen
+
+
+def _exhaust_gen(gen):
+    """Exhaust a generator and return its value."""
+    try:
+        while True:
+            next(gen)
+    except StopIteration as e:
+        return e.value
+
+
+class TestMarketCreationManagerBaseBehaviourGenerators:
+    """Test MarketCreationManagerBaseBehaviour generator methods."""
+
+    def setup_method(self) -> None:
+        """Setup test fixtures."""
+        from packages.valory.skills.market_creation_manager_abci.behaviours.answer_questions import (
+            AnswerQuestionsBehaviour,
+        )
+
+        context_mock = MagicMock()
+        context_mock.logger = MagicMock()
+        context_mock.params = MagicMock()
+        context_mock.params.conditional_tokens_contract = "0xConditionalTokens"
+        context_mock.params.multisend_address = "0x" + "ab" * 20
+        context_mock.state.round_sequence = MagicMock()
+        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = 1700000000
+        context_mock.state.synchronized_data = MagicMock()
+        context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
+        context_mock.benchmark_tool = MagicMock()
+        context_mock.agent_address = "0x1234567890123456789012345678901234567890"
+        context_mock.omen_subgraph = MagicMock()
+        context_mock.omen_subgraph.get_spec.return_value = {
+            "method": "POST",
+            "url": "http://subgraph.example.com",
+        }
+        context_mock.requests = MagicMock()
+        context_mock.outbox = MagicMock()
+        # Use a concrete subclass to test the base methods
+        self.behaviour = AnswerQuestionsBehaviour(
+            name="test", skill_context=context_mock
+        )
+
+    def test_calculate_condition_id_success(self) -> None:
+        """Test _calculate_condition_id returns condition_id."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.STATE
+        mock_resp.state.body = {"condition_id": "0xCondId123"}
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._calculate_condition_id(
+                oracle_contract="0xOracle",
+                question_id="0xQ1",
+            )
+            result = _exhaust_gen(gen)
+
+        assert result == "0xCondId123"
+
+    def test_calculate_condition_id_error(self) -> None:
+        """Test _calculate_condition_id returns None on error."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.ERROR
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._calculate_condition_id(
+                oracle_contract="0xOracle",
+                question_id="0xQ1",
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_safe_tx_hash_success(self) -> None:
+        """Test _get_safe_tx_hash returns stripped tx_hash."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.STATE
+        mock_resp.state.body = {"tx_hash": "0xabcdef1234567890"}
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._get_safe_tx_hash(
+                to_address="0xTo",
+                data=b"\x00",
+            )
+            result = _exhaust_gen(gen)
+
+        assert result == "abcdef1234567890"
+
+    def test_get_safe_tx_hash_error(self) -> None:
+        """Test _get_safe_tx_hash returns None on error."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.ERROR
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._get_safe_tx_hash(
+                to_address="0xTo",
+                data=b"\x00",
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_to_multisend_success(self) -> None:
+        """Test _to_multisend returns payload_data."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_raw_resp = MagicMock()
+        mock_raw_resp.performative = (
+            ContractApiMessage.Performative.RAW_TRANSACTION
+        )
+        mock_raw_resp.raw_transaction.body = {"data": "0xaabbccdd"}
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_raw_resp),
+        ), patch.object(
+            self.behaviour,
+            "_get_safe_tx_hash",
+            new=_make_gen("a" * 64),
+        ):
+            gen = self.behaviour._to_multisend(
+                transactions=[
+                    {"to": "0xTo", "value": 0, "data": b"\x00"},
+                ]
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is not None
+
+    def test_to_multisend_get_tx_data_error(self) -> None:
+        """Test _to_multisend returns None when get_tx_data fails."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.ERROR
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._to_multisend(
+                transactions=[
+                    {"to": "0xTo", "value": 0, "data": b"\x00"},
+                ]
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_to_multisend_safe_tx_hash_none(self) -> None:
+        """Test _to_multisend returns None when _get_safe_tx_hash returns None."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_raw_resp = MagicMock()
+        mock_raw_resp.performative = (
+            ContractApiMessage.Performative.RAW_TRANSACTION
+        )
+        mock_raw_resp.raw_transaction.body = {"data": "0xaabbccdd"}
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_raw_resp),
+        ), patch.object(
+            self.behaviour,
+            "_get_safe_tx_hash",
+            new=_make_gen(None),
+        ):
+            gen = self.behaviour._to_multisend(
+                transactions=[
+                    {"to": "0xTo", "value": 0, "data": b"\x00"},
+                ]
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_subgraph_result_success(self) -> None:
+        """Test get_subgraph_result returns parsed JSON."""
+        import json
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.body = json.dumps(
+            {"data": {"markets": []}}
+        ).encode()
+
+        with patch.object(
+            self.behaviour,
+            "get_http_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour.get_subgraph_result(query="{ markets {} }")
+            result = _exhaust_gen(gen)
+
+        assert result is not None
+        assert "data" in result
+
+    def test_get_subgraph_result_none_response(self) -> None:
+        """Test get_subgraph_result returns None when response is None."""
+        with patch.object(
+            self.behaviour,
+            "get_http_response",
+            new=_make_gen(None),
+        ):
+            gen = self.behaviour.get_subgraph_result(query="{ markets {} }")
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_subgraph_result_non_200(self) -> None:
+        """Test get_subgraph_result returns None on non-200 status."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 500
+        mock_resp.body = b"Server Error"
+
+        with patch.object(
+            self.behaviour,
+            "get_http_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour.get_subgraph_result(query="{ markets {} }")
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_synchronized_data_property(self) -> None:
+        """Test the synchronized_data property."""
+        from packages.valory.skills.market_creation_manager_abci.rounds import (
+            SynchronizedData,
+        )
+
+        # The property casts the parent's synchronized_data
+        # Just test it doesn't raise
+        mock_synced = MagicMock(spec=SynchronizedData)
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced),
+        ):
+            result = self.behaviour.synchronized_data
+            assert result is mock_synced
+
+    def test_params_property(self) -> None:
+        """Test the params property."""
+        # params is set via context, test it's accessible
+        assert self.behaviour.params is not None
+
+    def test_last_synced_timestamp_property(self) -> None:
+        """Test the last_synced_timestamp property."""
+        with patch.object(
+            type(self.behaviour),
+            "last_synced_timestamp",
+            new_callable=PropertyMock,
+            return_value=1700000000,
+        ):
+            result = self.behaviour.last_synced_timestamp
+            assert result == 1700000000
+
+    def test_shared_state_property(self) -> None:
+        """Test the shared_state property."""
+        mock_state = MagicMock()
+        with patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=PropertyMock,
+            return_value=mock_state,
+        ):
+            result = self.behaviour.shared_state
+            assert result is mock_state
+
+    def test_do_llm_request(self) -> None:
+        """Test do_llm_request basic flow."""
+        mock_llm_message = MagicMock()
+        mock_llm_dialogue = MagicMock()
+        mock_response = MagicMock()
+
+        with patch.object(
+            self.behaviour,
+            "_get_request_nonce_from_dialogue",
+            return_value="nonce123",
+        ), patch.object(
+            self.behaviour,
+            "get_callback_request",
+            return_value=MagicMock(),
+        ), patch.object(
+            self.behaviour,
+            "wait_for_message",
+            new=_make_gen(mock_response),
+        ):
+            gen = self.behaviour.do_llm_request(
+                mock_llm_message, mock_llm_dialogue
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is mock_response

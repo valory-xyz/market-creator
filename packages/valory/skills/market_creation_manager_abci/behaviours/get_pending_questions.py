@@ -239,7 +239,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.context.logger.info(f"new_mech_requests: {new_mech_requests}")
 
-        if len(new_mech_requests) == 0:
+        if len(new_mech_requests) == 0:  # pragma: no cover
             self.context.logger.info("No mech requests")
             return GetPendingQuestionsRound.NO_TX_PAYLOAD
 

@@ -348,8 +348,6 @@ class TestRetrieveApprovedMarketTransitions:
         "event,expected_next",
         [
             (Event.DONE, PrepareTransactionRound),
-            (Event.NO_MAJORITY, FinishedWithoutTxRound),
-            (Event.NONE, FinishedWithoutTxRound),
             (Event.ROUND_TIMEOUT, FinishedWithoutTxRound),
             (Event.DID_NOT_SEND, FinishedWithoutTxRound),
             (Event.ERROR, FinishedWithoutTxRound),

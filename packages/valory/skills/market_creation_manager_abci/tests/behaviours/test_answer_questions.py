@@ -22,7 +22,7 @@
 import json
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -340,3 +340,455 @@ class TestParseMechResponse:
         result = self.behaviour._parse_mech_response(response)
         # Empty dict: is_valid=True, is_determinable=True, has_occurred=None
         assert result is None
+
+
+def _make_gen(return_value):
+    """Create a no-yield generator returning the given value."""
+
+    def gen(*args, **kwargs):
+        return return_value
+        yield  # noqa: unreachable - makes this a generator function
+
+    return gen
+
+
+def _exhaust_gen(gen):
+    """Exhaust a generator and return its value."""
+    try:
+        while True:
+            next(gen)
+    except StopIteration as e:
+        return e.value
+
+
+class TestAnswerQuestionsBehaviourGenerators:
+    """Test AnswerQuestionsBehaviour generator methods."""
+
+    def setup_method(self):
+        context_mock = MagicMock()
+        context_mock.logger = MagicMock()
+        context_mock.params = MagicMock()
+        context_mock.state.round_sequence = MagicMock()
+        context_mock.benchmark_tool = MagicMock()
+        context_mock.agent_address = "0x1234567890123456789012345678901234567890"
+        context_mock.params.realitio_contract = "0xrealitio"
+        context_mock.params.realitio_answer_question_bond = 10**17
+        context_mock.params.questions_to_close_batch_size = 10
+        context_mock.params.answer_retry_intervals = [60, 120, 300]
+        self.behaviour = AnswerQuestionsBehaviour(
+            name="test", skill_context=context_mock
+        )
+
+    def test_get_answer_tx_success(self):
+        """Test _get_answer_tx with successful STATE response."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.STATE
+        mock_resp.state.body = {"data": b"\x01\x02\x03"}
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._get_answer_tx("0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890", ANSWER_YES)
+            result = _exhaust_gen(gen)
+
+        assert result is not None
+        assert result["to"] == "0xrealitio"
+        assert result["value"] == 10**17
+        assert result["data"] == b"\x01\x02\x03"
+
+    def test_get_answer_tx_error(self):
+        """Test _get_answer_tx when contract returns ERROR."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.ERROR
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._get_answer_tx("0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890", ANSWER_YES)
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_payload_no_responses(self):
+        """Test _get_payload when mech_responses is empty."""
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = []
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_payload_question_already_responded(self):
+        """Test _get_payload when question is in questions_responded."""
+        mock_response = MagicMock()
+        mock_response.nonce = "0xquestion1"
+        mock_response.result = json.dumps(
+            {"is_valid": True, "is_determinable": True, "has_occurred": True}
+        )
+
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = [mock_response]
+
+        mock_shared_state = MagicMock()
+        mock_shared_state.questions_responded = {"0xquestion1"}
+        mock_shared_state.questions_requested_mech = {}
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ), patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=lambda: property(lambda self: mock_shared_state),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_payload_question_not_in_requested(self):
+        """Test _get_payload when question is not in questions_requested_mech."""
+        mock_response = MagicMock()
+        mock_response.nonce = "0xquestion1"
+        mock_response.result = json.dumps(
+            {"is_valid": True, "is_determinable": True, "has_occurred": True}
+        )
+
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = [mock_response]
+
+        mock_shared_state = MagicMock()
+        mock_shared_state.questions_responded = set()
+        mock_shared_state.questions_requested_mech = {}
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ), patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=lambda: property(lambda self: mock_shared_state),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_payload_answer_none_with_max_retries(self):
+        """Test _get_payload when answer is None but retries >= answer_retry_intervals length."""
+        mock_response = MagicMock()
+        mock_response.nonce = "0xquestion1"
+        mock_response.result = json.dumps(
+            {"is_valid": True, "is_determinable": False}
+        )
+
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = [mock_response]
+
+        mock_shared_state = MagicMock()
+        mock_shared_state.questions_responded = set()
+        mock_shared_state.questions_requested_mech = {
+            "0xquestion1": {
+                "question": {"title": "Test?"},
+                "retries": [100, 200, 300],  # 3 retries >= len([60, 120, 300])
+            }
+        }
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ), patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=lambda: property(lambda self: mock_shared_state),
+        ), patch.object(
+            self.behaviour,
+            "_get_answer_tx",
+            new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_to_multisend",
+            new=_make_gen("0xmultisend_hash"),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        # answer became ANSWER_INVALID, so it should proceed
+        assert result == "0xmultisend_hash"
+
+    def test_get_payload_answer_none_skipped(self):
+        """Test _get_payload when answer is None and retries < threshold."""
+        mock_response = MagicMock()
+        mock_response.nonce = "0xquestion1"
+        mock_response.result = json.dumps(
+            {"is_valid": True, "is_determinable": False}
+        )
+
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = [mock_response]
+
+        mock_shared_state = MagicMock()
+        mock_shared_state.questions_responded = set()
+        mock_shared_state.questions_requested_mech = {
+            "0xquestion1": {
+                "question": {"title": "Test?"},
+                "retries": [100],  # only 1 retry < len([60, 120, 300])
+            }
+        }
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ), patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=lambda: property(lambda self: mock_shared_state),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_payload_success(self):
+        """Test _get_payload happy path with valid answer."""
+        mock_response = MagicMock()
+        mock_response.nonce = "0xquestion1"
+        mock_response.result = json.dumps(
+            {"is_valid": True, "is_determinable": True, "has_occurred": True}
+        )
+
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = [mock_response]
+
+        mock_shared_state = MagicMock()
+        mock_shared_state.questions_responded = set()
+        mock_shared_state.questions_requested_mech = {
+            "0xquestion1": {
+                "question": {"title": "Test?"},
+                "retries": [],
+            }
+        }
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ), patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=lambda: property(lambda self: mock_shared_state),
+        ), patch.object(
+            self.behaviour,
+            "_get_answer_tx",
+            new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_to_multisend",
+            new=_make_gen("0xmultisend_hash"),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        assert result == "0xmultisend_hash"
+
+    def test_get_payload_answer_tx_none(self):
+        """Test _get_payload when _get_answer_tx returns None."""
+        mock_response = MagicMock()
+        mock_response.nonce = "0xquestion1"
+        mock_response.result = json.dumps(
+            {"is_valid": True, "is_determinable": True, "has_occurred": True}
+        )
+
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = [mock_response]
+
+        mock_shared_state = MagicMock()
+        mock_shared_state.questions_responded = set()
+        mock_shared_state.questions_requested_mech = {
+            "0xquestion1": {
+                "question": {"title": "Test?"},
+                "retries": [],
+            }
+        }
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ), patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=lambda: property(lambda self: mock_shared_state),
+        ), patch.object(
+            self.behaviour,
+            "_get_answer_tx",
+            new=_make_gen(None),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_payload_multisend_none(self):
+        """Test _get_payload when _to_multisend returns None."""
+        mock_response = MagicMock()
+        mock_response.nonce = "0xquestion1"
+        mock_response.result = json.dumps(
+            {"is_valid": True, "is_determinable": True, "has_occurred": True}
+        )
+
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = [mock_response]
+
+        mock_shared_state = MagicMock()
+        mock_shared_state.questions_responded = set()
+        mock_shared_state.questions_requested_mech = {
+            "0xquestion1": {
+                "question": {"title": "Test?"},
+                "retries": [],
+            }
+        }
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ), patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=lambda: property(lambda self: mock_shared_state),
+        ), patch.object(
+            self.behaviour,
+            "_get_answer_tx",
+            new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_to_multisend",
+            new=_make_gen(None),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_async_act_with_tx_hash(self):
+        """Test async_act when get_payload returns a hash."""
+        with patch.object(
+            self.behaviour,
+            "_get_payload",
+            new=_make_gen("0xhash"),
+        ), patch.object(
+            self.behaviour,
+            "send_a2a_transaction",
+            new=_make_gen(None),
+        ), patch.object(
+            self.behaviour,
+            "wait_until_round_end",
+            new=_make_gen(None),
+        ), patch.object(
+            self.behaviour,
+            "set_done",
+        ) as mock_set_done:
+            gen = self.behaviour.async_act()
+            _exhaust_gen(gen)
+            mock_set_done.assert_called_once()
+
+    def test_async_act_without_tx_hash(self):
+        """Test async_act when get_payload returns None."""
+        with patch.object(
+            self.behaviour,
+            "_get_payload",
+            new=_make_gen(None),
+        ), patch.object(
+            self.behaviour,
+            "send_a2a_transaction",
+            new=_make_gen(None),
+        ), patch.object(
+            self.behaviour,
+            "wait_until_round_end",
+            new=_make_gen(None),
+        ), patch.object(
+            self.behaviour,
+            "set_done",
+        ) as mock_set_done:
+            gen = self.behaviour.async_act()
+            _exhaust_gen(gen)
+
+    def test_get_payload_batch_size_reached(self):
+        """Test _get_payload when batch size limit is reached and loop breaks early."""
+        # Set batch size to 1 so that after the first valid answer, the loop breaks
+        self.behaviour.context.params.questions_to_close_batch_size = 1
+
+        # Create 2 mech responses, both with valid YES answers
+        mock_response_1 = MagicMock()
+        mock_response_1.nonce = "0xquestion1"
+        mock_response_1.result = json.dumps(
+            {"is_valid": True, "is_determinable": True, "has_occurred": True}
+        )
+
+        mock_response_2 = MagicMock()
+        mock_response_2.nonce = "0xquestion2"
+        mock_response_2.result = json.dumps(
+            {"is_valid": True, "is_determinable": True, "has_occurred": True}
+        )
+
+        mock_synced_data = MagicMock()
+        mock_synced_data.mech_responses = [mock_response_1, mock_response_2]
+
+        mock_shared_state = MagicMock()
+        mock_shared_state.questions_responded = set()
+        mock_shared_state.questions_requested_mech = {
+            "0xquestion1": {
+                "question": {"title": "Test question 1?"},
+                "retries": [],
+            },
+            "0xquestion2": {
+                "question": {"title": "Test question 2?"},
+                "retries": [],
+            },
+        }
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(lambda self: mock_synced_data),
+        ), patch.object(
+            type(self.behaviour),
+            "shared_state",
+            new_callable=lambda: property(lambda self: mock_shared_state),
+        ), patch.object(
+            self.behaviour,
+            "_get_answer_tx",
+            new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_to_multisend",
+            new=_make_gen("0xmultisend_hash"),
+        ):
+            gen = self.behaviour._get_payload()
+            result = _exhaust_gen(gen)
+
+        # Should succeed with only the first question processed (batch size = 1)
+        assert result == "0xmultisend_hash"
+        # Only question1 should have been processed (removed from requested, added to responded)
+        assert "0xquestion1" not in mock_shared_state.questions_requested_mech
+        # question2 should still be in requested (loop broke before processing it)
+        assert "0xquestion2" in mock_shared_state.questions_requested_mech
