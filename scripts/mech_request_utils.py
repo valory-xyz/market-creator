@@ -79,14 +79,6 @@ query requests_query($sender: String!, $id_gt: ID!) {
 """
 
 
-def _hex_to_cid_v1(hex_hash: str) -> str:
-    """Convert raw hex hash (0x...) to CIDv1 base32 format (bafybei...)."""
-    raw_bytes = bytes.fromhex(hex_hash.removeprefix("0x"))
-    # CIDv1: version=1, codec=dag-pb(0x70), hash-fn=sha256(0x12), hash-len=32(0x20)
-    cid_bytes = bytes([0x01, 0x70, 0x12, 0x20]) + raw_bytes
-    return "b" + base64.b32encode(cid_bytes).decode().lower().rstrip("=")
-
-
 def _populate_requests(
     sender: str, mech_requests: Dict[str, Any]
 ) -> None:
@@ -102,28 +94,33 @@ def _populate_requests(
             "sender": sender,
             "id_gt": id_gt,
         }
+        t0 = time.time()
         response = client.execute(gql(REQUESTS_QUERY), variable_values=variables)
+        t1 = time.time()
         items = response.get("requests", [])
 
         if not items:
             break
 
         for mech_request in items:
+            # Pick the best delivery: closest blockNumber >= request blockNumber
+            deliveries = mech_request.pop("deliveries", [])
+            req_block = int(mech_request["blockNumber"])
+            best_deliver = None
+            for d in deliveries:
+                if int(d["blockNumber"]) >= req_block:
+                    if best_deliver is None or int(d["blockNumber"]) < int(best_deliver["blockNumber"]):
+                        best_deliver = d
+
             if mech_request["id"] not in mech_requests:
-                # Pick the best delivery: closest blockNumber >= request blockNumber
-                deliveries = mech_request.pop("deliveries", [])
-                req_block = int(mech_request["blockNumber"])
-                best_deliver = None
-                for d in deliveries:
-                    if int(d["blockNumber"]) >= req_block:
-                        if best_deliver is None or int(d["blockNumber"]) < int(best_deliver["blockNumber"]):
-                            best_deliver = d
                 if best_deliver:
                     mech_request["deliver"] = best_deliver
-
                 mech_requests[mech_request["id"]] = mech_request
+            elif "deliver" not in mech_requests[mech_request["id"]] and best_deliver:
+                mech_requests[mech_request["id"]]["deliver"] = best_deliver
 
-        print(f"{f'{len(items)} requests fetched':>{TEXT_ALIGNMENT}}")
+        t2 = time.time()
+        print(f"{f'{len(items)} requests fetched':>{TEXT_ALIGNMENT}}. Query time: {t1 - t0:.2f}s. Processing time: {t2 - t1:.2f}s. Total time: {t2 - t0:.2f}s.")
         id_gt = items[-1]["id"]
         _write_mech_events_to_file(mech_requests)
 
@@ -259,5 +256,5 @@ def get_mech_requests(
 
 
 if __name__ == "__main__":
-    service_safe_address = "0x89c5cc945dd550BcFfb72Fe42BfF002429F46Fec"
+    service_safe_address = "0xffc8029154ecd55abed15bd428ba596e7d23f557"
     get_mech_requests(service_safe_address, f"test_{DEFAULT_MECH_REQUESTS_JSON_PATH}")
