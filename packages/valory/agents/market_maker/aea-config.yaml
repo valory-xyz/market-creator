@@ -24,7 +24,7 @@ contracts:
 - valory/conditional_tokens:0.1.0:bafybeibg7arx2wjzcush3auzwrpoened5lfeulda5nlfxq6d2qkedk3tmi
 - valory/fpmm_deterministic_factory:0.1.0:bafybeifzq3m3jevrmdvxk3jhnein2ab3defpcbl64hk4xau676uzvzr6q4
 - valory/service_registry:0.1.0:bafybeia66yhd3iyvuzojalivuj7yzyh4vi4cxnfoz22saax5257kmjcr6e
-- valory/fpmm:0.1.0:bafybeigf6ry5ctjwnodthtlx26emvs77hucb33ziolzkr4zc4hlfa6ui2m
+- valory/fpmm:0.1.0:bafybeielusvm7isrqff4izd32f67dti2bttn43g55tva3kefuc6e7bc524
 - valory/agreement_store_manager:0.1.0:bafybeibm2oqx2ar36q7lcjkfsf3vrrfsi6r6owa363xopzgnlgmietgcjm
 - valory/did_registry:0.1.0:bafybeialk5be667aezuwnwmpzojswnxtowus5dkhvsayjhqlaf67mpnp74
 - valory/mech:0.1.0:bafybeieg4sb4c6fdqrluctuee4of3lhcfoioddh6lrllmhyxmxpb67kjty
@@ -55,9 +55,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeie7omzycvazfg6edexn2k3fteuey3alopfmlwye6e44exfcxv5apa
 - valory/abstract_round_abci:0.1.0:bafybeicehi2yqab3lldm7qzoqev3tmqrdk275sbtcabneyorhmzft76z7m
-- valory/market_maker_abci:0.1.0:bafybeie7k4tvbquvtzn55epljrz7bfcibln7quhgr5coaepdkkozazeuii
+- valory/market_maker_abci:0.1.0:bafybeiak4kryal2mhjhzd77iofqda3c2qsxe6nmdcg6274meqokg3ygywe
 - valory/registration_abci:0.1.0:bafybeihjgfzqvuymqgku6mwqih7hlvqwr2tmdjrip3m6unt5l4e55bshkm
-- valory/market_creation_manager_abci:0.1.0:bafybeibhjjvjmyskzulpwo54h2whkgshyfqo2b33elik5n7qu7gce2dgb4
+- valory/market_creation_manager_abci:0.1.0:bafybeiaa7u4lcstsvfovwxwezgrghen2pe5dz5o7d2dzxhagumyynvnfzi
 - valory/reset_pause_abci:0.1.0:bafybeih6bjalcohxytg6hj3doy5dhkxonrxpqgcnclyf6tnmuyfbom2usy
 - valory/termination_abci:0.1.0:bafybeiarjw4hhu2vf56yxqb4jh3kmk4hfxvqahygn6scc3rfnlogjkwwpe
 - valory/transaction_settlement_abci:0.1.0:bafybeigivknq755rbnelrdemaz3vm4x7jkofvaskm34uh36pbbg6uiquo4

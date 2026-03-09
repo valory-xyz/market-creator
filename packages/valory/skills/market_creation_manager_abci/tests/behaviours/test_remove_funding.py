@@ -350,7 +350,7 @@ class TestRemoveFundingBehaviour:
             new=_make_gen(mock_resp),
         ):
             gen = self.behaviour._get_merge_positions_tx(
-                collateral_token="0xCollateral",
+                collateral_token="0xCollateral",  # nosec
                 parent_collection_id="0x0",
                 condition_id="0xCond",
                 outcome_slot_count=2,
@@ -373,7 +373,7 @@ class TestRemoveFundingBehaviour:
             new=_make_gen(mock_resp),
         ):
             gen = self.behaviour._get_merge_positions_tx(
-                collateral_token="0xCollateral",
+                collateral_token="0xCollateral",  # nosec
                 parent_collection_id="0x0",
                 condition_id="0xCond",
                 outcome_slot_count=2,
