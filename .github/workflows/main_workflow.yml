@@ -128,7 +128,7 @@ jobs:
           gitleaks detect --report-format json --report-path --log-opts="HEAD" leak_report -v
   
   test:
-    continue-on-error: True
+    continue-on-error: False
     needs:
       - lock_check
       - copyright_and_dependencies_check
@@ -143,12 +143,13 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
+      - uses: actions/setup-python@v6
+        with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.21"
       - if: matrix.os == 'ubuntu-24.04'
@@ -157,30 +158,17 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tomte[tox]==0.4.0
-          pip install --upgrade setuptools==60.10.0
+          pip install tomte[tox]==0.6.1
 
           # install Protobuf compiler
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-          unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v24.3/protoc-24.3-linux-x86_64.zip
+          unzip protoc-24.3-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
-
-          # install IPFS
-          sudo apt-get install -y wget
-          wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
-          tar xvfz go-ipfs.tar.gz
-          sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
-          ipfs init
 
           # install Tendermint
           wget -O tendermint.tar.gz https://github.com/tendermint/tendermint/releases/download/v0.34.19/tendermint_0.34.19_linux_amd64.tar.gz
           tar -xf tendermint.tar.gz
           sudo mv tendermint /usr/local/bin/tendermint
-
-          # pull node image needed for the integration tests
-          docker pull node:16.7.0
-          docker pull trufflesuite/ganache:beta
-          docker pull valory/autonolas-registries:latest
 
       - if: matrix.os == 'ubuntu-24.04'
         name: Unit tests (ubuntu-24.04)
@@ -190,7 +178,7 @@ jobs:
       - if: matrix.os == 'macos-15'
         name: Install dependencies (macos-15)
         run: |
-          pip install tomte[tox]==0.4.0
+          pip install tomte[tox]==0.6.1
           brew install gcc
           brew tap yoheimuta/protolint
           brew install protolint
@@ -200,143 +188,23 @@ jobs:
           if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
             brew install protobuf
           else
-            wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-osx-x86_64.zip
-            unzip protoc-3.19.4-osx-x86_64.zip -d protoc
+            wget https://github.com/protocolbuffers/protobuf/releases/download/v24.3/protoc-24.3-osx-x86_64.zip
+            unzip protoc-24.3-osx-x86_64.zip -d protoc
             sudo mv protoc/bin/protoc /usr/local/bin/protoc
           fi
-
-          # install ipfs (curl -L to follow dist.ipfs.io -> dist.ipfs.tech redirect)
-          # v0.6.0 has no darwin-arm64; use v0.14.0 for Apple Silicon
-          if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
-            curl -L -o go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.14.0/go-ipfs_v0.14.0_darwin-arm64.tar.gz
-          else
-            curl -L -o go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_darwin-amd64.tar.gz
-          fi
-          tar -xvzf go-ipfs.tar.gz
-          cd go-ipfs
-          sudo ./install.sh
-          cd ..
-          rm -rf go-ipfs go-ipfs.tar.gz
-          ipfs init
 
       - if: matrix.os == 'macos-15'
         name: Skills unit tests macos-15
         run: |
           tox -e py${{ matrix.python-version }}-darwin -- -m 'not e2e'
 
-      - if: matrix.os == 'windows-2025'
-        name: Install dependencies (windows-2025)
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-        run: |
-          python -m pip install -U pip
-          choco install mingw -y
-          choco install make -y
-          make --version
-          pip install tomte[tox]==0.4.0
-
-          # install protoc (direct download; choco version can be unavailable)
-          curl -L -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
-          Expand-Archive -Path protoc.zip -DestinationPath protoc -Force
-          echo "$env:PWD\protoc\bin" >> $env:GITHUB_PATH
-
-          # install ipfs (GitHub Kubo release; curl -L to follow redirects)
-          New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\go\bin" | Out-Null
-          curl -L -o go-ipfs.zip https://github.com/ipfs/kubo/releases/download/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip
-          Expand-Archive -Path go-ipfs.zip -DestinationPath "$env:USERPROFILE\Apps" -Force
-          Copy-Item "$env:USERPROFILE\Apps\go-ipfs\ipfs.exe" -Destination "$env:USERPROFILE\go\bin\ipfs.exe"
-          echo "$env:USERPROFILE\go\bin" >> $env:GITHUB_PATH
-          $env:Path = "$env:USERPROFILE\go\bin;$env:Path"
-          ipfs init
-
-      - if: matrix.os == 'windows-2025'
-        name: Skills unit tests windows-2025
-        run: |
-          tox -e py${{ matrix.python-version }}-win -- -m 'not e2e'
-
       - if: matrix.os == 'ubuntu-24.04'
         name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
+          files: coverage.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
 
-  coverage:
-    continue-on-error: False
-    needs:
-      - linter_checks
-    runs-on: ubuntu-24.04
-
-    timeout-minutes: 30
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: |
-          pip install tomte[tox]==0.4.0
-
-      - name: Run unit tests with coverage
-        run: |
-          tox -e unit-tests-coverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: coverage.xml
-          fail_ci_if_error: false
-
-  # e2e-tests:
-  #   continue-on-error: True
-  #   needs:
-  #     - test
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     matrix:
-  #       os: [ ubuntu-24.04 ]
-  #       python-version: [ "3.10" ]
-  #   timeout-minutes: 30
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-python@v3
-  #       with:
-  #         submodules: recursive
-  #         python-version: ${{ matrix.python-version }}
-  #     - if: matrix.os == 'ubuntu-24.04'
-  #       name: Install dependencies (ubuntu-24.04)
-  #       run: |
-  #         sudo apt-get update --fix-missing
-  #         sudo apt-get autoremove
-  #         sudo apt-get autoclean
-  #         pip install tomte[tox]==0.4.0
-  #         pip install --upgrade setuptools==60.10.0
-
-  #         # install Protobuf compiler
-  #         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-  #         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
-  #         sudo mv protoc/bin/protoc /usr/local/bin/protoc
-
-  #         # install IPFS
-  #         sudo apt-get install -y wget
-  #         wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
-  #         tar xvfz go-ipfs.tar.gz
-  #         sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
-  #         ipfs init
-
-  #         # install Tendermint
-  #         wget -O tendermint.tar.gz https://github.com/tendermint/tendermint/releases/download/v0.34.19/tendermint_0.34.19_linux_amd64.tar.gz
-  #         tar -xf tendermint.tar.gz
-  #         sudo mv tendermint /usr/local/bin/tendermint
-
-  #         # pull node image needed for the integration tests
-  #         docker pull node:16.7.0
-
-  #     - name: e2e tests
-  #       run: |
-  #         tox -e py${{ matrix.python-version }} -- -m 'e2e'
