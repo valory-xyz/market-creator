@@ -55,6 +55,7 @@ query requests_query($sender: String!, $id_gt: ID!) {
     }
     transactionHash
     parsedRequest {
+      content
       hash
       id
     }
@@ -150,7 +151,28 @@ def get_deliver_ipfs_url(deliver: Dict[str, Any]) -> str:
 def _populate_event_ipfs_contents(event: Dict[str, Any], url: str) -> None:
     response = requests.get(url, timeout=60)
     response.raise_for_status()
-    event["ipfsContents"] = response.json()
+    ipfs_contents = response.json()
+
+    # # Verify IPFS contents match subgraph data
+    # if isinstance(ipfs_contents, dict):
+    #     tool_response = event.get("toolResponse")
+    #     parsed_content = (event.get("parsedRequest") or {}).get("content")
+
+    #     if tool_response and tool_response != ipfs_contents.get("result"):
+    #         print(f"WARNING: deliver mismatch for {url}")
+    #         print(f"  toolResponse:        {tool_response[:200]}")
+    #         print(f"  ipfsContents.result: {str(ipfs_contents.get('result'))[:200]}")
+    #     elif parsed_content:
+    #         try:
+    #             subgraph_data = json.loads(parsed_content)
+    #             for key, value in subgraph_data.items():
+    #                 if ipfs_contents.get(key) != value:
+    #                     print(f"WARNING: request mismatch for {url}")
+    #                     print(f"  key '{key}': subgraph={value!r}, ipfs={ipfs_contents.get(key)!r}")
+    #         except (json.JSONDecodeError, TypeError):
+    #             pass
+
+    event["ipfsContents"] = ipfs_contents
 
 
 def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
