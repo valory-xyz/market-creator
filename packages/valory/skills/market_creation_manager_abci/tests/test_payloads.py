@@ -34,7 +34,6 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     SyncMarketsPayload,
 )
 
-
 SENDER = "sender_address"
 
 

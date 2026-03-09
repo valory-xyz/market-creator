@@ -93,12 +93,8 @@ class TestSyncMarketsBehaviour:
         context_mock.state.synchronized_data = MagicMock()
         context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
         context_mock.benchmark_tool = MagicMock()
-        context_mock.agent_address = (
-            "0x1234567890123456789012345678901234567890"
-        )
-        self.behaviour = SyncMarketsBehaviour(
-            name="test", skill_context=context_mock
-        )
+        context_mock.agent_address = "0x1234567890123456789012345678901234567890"
+        self.behaviour = SyncMarketsBehaviour(name="test", skill_context=context_mock)
 
     def test_get_markets_subgraph_none(self):
         """Test get_markets when subgraph returns None."""
@@ -117,9 +113,7 @@ class TestSyncMarketsBehaviour:
         entry = _make_pool_entry()
         entry["pool"]["liquidityMeasure"] = None
 
-        subgraph_response = {
-            "data": {"fpmmPoolMemberships": [entry]}
-        }
+        subgraph_response = {"data": {"fpmmPoolMemberships": [entry]}}
 
         contract_resp = MagicMock()
         contract_resp.performative = ContractApiMessage.Performative.STATE
@@ -144,9 +138,7 @@ class TestSyncMarketsBehaviour:
         """Test get_markets filters out market with 0 liquidity."""
         entry = _make_pool_entry(liquidity="0")
 
-        subgraph_response = {
-            "data": {"fpmmPoolMemberships": [entry]}
-        }
+        subgraph_response = {"data": {"fpmmPoolMemberships": [entry]}}
 
         contract_resp = MagicMock()
         contract_resp.performative = ContractApiMessage.Performative.STATE
@@ -172,9 +164,7 @@ class TestSyncMarketsBehaviour:
         entry = _make_pool_entry()
         entry["pool"]["openingTimestamp"] = None
 
-        subgraph_response = {
-            "data": {"fpmmPoolMemberships": [entry]}
-        }
+        subgraph_response = {"data": {"fpmmPoolMemberships": [entry]}}
 
         contract_resp = MagicMock()
         contract_resp.performative = ContractApiMessage.Performative.STATE
@@ -199,9 +189,7 @@ class TestSyncMarketsBehaviour:
         """Test get_markets filters out condition without question."""
         entry = _make_pool_entry(has_question=False)
 
-        subgraph_response = {
-            "data": {"fpmmPoolMemberships": [entry]}
-        }
+        subgraph_response = {"data": {"fpmmPoolMemberships": [entry]}}
 
         contract_resp = MagicMock()
         contract_resp.performative = ContractApiMessage.Performative.STATE
@@ -226,9 +214,7 @@ class TestSyncMarketsBehaviour:
         """Test get_markets with valid markets returned."""
         entry = _make_pool_entry(pool_id="0xMarket1")
 
-        subgraph_response = {
-            "data": {"fpmmPoolMemberships": [entry]}
-        }
+        subgraph_response = {"data": {"fpmmPoolMemberships": [entry]}}
 
         contract_resp = MagicMock()
         contract_resp.performative = ContractApiMessage.Performative.STATE
@@ -288,9 +274,7 @@ class TestSyncMarketsBehaviour:
             "get_contract_api_response",
             new=_make_gen(contract_resp),
         ):
-            gen = self.behaviour._get_markets_with_funds(
-                ["0xMarket1"], "0xSafe"
-            )
+            gen = self.behaviour._get_markets_with_funds(["0xMarket1"], "0xSafe")
             result = _exhaust_gen(gen)
 
         assert result == []
@@ -368,9 +352,7 @@ class TestSyncMarketsBehaviour:
         """Test get_markets when market address not in get_markets_with_funds result."""
         entry = _make_pool_entry(pool_id="0xMarketNotFunded")
 
-        subgraph_response = {
-            "data": {"fpmmPoolMemberships": [entry]}
-        }
+        subgraph_response = {"data": {"fpmmPoolMemberships": [entry]}}
 
         contract_resp = MagicMock()
         contract_resp.performative = ContractApiMessage.Performative.STATE

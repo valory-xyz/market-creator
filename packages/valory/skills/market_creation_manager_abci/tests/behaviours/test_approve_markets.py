@@ -28,7 +28,6 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.approve_mark
     ApproveMarketsBehaviour,
 )
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 
@@ -236,15 +235,11 @@ class TestApproveMarketsBehaviourGenerators:
         """Test _not_sender_act waits and sets done."""
         with patch.object(
             self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done, patch.object(
+        ), patch.object(self.behaviour, "set_done") as mock_set_done, patch.object(
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    most_voted_keeper_address="0x9999"
-                )
+                lambda self: MagicMock(most_voted_keeper_address="0x9999")
             ),
         ):
             gen = self.behaviour._not_sender_act()
@@ -376,9 +371,9 @@ class TestApproveMarketsBehaviourGenerators:
             return mock_resp_fail
             yield  # noqa
 
-        with patch.object(
-            self.behaviour, "get_http_response", new=multi_gen
-        ), patch("time.sleep"):
+        with patch.object(self.behaviour, "get_http_response", new=multi_gen), patch(
+            "time.sleep"
+        ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
             )
@@ -409,9 +404,9 @@ class TestApproveMarketsBehaviourGenerators:
             return mock_resp_fail
             yield  # noqa
 
-        with patch.object(
-            self.behaviour, "get_http_response", new=multi_gen
-        ), patch("time.sleep"):
+        with patch.object(self.behaviour, "get_http_response", new=multi_gen), patch(
+            "time.sleep"
+        ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
             )
@@ -423,9 +418,7 @@ class TestApproveMarketsBehaviourGenerators:
         """Test async_act when _i_am_not_sending returns True."""
         with patch.object(
             self.behaviour, "_i_am_not_sending", return_value=True
-        ), patch.object(
-            self.behaviour, "_not_sender_act", new=_make_gen(None)
-        ):
+        ), patch.object(self.behaviour, "_not_sender_act", new=_make_gen(None)):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
@@ -433,9 +426,7 @@ class TestApproveMarketsBehaviourGenerators:
         """Test async_act when _i_am_not_sending returns False."""
         with patch.object(
             self.behaviour, "_i_am_not_sending", return_value=False
-        ), patch.object(
-            self.behaviour, "_sender_act", new=_make_gen(None)
-        ):
+        ), patch.object(self.behaviour, "_sender_act", new=_make_gen(None)):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 

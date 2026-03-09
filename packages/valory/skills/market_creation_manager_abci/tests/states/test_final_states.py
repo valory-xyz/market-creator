@@ -33,7 +33,6 @@ from packages.valory.skills.market_creation_manager_abci.states.final_states imp
     FinishedWithoutTxRound,
 )
 
-
 ALL_FINAL_STATES = [
     FinishedMarketCreationManagerRound,
     FinishedWithRemoveFundingRound,

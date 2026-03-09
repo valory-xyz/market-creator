@@ -30,7 +30,6 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.answer_quest
     AnswerQuestionsBehaviour,
 )
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 
@@ -182,7 +181,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             "get_contract_api_response",
             new=_make_gen(mock_resp),
         ):
-            gen = self.behaviour._get_answer_tx("0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890", ANSWER_YES)
+            gen = self.behaviour._get_answer_tx(
+                "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+                ANSWER_YES,
+            )
             result = _exhaust_gen(gen)
 
         assert result is not None
@@ -202,7 +204,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             "get_contract_api_response",
             new=_make_gen(mock_resp),
         ):
-            gen = self.behaviour._get_answer_tx("0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890", ANSWER_YES)
+            gen = self.behaviour._get_answer_tx(
+                "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+                ANSWER_YES,
+            )
             result = _exhaust_gen(gen)
 
         assert result is None
@@ -284,9 +289,7 @@ class TestAnswerQuestionsBehaviourGenerators:
         """Test _get_payload when answer is None but retries >= answer_retry_intervals length."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
-        mock_response.result = json.dumps(
-            {"is_valid": True, "is_determinable": False}
-        )
+        mock_response.result = json.dumps({"is_valid": True, "is_determinable": False})
 
         mock_synced_data = MagicMock()
         mock_synced_data.mech_responses = [mock_response]
@@ -327,9 +330,7 @@ class TestAnswerQuestionsBehaviourGenerators:
         """Test _get_payload when answer is None and retries < threshold."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
-        mock_response.result = json.dumps(
-            {"is_valid": True, "is_determinable": False}
-        )
+        mock_response.result = json.dumps({"is_valid": True, "is_determinable": False})
 
         mock_synced_data = MagicMock()
         mock_synced_data.mech_responses = [mock_response]

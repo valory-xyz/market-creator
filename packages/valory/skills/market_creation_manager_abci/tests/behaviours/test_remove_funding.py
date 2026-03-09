@@ -75,16 +75,14 @@ class TestRemoveFundingBehaviour:
         context_mock.params.conditional_tokens_contract = "0xConditionalTokens"
         context_mock.params.collateral_tokens_contract = "0xCollateral"
         context_mock.state.round_sequence = MagicMock()
-        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = 1700100000
+        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
+            1700100000
+        )
         context_mock.state.synchronized_data = MagicMock()
         context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
         context_mock.benchmark_tool = MagicMock()
-        context_mock.agent_address = (
-            "0x1234567890123456789012345678901234567890"
-        )
-        self.behaviour = RemoveFundingBehaviour(
-            name="test", skill_context=context_mock
-        )
+        context_mock.agent_address = "0x1234567890123456789012345678901234567890"
+        self.behaviour = RemoveFundingBehaviour(name="test", skill_context=context_mock)
 
     def test_get_market_to_close_found(self):
         """Test _get_market_to_close when a market with old removal_timestamp exists."""
@@ -440,9 +438,7 @@ class TestRemoveFundingBehaviour:
             RemoveFundingRound,
         )
 
-        with patch.object(
-            self.behaviour, "_get_market_to_close", return_value=None
-        ):
+        with patch.object(self.behaviour, "_get_market_to_close", return_value=None):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
 
@@ -461,9 +457,7 @@ class TestRemoveFundingBehaviour:
         }
         with patch.object(
             self.behaviour, "_get_market_to_close", return_value=market
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=_make_gen(None)
-        ):
+        ), patch.object(self.behaviour, "_calculate_amounts", new=_make_gen(None)):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
 
@@ -508,7 +502,8 @@ class TestRemoveFundingBehaviour:
         ), patch.object(
             self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
         ), patch.object(
-            self.behaviour, "_get_remove_funding_tx",
+            self.behaviour,
+            "_get_remove_funding_tx",
             new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
         ), patch.object(
             self.behaviour, "_get_merge_positions_tx", new=_make_gen(None)
@@ -534,10 +529,12 @@ class TestRemoveFundingBehaviour:
         ), patch.object(
             self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
         ), patch.object(
-            self.behaviour, "_get_remove_funding_tx",
+            self.behaviour,
+            "_get_remove_funding_tx",
             new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
         ), patch.object(
-            self.behaviour, "_get_merge_positions_tx",
+            self.behaviour,
+            "_get_merge_positions_tx",
             new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
         ), patch.object(
             self.behaviour, "_get_withdraw_tx", new=_make_gen(None)
@@ -563,13 +560,16 @@ class TestRemoveFundingBehaviour:
         ), patch.object(
             self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
         ), patch.object(
-            self.behaviour, "_get_remove_funding_tx",
+            self.behaviour,
+            "_get_remove_funding_tx",
             new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
         ), patch.object(
-            self.behaviour, "_get_merge_positions_tx",
+            self.behaviour,
+            "_get_merge_positions_tx",
             new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
         ), patch.object(
-            self.behaviour, "_get_withdraw_tx",
+            self.behaviour,
+            "_get_withdraw_tx",
             new=_make_gen({"to": "0xC", "data": b"\x03", "value": 0}),
         ), patch.object(
             self.behaviour, "_to_multisend", new=_make_gen(None)
@@ -593,13 +593,16 @@ class TestRemoveFundingBehaviour:
         ), patch.object(
             self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
         ), patch.object(
-            self.behaviour, "_get_remove_funding_tx",
+            self.behaviour,
+            "_get_remove_funding_tx",
             new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
         ), patch.object(
-            self.behaviour, "_get_merge_positions_tx",
+            self.behaviour,
+            "_get_merge_positions_tx",
             new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
         ), patch.object(
-            self.behaviour, "_get_withdraw_tx",
+            self.behaviour,
+            "_get_withdraw_tx",
             new=_make_gen({"to": "0xC", "data": b"\x03", "value": 0}),
         ), patch.object(
             self.behaviour, "_to_multisend", new=_make_gen("0xMultisendHash")

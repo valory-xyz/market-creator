@@ -31,16 +31,17 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.deposit_dai 
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import DepositDaiRound
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 
 
 def _make_gen(return_value):
     """Create a no-yield generator returning the given value."""
+
     def gen(*args, **kwargs):
         return return_value
         yield  # noqa: unreachable
+
     return gen
 
 
@@ -68,9 +69,7 @@ class TestDepositDaiBehaviour:
         context_mock.params.collateral_tokens_contract = (
             "0xaaaa567890123456789012345678901234567890"
         )
-        self.behaviour = DepositDaiBehaviour(
-            name="test", skill_context=context_mock
-        )
+        self.behaviour = DepositDaiBehaviour(name="test", skill_context=context_mock)
 
     def test_matching_round(self) -> None:
         """Test matching_round is correctly set."""
@@ -136,13 +135,9 @@ class TestDepositDaiBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
-        ), patch.object(
-            self.behaviour, "get_balance", new=_make_gen(None)
-        ):
+        ), patch.object(self.behaviour, "get_balance", new=_make_gen(None)):
             gen = self.behaviour.get_tx_hash()
             result = _exhaust_gen(gen)
 
@@ -154,12 +149,12 @@ class TestDepositDaiBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
-            self.behaviour, "get_balance", new=_make_gen(10**17)  # 0.1 xDAI < 1 xDAI threshold
+            self.behaviour,
+            "get_balance",
+            new=_make_gen(10**17),  # 0.1 xDAI < 1 xDAI threshold
         ):
             gen = self.behaviour.get_tx_hash()
             result = _exhaust_gen(gen)
@@ -172,9 +167,7 @@ class TestDepositDaiBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour, "get_balance", new=_make_gen(5 * 10**18)
@@ -192,9 +185,7 @@ class TestDepositDaiBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour, "get_balance", new=_make_gen(5 * 10**18)
@@ -214,9 +205,7 @@ class TestDepositDaiBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour, "get_balance", new=_make_gen(5 * 10**18)

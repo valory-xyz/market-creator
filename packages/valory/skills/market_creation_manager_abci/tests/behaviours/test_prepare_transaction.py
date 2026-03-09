@@ -26,7 +26,6 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_tran
     PrepareTransactionBehaviour,
 )
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 _ONE_DAY = 86400
@@ -131,7 +130,12 @@ class TestPrepareTransactionBehaviourGenerators:
             new=_make_gen(mock_resp),
         ):
             gen = self.behaviour._calculate_question_id(
-                question_data={"question": "Test?", "answers": "Yes,No", "topic": "test", "language": "en"},
+                question_data={
+                    "question": "Test?",
+                    "answers": "Yes,No",
+                    "topic": "test",
+                    "language": "en",
+                },
                 opening_timestamp=1700000000,
                 timeout=604800,
             )
@@ -153,7 +157,12 @@ class TestPrepareTransactionBehaviourGenerators:
             new=_make_gen(mock_resp),
         ):
             gen = self.behaviour._prepare_ask_question_mstx(
-                question_data={"question": "Test?", "answers": "Yes,No", "topic": "test", "language": "en"},
+                question_data={
+                    "question": "Test?",
+                    "answers": "Yes,No",
+                    "topic": "test",
+                    "language": "en",
+                },
                 opening_timestamp=1700000000,
                 timeout=604800,
             )
@@ -350,7 +359,9 @@ class TestPrepareTransactionBehaviourGenerators:
         ), patch.object(
             self.behaviour, "_prepare_ask_question_mstx", new=multi_ask_question
         ), patch.object(
-            self.behaviour, "_prepare_prepare_condition_mstx", new=multi_prepare_condition
+            self.behaviour,
+            "_prepare_prepare_condition_mstx",
+            new=multi_prepare_condition,
         ), patch.object(
             self.behaviour, "_calculate_condition_id", new=multi_calc_condition
         ), patch.object(
@@ -413,7 +424,8 @@ class TestPrepareTransactionBehaviourGenerators:
         ), patch.object(
             self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
         ), patch.object(
-            self.behaviour, "_prepare_ask_question_mstx",
+            self.behaviour,
+            "_prepare_ask_question_mstx",
             new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
         ), patch.object(
             self.behaviour, "_prepare_prepare_condition_mstx", new=_make_gen(None)
@@ -440,10 +452,12 @@ class TestPrepareTransactionBehaviourGenerators:
         ), patch.object(
             self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
         ), patch.object(
-            self.behaviour, "_prepare_ask_question_mstx",
+            self.behaviour,
+            "_prepare_ask_question_mstx",
             new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
         ), patch.object(
-            self.behaviour, "_prepare_prepare_condition_mstx",
+            self.behaviour,
+            "_prepare_prepare_condition_mstx",
             new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
         ), patch.object(
             self.behaviour, "_calculate_condition_id", new=_make_gen(None)
@@ -470,10 +484,12 @@ class TestPrepareTransactionBehaviourGenerators:
         ), patch.object(
             self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
         ), patch.object(
-            self.behaviour, "_prepare_ask_question_mstx",
+            self.behaviour,
+            "_prepare_ask_question_mstx",
             new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
         ), patch.object(
-            self.behaviour, "_prepare_prepare_condition_mstx",
+            self.behaviour,
+            "_prepare_prepare_condition_mstx",
             new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
         ), patch.object(
             self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
@@ -502,16 +518,21 @@ class TestPrepareTransactionBehaviourGenerators:
         ), patch.object(
             self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
         ), patch.object(
-            self.behaviour, "_prepare_ask_question_mstx",
+            self.behaviour,
+            "_prepare_ask_question_mstx",
             new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
         ), patch.object(
-            self.behaviour, "_prepare_prepare_condition_mstx",
+            self.behaviour,
+            "_prepare_prepare_condition_mstx",
             new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
         ), patch.object(
             self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
         ), patch.object(
-            self.behaviour, "_prepare_create_fpmm_mstx",
-            new=_make_gen({"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}),
+            self.behaviour,
+            "_prepare_create_fpmm_mstx",
+            new=_make_gen(
+                {"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}
+            ),
         ), patch.object(
             self.behaviour, "_get_approve_tx", new=_make_gen(None)
         ):
@@ -537,18 +558,24 @@ class TestPrepareTransactionBehaviourGenerators:
         ), patch.object(
             self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
         ), patch.object(
-            self.behaviour, "_prepare_ask_question_mstx",
+            self.behaviour,
+            "_prepare_ask_question_mstx",
             new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
         ), patch.object(
-            self.behaviour, "_prepare_prepare_condition_mstx",
+            self.behaviour,
+            "_prepare_prepare_condition_mstx",
             new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
         ), patch.object(
             self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
         ), patch.object(
-            self.behaviour, "_prepare_create_fpmm_mstx",
-            new=_make_gen({"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}),
+            self.behaviour,
+            "_prepare_create_fpmm_mstx",
+            new=_make_gen(
+                {"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}
+            ),
         ), patch.object(
-            self.behaviour, "_get_approve_tx",
+            self.behaviour,
+            "_get_approve_tx",
             new=_make_gen({"to": "0xC", "data": b"\x04", "value": 0}),
         ), patch.object(
             self.behaviour, "_to_multisend", new=_make_gen(None)

@@ -32,16 +32,17 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     RetrieveApprovedMarketRound,
 )
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 
 
 def _make_gen(return_value):
     """Create a no-yield generator returning the given value."""
+
     def gen(*args, **kwargs):
         return return_value
         yield  # noqa: unreachable
+
     return gen
 
 
@@ -183,9 +184,7 @@ class TestRetrieveApprovedMarketBehaviour:
         """Test async_act when not sender."""
         with patch.object(
             self.behaviour, "_i_am_not_sending", return_value=True
-        ), patch.object(
-            self.behaviour, "_not_sender_act", new=_make_gen(None)
-        ):
+        ), patch.object(self.behaviour, "_not_sender_act", new=_make_gen(None)):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
@@ -193,9 +192,7 @@ class TestRetrieveApprovedMarketBehaviour:
         """Test async_act when sender."""
         with patch.object(
             self.behaviour, "_i_am_not_sending", return_value=False
-        ), patch.object(
-            self.behaviour, "_sender_act", new=_make_gen(None)
-        ):
+        ), patch.object(self.behaviour, "_sender_act", new=_make_gen(None)):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 

@@ -26,7 +26,6 @@ from unittest.mock import MagicMock
 import pytest
 from hypothesis import HealthCheck, settings
 
-
 # Mock openai module to allow importing propose_questions.py
 sys.modules["openai"] = MagicMock()
 sys.modules["tiktoken"] = MagicMock()

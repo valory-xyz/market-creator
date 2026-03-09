@@ -30,7 +30,6 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
     to_content,
 )
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 
@@ -191,7 +190,9 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         context_mock.params.conditional_tokens_contract = "0xConditionalTokens"
         context_mock.params.multisend_address = "0x" + "ab" * 20
         context_mock.state.round_sequence = MagicMock()
-        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = 1700000000
+        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
+            1700000000
+        )
         context_mock.state.synchronized_data = MagicMock()
         context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
         context_mock.benchmark_tool = MagicMock()
@@ -295,9 +296,7 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         from packages.valory.protocols.contract_api import ContractApiMessage
 
         mock_raw_resp = MagicMock()
-        mock_raw_resp.performative = (
-            ContractApiMessage.Performative.RAW_TRANSACTION
-        )
+        mock_raw_resp.performative = ContractApiMessage.Performative.RAW_TRANSACTION
         mock_raw_resp.raw_transaction.body = {"data": "0xaabbccdd"}
 
         with patch.object(
@@ -344,9 +343,7 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         from packages.valory.protocols.contract_api import ContractApiMessage
 
         mock_raw_resp = MagicMock()
-        mock_raw_resp.performative = (
-            ContractApiMessage.Performative.RAW_TRANSACTION
-        )
+        mock_raw_resp.performative = ContractApiMessage.Performative.RAW_TRANSACTION
         mock_raw_resp.raw_transaction.body = {"data": "0xaabbccdd"}
 
         with patch.object(
@@ -373,9 +370,7 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
 
         mock_resp = MagicMock()
         mock_resp.status_code = 200
-        mock_resp.body = json.dumps(
-            {"data": {"markets": []}}
-        ).encode()
+        mock_resp.body = json.dumps({"data": {"markets": []}}).encode()
 
         with patch.object(
             self.behaviour,
@@ -477,9 +472,7 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
             "wait_for_message",
             new=_make_gen(mock_response),
         ):
-            gen = self.behaviour.do_llm_request(
-                mock_llm_message, mock_llm_dialogue
-            )
+            gen = self.behaviour.do_llm_request(mock_llm_message, mock_llm_dialogue)
             result = _exhaust_gen(gen)
 
         assert result is mock_response

@@ -71,9 +71,7 @@ class TestPostTransactionBehaviour:
         context_mock.state.round_sequence = MagicMock()
         context_mock.state.synchronized_data = MagicMock()
         context_mock.benchmark_tool = MagicMock()
-        context_mock.agent_address = (
-            "0x1234567890123456789012345678901234567890"
-        )
+        context_mock.agent_address = "0x1234567890123456789012345678901234567890"
         self.behaviour = PostTransactionBehaviour(
             name="test", skill_context=context_mock
         )
@@ -102,9 +100,7 @@ class TestPostTransactionBehaviour:
     def test_get_payload_redeem_bond_submitter(self):
         """Test get_payload when tx_submitter is RedeemBondRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
-        self.behaviour.synchronized_data.tx_submitter = (
-            RedeemBondRound.auto_round_id()
-        )
+        self.behaviour.synchronized_data.tx_submitter = RedeemBondRound.auto_round_id()
 
         gen = self.behaviour.get_payload()
         result = _exhaust_gen(gen)
@@ -114,9 +110,7 @@ class TestPostTransactionBehaviour:
     def test_get_payload_deposit_dai_submitter(self):
         """Test get_payload when tx_submitter is DepositDaiRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
-        self.behaviour.synchronized_data.tx_submitter = (
-            DepositDaiRound.auto_round_id()
-        )
+        self.behaviour.synchronized_data.tx_submitter = DepositDaiRound.auto_round_id()
 
         gen = self.behaviour.get_payload()
         result = _exhaust_gen(gen)
@@ -177,9 +171,7 @@ class TestPostTransactionBehaviour:
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = "some_other_round"
         self.behaviour.synchronized_data.is_approved_question_data_set = True
-        self.behaviour.synchronized_data.approved_question_data = {
-            "id": "market_1"
-        }
+        self.behaviour.synchronized_data.approved_question_data = {"id": "market_1"}
 
         gen = self.behaviour.get_payload()
         result = _exhaust_gen(gen)
@@ -190,9 +182,7 @@ class TestPostTransactionBehaviour:
         """Test _get_fpmm_id with successful contract API response."""
         mock_resp = MagicMock()
         mock_resp.performative = ContractApiMessage.Performative.STATE
-        mock_resp.state.body = {
-            "data": {"fixed_product_market_maker": "0xFPMM123"}
-        }
+        mock_resp.state.body = {"data": {"fixed_product_market_maker": "0xFPMM123"}}
 
         with patch.object(
             self.behaviour,
@@ -367,9 +357,7 @@ class TestPostTransactionBehaviour:
             PrepareTransactionRound.auto_round_id()
         )
         self.behaviour.synchronized_data.is_approved_question_data_set = True
-        self.behaviour.synchronized_data.approved_question_data = {
-            "id": "market_1"
-        }
+        self.behaviour.synchronized_data.approved_question_data = {"id": "market_1"}
 
         with patch.object(
             self.behaviour,

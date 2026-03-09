@@ -23,8 +23,8 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.get_pending_questions import (
-    OPEN_FPMM_QUERY,
     GetPendingQuestionsBehaviour,
+    OPEN_FPMM_QUERY,
 )
 from packages.valory.skills.market_creation_manager_abci.states.get_pending_questions import (
     GetPendingQuestionsRound,
@@ -77,16 +77,14 @@ class TestGetPendingQuestionsBehaviour:
         context_mock.params.realitio_answer_question_bond = 100
         context_mock.params.mech_tool_resolve_market = "resolve_market"
         context_mock.state.round_sequence = MagicMock()
-        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = 1700000100
+        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
+            1700000100
+        )
         context_mock.state.questions_responded = {}
         context_mock.state.questions_requested_mech = {}
-        context_mock.state.synchronized_data.safe_contract_address = (
-            "0xSafeAddress"
-        )
+        context_mock.state.synchronized_data.safe_contract_address = "0xSafeAddress"
         context_mock.benchmark_tool = MagicMock()
-        context_mock.agent_address = (
-            "0x1234567890123456789012345678901234567890"
-        )
+        context_mock.agent_address = "0x1234567890123456789012345678901234567890"
         self.behaviour = GetPendingQuestionsBehaviour(
             name="test", skill_context=context_mock
         )
@@ -94,9 +92,7 @@ class TestGetPendingQuestionsBehaviour:
     def test_get_unanswered_questions_success(self):
         """Test _get_unanswered_questions with valid subgraph data."""
         questions = [_make_question("q1"), _make_question("q2")]
-        subgraph_response = {
-            "data": {"fixedProductMarketMakers": questions}
-        }
+        subgraph_response = {"data": {"fixedProductMarketMakers": questions}}
 
         with patch.object(
             self.behaviour,

@@ -23,8 +23,8 @@ import json
 from unittest.mock import MagicMock, patch
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import (
-    FPMM_QUERY,
     CollectProposedMarketsBehaviour,
+    FPMM_QUERY,
 )
 from packages.valory.skills.market_creation_manager_abci.states.collect_proposed_markets import (
     CollectProposedMarketsRound,
@@ -59,13 +59,9 @@ class TestCollectProposedMarketsBehaviour:
         context_mock.logger = MagicMock()
         context_mock.params = MagicMock()
         context_mock.state.round_sequence = MagicMock()
-        context_mock.state.synchronized_data.safe_contract_address = (
-            "0xSafeAddress"
-        )
+        context_mock.state.synchronized_data.safe_contract_address = "0xSafeAddress"
         context_mock.benchmark_tool = MagicMock()
-        context_mock.agent_address = (
-            "0x1234567890123456789012345678901234567890"
-        )
+        context_mock.agent_address = "0x1234567890123456789012345678901234567890"
         self.behaviour = CollectProposedMarketsBehaviour(
             name="test", skill_context=context_mock
         )
@@ -74,9 +70,7 @@ class TestCollectProposedMarketsBehaviour:
         """Test _collect_approved_markets with a successful 200 response."""
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.body = json.dumps(
-            {"approved_markets": [{"id": "m1"}]}
-        ).encode()
+        mock_response.body = json.dumps({"approved_markets": [{"id": "m1"}]}).encode()
 
         with patch.object(
             self.behaviour,
@@ -209,7 +203,9 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
         context_mock.params.min_approve_markets_epoch_seconds = 3600
         context_mock.params.max_approved_markets = 10
         context_mock.state.round_sequence = MagicMock()
-        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = 1700000000
+        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
+            1700000000
+        )
         context_mock.state.synchronized_data = MagicMock()
         context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
         context_mock.benchmark_tool = MagicMock()

@@ -24,7 +24,6 @@ from pathlib import Path
 
 from hypothesis import settings
 
-
 CI = "CI"
 PACKAGE_DIR = Path(__file__).parent.parent
 

@@ -31,16 +31,17 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_bond 
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import RedeemBondRound
 
-
 CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 
 
 def _make_gen(return_value):
     """Create a no-yield generator returning the given value."""
+
     def gen(*args, **kwargs):
         return return_value
         yield  # noqa: unreachable
+
     return gen
 
 
@@ -67,9 +68,7 @@ class TestRedeemBondBehaviour:
         context_mock.params.realitio_contract = (
             "0xbbbb567890123456789012345678901234567890"
         )
-        self.behaviour = RedeemBondBehaviour(
-            name="test", skill_context=context_mock
-        )
+        self.behaviour = RedeemBondBehaviour(name="test", skill_context=context_mock)
 
     def test_matching_round(self) -> None:
         """Test matching_round is correctly set."""
@@ -89,9 +88,7 @@ class TestRedeemBondBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
@@ -110,9 +107,7 @@ class TestRedeemBondBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
@@ -158,13 +153,9 @@ class TestRedeemBondBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
-        ), patch.object(
-            self.behaviour, "get_balance", new=_make_gen(None)
-        ):
+        ), patch.object(self.behaviour, "get_balance", new=_make_gen(None)):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
 
@@ -176,9 +167,7 @@ class TestRedeemBondBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour,
@@ -196,9 +185,7 @@ class TestRedeemBondBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour,
@@ -223,9 +210,7 @@ class TestRedeemBondBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour,
@@ -252,9 +237,7 @@ class TestRedeemBondBehaviour:
             type(self.behaviour),
             "synchronized_data",
             new_callable=lambda: property(
-                lambda self: MagicMock(
-                    safe_contract_address="0xsafe"
-                )
+                lambda self: MagicMock(safe_contract_address="0xsafe")
             ),
         ), patch.object(
             self.behaviour,
