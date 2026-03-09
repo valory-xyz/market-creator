@@ -21,12 +21,13 @@
 
 """Script for retrieving mech requests and their delivers."""
 
+import base64
 import json
 import time
-from collections import defaultdict
+import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import requests
 from gql import Client, gql
@@ -36,82 +37,63 @@ from tqdm import tqdm
 
 TEXT_ALIGNMENT = 30
 MINIMUM_WRITE_FILE_DELAY_SECONDS = 20
-MECH_FROM_BLOCK_RANGE = 50000
 DEFAULT_MECH_REQUESTS_JSON_PATH = "mech_requests.json"
 IPFS_ADDRESS = "https://gateway.autonolas.tech/ipfs/"
 CID_V1_PREFIX = "f01701220"
 THREAD_POOL_EXECUTOR_MAX_WORKERS = 10
 
-LEGACY_REQUESTS_QUERY = """
+SUBGRAPH_URL = "https://api.subgraph.autonolas.tech/api/proxy/marketplace-gnosis"
+
+REQUESTS_QUERY = """
 query requests_query($sender: String!, $id_gt: ID!) {
   requests(where: {sender: $sender, id_gt: $id_gt}, orderBy: id, first: 1000) {
     blockNumber
     blockTimestamp
     id
-    ipfsHash
-    requestId
     sender {
       id
     }
     transactionHash
+    parsedRequest {
+      hash
+      id
+    }
+    deliveries {
+      blockNumber
+      blockTimestamp
+      id
+      requestId
+      sender
+      transactionHash
+      toolResponse
+      mechDelivery {
+        ipfsHash
+        requestId
+      }
+      marketplaceDelivery {
+        ipfsHashBytes
+      }
+    }
   }
 }
 """
 
-LEGACY_DELIVERS_QUERY = """
-query delivers_query($requestId_in: [BigInt!], $id_gt: Bytes!) {
-  delivers(where: {requestId_in: $requestId_in, id_gt: $id_gt}, orderBy: blockNumber, first: 1000) {
-    blockNumber
-    blockTimestamp
-    id
-    ipfsHash
-    requestId
-    sender
-    transactionHash
-  }
-}
-"""
 
-MM_REQUESTS_QUERY = LEGACY_REQUESTS_QUERY
-
-MM_DELIVERS_QUERY = """
-query delivers_query($requestId_in: [Bytes!], $id_gt: ID!) {
-  delivers(where: {requestId_in: $requestId_in, id_gt: $id_gt}, orderBy: blockNumber, first: 1000) {
-    blockNumber
-    blockTimestamp
-    id
-    ipfsHash
-    requestId
-    sender
-    transactionHash
-  }
-}
-"""
-
-graph_endpoints_data = {
-    "legacy": {
-        "url": "https://api.subgraph.autonolas.tech/api/proxy/mech",
-        "requests_query": LEGACY_REQUESTS_QUERY,
-        "delivers_query": LEGACY_DELIVERS_QUERY,
-    },
-    "marketplace": {
-        "url": "https://api.studio.thegraph.com/query/1716136/olas-gnosis-mech-marketplace/version/latest",
-        "requests_query": MM_REQUESTS_QUERY,
-        "delivers_query": MM_DELIVERS_QUERY,
-    },
-}
+def _hex_to_cid_v1(hex_hash: str) -> str:
+    """Convert raw hex hash (0x...) to CIDv1 base32 format (bafybei...)."""
+    raw_bytes = bytes.fromhex(hex_hash.removeprefix("0x"))
+    # CIDv1: version=1, codec=dag-pb(0x70), hash-fn=sha256(0x12), hash-len=32(0x20)
+    cid_bytes = bytes([0x01, 0x70, 0x12, 0x20]) + raw_bytes
+    return "b" + base64.b32encode(cid_bytes).decode().lower().rstrip("=")
 
 
-def _populate_missing_requests(
-    endpoint_id: str, sender: str, mech_requests: Dict[str, Any]
+def _populate_requests(
+    sender: str, mech_requests: Dict[str, Any]
 ) -> None:
-    print(f"{f'Fetching requests ({endpoint_id})...':>{TEXT_ALIGNMENT}}")
+    """Fetch all requests (with inline deliveries) from the subgraph."""
+    print(f"{'Fetching requests...':>{TEXT_ALIGNMENT}}")
 
-    url = graph_endpoints_data[endpoint_id]["url"]
-    requests_query = graph_endpoints_data[endpoint_id]["requests_query"]
-    transport = RequestsHTTPTransport(
-        url=url,
-    )
+    transport = RequestsHTTPTransport(url=SUBGRAPH_URL)
     client = Client(transport=transport, fetch_schema_from_transport=True)
 
     id_gt = "0x00"
@@ -120,129 +102,73 @@ def _populate_missing_requests(
             "sender": sender,
             "id_gt": id_gt,
         }
-        response = client.execute(gql(requests_query), variable_values=variables)
+        response = client.execute(gql(REQUESTS_QUERY), variable_values=variables)
         items = response.get("requests", [])
 
         if not items:
             break
 
         for mech_request in items:
-            if mech_request["requestId"] is None:
-                print(
-                    f"Warning: skipping request with id {mech_request['id']} due to missing requestId"
-                )
-                continue
             if mech_request["id"] not in mech_requests:
-                mech_request["endpointId"] = endpoint_id
-                mech_requests[mech_request["id"]] = mech_request
-            elif "endpointId" not in mech_requests[mech_request["id"]]:
-                mech_requests[mech_request["id"]]["endpointId"] = "legacy"
+                # Pick the best delivery: closest blockNumber >= request blockNumber
+                deliveries = mech_request.pop("deliveries", [])
+                req_block = int(mech_request["blockNumber"])
+                best_deliver = None
+                for d in deliveries:
+                    if int(d["blockNumber"]) >= req_block:
+                        if best_deliver is None or int(d["blockNumber"]) < int(best_deliver["blockNumber"]):
+                            best_deliver = d
+                if best_deliver:
+                    mech_request["deliver"] = best_deliver
 
+                mech_requests[mech_request["id"]] = mech_request
+
+        print(f"{f'{len(items)} requests fetched':>{TEXT_ALIGNMENT}}")
         id_gt = items[-1]["id"]
         _write_mech_events_to_file(mech_requests)
 
     _write_mech_events_to_file(mech_requests, True)
-    print(f"{f'{len(mech_requests)} requests found':>{TEXT_ALIGNMENT}}")
+    print(f"{f'{len(mech_requests)} total requests found':>{TEXT_ALIGNMENT}}")
 
 
-def _populate_missing_delivers(endpoint_id: str, mech_requests: Dict[str, Any]) -> None:
-    print(f"{f'Fetching delivers ({endpoint_id})...':>{TEXT_ALIGNMENT}}")
+def get_request_ipfs_url(mech_request: Dict[str, Any]) -> str:
+    """Get the IPFS URL for a mech request."""
+    ipfs_hash = mech_request["parsedRequest"]["hash"]
+    return f"{IPFS_ADDRESS}{ipfs_hash}/metadata.json"
 
-    url = graph_endpoints_data[endpoint_id]["url"]
-    delivers_query = graph_endpoints_data[endpoint_id]["delivers_query"]
-    transport = RequestsHTTPTransport(url=url)
-    client = Client(transport=transport, fetch_schema_from_transport=True)
 
-    NUM_REQUESTS_PER_QUERY = 100
-    pending_mech_requests = {
-        k: req
-        for k, req in mech_requests.items()
-        if "deliver" not in req and req["endpointId"] == endpoint_id
-    }
-
-    progress_bar = tqdm(
-        total=len(pending_mech_requests),
-        desc=f"{f'Fetching delivers ({endpoint_id})':>{TEXT_ALIGNMENT}}",
-        miniters=1,
-    )
-
-    while pending_mech_requests:
-        picked_requests = list(pending_mech_requests.values())[:NUM_REQUESTS_PER_QUERY]
-
-        for mech_request in picked_requests:
-            del pending_mech_requests[mech_request["id"]]
-
-        requestsId_in = [mech_request["requestId"] for mech_request in picked_requests]
-
-        mech_delivers = []
-        id_gt = "0x00"
-        while True:
-            variables = {
-                "requestId_in": requestsId_in,
-                "id_gt": id_gt,
-            }
-            response = client.execute(gql(delivers_query), variable_values=variables)
-            items = response.get("delivers")
-
-            if not items:
-                break
-
-            mech_delivers.extend(items)
-            id_gt = items[-1]["id"]
-
-        # If the user sends requests with the same values (tool, prompt, nonce) it
-        # will generate the same requestId. Therefore, multiple items can be retrieved
-        # at this point. We assume the most likely deliver to this request is the
-        # one with the closest blockNumber among all delivers with the same requestId.
-        #
-        # In conclusion, for each request in picked_requests, find the deliver with the
-        # smallest blockNumber such that >= request's blockNumber
-        for mech_request in picked_requests:
-            for deliver in mech_delivers:
-                if deliver["requestId"] == mech_request["requestId"] and int(
-                    deliver["blockNumber"]
-                ) >= int(mech_request["blockNumber"]):
-                    mech_request["deliver"] = deliver
-                    break
-
-        progress_bar.update(len(picked_requests))
-        _write_mech_events_to_file(mech_requests)
-
-    _write_mech_events_to_file(mech_requests, True)
+def get_deliver_ipfs_url(deliver: Dict[str, Any]) -> str:
+    """Get the IPFS URL for a deliver."""
+    if deliver.get("mechDelivery") and deliver["mechDelivery"].get("ipfsHash"):
+        ipfs_hash = deliver["mechDelivery"]["ipfsHash"]
+        request_id = deliver["mechDelivery"]["requestId"]
+        return f"{IPFS_ADDRESS}{ipfs_hash}/{int(request_id, 16)}"
+    if deliver.get("marketplaceDelivery") and deliver["marketplaceDelivery"].get("ipfsHashBytes"):
+        ipfs_hash = deliver["marketplaceDelivery"]["ipfsHashBytes"]
+        request_id = deliver["requestId"]
+        return f"{IPFS_ADDRESS}{CID_V1_PREFIX}{ipfs_hash[2:]}/{int(request_id, 16)}"
+    return ""
 
 
 def _populate_event_ipfs_contents(event: Dict[str, Any], url: str) -> None:
     response = requests.get(url, timeout=60)
-    response.raise_for_status()  # Raise an exception for HTTP error responses
+    response.raise_for_status()
     event["ipfsContents"] = response.json()
 
 
 def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
     error_count = 0
-
-    # Collect all pending events
     pending_events = []
 
     for _, mech_request in mech_requests.items():
         if "ipfsContents" not in mech_request:
-            ipfs_hash = mech_request["ipfsHash"]
-            if mech_request["endpointId"] == "legacy":
-                url = f"{IPFS_ADDRESS}{ipfs_hash}/metadata.json"
-            else:  # marketplace
-                url = f"{IPFS_ADDRESS}{CID_V1_PREFIX}{ipfs_hash[2:]}/metadata.json"
+            url = get_request_ipfs_url(mech_request)
             pending_events.append((mech_request, url))
 
-        if "deliver" in mech_request:
-            deliver = mech_request["deliver"]
-            if "ipfsContents" not in deliver:
-                ipfs_hash = deliver["ipfsHash"]
-                request_id = deliver["requestId"]
-                if mech_request["endpointId"] == "legacy":
-                    url = f"{IPFS_ADDRESS}{ipfs_hash}/{request_id}"
-                else:  # marketplace
-                    url = f"{IPFS_ADDRESS}{CID_V1_PREFIX}{ipfs_hash[2:]}/{int(request_id, 16)}"
-
-                pending_events.append((deliver, url))
+        if "deliver" in mech_request and "ipfsContents" not in mech_request["deliver"]:
+            url = get_deliver_ipfs_url(mech_request["deliver"])
+            if url:
+                pending_events.append((mech_request["deliver"], url))
 
     with ThreadPoolExecutor(max_workers=THREAD_POOL_EXECUTOR_MAX_WORKERS) as executor:
         futures = [
@@ -265,47 +191,6 @@ def _populate_missing_ipfs_contents(mech_requests: Dict[str, Any]) -> int:
 
     _write_mech_events_to_file(mech_requests, True)
     return error_count
-
-
-def _find_duplicate_delivers(
-    mech_requests: Dict[str, Any],
-) -> Dict[str, List[Dict[str, Any]]]:
-    requests_with_duplicate_deliver_ids = defaultdict(list)
-
-    for _, r in tqdm(
-        mech_requests.items(),
-        desc=f"{'Finding duplicate delivers':>{TEXT_ALIGNMENT}}",
-        miniters=1,
-    ):
-        if "deliver" in r:
-            requests_with_duplicate_deliver_ids[r["deliver"]["id"]].append(r)
-
-    for k in list(requests_with_duplicate_deliver_ids.keys()):
-        if len(requests_with_duplicate_deliver_ids[k]) == 1:
-            del requests_with_duplicate_deliver_ids[k]
-
-    print(
-        f"Duplicate deliver ids found: {len(requests_with_duplicate_deliver_ids.keys())}"
-    )
-    return requests_with_duplicate_deliver_ids
-
-
-def _process_duplicate_delivers(mech_requests: Dict[str, Any]) -> None:
-    requests_with_duplicate_deliver_ids = _find_duplicate_delivers(mech_requests)
-    for mech_requests_list in tqdm(
-        requests_with_duplicate_deliver_ids.values(),
-        desc=f"{'Processing duplicate delivers':>{TEXT_ALIGNMENT}}",
-        miniters=1,
-    ):
-        min_difference_request = min(
-            mech_requests_list,
-            key=lambda x: int(x["deliver"]["blockNumber"]) - int(x["blockNumber"]),
-        )
-        for mech_request in mech_requests_list:
-            if mech_request is not min_difference_request:
-                mech_request.pop("deliver", None)
-
-    _write_mech_events_to_file(mech_requests, True)
 
 
 last_write_time = 0.0
@@ -351,18 +236,10 @@ def get_mech_requests(
         mech_requests = {}
 
     try:
-        for endpoint_id in graph_endpoints_data.keys():
-            _populate_missing_requests(
-                endpoint_id=endpoint_id,
-                sender=sender.lower(),
-                mech_requests=mech_requests,
-            )
-            _populate_missing_delivers(
-                endpoint_id=endpoint_id, mech_requests=mech_requests
-            )
-
-        _process_duplicate_delivers(mech_requests)
-        _find_duplicate_delivers(mech_requests)
+        _populate_requests(
+            sender=sender.lower(),
+            mech_requests=mech_requests,
+        )
         error_count = _populate_missing_ipfs_contents(mech_requests)
 
         if error_count > 0:
@@ -370,6 +247,7 @@ def get_mech_requests(
             _populate_missing_ipfs_contents(mech_requests)
     except Exception as e:  # pylint: disable=broad-except
         print(f"An error occurred while updating mech requests: {e}")
+        traceback.print_exc()
 
     end_time = time.time()
     elapsed_time = end_time - start_time
