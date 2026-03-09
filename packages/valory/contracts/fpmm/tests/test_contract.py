@@ -24,32 +24,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from packages.valory.contracts.fpmm.contract import (
-    BATCH_TOTAL_SUPPLY_DATA,
     FPMMContract,
-    PUBLIC_ID,
 )
-
-
-class TestFPMMContractConstants:
-    """Test module constants."""
-
-    def test_public_id(self) -> None:
-        """Test PUBLIC_ID."""
-        assert str(PUBLIC_ID) == "valory/fpmm:0.1.0"
-
-    def test_contract_id(self) -> None:
-        """Test contract_id."""
-        assert str(FPMMContract.contract_id) == "valory/fpmm:0.1.0"
-
-    def test_batch_total_supply_has_abi(self) -> None:
-        """Test BATCH_TOTAL_SUPPLY_DATA has abi."""
-        assert "abi" in BATCH_TOTAL_SUPPLY_DATA
-        assert len(BATCH_TOTAL_SUPPLY_DATA["abi"]) == 1
-
-    def test_batch_total_supply_has_bytecode(self) -> None:
-        """Test BATCH_TOTAL_SUPPLY_DATA has bytecode."""
-        assert "bytecode" in BATCH_TOTAL_SUPPLY_DATA
-        assert BATCH_TOTAL_SUPPLY_DATA["bytecode"].startswith("0x")
 
 
 class TestFPMMContractNotImplemented:

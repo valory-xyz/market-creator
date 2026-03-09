@@ -7,6 +7,9 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   lock_check:
     continue-on-error: False
@@ -137,7 +140,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ ubuntu-24.04, macos-15 ]
+        os: [ ubuntu-24.04, macos-15, windows-2025 ]
         python-version: [ "3.10", "3.11" ]
 
     timeout-minutes: 30
@@ -180,19 +183,19 @@ jobs:
         run: |
           pip install tomte[tox]==0.6.1
           brew install gcc
-          brew tap yoheimuta/protolint
-          brew install protolint
-
+          
           # protoc: use brew on arm64 (no osx-aarch_64 in 3.19.x), manual download on x86_64
           ARCH=$(uname -m)
           if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
-            brew install protobuf
+          brew install protobuf
           else
-            wget https://github.com/protocolbuffers/protobuf/releases/download/v24.3/protoc-24.3-osx-x86_64.zip
-            unzip protoc-24.3-osx-x86_64.zip -d protoc
-            sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v24.3/protoc-24.3-osx-x86_64.zip
+          unzip protoc-24.3-osx-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
           fi
-
+          
+          brew tap yoheimuta/protolint
+          brew install protolint
       - if: matrix.os == 'macos-15'
         name: Skills unit tests macos-15
         run: |

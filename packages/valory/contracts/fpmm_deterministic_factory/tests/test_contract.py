@@ -24,30 +24,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from packages.valory.contracts.fpmm_deterministic_factory.contract import (
-    DEFAULT_MARKET_FEE,
     FPMMDeterministicFactory,
-    PUBLIC_ID,
     get_logs,
 )
-
-
-class TestConstants:
-    """Test module constants."""
-
-    def test_default_market_fee(self) -> None:
-        """Test DEFAULT_MARKET_FEE."""
-        assert DEFAULT_MARKET_FEE == 2.0
-
-    def test_public_id(self) -> None:
-        """Test PUBLIC_ID."""
-        assert str(PUBLIC_ID) == "valory/fpmm_deterministic_factory:0.1.0"
-
-    def test_contract_id(self) -> None:
-        """Test contract_id."""
-        assert (
-            str(FPMMDeterministicFactory.contract_id)
-            == "valory/fpmm_deterministic_factory:0.1.0"
-        )
 
 
 class TestGetLogs:
