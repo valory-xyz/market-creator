@@ -333,14 +333,11 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
         mock_synced.approved_markets_timestamp = 0
         mock_synced.safe_contract_address = "0xsafe"
 
-        # With current_timestamp=1700000000 and approve_market_event_days_offset=3,
-        # required_opening_ts will be computed as follows:
-        # openingTimestamp_gte = 1700000000 + 86400 = 1700086400
-        # openingTimestamp_lte = 1700000000 + 3*86400 = 1700259200
-        # current_day_start = 1700086400 - (1700086400 % 86400) + 86400
-        # 1700086400 % 86400 = 80000, so current_day_start = 1700092800
-        # required_opening_ts = [1700092800, 1700179200] (2 days)
-        # markets_to_approve_per_day = 2, so we need 2 markets at each ts
+        # With current_timestamp 1700000000 and approve_market_event_days_offset 3,
+        # the openingTimestamp_gte is 1700086400 and openingTimestamp_lte is 1700259200.
+        # The current_day_start computes to 1700092800, giving
+        # required_opening_ts of [1700092800, 1700179200] (2 days).
+        # With markets_to_approve_per_day of 2, we need 2 markets at each ts.
         ts1 = 1700092800
         ts2 = 1700179200
         markets = [

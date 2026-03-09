@@ -105,7 +105,11 @@ class TestGetCallableName:
 
     def test_get_callable_name_with_lambda(self) -> None:
         """Test get_callable_name with a lambda."""
-        my_lambda = lambda x: x + 1
+
+        def my_lambda(x: Any) -> Any:
+            return x + 1
+
+        my_lambda.__name__ = "<lambda>"
         assert get_callable_name(my_lambda) == "<lambda>"
 
     def test_get_callable_name_with_method(self) -> None:

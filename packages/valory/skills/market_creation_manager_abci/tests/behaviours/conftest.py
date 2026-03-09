@@ -20,7 +20,6 @@
 """Shared fixtures for behaviour tests."""
 
 import sys
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest

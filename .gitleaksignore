@@ -73,3 +73,4 @@ c2227ab5ee37dd1a2392ac9880af8329afb04ffc:market_approval_server/templates/index.
 29efe1ee0532bed74371b5be4d8e6b32f825fc06:scripts/create_market.py:generic-api-key:35
 29efe1ee0532bed74371b5be4d8e6b32f825fc06:scripts/create_market.py:generic-api-key:38
 29efe1ee0532bed74371b5be4d8e6b32f825fc06:packages/valory/skills/market_creation_manager_abci/skill.yaml:generic-api-key:85
+af9837782f2045b19cb0b7410ceb19b34e24ddfb:notebooks/roi_analysis.ipynb:easypost-api-token:774

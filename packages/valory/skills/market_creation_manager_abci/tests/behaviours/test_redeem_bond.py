@@ -23,8 +23,6 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_bond import (
     MIN_BALANCE_WITHDRAW_REALITIO,

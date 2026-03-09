@@ -155,6 +155,7 @@ class TestAnswerQuestionsBehaviourGenerators:
     """Test AnswerQuestionsBehaviour generator methods."""
 
     def setup_method(self) -> None:
+        """Setup method."""
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
         context_mock.params = MagicMock()

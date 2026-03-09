@@ -22,9 +22,7 @@
 import json
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, PropertyMock, patch
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.retrieve_approved_market import (
     RetrieveApprovedMarketBehaviour,

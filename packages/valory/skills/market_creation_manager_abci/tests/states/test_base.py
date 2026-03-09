@@ -24,7 +24,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from packages.valory.skills.market_creation_manager_abci.states.base import (
-    DEFAULT_PROPOSED_MARKETS_DATA,
     SynchronizedData,
 )
 
