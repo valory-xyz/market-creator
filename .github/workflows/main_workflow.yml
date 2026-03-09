@@ -137,7 +137,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ ubuntu-24.04, macos-15 ]
         python-version: [ "3.10", "3.11" ]
 
     timeout-minutes: 30
@@ -151,8 +151,8 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.21"
-      - if: matrix.os == 'ubuntu-latest'
-        name: Install dependencies (ubuntu-latest)
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Install dependencies (ubuntu-24.04)
         run: |
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
@@ -182,13 +182,13 @@ jobs:
           docker pull trufflesuite/ganache:beta
           docker pull valory/autonolas-registries:latest
 
-      - if: matrix.os == 'ubuntu-latest'
-        name: Unit tests (ubuntu-latest)
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Unit tests (ubuntu-24.04)
         run: |
           tox -e py${{ matrix.python-version }}-linux -- -m 'not e2e'
 
-      - if: matrix.os == 'macos-latest'
-        name: Install dependencies (macos-latest)
+      - if: matrix.os == 'macos-15'
+        name: Install dependencies (macos-15)
         run: |
           pip install tomte[tox]==0.4.0
           brew install gcc
@@ -219,13 +219,13 @@ jobs:
           rm -rf go-ipfs go-ipfs.tar.gz
           ipfs init
 
-      - if: matrix.os == 'macos-latest'
-        name: Skills unit tests macos-latest
+      - if: matrix.os == 'macos-15'
+        name: Skills unit tests macos-15
         run: |
           tox -e py${{ matrix.python-version }}-darwin -- -m 'not e2e'
 
-      - if: matrix.os == 'windows-latest'
-        name: Install dependencies (windows-latest)
+      - if: matrix.os == 'windows-2025'
+        name: Install dependencies (windows-2025)
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         run: |
@@ -249,12 +249,12 @@ jobs:
           $env:Path = "$env:USERPROFILE\go\bin;$env:Path"
           ipfs init
 
-      - if: matrix.os == 'windows-latest'
-        name: Skills unit tests windows-latest
+      - if: matrix.os == 'windows-2025'
+        name: Skills unit tests windows-2025
         run: |
           tox -e py${{ matrix.python-version }}-win -- -m 'not e2e'
 
-      - if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'ubuntu-24.04'
         name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
@@ -268,7 +268,7 @@ jobs:
     continue-on-error: False
     needs:
       - linter_checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     timeout-minutes: 30
 
@@ -299,7 +299,7 @@ jobs:
   #   runs-on: ${{ matrix.os }}
   #   strategy:
   #     matrix:
-  #       os: [ ubuntu-latest ]
+  #       os: [ ubuntu-24.04 ]
   #       python-version: [ "3.10" ]
   #   timeout-minutes: 30
   #   steps:
@@ -308,8 +308,8 @@ jobs:
   #       with:
   #         submodules: recursive
   #         python-version: ${{ matrix.python-version }}
-  #     - if: matrix.os == 'ubuntu-latest'
-  #       name: Install dependencies (ubuntu-latest)
+  #     - if: matrix.os == 'ubuntu-24.04'
+  #       name: Install dependencies (ubuntu-24.04)
   #       run: |
   #         sudo apt-get update --fix-missing
   #         sudo apt-get autoremove
