@@ -19,6 +19,7 @@
 
 """Tests for GetPendingQuestionsBehaviour."""
 
+from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from packages.valory.protocols.ledger_api import LedgerApiMessage
@@ -31,17 +32,17 @@ from packages.valory.skills.market_creation_manager_abci.states.get_pending_ques
 )
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:
@@ -50,7 +51,7 @@ def _exhaust_gen(gen):
         return e.value
 
 
-def _make_question(question_id, title="Will X happen?"):
+def _make_question(question_id: str, title: str = "Will X happen?") -> Any:
     """Create a sample question dict."""
     return {
         "id": f"0x{question_id}",
@@ -66,7 +67,7 @@ def _make_question(question_id, title="Will X happen?"):
 class TestGetPendingQuestionsBehaviour:
     """Tests for GetPendingQuestionsBehaviour."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
@@ -89,7 +90,7 @@ class TestGetPendingQuestionsBehaviour:
             name="test", skill_context=context_mock
         )
 
-    def test_get_unanswered_questions_success(self):
+    def test_get_unanswered_questions_success(self) -> None:
         """Test _get_unanswered_questions with valid subgraph data."""
         questions = [_make_question("q1"), _make_question("q2")]
         subgraph_response = {"data": {"fixedProductMarketMakers": questions}}
@@ -104,7 +105,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert len(result) == 2
 
-    def test_get_unanswered_questions_none(self):
+    def test_get_unanswered_questions_none(self) -> None:
         """Test _get_unanswered_questions when subgraph returns None."""
         with patch.object(
             self.behaviour,
@@ -116,9 +117,9 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result == []
 
-    def test_get_unanswered_questions_empty(self):
+    def test_get_unanswered_questions_empty(self) -> None:
         """Test _get_unanswered_questions when subgraph returns empty list."""
-        subgraph_response = {"data": {"fixedProductMarketMakers": []}}
+        subgraph_response: Any = {"data": {"fixedProductMarketMakers": []}}
 
         with patch.object(
             self.behaviour,
@@ -130,7 +131,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result == []
 
-    def test_get_balance_success(self):
+    def test_get_balance_success(self) -> None:
         """Test _get_balance with correct performative and balance result."""
         mock_resp = MagicMock()
         mock_resp.performative = LedgerApiMessage.Performative.STATE
@@ -146,7 +147,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result == 1000
 
-    def test_get_balance_error(self):
+    def test_get_balance_error(self) -> None:
         """Test _get_balance when performative is wrong."""
         mock_resp = MagicMock()
         mock_resp.performative = LedgerApiMessage.Performative.ERROR
@@ -161,7 +162,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result is None
 
-    def test_eligible_questions_new_question(self):
+    def test_eligible_questions_new_question(self) -> None:
         """Test _eligible_questions_to_answer with a new, unseen question."""
         questions = [_make_question("q1")]
 
@@ -184,7 +185,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert "q1" in result
 
-    def test_eligible_questions_already_responded(self):
+    def test_eligible_questions_already_responded(self) -> None:
         """Test _eligible_questions_to_answer when question already responded."""
         questions = [_make_question("q1")]
 
@@ -207,7 +208,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert "q1" not in result
 
-    def test_eligible_questions_retry_not_ready(self):
+    def test_eligible_questions_retry_not_ready(self) -> None:
         """Test _eligible_questions_to_answer when retry interval not elapsed."""
         questions = [_make_question("q1")]
 
@@ -236,7 +237,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert "q1" not in result
 
-    def test_eligible_questions_retry_ready(self):
+    def test_eligible_questions_retry_ready(self) -> None:
         """Test _eligible_questions_to_answer when retry interval has elapsed."""
         questions = [_make_question("q1")]
 
@@ -265,7 +266,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert "q1" in result
 
-    def test_get_payload_no_questions(self):
+    def test_get_payload_no_questions(self) -> None:
         """Test get_payload when _get_unanswered_questions returns None."""
         with patch.object(
             self.behaviour,
@@ -277,7 +278,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result == GetPendingQuestionsRound.ERROR_PAYLOAD
 
-    def test_get_payload_no_eligible(self):
+    def test_get_payload_no_eligible(self) -> None:
         """Test get_payload when all questions are already responded."""
         questions = [_make_question("q1")]
 
@@ -295,7 +296,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result == GetPendingQuestionsRound.NO_TX_PAYLOAD
 
-    def test_get_payload_insufficient_balance(self):
+    def test_get_payload_insufficient_balance(self) -> None:
         """Test get_payload when balance is less than bond_required."""
         questions = [_make_question("q1")]
 
@@ -320,7 +321,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result == GetPendingQuestionsRound.NO_TX_PAYLOAD
 
-    def test_open_fpmm_query_template(self):
+    def test_open_fpmm_query_template(self) -> None:
         """Test that OPEN_FPMM_QUERY template contains expected fields."""
         template_str = OPEN_FPMM_QUERY.template
         assert "fixedProductMarketMakers" in template_str
@@ -330,7 +331,7 @@ class TestGetPendingQuestionsBehaviour:
         assert "currentAnswerBond" in template_str
         assert "question" in template_str
 
-    def test_get_payload_balance_none(self):
+    def test_get_payload_balance_none(self) -> None:
         """Test get_payload when _get_balance returns None."""
         questions = [_make_question("q1")]
 
@@ -353,7 +354,7 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result == GetPendingQuestionsRound.NO_TX_PAYLOAD
 
-    def test_get_payload_success_with_mech_requests(self):
+    def test_get_payload_success_with_mech_requests(self) -> None:
         """Test get_payload happy path returning JSON mech requests."""
         import json
 
@@ -402,7 +403,7 @@ class TestGetPendingQuestionsBehaviour:
         assert len(parsed) == 1
         assert parsed[0]["nonce"] == "q1"
 
-    def test_async_act(self):
+    def test_async_act(self) -> None:
         """Test async_act wraps get_payload correctly."""
         with patch.object(
             self.behaviour,

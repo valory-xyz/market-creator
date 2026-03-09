@@ -22,7 +22,7 @@
 import os
 from pathlib import Path
 
-from hypothesis import settings
+from hypothesis import settings  # type: ignore[import-not-found]
 
 CI = "CI"
 PACKAGE_DIR = Path(__file__).parent.parent

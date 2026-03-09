@@ -21,6 +21,7 @@
 
 import json
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
@@ -36,17 +37,17 @@ CURRENT_FILE_PATH = Path(__file__).resolve()
 PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:

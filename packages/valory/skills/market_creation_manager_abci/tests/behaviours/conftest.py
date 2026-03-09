@@ -24,7 +24,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-from hypothesis import HealthCheck, settings
+from hypothesis import HealthCheck, settings  # type: ignore[import-not-found]
 
 # Mock openai module to allow importing propose_questions.py
 sys.modules["openai"] = MagicMock()

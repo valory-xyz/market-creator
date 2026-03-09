@@ -21,6 +21,7 @@
 
 import json
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.answer_questions import (
@@ -131,17 +132,17 @@ class TestParseMechResponse:
         assert result is None
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:
@@ -153,7 +154,7 @@ def _exhaust_gen(gen):
 class TestAnswerQuestionsBehaviourGenerators:
     """Test AnswerQuestionsBehaviour generator methods."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
         context_mock.params = MagicMock()
@@ -168,7 +169,7 @@ class TestAnswerQuestionsBehaviourGenerators:
             name="test", skill_context=context_mock
         )
 
-    def test_get_answer_tx_success(self):
+    def test_get_answer_tx_success(self) -> None:
         """Test _get_answer_tx with successful STATE response."""
         from packages.valory.protocols.contract_api import ContractApiMessage
 
@@ -192,7 +193,7 @@ class TestAnswerQuestionsBehaviourGenerators:
         assert result["value"] == 10**17
         assert result["data"] == b"\x01\x02\x03"
 
-    def test_get_answer_tx_error(self):
+    def test_get_answer_tx_error(self) -> None:
         """Test _get_answer_tx when contract returns ERROR."""
         from packages.valory.protocols.contract_api import ContractApiMessage
 
@@ -212,7 +213,7 @@ class TestAnswerQuestionsBehaviourGenerators:
 
         assert result is None
 
-    def test_get_payload_no_responses(self):
+    def test_get_payload_no_responses(self) -> None:
         """Test _get_payload when mech_responses is empty."""
         mock_synced_data = MagicMock()
         mock_synced_data.mech_responses = []
@@ -227,7 +228,7 @@ class TestAnswerQuestionsBehaviourGenerators:
 
         assert result is None
 
-    def test_get_payload_question_already_responded(self):
+    def test_get_payload_question_already_responded(self) -> None:
         """Test _get_payload when question is in questions_responded."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
@@ -256,7 +257,7 @@ class TestAnswerQuestionsBehaviourGenerators:
 
         assert result is None
 
-    def test_get_payload_question_not_in_requested(self):
+    def test_get_payload_question_not_in_requested(self) -> None:
         """Test _get_payload when question is not in questions_requested_mech."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
@@ -285,7 +286,7 @@ class TestAnswerQuestionsBehaviourGenerators:
 
         assert result is None
 
-    def test_get_payload_answer_none_with_max_retries(self):
+    def test_get_payload_answer_none_with_max_retries(self) -> None:
         """Test _get_payload when answer is None but retries >= answer_retry_intervals length."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
@@ -326,7 +327,7 @@ class TestAnswerQuestionsBehaviourGenerators:
         # answer became ANSWER_INVALID, so it should proceed
         assert result == "0xmultisend_hash"
 
-    def test_get_payload_answer_none_skipped(self):
+    def test_get_payload_answer_none_skipped(self) -> None:
         """Test _get_payload when answer is None and retries < threshold."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
@@ -358,7 +359,7 @@ class TestAnswerQuestionsBehaviourGenerators:
 
         assert result is None
 
-    def test_get_payload_success(self):
+    def test_get_payload_success(self) -> None:
         """Test _get_payload happy path with valid answer."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
@@ -400,7 +401,7 @@ class TestAnswerQuestionsBehaviourGenerators:
 
         assert result == "0xmultisend_hash"
 
-    def test_get_payload_answer_tx_none(self):
+    def test_get_payload_answer_tx_none(self) -> None:
         """Test _get_payload when _get_answer_tx returns None."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
@@ -438,7 +439,7 @@ class TestAnswerQuestionsBehaviourGenerators:
 
         assert result is None
 
-    def test_get_payload_multisend_none(self):
+    def test_get_payload_multisend_none(self) -> None:
         """Test _get_payload when _to_multisend returns None."""
         mock_response = MagicMock()
         mock_response.nonce = "0xquestion1"
@@ -480,7 +481,7 @@ class TestAnswerQuestionsBehaviourGenerators:
 
         assert result is None
 
-    def test_async_act_with_tx_hash(self):
+    def test_async_act_with_tx_hash(self) -> None:
         """Test async_act when get_payload returns a hash."""
         with patch.object(
             self.behaviour,
@@ -502,7 +503,7 @@ class TestAnswerQuestionsBehaviourGenerators:
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
-    def test_async_act_without_tx_hash(self):
+    def test_async_act_without_tx_hash(self) -> None:
         """Test async_act when get_payload returns None."""
         with patch.object(
             self.behaviour,
@@ -523,7 +524,7 @@ class TestAnswerQuestionsBehaviourGenerators:
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
-    def test_get_payload_batch_size_reached(self):
+    def test_get_payload_batch_size_reached(self) -> None:
         """Test _get_payload when batch size limit is reached and loop breaks early."""
         # Set batch size to 1 so that after the first valid answer, the loop breaks
         self.behaviour.context.params.questions_to_close_batch_size = 1

@@ -22,6 +22,7 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets import (
@@ -188,17 +189,17 @@ class TestIsResolutionDateInQuestion:
         assert result is False
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:
@@ -363,7 +364,7 @@ class TestApproveMarketsBehaviourGenerators:
 
         call_count = 0
 
-        def multi_gen(*args, **kwargs):
+        def multi_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -396,7 +397,7 @@ class TestApproveMarketsBehaviourGenerators:
 
         call_count = 0
 
-        def multi_gen(*args, **kwargs):
+        def multi_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count <= 2:

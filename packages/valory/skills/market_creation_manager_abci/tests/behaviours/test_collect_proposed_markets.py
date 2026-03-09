@@ -20,6 +20,7 @@
 """Tests for CollectProposedMarketsBehaviour."""
 
 import json
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import (
@@ -31,17 +32,17 @@ from packages.valory.skills.market_creation_manager_abci.states.collect_proposed
 )
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:
@@ -53,7 +54,7 @@ def _exhaust_gen(gen):
 class TestCollectProposedMarketsBehaviour:
     """Tests for CollectProposedMarketsBehaviour."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
@@ -66,7 +67,7 @@ class TestCollectProposedMarketsBehaviour:
             name="test", skill_context=context_mock
         )
 
-    def test_collect_approved_markets_success(self):
+    def test_collect_approved_markets_success(self) -> None:
         """Test _collect_approved_markets with a successful 200 response."""
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -84,7 +85,7 @@ class TestCollectProposedMarketsBehaviour:
         assert len(result["approved_markets"]) == 1
         assert result["approved_markets"][0]["id"] == "m1"
 
-    def test_collect_approved_markets_non_200(self):
+    def test_collect_approved_markets_non_200(self) -> None:
         """Test _collect_approved_markets with a non-200 status code."""
         mock_response = MagicMock()
         mock_response.status_code = 400
@@ -100,7 +101,7 @@ class TestCollectProposedMarketsBehaviour:
 
         assert result == {"approved_markets": {}}
 
-    def test_collect_approved_markets_json_decode_error(self):
+    def test_collect_approved_markets_json_decode_error(self) -> None:
         """Test _collect_approved_markets when body cannot be decoded as JSON."""
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -116,7 +117,7 @@ class TestCollectProposedMarketsBehaviour:
 
         assert result == {"approved_markets": {}}
 
-    def test_collect_approved_markets_missing_key(self):
+    def test_collect_approved_markets_missing_key(self) -> None:
         """Test _collect_approved_markets when JSON has no 'approved_markets' key."""
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -132,7 +133,7 @@ class TestCollectProposedMarketsBehaviour:
 
         assert result == {"approved_markets": {}}
 
-    def test_collect_latest_open_markets_success(self):
+    def test_collect_latest_open_markets_success(self) -> None:
         """Test _collect_latest_open_markets with valid subgraph data."""
         subgraph_response = {
             "data": {
@@ -156,7 +157,7 @@ class TestCollectProposedMarketsBehaviour:
         assert "fixedProductMarketMakers" in result
         assert len(result["fixedProductMarketMakers"]) == 1
 
-    def test_collect_latest_open_markets_none(self):
+    def test_collect_latest_open_markets_none(self) -> None:
         """Test _collect_latest_open_markets when subgraph returns None."""
         with patch.object(
             self.behaviour,
@@ -171,7 +172,7 @@ class TestCollectProposedMarketsBehaviour:
 
         assert result == {"fixedProductMarketMakers": []}
 
-    def test_fpmm_query_template_defined(self):
+    def test_fpmm_query_template_defined(self) -> None:
         """Test that FPMM_QUERY template contains expected fields."""
         template_str = FPMM_QUERY.template
         assert "fixedProductMarketMakers" in template_str
@@ -182,7 +183,7 @@ class TestCollectProposedMarketsBehaviour:
         assert "currentAnswer" in template_str
         assert "question" in template_str
 
-    def test_matching_round(self):
+    def test_matching_round(self) -> None:
         """Test that matching_round is CollectProposedMarketsRound."""
         assert (
             CollectProposedMarketsBehaviour.matching_round
@@ -193,7 +194,7 @@ class TestCollectProposedMarketsBehaviour:
 class TestCollectProposedMarketsBehaviourAsyncAct:
     """Tests for CollectProposedMarketsBehaviour async_act."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
@@ -214,13 +215,13 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             name="test", skill_context=context_mock
         )
 
-    def _make_open_markets_response(self, markets=None):
+    def _make_open_markets_response(self, markets: Any = None) -> Any:
         """Helper to create open markets response."""
         if markets is None:
             markets = []
         return {"fixedProductMarketMakers": markets}
 
-    def test_async_act_max_markets_reached(self):
+    def test_async_act_max_markets_reached(self) -> None:
         """Test async_act when approved_markets_count >= max_approved_markets."""
         mock_synced = MagicMock()
         mock_synced.approved_markets_count = 15
@@ -254,7 +255,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
-    def test_async_act_timeout_not_reached_1(self):
+    def test_async_act_timeout_not_reached_1(self) -> None:
         """Test async_act when current_timestamp - latest_approve_market_timestamp < threshold."""
         mock_synced = MagicMock()
         mock_synced.approved_markets_count = 0
@@ -287,7 +288,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
-    def test_async_act_timeout_not_reached_2(self):
+    def test_async_act_timeout_not_reached_2(self) -> None:
         """Test async_act when current_timestamp - largest_creation_timestamp < threshold."""
         mock_synced = MagicMock()
         mock_synced.approved_markets_count = 0
@@ -325,7 +326,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
-    def test_async_act_no_markets_to_approve(self):
+    def test_async_act_no_markets_to_approve(self) -> None:
         """Test async_act when num_markets_to_approve <= 0 (lines 177-178)."""
         mock_synced = MagicMock()
         mock_synced.approved_markets_count = 0
@@ -380,7 +381,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             ]
             assert any("No market approval required" in c for c in log_calls)
 
-    def test_async_act_unprocessed_markets_exist(self):
+    def test_async_act_unprocessed_markets_exist(self) -> None:
         """Test async_act when approved_markets list not empty."""
         mock_synced = MagicMock()
         mock_synced.approved_markets_count = 0
@@ -413,7 +414,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
-    def test_async_act_success(self):
+    def test_async_act_success(self) -> None:
         """Test async_act when all conditions pass and returns JSON content."""
         mock_synced = MagicMock()
         mock_synced.approved_markets_count = 0

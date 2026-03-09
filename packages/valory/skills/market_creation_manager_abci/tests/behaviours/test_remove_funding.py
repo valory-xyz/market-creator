@@ -19,6 +19,7 @@
 
 """Tests for RemoveFundingBehaviour."""
 
+from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from packages.valory.protocols.contract_api import ContractApiMessage
@@ -30,17 +31,17 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.remove_fundi
 )
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:
@@ -49,7 +50,7 @@ def _exhaust_gen(gen):
         return e.value
 
 
-def _make_contract_state_response(body_data):
+def _make_contract_state_response(body_data: Any) -> Any:
     """Create a mock contract API STATE response."""
     mock_resp = MagicMock()
     mock_resp.performative = ContractApiMessage.Performative.STATE
@@ -57,7 +58,7 @@ def _make_contract_state_response(body_data):
     return mock_resp
 
 
-def _make_contract_error_response():
+def _make_contract_error_response() -> Any:
     """Create a mock contract API ERROR response."""
     mock_resp = MagicMock()
     mock_resp.performative = ContractApiMessage.Performative.ERROR
@@ -67,7 +68,7 @@ def _make_contract_error_response():
 class TestRemoveFundingBehaviour:
     """Tests for RemoveFundingBehaviour."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
@@ -82,9 +83,11 @@ class TestRemoveFundingBehaviour:
         context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
         context_mock.benchmark_tool = MagicMock()
         context_mock.agent_address = "0x1234567890123456789012345678901234567890"
-        self.behaviour = RemoveFundingBehaviour(name="test", skill_context=context_mock)
+        self.behaviour: Any = RemoveFundingBehaviour(
+            name="test", skill_context=context_mock
+        )
 
-    def test_get_market_to_close_found(self):
+    def test_get_market_to_close_found(self) -> None:
         """Test _get_market_to_close when a market with old removal_timestamp exists."""
         markets = [
             {
@@ -107,7 +110,7 @@ class TestRemoveFundingBehaviour:
         assert result is not None
         assert result["address"] == "0xMarket1"
 
-    def test_get_market_to_close_none(self):
+    def test_get_market_to_close_none(self) -> None:
         """Test _get_market_to_close when no market has old enough timestamp."""
         markets = [
             {
@@ -129,7 +132,7 @@ class TestRemoveFundingBehaviour:
 
         assert result is None
 
-    def test_calculate_amounts_success(self):
+    def test_calculate_amounts_success(self) -> None:
         """Test _calculate_amounts when all 3 contract calls succeed."""
         resp_holdings = _make_contract_state_response(
             {"shares": [100, 200], "holdings": [300, 400]}
@@ -139,7 +142,7 @@ class TestRemoveFundingBehaviour:
 
         call_count = 0
 
-        def mock_contract_gen(*args, **kwargs):
+        def mock_contract_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -161,7 +164,7 @@ class TestRemoveFundingBehaviour:
         amount_to_remove, amount_to_merge = result
         assert amount_to_remove == 500
 
-    def test_calculate_amounts_holdings_fail(self):
+    def test_calculate_amounts_holdings_fail(self) -> None:
         """Test _calculate_amounts when first contract call (holdings) fails."""
         resp_error = _make_contract_error_response()
 
@@ -175,7 +178,7 @@ class TestRemoveFundingBehaviour:
 
         assert result is None
 
-    def test_calculate_amounts_balance_fail(self):
+    def test_calculate_amounts_balance_fail(self) -> None:
         """Test _calculate_amounts when second contract call (balance) fails."""
         resp_holdings = _make_contract_state_response(
             {"shares": [100, 200], "holdings": [300, 400]}
@@ -184,7 +187,7 @@ class TestRemoveFundingBehaviour:
 
         call_count = 0
 
-        def mock_contract_gen(*args, **kwargs):
+        def mock_contract_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -202,7 +205,7 @@ class TestRemoveFundingBehaviour:
 
         assert result is None
 
-    def test_calculate_amounts_supply_fail(self):
+    def test_calculate_amounts_supply_fail(self) -> None:
         """Test _calculate_amounts when third contract call (supply) fails."""
         resp_holdings = _make_contract_state_response(
             {"shares": [100, 200], "holdings": [300, 400]}
@@ -212,7 +215,7 @@ class TestRemoveFundingBehaviour:
 
         call_count = 0
 
-        def mock_contract_gen(*args, **kwargs):
+        def mock_contract_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -232,7 +235,7 @@ class TestRemoveFundingBehaviour:
 
         assert result is None
 
-    def test_calculate_amounts_full_removal(self):
+    def test_calculate_amounts_full_removal(self) -> None:
         """Test _calculate_amounts when amount_to_remove == total_pool_shares."""
         resp_holdings = _make_contract_state_response(
             {"shares": [10, 20], "holdings": [300, 400]}
@@ -242,7 +245,7 @@ class TestRemoveFundingBehaviour:
 
         call_count = 0
 
-        def mock_contract_gen(*args, **kwargs):
+        def mock_contract_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -267,7 +270,7 @@ class TestRemoveFundingBehaviour:
         # amount_to_merge = min(300+10, 400+20) = min(310, 420) = 310
         assert amount_to_merge == 310
 
-    def test_calculate_amounts_partial_removal(self):
+    def test_calculate_amounts_partial_removal(self) -> None:
         """Test _calculate_amounts when amount_to_remove < total_pool_shares."""
         resp_holdings = _make_contract_state_response(
             {"shares": [10, 20], "holdings": [300, 400]}
@@ -277,7 +280,7 @@ class TestRemoveFundingBehaviour:
 
         call_count = 0
 
-        def mock_contract_gen(*args, **kwargs):
+        def mock_contract_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -302,7 +305,7 @@ class TestRemoveFundingBehaviour:
         # amount_to_merge = min(150+10, 200+20) = min(160, 220) = 160
         assert amount_to_merge == 160
 
-    def test_get_remove_funding_tx_success(self):
+    def test_get_remove_funding_tx_success(self) -> None:
         """Test _get_remove_funding_tx with successful contract response."""
         mock_resp = _make_contract_state_response({"data": "0xEncodedData"})
 
@@ -321,7 +324,7 @@ class TestRemoveFundingBehaviour:
         assert result["data"] == "0xEncodedData"
         assert result["value"] == ETHER_VALUE
 
-    def test_get_remove_funding_tx_fail(self):
+    def test_get_remove_funding_tx_fail(self) -> None:
         """Test _get_remove_funding_tx with wrong performative."""
         mock_resp = _make_contract_error_response()
 
@@ -337,7 +340,7 @@ class TestRemoveFundingBehaviour:
 
         assert result is None
 
-    def test_get_merge_positions_tx_success(self):
+    def test_get_merge_positions_tx_success(self) -> None:
         """Test _get_merge_positions_tx with successful response."""
         mock_resp = _make_contract_state_response({"data": "0xMergeData"})
 
@@ -360,7 +363,7 @@ class TestRemoveFundingBehaviour:
         assert result["data"] == "0xMergeData"
         assert result["value"] == ETHER_VALUE
 
-    def test_get_merge_positions_tx_fail(self):
+    def test_get_merge_positions_tx_fail(self) -> None:
         """Test _get_merge_positions_tx with wrong performative."""
         mock_resp = _make_contract_error_response()
 
@@ -380,7 +383,7 @@ class TestRemoveFundingBehaviour:
 
         assert result is None
 
-    def test_get_withdraw_tx_success(self):
+    def test_get_withdraw_tx_success(self) -> None:
         """Test _get_withdraw_tx with successful response."""
         mock_resp = _make_contract_state_response({"data": "0xWithdrawData"})
 
@@ -397,7 +400,7 @@ class TestRemoveFundingBehaviour:
         assert result["data"] == "0xWithdrawData"
         assert result["value"] == ETHER_VALUE
 
-    def test_get_withdraw_tx_fail(self):
+    def test_get_withdraw_tx_fail(self) -> None:
         """Test _get_withdraw_tx with wrong performative."""
         mock_resp = _make_contract_error_response()
 
@@ -411,7 +414,7 @@ class TestRemoveFundingBehaviour:
 
         assert result is None
 
-    def test_async_act(self):
+    def test_async_act(self) -> None:
         """Test async_act wraps get_payload correctly."""
         from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
             RemoveFundingRound,
@@ -432,7 +435,7 @@ class TestRemoveFundingBehaviour:
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
-    def test_get_payload_no_market(self):
+    def test_get_payload_no_market(self) -> None:
         """Test get_payload when _get_market_to_close returns None."""
         from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
             RemoveFundingRound,
@@ -444,7 +447,7 @@ class TestRemoveFundingBehaviour:
 
         assert result == RemoveFundingRound.NO_UPDATE_PAYLOAD
 
-    def test_get_payload_amounts_none(self):
+    def test_get_payload_amounts_none(self) -> None:
         """Test get_payload when _calculate_amounts returns None."""
         from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
             RemoveFundingRound,
@@ -463,7 +466,7 @@ class TestRemoveFundingBehaviour:
 
         assert result == RemoveFundingRound.NO_UPDATE_PAYLOAD
 
-    def test_get_payload_remove_funding_tx_none(self):
+    def test_get_payload_remove_funding_tx_none(self) -> None:
         """Test get_payload when _get_remove_funding_tx returns None."""
         from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
             RemoveFundingRound,
@@ -486,7 +489,7 @@ class TestRemoveFundingBehaviour:
 
         assert result == RemoveFundingRound.ERROR_PAYLOAD
 
-    def test_get_payload_merge_positions_none(self):
+    def test_get_payload_merge_positions_none(self) -> None:
         """Test get_payload when _get_merge_positions_tx returns None."""
         from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
             RemoveFundingRound,
@@ -513,7 +516,7 @@ class TestRemoveFundingBehaviour:
 
         assert result == RemoveFundingRound.ERROR_PAYLOAD
 
-    def test_get_payload_withdraw_tx_none(self):
+    def test_get_payload_withdraw_tx_none(self) -> None:
         """Test get_payload when _get_withdraw_tx returns None."""
         from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
             RemoveFundingRound,
@@ -544,7 +547,7 @@ class TestRemoveFundingBehaviour:
 
         assert result == RemoveFundingRound.ERROR_PAYLOAD
 
-    def test_get_payload_multisend_none(self):
+    def test_get_payload_multisend_none(self) -> None:
         """Test get_payload when _to_multisend returns None."""
         from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
             RemoveFundingRound,
@@ -579,7 +582,7 @@ class TestRemoveFundingBehaviour:
 
         assert result == RemoveFundingRound.ERROR_PAYLOAD
 
-    def test_get_payload_success(self):
+    def test_get_payload_success(self) -> None:
         """Test get_payload happy path returning JSON with tx and market."""
         import json
 

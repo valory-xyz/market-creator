@@ -20,6 +20,7 @@
 """Tests for SyncMarketsBehaviour."""
 
 import json
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from packages.valory.protocols.contract_api import ContractApiMessage
@@ -32,17 +33,17 @@ from packages.valory.skills.market_creation_manager_abci.states.sync_markets imp
 )
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:
@@ -52,11 +53,11 @@ def _exhaust_gen(gen):
 
 
 def _make_pool_entry(
-    pool_id="0xMarket1",
-    liquidity="1000",
-    opening_ts="1700200000",
-    has_question=True,
-):
+    pool_id: str = "0xMarket1",
+    liquidity: str = "1000",
+    opening_ts: str = "1700200000",
+    has_question: bool = True,
+) -> Any:
     """Create a sample fpmmPoolMemberships entry."""
     condition = {
         "id": "0xCondition1",
@@ -84,7 +85,7 @@ def _make_pool_entry(
 class TestSyncMarketsBehaviour:
     """Tests for SyncMarketsBehaviour."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
@@ -96,7 +97,7 @@ class TestSyncMarketsBehaviour:
         context_mock.agent_address = "0x1234567890123456789012345678901234567890"
         self.behaviour = SyncMarketsBehaviour(name="test", skill_context=context_mock)
 
-    def test_get_markets_subgraph_none(self):
+    def test_get_markets_subgraph_none(self) -> None:
         """Test get_markets when subgraph returns None."""
         with patch.object(
             self.behaviour,
@@ -108,7 +109,7 @@ class TestSyncMarketsBehaviour:
 
         assert result == ([], 0)
 
-    def test_get_markets_filters_no_liquidity_measure(self):
+    def test_get_markets_filters_no_liquidity_measure(self) -> None:
         """Test get_markets filters out market without liquidityMeasure."""
         entry = _make_pool_entry()
         entry["pool"]["liquidityMeasure"] = None
@@ -134,7 +135,7 @@ class TestSyncMarketsBehaviour:
         markets, from_block = result
         assert len(markets) == 0
 
-    def test_get_markets_filters_zero_liquidity(self):
+    def test_get_markets_filters_zero_liquidity(self) -> None:
         """Test get_markets filters out market with 0 liquidity."""
         entry = _make_pool_entry(liquidity="0")
 
@@ -159,7 +160,7 @@ class TestSyncMarketsBehaviour:
         markets, from_block = result
         assert len(markets) == 0
 
-    def test_get_markets_filters_no_opening_timestamp(self):
+    def test_get_markets_filters_no_opening_timestamp(self) -> None:
         """Test get_markets filters out market without openingTimestamp."""
         entry = _make_pool_entry()
         entry["pool"]["openingTimestamp"] = None
@@ -185,7 +186,7 @@ class TestSyncMarketsBehaviour:
         markets, from_block = result
         assert len(markets) == 0
 
-    def test_get_markets_filters_no_question(self):
+    def test_get_markets_filters_no_question(self) -> None:
         """Test get_markets filters out condition without question."""
         entry = _make_pool_entry(has_question=False)
 
@@ -210,7 +211,7 @@ class TestSyncMarketsBehaviour:
         markets, from_block = result
         assert len(markets) == 0
 
-    def test_get_markets_success(self):
+    def test_get_markets_success(self) -> None:
         """Test get_markets with valid markets returned."""
         entry = _make_pool_entry(pool_id="0xMarket1")
 
@@ -239,14 +240,14 @@ class TestSyncMarketsBehaviour:
         assert markets[0]["question_id"] == "0xQuestion1"
         assert from_block == 0
 
-    def test_get_markets_with_funds_empty(self):
+    def test_get_markets_with_funds_empty(self) -> None:
         """Test _get_markets_with_funds with no market addresses."""
         gen = self.behaviour._get_markets_with_funds([], "0xSafe")
         result = _exhaust_gen(gen)
 
         assert result == []
 
-    def test_get_markets_with_funds_success(self):
+    def test_get_markets_with_funds_success(self) -> None:
         """Test _get_markets_with_funds with successful contract response."""
         contract_resp = MagicMock()
         contract_resp.performative = ContractApiMessage.Performative.STATE
@@ -264,7 +265,7 @@ class TestSyncMarketsBehaviour:
 
         assert result == ["0xMarket1", "0xMarket2"]
 
-    def test_get_markets_with_funds_contract_fail(self):
+    def test_get_markets_with_funds_contract_fail(self) -> None:
         """Test _get_markets_with_funds when contract returns wrong performative."""
         contract_resp = MagicMock()
         contract_resp.performative = ContractApiMessage.Performative.ERROR
@@ -279,7 +280,7 @@ class TestSyncMarketsBehaviour:
 
         assert result == []
 
-    def test_get_payload_error(self):
+    def test_get_payload_error(self) -> None:
         """Test get_payload when get_markets returns None."""
         with patch.object(
             self.behaviour,
@@ -291,7 +292,7 @@ class TestSyncMarketsBehaviour:
 
         assert result == SyncMarketsRound.ERROR_PAYLOAD
 
-    def test_get_payload_no_markets(self):
+    def test_get_payload_no_markets(self) -> None:
         """Test get_payload when get_markets returns empty list."""
         with patch.object(
             self.behaviour,
@@ -303,7 +304,7 @@ class TestSyncMarketsBehaviour:
 
         assert result == SyncMarketsRound.NO_UPDATE_PAYLOAD
 
-    def test_get_payload_success(self):
+    def test_get_payload_success(self) -> None:
         """Test get_payload with valid markets."""
         markets = [{"address": "0xMarket1", "amount": 500}]
 
@@ -321,7 +322,7 @@ class TestSyncMarketsBehaviour:
         assert len(parsed["markets"]) == 1
         assert parsed["from_block"] == 0
 
-    def test_fpmm_pool_query_template(self):
+    def test_fpmm_pool_query_template(self) -> None:
         """Test that FPMM_POOL_MEMBERSHIPS_QUERY template contains expected fields."""
         template_str = FPMM_POOL_MEMBERSHIPS_QUERY.template
         assert "fpmmPoolMemberships" in template_str
@@ -331,7 +332,7 @@ class TestSyncMarketsBehaviour:
         assert "outcomeSlotCount" in template_str
         assert "outcomeTokenAmounts" in template_str
 
-    def test_async_act(self):
+    def test_async_act(self) -> None:
         """Test async_act wraps get_payload correctly."""
         with patch.object(
             self.behaviour,
@@ -348,7 +349,7 @@ class TestSyncMarketsBehaviour:
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
-    def test_get_markets_market_not_in_funds_list(self):
+    def test_get_markets_market_not_in_funds_list(self) -> None:
         """Test get_markets when market address not in get_markets_with_funds result."""
         entry = _make_pool_entry(pool_id="0xMarketNotFunded")
 

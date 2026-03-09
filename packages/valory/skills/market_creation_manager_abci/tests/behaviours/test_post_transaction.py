@@ -20,6 +20,7 @@
 """Tests for PostTransactionBehaviour."""
 
 import json
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
@@ -38,17 +39,17 @@ from packages.valory.skills.market_creation_manager_abci.states.post_transaction
 )
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:
@@ -60,7 +61,7 @@ def _exhaust_gen(gen):
 class TestPostTransactionBehaviour:
     """Tests for PostTransactionBehaviour."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
@@ -72,11 +73,11 @@ class TestPostTransactionBehaviour:
         context_mock.state.synchronized_data = MagicMock()
         context_mock.benchmark_tool = MagicMock()
         context_mock.agent_address = "0x1234567890123456789012345678901234567890"
-        self.behaviour = PostTransactionBehaviour(
+        self.behaviour: Any = PostTransactionBehaviour(
             name="test", skill_context=context_mock
         )
 
-    def test_get_payload_no_settled_tx(self):
+    def test_get_payload_no_settled_tx(self) -> None:
         """Test get_payload when settled_tx_hash is None."""
         self.behaviour.synchronized_data.settled_tx_hash = None
 
@@ -85,7 +86,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.DONE_PAYLOAD
 
-    def test_get_payload_mech_request_submitter(self):
+    def test_get_payload_mech_request_submitter(self) -> None:
         """Test get_payload when tx_submitter is MechRequestRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = (
@@ -97,7 +98,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
 
-    def test_get_payload_redeem_bond_submitter(self):
+    def test_get_payload_redeem_bond_submitter(self) -> None:
         """Test get_payload when tx_submitter is RedeemBondRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = RedeemBondRound.auto_round_id()
@@ -107,7 +108,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
 
-    def test_get_payload_deposit_dai_submitter(self):
+    def test_get_payload_deposit_dai_submitter(self) -> None:
         """Test get_payload when tx_submitter is DepositDaiRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = DepositDaiRound.auto_round_id()
@@ -117,7 +118,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
 
-    def test_get_payload_answer_questions_submitter(self):
+    def test_get_payload_answer_questions_submitter(self) -> None:
         """Test get_payload when tx_submitter is AnswerQuestionsRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = (
@@ -129,7 +130,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
 
-    def test_get_payload_remove_funding_submitter(self):
+    def test_get_payload_remove_funding_submitter(self) -> None:
         """Test get_payload when tx_submitter is RemoveFundingRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = (
@@ -141,7 +142,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
 
-    def test_get_payload_no_approved_question_data(self):
+    def test_get_payload_no_approved_question_data(self) -> None:
         """Test get_payload when is_approved_question_data_set is False."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = "some_other_round"
@@ -152,7 +153,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.DONE_PAYLOAD
 
-    def test_get_payload_no_market_id(self):
+    def test_get_payload_no_market_id(self) -> None:
         """Test get_payload when approved_question_data has no 'id'."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = "some_other_round"
@@ -166,7 +167,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.DONE_PAYLOAD
 
-    def test_get_payload_non_prepare_tx_submitter(self):
+    def test_get_payload_non_prepare_tx_submitter(self) -> None:
         """Test get_payload when tx_submitter is not PrepareTransactionRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = "some_other_round"
@@ -178,7 +179,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.DONE_PAYLOAD
 
-    def test_get_fpmm_id_success(self):
+    def test_get_fpmm_id_success(self) -> None:
         """Test _get_fpmm_id with successful contract API response."""
         mock_resp = MagicMock()
         mock_resp.performative = ContractApiMessage.Performative.STATE
@@ -194,7 +195,7 @@ class TestPostTransactionBehaviour:
 
         assert result == "0xFPMM123"
 
-    def test_get_fpmm_id_failure(self):
+    def test_get_fpmm_id_failure(self) -> None:
         """Test _get_fpmm_id when contract API returns wrong performative."""
         mock_resp = MagicMock()
         mock_resp.performative = ContractApiMessage.Performative.ERROR
@@ -209,7 +210,7 @@ class TestPostTransactionBehaviour:
 
         assert result is None
 
-    def test_mark_market_as_done_success(self):
+    def test_mark_market_as_done_success(self) -> None:
         """Test _mark_market_as_done when both HTTP PUTs return 200."""
         mock_resp_1 = MagicMock()
         mock_resp_1.status_code = 200
@@ -221,7 +222,7 @@ class TestPostTransactionBehaviour:
 
         call_count = 0
 
-        def mock_http_gen(*args, **kwargs):
+        def mock_http_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -239,7 +240,7 @@ class TestPostTransactionBehaviour:
 
         assert result is None
 
-    def test_mark_market_as_done_first_put_fails(self):
+    def test_mark_market_as_done_first_put_fails(self) -> None:
         """Test _mark_market_as_done when first PUT returns 400."""
         mock_resp = MagicMock()
         mock_resp.status_code = 400
@@ -255,7 +256,7 @@ class TestPostTransactionBehaviour:
 
         assert result is not None
 
-    def test_mark_market_as_done_second_put_fails(self):
+    def test_mark_market_as_done_second_put_fails(self) -> None:
         """Test _mark_market_as_done when first PUT OK, second PUT fails."""
         mock_resp_ok = MagicMock()
         mock_resp_ok.status_code = 200
@@ -267,7 +268,7 @@ class TestPostTransactionBehaviour:
 
         call_count = 0
 
-        def mock_http_gen(*args, **kwargs):
+        def mock_http_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -285,7 +286,7 @@ class TestPostTransactionBehaviour:
 
         assert result is not None
 
-    def test_handle_market_creation_fpmm_none(self):
+    def test_handle_market_creation_fpmm_none(self) -> None:
         """Test _handle_market_creation when _get_fpmm_id returns None."""
         with patch.object(
             self.behaviour,
@@ -297,7 +298,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.ERROR_PAYLOAD
 
-    def test_handle_market_creation_mark_done_error(self):
+    def test_handle_market_creation_mark_done_error(self) -> None:
         """Test _handle_market_creation when _mark_market_as_done returns error."""
         with patch.object(
             self.behaviour,
@@ -313,7 +314,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.ERROR_PAYLOAD
 
-    def test_handle_market_creation_success(self):
+    def test_handle_market_creation_success(self) -> None:
         """Test _handle_market_creation happy path."""
         with patch.object(
             self.behaviour,
@@ -329,7 +330,7 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.DONE_PAYLOAD
 
-    def test_async_act(self):
+    def test_async_act(self) -> None:
         """Test async_act wraps get_payload correctly."""
         with patch.object(
             self.behaviour,
@@ -346,7 +347,7 @@ class TestPostTransactionBehaviour:
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
-    def test_get_payload_prepare_tx_submitter(self):
+    def test_get_payload_prepare_tx_submitter(self) -> None:
         """Test get_payload when tx_submitter is PrepareTransactionRound."""
         from packages.valory.skills.market_creation_manager_abci.rounds import (
             PrepareTransactionRound,

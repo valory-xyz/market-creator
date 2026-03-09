@@ -20,6 +20,7 @@
 """Tests for market_creation_manager_abci base behaviour helpers."""
 
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
@@ -156,17 +157,17 @@ class TestParseDateTimestringEdgeCases:
         assert result is None
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:

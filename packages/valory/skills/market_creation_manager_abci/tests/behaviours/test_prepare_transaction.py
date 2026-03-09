@@ -20,6 +20,7 @@
 """Tests for market_creation_manager_abci PrepareTransactionBehaviour."""
 
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_transaction import (
@@ -71,17 +72,17 @@ class TestPrepareTransactionBehaviourMethods:
         assert self.behaviour.matching_round == PrepareTransactionRound
 
 
-def _make_gen(return_value):
+def _make_gen(return_value: Any) -> Any:
     """Create a no-yield generator returning the given value."""
 
-    def gen(*args, **kwargs):
+    def gen(*args: Any, **kwargs: Any) -> Any:
         return return_value
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
 
 
-def _exhaust_gen(gen):
+def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
         while True:
@@ -326,27 +327,27 @@ class TestPrepareTransactionBehaviourGenerators:
         }
         mock_synced.safe_contract_address = "0xSafe"
 
-        def multi_calc_question_id(*args, **kwargs):
+        def multi_calc_question_id(*args: Any, **kwargs: Any) -> Any:
             return "0xQuestionId"
             yield  # noqa
 
-        def multi_ask_question(*args, **kwargs):
+        def multi_ask_question(*args: Any, **kwargs: Any) -> Any:
             return {"to": "0xR", "data": b"\x01", "value": 100}
             yield  # noqa
 
-        def multi_prepare_condition(*args, **kwargs):
+        def multi_prepare_condition(*args: Any, **kwargs: Any) -> Any:
             return {"to": "0xCT", "data": b"\x02", "value": 0}
             yield  # noqa
 
-        def multi_calc_condition(*args, **kwargs):
+        def multi_calc_condition(*args: Any, **kwargs: Any) -> Any:
             return "0xCondId"
             yield  # noqa
 
-        def multi_create_fpmm(*args, **kwargs):
+        def multi_create_fpmm(*args: Any, **kwargs: Any) -> Any:
             return {"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}
             yield  # noqa
 
-        def multi_approve(*args, **kwargs):
+        def multi_approve(*args: Any, **kwargs: Any) -> Any:
             return {"to": "0xC", "data": b"\x04", "value": 0}
             yield  # noqa
 
