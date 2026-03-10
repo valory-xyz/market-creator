@@ -170,29 +170,18 @@ models:
       openai_api_key: openai_api_key
       topics:
       - business
-      - cryptocurrency
+      - curiosities
+      - entertainment
+      - finance
+      - health
+      - international
+      - pets
       - politics
       - science
-      - technology
-      - trending
-      - fashion
-      - social
-      - health
       - sustainability
-      - internet
+      - technology
       - travel
-      - food
-      - pets
-      - animals
-      - curiosities
-      - music
-      - economy
-      - arts
-      - entertainment
       - weather
-      - sports
-      - finance
-      - international
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 1
