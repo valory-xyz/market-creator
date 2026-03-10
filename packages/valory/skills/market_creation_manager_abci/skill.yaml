@@ -63,7 +63,7 @@ fingerprint:
   tests/behaviours/test_prepare_transaction.py: bafybeidk4zz647o6bqhtfmymucwag4t5tjafkyh3pusyxmmsmprur43vlu
   tests/behaviours/test_redeem_bond.py: bafybeidte4s6ywvgulpypw3ljuen7olbyf3g5cyozbxaa2hqflcqyd3imm
   tests/behaviours/test_remove_funding.py: bafybeibys5quz5o5kbeo5bpvbg23jyayam2xlc33naglxtlkklo5la5u5i
-  tests/behaviours/test_retrieve_approved_market.py: bafybeidlchadtflsyxc62lcr7qd5u32ooqpeonhiz3pjxatjayiw4m6w4e
+  tests/behaviours/test_retrieve_approved_market.py: bafybeiablrzcjrogcyr4lshwpdylvndyd4ohcvachnfu3biu3ewqlxged4
   tests/behaviours/test_sync_markets.py: bafybeigpbcusciz2jgwuqnt25hijowbgbaei4d33tq33rril7wlk6avk6e
   tests/conftest.py: bafybeiawchmkylfcavckf73slvfqnyrz73owyubjua3k2e3txvsrkqs7hm
   tests/states/__init__.py: bafybeia5upph3nlp3opku7erao46kkvbsddderrgmwfrcustzobnq2h44e
@@ -74,7 +74,7 @@ fingerprint:
   tests/states/test_get_pending_questions.py: bafybeiaiihezlwh5lg2wa3bdqkrl3jlvhnmwwyzjrfk53vnhngqc725b4y
   tests/states/test_post_transaction.py: bafybeigpcfa74tu2kfxsdy7owk4l3vd3b7mvfjwrhzgq75v63bp45oxm64
   tests/states/test_remove_funding.py: bafybeifmylsqoyxja6x4wts6gwlpnk7cu3nxj7opzegq3eqfrmyaayvqgm
-  tests/states/test_retrieve_approved_market.py: bafybeic6neyvs3nu4vmsrzlc623yefbgacpc7ofis2qw57e5g2c7bdufii
+  tests/states/test_retrieve_approved_market.py: bafybeiggsxsrnbj3keevbim7mqs6fro2jcteg5457uiw34sg6kpxfuvnzi
   tests/states/test_sync_markets.py: bafybeiamd47774ud26jd5fywoaiqnxugqern53khdxcdrdvgcon4zp5sry
   tests/test_dialogues.py: bafybeiesmzycauqtuv6wixghbidu44lvnptijvosysz6ifr2d5qvwk35nm
   tests/test_handlers.py: bafybeibobdd3b7vweme7y7oki45afnbi5vmcb77wjgbir3duzxtppet4fa

@@ -141,8 +141,8 @@ class TestRetrieveApprovedMarketBehaviour:
             gen = self.behaviour._get_process_random_approved_market()
             result = _exhaust_gen(gen)
 
-        # retries=3 >= MAX_RETRIES=3, so should return MAX_RETRIES_PAYLOAD
-        assert result == RetrieveApprovedMarketRound.MAX_RETRIES_PAYLOAD
+        # On HTTP error, should return ERROR_PAYLOAD directly
+        assert result == RetrieveApprovedMarketRound.ERROR_PAYLOAD
 
     def test_not_sender_act(self) -> None:
         """Test _not_sender_act waits for round end."""

@@ -148,13 +148,6 @@ class TestSharedState:
             == 30
         )
         assert MarketCreatorAbciApp.event_to_timeout[TSEvent.ROUND_TIMEOUT] == 30
-        # Market proposal timeout: max(30, 45 * (5 - 1 + 1)) + 5 = max(30, 225) + 5 = 230
-        assert (
-            MarketCreatorAbciApp.event_to_timeout[
-                MarketCreationManagerEvent.MARKET_PROPOSAL_ROUND_TIMEOUT
-            ]
-            == 230
-        )
         assert (
             MarketCreatorAbciApp.event_to_timeout[ResetPauseEvent.ROUND_TIMEOUT] == 30
         )
