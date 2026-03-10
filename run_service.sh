@@ -16,7 +16,7 @@ export MARKET_APPROVAL_SERVER_API_KEY=YOUR_MARKET_APPROVAL_SERVER_API_KEY
 
 export MAX_PROPOSED_MARKETS=-1
 export MIN_MARKET_PROPOSAL_INTERVAL_SECONDS=1800
-export TOPICS='["business","science","technology","politics","arts","weather"]'
+export TOPICS='["business","curiosities","entertainment","finance","health","international","pets","politics","science","sustainability","technology","travel","weather"]'
 export MARKET_FEE=2
 export INITIAL_FUNDS=1
 export MARKET_TIMEOUT=1

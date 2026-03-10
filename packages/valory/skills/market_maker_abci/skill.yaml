@@ -32,7 +32,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeicehi2yqab3lldm7qzoqev3tmqrdk275sbtcabneyorhmzft76z7m
 - valory/registration_abci:0.1.0:bafybeihjgfzqvuymqgku6mwqih7hlvqwr2tmdjrip3m6unt5l4e55bshkm
 - valory/reset_pause_abci:0.1.0:bafybeih6bjalcohxytg6hj3doy5dhkxonrxpqgcnclyf6tnmuyfbom2usy
-- valory/market_creation_manager_abci:0.1.0:bafybeie6ujkqigicw2feomyvzpkunsigl7d2uktopygphfoh3zqgn6wzqa
+- valory/market_creation_manager_abci:0.1.0:bafybeiejyw7omejrq2u6tswzmecofmgvswaymn25xe2zdxxjdzrl67ypmy
 - valory/termination_abci:0.1.0:bafybeiarjw4hhu2vf56yxqb4jh3kmk4hfxvqahygn6scc3rfnlogjkwwpe
 - valory/transaction_settlement_abci:0.1.0:bafybeigivknq755rbnelrdemaz3vm4x7jkofvaskm34uh36pbbg6uiquo4
 - valory/mech_interact_abci:0.1.0:bafybeigqq2vnnwqelllo2rb2wq3v6adkstkv47atcr6ieqxstvkkxm3toy
@@ -103,29 +103,18 @@ models:
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       topics:
       - business
-      - cryptocurrency
+      - curiosities
+      - entertainment
+      - finance
+      - health
+      - international
+      - pets
       - politics
       - science
-      - technology
-      - trending
-      - fashion
-      - social
-      - health
       - sustainability
-      - internet
+      - technology
       - travel
-      - food
-      - pets
-      - animals
-      - curiosities
-      - music
-      - economy
-      - arts
-      - entertainment
       - weather
-      - sports
-      - finance
-      - international
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 1
