@@ -1,4 +1,4 @@
-name: main_workflow
+name: common_checks
 
 on:
   push:
