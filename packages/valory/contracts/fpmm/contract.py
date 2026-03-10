@@ -200,6 +200,6 @@ class FPMMContract(Contract):
 
             _logger.info(f"Markets with non-zero funds retrieved: {non_zero_markets}")
             return dict(data=non_zero_markets)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             _logger.error("An exception occurred in get_markets_with_funds():", str(e))
             raise

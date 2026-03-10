@@ -1,0 +1,18 @@
+[run]
+source =
+    packages/valory/contracts/fpmm_deterministic_factory
+    packages/valory/contracts/fpmm
+    packages/valory/skills/market_creation_manager_abci
+    packages/valory/skills/market_maker_abci
+
+[report]
+omit =
+    */propose_questions.py
+    */__init__.py
+    */tests/*
+
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    if TYPE_CHECKING
+    pass

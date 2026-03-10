@@ -480,13 +480,13 @@ files = [
 
 [[package]]
 name = "cachetools"
-version = "7.0.3"
+version = "7.0.5"
 description = "Extensible memoizing collections and decorators"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "cachetools-7.0.3-py3-none-any.whl", hash = "sha256:c128ffca156eef344c25fcd08a96a5952803786fa33097f5f2d49edf76f79d53"},
-    {file = "cachetools-7.0.3.tar.gz", hash = "sha256:8c246313b95849964e54a909c03b327a87ab0428b068fac10da7b105ca275ef6"},
+    {file = "cachetools-7.0.5-py3-none-any.whl", hash = "sha256:46bc8ebefbe485407621d0a4264b23c080cedd913921bad7ac3ed2f26c183114"},
+    {file = "cachetools-7.0.5.tar.gz", hash = "sha256:0cd042c24377200c1dcd225f8b7b12b0ca53cc2c961b43757e774ebe190fd990"},
 ]
 
 [[package]]
@@ -1411,13 +1411,13 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "filelock"
-version = "3.25.0"
+version = "3.25.1"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "filelock-3.25.0-py3-none-any.whl", hash = "sha256:5ccf8069f7948f494968fc0713c10e5c182a9c9d9eef3a636307a20c2490f047"},
-    {file = "filelock-3.25.0.tar.gz", hash = "sha256:8f00faf3abf9dc730a1ffe9c354ae5c04e079ab7d3a683b7c32da5dd05f26af3"},
+    {file = "filelock-3.25.1-py3-none-any.whl", hash = "sha256:18972df45473c4aa2c7921b609ee9ca4925910cc3a0fb226c96b92fc224ef7bf"},
+    {file = "filelock-3.25.1.tar.gz", hash = "sha256:b9a2e977f794ef94d77cdf7d27129ac648a61f585bff3ca24630c1629f701aa9"},
 ]
 
 [[package]]
@@ -1599,13 +1599,13 @@ files = [
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.72.0"
+version = "1.73.0"
 description = "Common protobufs used in Google APIs"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "googleapis_common_protos-1.72.0-py3-none-any.whl", hash = "sha256:4299c5a82d5ae1a9702ada957347726b167f9f8d1fc352477702a1e851ff4038"},
-    {file = "googleapis_common_protos-1.72.0.tar.gz", hash = "sha256:e55a601c1b32b52d7a3e65f43563e2aa61bcd737998ee672ac9b951cd49319f5"},
+    {file = "googleapis_common_protos-1.73.0-py3-none-any.whl", hash = "sha256:dfdaaa2e860f242046be561e6d6cb5c5f1541ae02cfbcb034371aadb2942b4e8"},
+    {file = "googleapis_common_protos-1.73.0.tar.gz", hash = "sha256:778d07cd4fbeff84c6f7c72102f0daf98fa2bfd3fa8bea426edc545588da0b5a"},
 ]
 
 [package.dependencies]
@@ -3382,13 +3382,13 @@ six = ">=1.5"
 
 [[package]]
 name = "python-discovery"
-version = "1.1.0"
+version = "1.1.2"
 description = "Python interpreter discovery"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "python_discovery-1.1.0-py3-none-any.whl", hash = "sha256:a162893b8809727f54594a99ad2179d2ede4bf953e12d4c7abc3cc9cdbd1437b"},
-    {file = "python_discovery-1.1.0.tar.gz", hash = "sha256:447941ba1aed8cc2ab7ee3cb91be5fc137c5bdbb05b7e6ea62fbdcb66e50b268"},
+    {file = "python_discovery-1.1.2-py3-none-any.whl", hash = "sha256:d18edd61b382d62f8bcd004a71ebaabc87df31dbefb30aeed59f4fc6afa005be"},
+    {file = "python_discovery-1.1.2.tar.gz", hash = "sha256:c500bd2153e3afc5f48a61d33ff570b6f3e710d36ceaaf882fa9bbe5cc2cec49"},
 ]
 
 [package.dependencies]
@@ -4095,13 +4095,13 @@ files = [
 
 [[package]]
 name = "tomte"
-version = "0.6.1"
+version = "0.6.2"
 description = "A library that wraps many useful tools (linters, analysers, etc) to keep Python code clean, secure, well-documented and optimised."
 optional = false
 python-versions = "<4,>=3.10"
 files = [
-    {file = "tomte-0.6.1-py3-none-any.whl", hash = "sha256:3fdd83a7f38bc3a43aa5ce24a2ce84c9a34904cf5887bff06c9cb781024ac59f"},
-    {file = "tomte-0.6.1.tar.gz", hash = "sha256:1e039fd94b1fdd0202c7a4dc01e9324e3786fb2ff18ac5bb6cce142edf9f779e"},
+    {file = "tomte-0.6.2-py3-none-any.whl", hash = "sha256:d57b466d2d65e2b1730651e041f64ac31bc86bb763a31c710dac805cedba1f1b"},
+    {file = "tomte-0.6.2.tar.gz", hash = "sha256:1cdfcdbc0cbc222ad95bfd35b9d3372316b3a53e5545c193d7b7410478905c6f"},
 ]
 
 [package.dependencies]
@@ -4256,13 +4256,13 @@ files = [
 
 [[package]]
 name = "virtualenv"
-version = "21.1.0"
+version = "21.2.0"
 description = "Virtual Python Environment builder"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "virtualenv-21.1.0-py3-none-any.whl", hash = "sha256:164f5e14c5587d170cf98e60378eb91ea35bf037be313811905d3a24ea33cc07"},
-    {file = "virtualenv-21.1.0.tar.gz", hash = "sha256:1990a0188c8f16b6b9cf65c9183049007375b26aad415514d377ccacf1e4fb44"},
+    {file = "virtualenv-21.2.0-py3-none-any.whl", hash = "sha256:1bd755b504931164a5a496d217c014d098426cddc79363ad66ac78125f9d908f"},
+    {file = "virtualenv-21.2.0.tar.gz", hash = "sha256:1720dc3a62ef5b443092e3f499228599045d7fea4c79199770499df8becf9098"},
 ]
 
 [package.dependencies]
@@ -4587,4 +4587,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.15"
-content-hash = "3920b24c89be8b4138fefb9e2d895b359d05e1c004a23d6648269d46c35bb2cb"
+content-hash = "0ddd95595f5d507b953c4dca3595d23493ffdf959aadbdb54c2a83b87d080255"

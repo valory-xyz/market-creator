@@ -267,7 +267,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 return
 
             agent = self.context.agent_address
-            if tx_hash is None:
+            if tx_hash is None:  # pragma: no cover
                 tx_submitter = None
             else:
                 tx_submitter = self.matching_round.auto_round_id()
