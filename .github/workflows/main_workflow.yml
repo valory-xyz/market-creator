@@ -202,7 +202,7 @@ jobs:
           tox -e py${{ matrix.python-version }}-darwin
 
       - if: matrix.os == 'windows-2025'
-        name: Install dependencies (windows-latest)
+        name: Install dependencies (windows-2025)
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         run: |
@@ -214,8 +214,7 @@ jobs:
           choco install make -y
           # to check make was installed
           make --version
-          pip install tomte[tox]==0.2.14
-
+          pip install tomte[tox]==0.6.1
       - if: matrix.os == 'windows-2025'
         name: Packages unit tests windows-2025
         run: |
