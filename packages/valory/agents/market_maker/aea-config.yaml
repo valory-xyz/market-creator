@@ -188,9 +188,7 @@ models:
       market_approval_server_api_key: ${str:api_key}
       newsapi_endpoint: ${str:https://newsapi.org/v2}
       newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
-      topics: ${list:["business", "curiosities", "entertainment", "finance", "health",
-        "international", "pets", "politics", "science", "sustainability", "technology",
-        "travel", "weather"]}
+      topics: ${list:["business","curiosities","entertainment","finance","health","international","pets","politics","science","sustainability","technology","travel","weather"]}
       market_fee: ${float:2.0}
       initial_funds: ${float:1.0}
       market_timeout: ${int:1}
