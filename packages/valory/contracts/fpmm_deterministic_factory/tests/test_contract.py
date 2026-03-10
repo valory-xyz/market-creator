@@ -241,3 +241,39 @@ class TestParseMarketCreationEvent:
         data = result["data"]
         assert data["tx_hash"] == "0xtxhash"
         assert data["block_number"] == 12345
+
+    def test_parse_market_creation_event_no_receipt(self) -> None:
+        """Test parse_market_creation_event raises when receipt is None."""
+        mock_ledger_api = MagicMock()
+        mock_ledger_api.api.eth.get_transaction_receipt.return_value = None
+
+        with patch.object(
+            FPMMDeterministicFactory, "get_instance", return_value=MagicMock()
+        ):
+            with pytest.raises(ValueError, match="Transaction receipt not found"):
+                FPMMDeterministicFactory.parse_market_creation_event(
+                    ledger_api=mock_ledger_api,
+                    contract_address="0xfactory",
+                    tx_hash="0xtxhash",
+                )
+
+    def test_parse_market_creation_event_no_logs(self) -> None:
+        """Test parse_market_creation_event raises when no events found."""
+        mock_ledger_api = MagicMock()
+        mock_instance = MagicMock()
+        mock_instance.events.FixedProductMarketMakerCreation.return_value.process_receipt.return_value = (
+            []
+        )
+        mock_ledger_api.api.eth.get_transaction_receipt.return_value = MagicMock()
+
+        with patch.object(
+            FPMMDeterministicFactory, "get_instance", return_value=mock_instance
+        ):
+            with pytest.raises(
+                ValueError, match="No FixedProductMarketMakerCreation events found"
+            ):
+                FPMMDeterministicFactory.parse_market_creation_event(
+                    ledger_api=mock_ledger_api,
+                    contract_address="0xfactory",
+                    tx_hash="0xtxhash",
+                )

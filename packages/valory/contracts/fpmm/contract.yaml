@@ -10,7 +10,7 @@ fingerprint:
   build/FPMM.json: bafybeidvvevt5hderny4jme6oml4srnm3jf2gwht2hxcxjixjeygejyrvy
   contract.py: bafybeifdhheknloaj6cdjukx4aj5osdtpayzoawquq6ryjuwf5swaba2fu
   tests/__init__.py: bafybeigrnl4bgjh5xbdpvikvf6d5cjmxisntlwmkn2ugwtahk7yspkeiwa
-  tests/test_contract.py: bafybeiac6fkktqyutv3qa2lbmkz5fbzqcxgqv4llrbywrei5t7wzmvlhmq
+  tests/test_contract.py: bafybeifjj635ui5ciy3nv4fxtizmn7vgwkhjbntbua2wc6tvjcshfke564
 fingerprint_ignore_patterns: []
 class_name: FPMMContract
 contract_interface_paths:
