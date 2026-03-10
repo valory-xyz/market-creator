@@ -4,7 +4,7 @@
 
 - **Branch**: `test/unit-test-coverage`
 - **Coverage**: 100% statement + 100% branch
-- **Tests**: ~450 passing (after minimization from ~575)
+- **Tests**: **568 passing**
 - **PR**: [#167](https://github.com/valory-xyz/market-creator/pull/167)
 - **Status**: COMPLETE
 
@@ -82,9 +82,9 @@
 | `.github/workflows/common_checks.yml` | Replaced `main_workflow.yml`; updated actions to v6, tomte to 0.6.2, added Windows/macOS test matrix |
 | `packages/valory/__init__.py` | Added missing init file (fixes Windows CI namespace package resolution) |
 
-### Test minimization
+### Notes
 
-Removed 5 redundant test files (~125 tests) that provided no unique coverage, reducing the suite from ~575 to ~450 tests while maintaining 100% coverage.
+All tests are deterministic with full mocking of external boundaries. No test minimization was applied — the full suite of 568 tests is retained for maximum coverage confidence.
 
 ---
 
