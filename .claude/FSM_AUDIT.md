@@ -26,16 +26,10 @@
 - **Risk:** If any `end_block()` were to return these events, the transition would silently fail and hang the round.
 - **Fix:** Remove these events if they are truly unused, or add corresponding transitions to the appropriate rounds.
 
-### C3.2: SyncMarketsRound Placeholder Keys
+### ~~C3.2: SyncMarketsRound Placeholder Keys~~ — FALSE POSITIVE
 
 - **File:** `states/sync_markets.py:50-51`
-- **Issue:** `SyncMarketsRound` extends `CollectSameUntilThresholdRound` but has empty placeholder values:
-  ```python
-  selection_key: Tuple[str, ...] = ()  # TODO placeholder
-  collection_key = ""  # TODO placeholder
-  ```
-- **Risk:** The round's collection mechanism relies on these keys. Empty values mean the framework's automatic data collection does not store results under meaningful DB keys.
-- **Fix:** Define proper `selection_key` and `collection_key` values matching the `SynchronizedData` properties, or verify that the custom `end_block()` handles data storage manually (bypassing the framework's default).
+- **Verified:** `SyncMarketsRound.end_block()` completely overrides the base class logic without calling `super()`. It manually constructs the synchronized data update with hardcoded field names (`markets_to_remove_liquidity`, `market_from_block`). The placeholder `selection_key` and `collection_key` values are never used.
 
 ## High Findings
 
@@ -103,21 +97,9 @@
   ```
 - **Fix:** Remove if truly unused, or implement corresponding logic.
 
-### M5.1: selection_key Type Mismatch (Multiple Rounds)
+### ~~M5.1: selection_key Type Mismatch~~ — FALSE POSITIVE
 
-- **Files:**
-  - `states/select_keeper.py:44`
-  - `states/collect_proposed_markets.py:52`
-  - `states/get_pending_questions.py:49`
-- **Issue:** `selection_key` is assigned a bare string instead of a tuple. `CollectSameUntilThresholdRound` expects `Tuple[str, ...]`:
-  ```python
-  # Current (bare string):
-  selection_key = get_name(SynchronizedData.most_voted_keeper_address)
-
-  # Expected (tuple):
-  selection_key = (get_name(SynchronizedData.most_voted_keeper_address),)
-  ```
-- **Note:** Verify whether the framework coerces strings to tuples internally. If it does, this is cosmetic; if not, the data extraction may silently fail.
+- **Verified:** The framework declares `selection_key: Union[str, Tuple[str, ...]]` and uses `isinstance(self.selection_key, tuple)` in `end_block()` to handle both cases correctly. Bare strings are a valid and intentional usage — the string branch stores the entire `most_voted_payload` under that single key.
 
 ### H3.2: Missing Transaction Receipt Null Check
 
@@ -184,9 +166,9 @@ No findings. All T1-T6 checks passed:
 
 | Severity | Count |
 |----------|-------|
-| Critical | 2 |
+| Critical | 1 (1 false positive) |
 | High | 2 |
-| Medium | 6 |
+| Medium | 5 (1 false positive) |
 | Low | 3 |
 | Test | 0 |
 
@@ -194,5 +176,6 @@ No findings. All T1-T6 checks passed:
 
 - **False positives excluded:** Standard `ROUND_TIMEOUT` event usage follows library skill conventions and is not flagged.
 - **Scope limitation:** Third-party synced packages (e.g., `mech_interact_abci`, `transaction_settlement_abci`) were not audited beyond their composition interfaces.
-- **H2.1 requires verification:** The two missing final states (`FinishedMarketplaceLegacyDetectedRound`, `FinishedMechPurchaseSubscriptionRound`) may have been added to `MechInteractAbciApp` after the composition was written. Confirm whether these states are reachable in the current Mech version before fixing.
-- **M5.1 requires verification:** Check if `CollectSameUntilThresholdRound` coerces bare strings to tuples internally. If so, the finding is cosmetic.
+- **H2.1 verified:** Both missing final states (`FinishedMarketplaceLegacyDetectedRound`, `FinishedMechPurchaseSubscriptionRound`) exist in `MechInteractAbciApp.final_states`. The composition mapping is confirmed incomplete.
+- **M5.1 verified:** FALSE POSITIVE — framework handles both `str` and `Tuple[str, ...]` via `isinstance()` check.
+- **C3.2 verified:** FALSE POSITIVE — `SyncMarketsRound.end_block()` completely bypasses the framework's collection/selection mechanism.
