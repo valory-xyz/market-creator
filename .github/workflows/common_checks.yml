@@ -1,4 +1,4 @@
-name: common_checks
+name: Common Checks
 
 on:
   push:
