@@ -217,6 +217,42 @@ If you get stale dependency errors, clear tox cache: `rm -rf .tox` or use `tox -
 
 - **[audit-fsm](https://github.com/valory-xyz/open-autonomy/tree/main/claude-skills/audit-fsm)**: Claude skill for auditing FSM specifications in Open Autonomy services. Use it to validate FSM transition graphs, detect unreachable states, and check consistency between `rounds.py` and `fsm_specification.yaml`.
 
+## FSM Change Discipline
+
+FSM definitions are tightly coupled across multiple files. When modifying events, rounds, or transitions, **all** of the following must stay in sync:
+
+1. **`states/base.py`** — `Event` enum members
+2. **`rounds.py`** — `transition_function` entries and the class docstring (transition table)
+3. **`fsm_specification.yaml`** — `alphabet_in` and `transition_func` entries
+4. **Test files** — parametrized transition test cases (e.g., `TestRetrieveApprovedMarketTransitions`)
+
+After any FSM change, run:
+
+```bash
+# Validate FSM specs match rounds.py (both skills)
+autonomy analyse fsm-specs --package packages/valory/skills/market_creation_manager_abci
+autonomy analyse fsm-specs --package packages/valory/skills/market_maker_abci
+
+# If the yaml is out of date, regenerate it:
+autonomy analyse fsm-specs --update --package packages/valory/skills/market_creation_manager_abci
+
+# Validate docstrings and handlers
+autonomy analyse docstrings
+autonomy analyse handlers
+```
+
+### Common FSM pitfalls
+
+- **Unused events**: Every event in the `Event` enum must appear in at least one round's `transition_function`. The FSM spec validator will reject unreferenced events.
+- **Composition completeness**: In `market_maker_abci/composition.py`, the `abci_app_transition_mapping` must map **every** final state of each sub-app. Missing mappings cause runtime errors. When third-party skills add new final states (e.g., `MechInteractAbciApp` adding `FinishedMarketplaceLegacyDetectedRound`), the composition must be updated.
+- **`OnlyKeeperSendsRound` overrides**: Rounds extending `OnlyKeeperSendsRound` (like `RetrieveApprovedMarketRound`) have `done_event`, `fail_event`, `payload_key`, and `payload_attribute`. If `end_block()` is fully overridden, placeholder values for `payload_key` are harmless but should be noted.
+- **`selection_key` types**: The framework accepts both `str` and `Tuple[str, ...]` for `selection_key` — it uses `isinstance()` internally. Both forms are valid.
+- **Cascading removals**: Removing an event or round cascades through enum → transition_function → yaml → docstring → tests. Miss one and CI breaks.
+
+### Completed audit baseline
+
+See [FSM_AUDIT.md](FSM_AUDIT.md) for the full audit report with all findings and their resolution status.
+
 ## Open Autonomy Concepts
 
 - **ABCI App**: FSM-based application where agents reach consensus on state transitions via Tendermint
