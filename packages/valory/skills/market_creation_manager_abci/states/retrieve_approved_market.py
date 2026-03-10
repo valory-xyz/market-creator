@@ -48,7 +48,6 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
     payload_key = ""  # TODO placeholder
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
     NO_MARKETS_RETRIEVED_PAYLOAD = "NO_MARKETS_RETRIEVED_PAYLOAD"
 
     def end_block(
@@ -59,10 +58,6 @@ class RetrieveApprovedMarketRound(OnlyKeeperSendsRound):
         """Process the end of the block."""
         if self.keeper_payload is None:
             return None
-
-        # Keeper did not send
-        if self.keeper_payload is None:  # pragma: no cover
-            return self.synchronized_data, Event.DID_NOT_SEND
 
         # API error
         if (

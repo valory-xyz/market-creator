@@ -149,7 +149,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         9. RetrieveApprovedMarketRound
             - done: 10.
             - round timeout: 20.
-            - did not send: 20.
             - api error: 20.
             - no markets retrieved: 20.
         10. PrepareTransactionRound
@@ -263,7 +262,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         RetrieveApprovedMarketRound: {
             Event.DONE: PrepareTransactionRound,
             Event.ROUND_TIMEOUT: FinishedWithoutTxRound,
-            Event.DID_NOT_SEND: FinishedWithoutTxRound,
             Event.ERROR: FinishedWithoutTxRound,
             Event.NO_MARKETS_RETRIEVED: FinishedWithoutTxRound,
         },

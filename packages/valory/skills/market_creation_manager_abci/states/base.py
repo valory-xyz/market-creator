@@ -49,10 +49,7 @@ class Event(Enum):
     NONE = "none"
     NO_TX = "no_tx"
     ROUND_TIMEOUT = "round_timeout"
-    MARKET_PROPOSAL_ROUND_TIMEOUT = "market_proposal_round_timeout"
     ERROR = "api_error"
-    DID_NOT_SEND = "did_not_send"
-    MAX_PROPOSED_MARKETS_REACHED = "max_markets_reached"
     MAX_APPROVED_MARKETS_REACHED = "max_approved_markets_reached"
     MAX_RETRIES_REACHED = "max_retries_reached"
     MECH_REQUEST_DONE = "mech_request_done"
@@ -61,7 +58,6 @@ class Event(Enum):
     DEPOSIT_DAI_DONE = "deposit_dai_done"
     ANSWER_QUESTION_DONE = "answer_question_done"
     REMOVE_FUNDING_DONE = "remove_funding_done"
-    SKIP_MARKET_PROPOSAL = "skip_market_proposal"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
 
 

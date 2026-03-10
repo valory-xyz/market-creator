@@ -15,167 +15,108 @@
 
 ## Critical Findings
 
-### C3.1: Unused Events in Event Enum
+### C3.1: Unused Events in Event Enum — FIXED
 
-- **File:** `states/base.py:55,64`
-- **Issue:** Two events are defined in the `Event` enum but never appear as keys in any round's `transition_function`:
-  ```python
-  MAX_PROPOSED_MARKETS_REACHED = "max_markets_reached"
-  SKIP_MARKET_PROPOSAL = "skip_market_proposal"
-  ```
-- **Risk:** If any `end_block()` were to return these events, the transition would silently fail and hang the round.
-- **Fix:** Remove these events if they are truly unused, or add corresponding transitions to the appropriate rounds.
+- **File:** `states/base.py`
+- **Issue:** Four events were defined in the `Event` enum but never used in any round's `transition_function` or `end_block()`:
+  - `MARKET_PROPOSAL_ROUND_TIMEOUT`
+  - `MAX_PROPOSED_MARKETS_REACHED`
+  - `SKIP_MARKET_PROPOSAL`
+  - `DID_NOT_SEND` (was only reachable via unreachable code — see L1.1)
+- **Fix applied:** Removed all four unused events from the enum. Removed `DID_NOT_SEND` from `RetrieveApprovedMarketRound` transition function, `fsm_specification.yaml`, and test parametrization.
 
 ### ~~C3.2: SyncMarketsRound Placeholder Keys~~ — FALSE POSITIVE
 
-- **File:** `states/sync_markets.py:50-51`
-- **Verified:** `SyncMarketsRound.end_block()` completely overrides the base class logic without calling `super()`. It manually constructs the synchronized data update with hardcoded field names (`markets_to_remove_liquidity`, `market_from_block`). The placeholder `selection_key` and `collection_key` values are never used.
+- **Verified:** `SyncMarketsRound.end_block()` completely overrides the base class logic without calling `super()`. The placeholder `selection_key` and `collection_key` values are never used.
 
 ## High Findings
 
-### H2.1: Missing Final States in Composition Mapping
+### H2.1: Missing Final States in Composition Mapping — FIXED
 
-- **File:** `market_maker_abci/composition.py:51-72`
-- **Issue:** Two `MechInteractAbciApp` final states are not mapped in `abci_app_transition_mapping`:
+- **File:** `market_maker_abci/composition.py`
+- **Issue:** Two `MechInteractAbciApp` final states were not mapped in `abci_app_transition_mapping`:
   - `FinishedMarketplaceLegacyDetectedRound`
   - `FinishedMechPurchaseSubscriptionRound`
-- **Risk:** If the FSM reaches these states, there is no transition target defined, potentially causing the service to hang.
-- **Fix:** Add entries to the mapping:
-  ```python
-  MechFinalStates.FinishedMarketplaceLegacyDetectedRound: MechRequestStates.MechRequestRound,
-  MechFinalStates.FinishedMechPurchaseSubscriptionRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-  ```
-  Verify the correct targets based on business logic.
+- **Fix applied:** Added both mappings (following trader repo patterns):
+  - `FinishedMarketplaceLegacyDetectedRound` → `MechRequestRound`
+  - `FinishedMechPurchaseSubscriptionRound` → `RandomnessTransactionSubmissionRound`
+- Regenerated `market_maker_abci/fsm_specification.yaml`.
 
-### H3.1: Unsafe Array Indexing in Contract
+### H3.1: Unsafe Array Indexing in Contract — FIXED
 
-- **File:** `contracts/fpmm_deterministic_factory/contract.py:251`
-- **Issue:** Direct access to `logs[0]` without bounds check:
-  ```python
-  logs = contract.events.FixedProductMarketMakerCreation().process_receipt(receipt)
-  event = logs[0]  # No bounds check
-  ```
-- **Risk:** `IndexError` crash if the receipt contains no matching events.
-- **Fix:**
-  ```python
-  if not logs:
-      raise ValueError(f"No FixedProductMarketMakerCreation events found in tx {tx_hash}")
-  event = logs[0]
-  ```
+- **File:** `contracts/fpmm_deterministic_factory/contract.py`
+- **Issue:** Direct access to `logs[0]` without bounds check; no null check on transaction receipt.
+- **Fix applied:** Added `if receipt is None: raise ValueError(...)` and `if not logs: raise ValueError(...)` guards before accessing the event data.
 
 ## Medium Findings
 
-### M1.1: ApproveMarketsRound Multi-Element payload_key
+### M1.1: ApproveMarketsRound Multi-Element payload_key — DEFERRED
 
 - **File:** `states/approve_markets.py:49-53`
-- **Issue:** `payload_key` is a 3-element tuple for an `OnlyKeeperSendsRound`. Verify the framework correctly handles multi-element `payload_key` tuples.
-  ```python
-  payload_key = (
-      get_name(SynchronizedData.approved_markets_data),
-      get_name(SynchronizedData.approved_markets_count),
-      get_name(SynchronizedData.approved_markets_timestamp),
-  )
-  ```
+- **Status:** Low risk. The `end_block()` override handles data manually. Requires framework investigation to determine if this is a concern.
 
-### M1.2: RetrieveApprovedMarketRound Empty payload_key
+### M1.2: RetrieveApprovedMarketRound Empty payload_key — DEFERRED
 
 - **File:** `states/retrieve_approved_market.py:48`
-- **Issue:** Empty string placeholder for `payload_key`:
-  ```python
-  payload_key = ""  # TODO placeholder
-  ```
-- **Fix:** Define the proper key or document why manual handling in `end_block()` is required.
+- **Status:** Low risk. The `end_block()` override handles all data flow manually, making the placeholder harmless (same pattern as C3.2).
 
-### M2.1: Unused Event Definitions
+### M2.1: Unused Event Definitions — FIXED (merged into C3.1)
 
-- **File:** `states/base.py:52,55,64`
-- **Issue:** Three events defined but never used in `transition_function` or returned from `end_block()`:
-  ```python
-  MARKET_PROPOSAL_ROUND_TIMEOUT = "market_proposal_round_timeout"
-  MAX_PROPOSED_MARKETS_REACHED = "max_markets_reached"
-  SKIP_MARKET_PROPOSAL = "skip_market_proposal"
-  ```
-- **Fix:** Remove if truly unused, or implement corresponding logic.
+- Covered by C3.1 fix above.
 
 ### ~~M5.1: selection_key Type Mismatch~~ — FALSE POSITIVE
 
-- **Verified:** The framework declares `selection_key: Union[str, Tuple[str, ...]]` and uses `isinstance(self.selection_key, tuple)` in `end_block()` to handle both cases correctly. Bare strings are a valid and intentional usage — the string branch stores the entire `most_voted_payload` under that single key.
+- **Verified:** The framework declares `selection_key: Union[str, Tuple[str, ...]]` and uses `isinstance()` to handle both cases correctly.
 
-### H3.2: Missing Transaction Receipt Null Check
+### H3.2: Missing Transaction Receipt Null Check — FIXED (merged into H3.1)
 
-- **File:** `contracts/fpmm_deterministic_factory/contract.py:247`
-- **Issue:** No null check on `get_transaction_receipt()` result before calling `.process_receipt()`.
-- **Fix:** Add `if receipt is None: raise ValueError(...)` before processing.
+- Covered by H3.1 fix above.
 
-### G2: Non-Cryptographic Random for Salt Nonce
+### G2: Non-Cryptographic Random for Salt Nonce — DEFERRED
 
 - **File:** `contracts/fpmm_deterministic_factory/contract.py:137,178`
-- **Issue:** Uses `random.randint(0, 1000000)` (marked `# nosec`) for salt nonce. Low entropy (~20 bits).
-- **Risk:** Predictable nonces in a blockchain context. Acceptable if matching Omen's reference implementation.
-- **Fix:** Consider `secrets.randbelow()` or document the security rationale.
+- **Status:** Matches Omen's reference implementation (`# nosec` annotated). Acceptable as-is.
 
 ## Low Findings
 
-### L1.1: Unreachable Duplicate None Check
+### L1.1: Unreachable Duplicate None Check — FIXED
 
-- **File:** `states/retrieve_approved_market.py:60-65`
-- **Issue:** Duplicate `if self.keeper_payload is None:` check — the second is unreachable:
-  ```python
-  if self.keeper_payload is None:
-      return None
+- **File:** `states/retrieve_approved_market.py`
+- **Fix applied:** Removed the unreachable duplicate `if self.keeper_payload is None:` check and the dead `DID_NOT_SEND` event path.
 
-  # Keeper did not send
-  if self.keeper_payload is None:  # pragma: no cover
-      return self.synchronized_data, Event.DID_NOT_SEND
-  ```
-- **Fix:** Remove the second check. If `DID_NOT_SEND` is a valid state, differentiate it from the first check.
+### L1.2: Hardcoded Retry Always Hits MAX_RETRIES — FIXED
 
-### L1.2: Hardcoded Retry Always Hits MAX_RETRIES
+- **File:** `behaviours/retrieve_approved_market.py`
+- **Fix applied:** Removed the dead retry logic (`retries = 3` always hit `MAX_RETRIES = 3`). On HTTP error, the behaviour now returns `ERROR_PAYLOAD` directly. Removed unused `MAX_RETRIES` import.
 
-- **File:** `behaviours/retrieve_approved_market.py:115`
-- **Issue:** `retries = 3` is hardcoded and immediately compared to `MAX_RETRIES = 3`, so `if retries >= MAX_RETRIES:` is always True:
-  ```python
-  retries = 3  # TODO: Make params
-  if retries >= MAX_RETRIES:
-  ```
-- **Fix:** Implement actual retry tracking or remove the dead logic.
+### G1: Improper Logging Format — FIXED
 
-### G1: Improper Logging Format
-
-- **File:** `contracts/fpmm/contract.py:204`
-- **Issue:** Logger call passes exception as a separate argument instead of formatting:
-  ```python
-  _logger.error("An exception occurred in get_markets_with_funds():", str(e))
-  ```
-- **Fix:**
-  ```python
-  _logger.error(f"An exception occurred in get_markets_with_funds(): {e}")
-  ```
+- **File:** `contracts/fpmm/contract.py`
+- **Fix applied:** Changed `_logger.error("...", str(e))` to `_logger.error(f"...: {e}")`.
 
 ## Test Findings
 
-No findings. All T1-T6 checks passed:
-- T1: No `@classmethod @pytest.fixture` anti-pattern
-- T2: Correct base test classes for round types
-- T3: All required test class attributes set
-- T4: `mock_a2a_transaction()` properly used
-- T5: All round events have test coverage
-- T6: No `_MetaPayload.registry` corruption
+No findings. All T1-T6 checks passed.
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| Critical | 1 (1 false positive) |
-| High | 2 |
-| Medium | 5 (1 false positive) |
-| Low | 3 |
-| Test | 0 |
+| Severity | Found | Fixed | False Positive | Deferred |
+|----------|-------|-------|----------------|----------|
+| Critical | 2 | 1 | 1 | 0 |
+| High | 2 | 2 | 0 | 0 |
+| Medium | 6 | 2 | 1 | 3 |
+| Low | 3 | 3 | 0 | 0 |
+| Test | 0 | 0 | 0 | 0 |
+
+## Verification
+
+All fixes verified:
+- `autonomy analyse fsm-specs` — PASS for both skills
+- `autonomy analyse docstrings` — PASS
+- Python imports — OK for both `MarketCreationManagerAbciApp` and `MarketCreatorAbciApp`
 
 ## Notes
 
 - **False positives excluded:** Standard `ROUND_TIMEOUT` event usage follows library skill conventions and is not flagged.
 - **Scope limitation:** Third-party synced packages (e.g., `mech_interact_abci`, `transaction_settlement_abci`) were not audited beyond their composition interfaces.
-- **H2.1 verified:** Both missing final states (`FinishedMarketplaceLegacyDetectedRound`, `FinishedMechPurchaseSubscriptionRound`) exist in `MechInteractAbciApp.final_states`. The composition mapping is confirmed incomplete.
-- **M5.1 verified:** FALSE POSITIVE — framework handles both `str` and `Tuple[str, ...]` via `isinstance()` check.
-- **C3.2 verified:** FALSE POSITIVE — `SyncMarketsRound.end_block()` completely bypasses the framework's collection/selection mechanism.
+- **Deferred items** (M1.1, M1.2, G2) are low-risk patterns where custom `end_block()` overrides bypass the framework defaults, or where the implementation intentionally matches an external reference (Omen).
