@@ -21,6 +21,7 @@ alphabet_in:
 - NO_MARKETS_RETRIEVED
 - NO_TX
 - REDEEM_BOND_DONE
+- REDEEM_WINNINGS_DONE
 - REMOVE_FUNDING_DONE
 - RESET_AND_PAUSE_TIMEOUT
 - RESET_TIMEOUT
@@ -57,6 +58,7 @@ states:
 - PrepareTransactionRound
 - RandomnessTransactionSubmissionRound
 - RedeemBondRound
+- RedeemWinningsRound
 - RegistrationRound
 - RegistrationStartupRound
 - RemoveFundingRound
@@ -151,7 +153,8 @@ transition_func:
     (PostTransactionRound, NONE): PostTransactionRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
     (PostTransactionRound, REDEEM_BOND_DONE): CollectProposedMarketsRound
-    (PostTransactionRound, REMOVE_FUNDING_DONE): DepositDaiRound
+    (PostTransactionRound, REDEEM_WINNINGS_DONE): DepositDaiRound
+    (PostTransactionRound, REMOVE_FUNDING_DONE): RedeemWinningsRound
     (PrepareTransactionRound, DONE): RandomnessTransactionSubmissionRound
     (PrepareTransactionRound, NONE): ResetAndPauseRound
     (PrepareTransactionRound, NO_MAJORITY): ResetAndPauseRound
@@ -164,15 +167,19 @@ transition_func:
     (RedeemBondRound, NONE): CollectProposedMarketsRound
     (RedeemBondRound, NO_MAJORITY): CollectProposedMarketsRound
     (RedeemBondRound, ROUND_TIMEOUT): CollectProposedMarketsRound
+    (RedeemWinningsRound, DONE): RandomnessTransactionSubmissionRound
+    (RedeemWinningsRound, NONE): DepositDaiRound
+    (RedeemWinningsRound, NO_MAJORITY): DepositDaiRound
+    (RedeemWinningsRound, ROUND_TIMEOUT): DepositDaiRound
     (RegistrationRound, DONE): SyncMarketsRound
     (RegistrationRound, NO_MAJORITY): RegistrationRound
     (RegistrationStartupRound, DONE): SyncMarketsRound
     (RemoveFundingRound, DONE): RandomnessTransactionSubmissionRound
-    (RemoveFundingRound, ERROR): DepositDaiRound
-    (RemoveFundingRound, NONE): DepositDaiRound
-    (RemoveFundingRound, NO_MAJORITY): DepositDaiRound
-    (RemoveFundingRound, NO_TX): DepositDaiRound
-    (RemoveFundingRound, ROUND_TIMEOUT): DepositDaiRound
+    (RemoveFundingRound, ERROR): RedeemWinningsRound
+    (RemoveFundingRound, NONE): RedeemWinningsRound
+    (RemoveFundingRound, NO_MAJORITY): RedeemWinningsRound
+    (RemoveFundingRound, NO_TX): RedeemWinningsRound
+    (RemoveFundingRound, ROUND_TIMEOUT): RedeemWinningsRound
     (ResetAndPauseRound, DONE): SyncMarketsRound
     (ResetAndPauseRound, NO_MAJORITY): RegistrationRound
     (ResetAndPauseRound, RESET_AND_PAUSE_TIMEOUT): RegistrationRound

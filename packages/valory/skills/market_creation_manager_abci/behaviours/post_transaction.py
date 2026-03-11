@@ -40,6 +40,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     PostTransactionRound,
     PrepareTransactionRound,
     RedeemBondRound,
+    RedeemWinningsRound,
     RemoveFundingRound,
 )
 
@@ -84,6 +85,9 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
 
         if self.synchronized_data.tx_submitter == RemoveFundingRound.auto_round_id():
             return PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
+
+        if self.synchronized_data.tx_submitter == RedeemWinningsRound.auto_round_id():
+            return PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
 
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set

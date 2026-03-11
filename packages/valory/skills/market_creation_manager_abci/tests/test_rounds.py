@@ -53,6 +53,7 @@ from packages.valory.skills.market_creation_manager_abci.states.final_states imp
     FinishedWithGetPendingQuestionsRound,
     FinishedWithMechRequestRound,
     FinishedWithRedeemBondRound,
+    FinishedWithRedeemWinningsRound,
     FinishedWithRemoveFundingRound,
     FinishedWithoutTxRound,
 )
@@ -67,6 +68,9 @@ from packages.valory.skills.market_creation_manager_abci.states.prepare_transact
 )
 from packages.valory.skills.market_creation_manager_abci.states.redeem_bond import (
     RedeemBondRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.redeem_winnings import (
+    RedeemWinningsRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
     RemoveFundingRound,
@@ -105,6 +109,7 @@ class TestAbciAppInitialization:
             CollectRandomnessRound,
             DepositDaiRound,
             PostTransactionRound,
+            RedeemWinningsRound,
             SyncMarketsRound,
             GetPendingQuestionsRound,
         }
@@ -117,6 +122,7 @@ class TestAbciAppInitialization:
             FinishedWithAnswerQuestionsRound,
             FinishedWithMechRequestRound,
             FinishedWithRemoveFundingRound,
+            FinishedWithRedeemWinningsRound,
             FinishedWithDepositDaiRound,
             FinishedWithGetPendingQuestionsRound,
             FinishedWithRedeemBondRound,
@@ -162,7 +168,8 @@ class TestPostTransactionTransitions:
             (Event.MECH_REQUEST_DONE, FinishedWithMechRequestRound),
             (Event.ANSWER_QUESTION_DONE, CollectRandomnessRound),
             (Event.REDEEM_BOND_DONE, CollectProposedMarketsRound),
-            (Event.REMOVE_FUNDING_DONE, DepositDaiRound),
+            (Event.REMOVE_FUNDING_DONE, RedeemWinningsRound),
+            (Event.REDEEM_WINNINGS_DONE, DepositDaiRound),
         ],
     )
     def test_transitions(
@@ -417,11 +424,11 @@ class TestRemoveFundingTransitions:
         "event,expected_next",
         [
             (Event.DONE, FinishedWithRemoveFundingRound),
-            (Event.NONE, DepositDaiRound),
-            (Event.NO_MAJORITY, DepositDaiRound),
-            (Event.ROUND_TIMEOUT, DepositDaiRound),
-            (Event.NO_TX, DepositDaiRound),
-            (Event.ERROR, DepositDaiRound),
+            (Event.NONE, RedeemWinningsRound),
+            (Event.NO_MAJORITY, RedeemWinningsRound),
+            (Event.ROUND_TIMEOUT, RedeemWinningsRound),
+            (Event.NO_TX, RedeemWinningsRound),
+            (Event.ERROR, RedeemWinningsRound),
         ],
     )
     def test_transitions(
@@ -435,6 +442,29 @@ class TestRemoveFundingTransitions:
         assert tf[event] == expected_next
 
 
+class TestRedeemWinningsTransitions:
+    """Test RedeemWinningsRound transitions."""
+
+    @pytest.mark.parametrize(
+        "event,expected_next",
+        [
+            (Event.DONE, FinishedWithRedeemWinningsRound),
+            (Event.NO_MAJORITY, DepositDaiRound),
+            (Event.NONE, DepositDaiRound),
+            (Event.ROUND_TIMEOUT, DepositDaiRound),
+        ],
+    )
+    def test_transitions(
+        self,
+        abci_app: MarketCreationManagerAbciApp,
+        event: Event,
+        expected_next: type,
+    ) -> None:
+        """Test all RedeemWinningsRound transitions."""
+        tf = abci_app.transition_function[RedeemWinningsRound]
+        assert tf[event] == expected_next
+
+
 class TestFinalStateTransitions:
     """Test final state rounds have empty transition functions."""
 
@@ -445,6 +475,7 @@ class TestFinalStateTransitions:
             FinishedWithAnswerQuestionsRound,
             FinishedWithMechRequestRound,
             FinishedWithRemoveFundingRound,
+            FinishedWithRedeemWinningsRound,
             FinishedWithDepositDaiRound,
             FinishedWithGetPendingQuestionsRound,
             FinishedWithRedeemBondRound,
@@ -485,6 +516,7 @@ class TestDbPreConditions:
             GetPendingQuestionsRound,
             CollectRandomnessRound,
             PostTransactionRound,
+            RedeemWinningsRound,
             SyncMarketsRound,
         ],
     )
@@ -506,6 +538,7 @@ class TestDbPostConditions:
             FinishedWithAnswerQuestionsRound,
             FinishedWithDepositDaiRound,
             FinishedWithRedeemBondRound,
+            FinishedWithRedeemWinningsRound,
             FinishedMarketCreationManagerRound,
             FinishedWithRemoveFundingRound,
         ],

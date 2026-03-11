@@ -52,6 +52,9 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_tran
 from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_bond import (
     RedeemBondBehaviour,
 )
+from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_winnings import (
+    RedeemWinningsBehaviour,
+)
 from packages.valory.skills.market_creation_manager_abci.behaviours.remove_funding import (
     RemoveFundingBehaviour,
 )
@@ -87,5 +90,6 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
         RemoveFundingBehaviour,
         DepositDaiBehaviour,
         RedeemBondBehaviour,
+        RedeemWinningsBehaviour,
         PostTransactionBehaviour,
     }

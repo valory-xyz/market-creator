@@ -32,6 +32,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     AnswerQuestionsRound,
     DepositDaiRound,
     RedeemBondRound,
+    RedeemWinningsRound,
     RemoveFundingRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.post_transaction import (
@@ -141,6 +142,18 @@ class TestPostTransactionBehaviour:
         result = _exhaust_gen(gen)
 
         assert result == PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
+
+    def test_get_payload_redeem_winnings_submitter(self) -> None:
+        """Test get_payload when tx_submitter is RedeemWinningsRound."""
+        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
+        self.behaviour.synchronized_data.tx_submitter = (
+            RedeemWinningsRound.auto_round_id()
+        )
+
+        gen = self.behaviour.get_payload()
+        result = _exhaust_gen(gen)
+
+        assert result == PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
 
     def test_get_payload_no_approved_question_data(self) -> None:
         """Test get_payload when is_approved_question_data_set is False."""
