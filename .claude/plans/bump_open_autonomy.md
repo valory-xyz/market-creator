@@ -15,7 +15,22 @@ The user provides:
 
 ## Phase 2 — Resolve Dependency Versions
 
-Go to the [open-autonomy releases](https://github.com/valory-xyz/open-autonomy/releases) page and find the target version tag. From its `pyproject.toml` (or `setup.cfg`), extract the pinned versions of:
+### 2.1 Find the latest open-autonomy release
+
+```bash
+gh release list --repo valory-xyz/open-autonomy --limit 5
+```
+
+### 2.2 Extract pinned dependency versions
+
+Fetch the target version's `pyproject.toml` and extract library versions:
+
+```bash
+gh api repos/valory-xyz/open-autonomy/contents/pyproject.toml?ref=v<TARGET> \
+  --jq '.content' | base64 -d
+```
+
+Record the versions of:
 
 | Library | Description |
 | ------- | ----------- |
@@ -26,9 +41,32 @@ Go to the [open-autonomy releases](https://github.com/valory-xyz/open-autonomy/r
 | `open-aea-test-autonomy` | Test utilities (version tracks open-autonomy) |
 | `tomte` | Linter/tooling orchestrator |
 
+Verify `open-aea-test-autonomy` is published for the target version:
+
+```bash
+pip index versions open-aea-test-autonomy
+```
+
 Also note any transitive dependency changes (e.g., `protobuf`, `grpcio`, `requests`, `web3`, `openapi-core`, `jsonschema`, `typing_extensions`). These often change between major bumps.
 
-Record all resolved versions — they will be used in every file below.
+### 2.3 Identify upstream repo tags
+
+Read `CLAUDE.md` for the list of third-party dependency repositories. For each one, find the release tag that uses the target open-autonomy version:
+
+```bash
+# List releases
+gh release list --repo valory-xyz/<REPO> --limit 5
+
+# Check which open-autonomy version a tag uses (pyproject.toml or Pipfile)
+gh api repos/valory-xyz/<REPO>/contents/pyproject.toml?ref=<TAG> \
+  --jq '.content' | base64 -d | grep open-autonomy
+
+# Some repos use Pipfile instead of pyproject.toml
+gh api repos/valory-xyz/<REPO>/contents/Pipfile?ref=<TAG> \
+  --jq '.content' | base64 -d | grep open-autonomy
+```
+
+Record the compatible tag for each upstream repo — these are needed in Phase 3.6.
 
 ---
 
@@ -64,6 +102,8 @@ Update **all** occurrences (there are many). Key sections:
 - All linter environments: `tomte[bandit]`, `tomte[black]`, `tomte[isort]`, `tomte[flake8]`, `tomte[mypy]`, `tomte[pylint]`, `tomte[safety]`, `tomte[darglint]`, `tomte[liccheck,cli]`, `tomte[cli]`
 
 **Tip**: Use find-and-replace for the old version string → new version string.
+
+**Watch for variant patterns**: The same version can appear with different extras suffixes (e.g., `open-autonomy==0.21.12rc4` vs `open-autonomy[all]==0.21.12rc4`). Search for the version string itself, not the full package specifier, to catch all occurrences.
 
 #### Tox 4 compatibility (if upgrading tomte)
 
@@ -137,12 +177,22 @@ Third-party packages (listed in `packages.json` under `"third_party"`) have thei
 Third-party package hashes must be updated to match the versions published by the upstream repos at the target open-autonomy version.
 
 Steps:
-1. Read `CLAUDE.md` for the list of upstream repos this service depends on
-2. Identify which tag/release of each upstream repo corresponds to the target version
-3. **Option A** — If you have upstream repos cloned locally, use a `compare_hashes.py` script (see Appendix) to identify mismatches, then update hashes manually
-4. **Option B** — Run `autonomy packages sync --update-packages` to fetch correct hashes from IPFS
+
+1. **Read `CLAUDE.md`** for the list of upstream repos this service depends on
+2. **Use the tags identified in Phase 2.3** for each upstream repo
+3. **Fetch upstream packages.json** from each repo at the correct tag:
+
+   ```bash
+   gh api repos/valory-xyz/<REPO>/contents/packages/packages.json?ref=<TAG> \
+     --jq '.content' | base64 -d > /tmp/<REPO>_packages.json
+   ```
+
+4. **Compare and update**: Write a script (see Appendix) that merges `dev` + `third_party` sections from all upstream repos and compares against your `third_party` hashes. Update mismatched hashes.
+5. **Handle "missing" packages**: If some packages aren't found in any known upstream repo, they come from a repo not yet listed in `CLAUDE.md`. Search for those package names in other Valory repos (common sources: `trader`, `funds-manager`, `kv-store`). Once found, add the repo to `CLAUDE.md` for future bumps.
 
 **Critical**: Packages come from MULTIPLE upstream repos, not just open-autonomy. Running against only one repo will leave packages with stale hashes.
+
+**Alternative**: If you have upstream repos cloned locally, point the comparison script at local paths instead of fetching via GitHub API. Or run `autonomy packages sync --update-packages` to fetch correct hashes from IPFS directly (but this may not resolve all packages if IPFS nodes are slow).
 
 ### 3.7 Test file compatibility
 
@@ -249,7 +299,7 @@ tox -e spell-check     # may need .spelling file updates
 - **`check-hash` needs jsonschema**: If `check-hash` fails with `ModuleNotFoundError: No module named 'jsonschema._keywords'`, add `jsonschema>=4.23.0,<5.0.0` to the `[testenv:check-hash]` deps.
 - **release.yaml**: The release workflow has its own version pins (Docker images, autonomy version, action versions). Always search ALL `.github/workflows/*.yml` files.
 - **CI env name mismatch**: In tox 4, if a named env doesn't exist, it falls back to `[testenv]` base which runs the wrong commands silently. Verify that tox env names in CI match actual `[testenv:*]` sections.
-- **Dev YAML pins**: Dev package YAMLs contain version pins that must match pyproject.toml/tox.ini. Easy to forget.
+- **Dev YAML pins**: Dev package YAMLs (`contract.yaml`, `aea-config.yaml`, `skill.yaml`) contain version pins that must match pyproject.toml/tox.ini. Easy to forget. Search for ALL old version strings (e.g., both `rc4` and `rc6` if open-aea and open-autonomy had different rc versions). The conflict manifests as `specifier set '==X,==Y' not satisfiable` at runtime.
 - **Bandit false positives**: Bandit B105 flags dict keys containing "password"/"secret"/"token" even with `None` values. Add `# nosec` inline, then re-lock.
 - **Safety vulnerabilities**: New deps may introduce new CVE IDs. Add `-i <ID>` to the safety command as needed.
 - **License compliance**: New transitive deps may introduce licenses not in `[Licenses] authorized_licenses`. Add the license string (e.g., `PSF-2.0`) rather than adding the package to `[Authorized Packages]`.
@@ -257,22 +307,43 @@ tox -e spell-check     # may need .spelling file updates
 
 ---
 
-## Appendix: Hash Comparison Script
+## Appendix: Hash Comparison and Update Script
 
-A local-only script (not committed) to compare third-party hashes against upstream source repos. Adapt `SOURCE_REPOS` per repository — read `CLAUDE.md` for the list of upstream repos.
+A local-only script (not committed) to compare and update third-party hashes against upstream source repos. It works with locally downloaded JSON files — fetch them first using `gh api` as shown in Phase 3.6.
+
+### Usage
+
+```bash
+# 1. Fetch upstream packages.json files (one per upstream repo from CLAUDE.md)
+gh api repos/valory-xyz/open-autonomy/contents/packages/packages.json?ref=v0.21.13 \
+  --jq '.content' | base64 -d > /tmp/oa_packages.json
+gh api repos/valory-xyz/open-aea/contents/packages/packages.json?ref=v2.1.0 \
+  --jq '.content' | base64 -d > /tmp/oaea_packages.json
+# ... repeat for each upstream repo
+
+# 2. Run comparison (report only)
+python3 scripts/compare_hashes.py
+
+# 3. Run with --update to auto-apply fixes
+python3 scripts/compare_hashes.py --update
+```
+
+### Script
 
 ```python
 #!/usr/bin/env python3
-"""Compare package hashes between source-of-truth repos and this repo."""
+"""Compare (and optionally update) package hashes against upstream repos."""
 
 import json
+import sys
 from pathlib import Path
 
-# Adjust per repo — read CLAUDE.md for upstream dependency repos
-SOURCE_REPOS = [
-    Path("/path/to/open-autonomy/packages/packages.json"),
-    Path("/path/to/open-aea/packages/packages.json"),
-    # Add other upstream repos as listed in CLAUDE.md
+# Paths to upstream packages.json files fetched via gh api.
+# Adjust per repo — read CLAUDE.md for which upstream repos to include.
+SOURCE_FILES = [
+    Path("/tmp/oa_packages.json"),    # open-autonomy
+    Path("/tmp/oaea_packages.json"),  # open-aea
+    # Add more as listed in CLAUDE.md
 ]
 
 TARGET_PACKAGES_JSON = Path("packages/packages.json")
@@ -280,27 +351,29 @@ TARGET_PACKAGES_JSON = Path("packages/packages.json")
 
 def main() -> None:
     """Compare hashes."""
+    update = "--update" in sys.argv
+
     source_all = {}
-    for repo_path in SOURCE_REPOS:
-        if not repo_path.exists():
-            print(f"WARNING: {repo_path} not found, skipping")
+    for path in SOURCE_FILES:
+        if not path.exists():
+            print(f"WARNING: {path} not found, skipping")
             continue
-        with open(repo_path, encoding="utf-8") as f:
-            source = json.load(f)
-        source_all.update(source.get("third_party", {}))
-        source_all.update(source.get("dev", {}))
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        source_all.update(data.get("third_party", {}))
+        source_all.update(data.get("dev", {}))
 
     with open(TARGET_PACKAGES_JSON, encoding="utf-8") as f:
-        target = json.load(f)
+        ours = json.load(f)
 
-    target_third = target.get("third_party", {})
+    target_third = ours.get("third_party", {})
 
     mismatches = []
     missing = []
-    for pkg, target_hash in target_third.items():
+    for pkg, our_hash in target_third.items():
         if pkg in source_all:
-            if target_hash != source_all[pkg]:
-                mismatches.append((pkg, target_hash, source_all[pkg]))
+            if our_hash != source_all[pkg]:
+                mismatches.append((pkg, our_hash, source_all[pkg]))
         else:
             missing.append(pkg)
 
@@ -309,15 +382,26 @@ def main() -> None:
         return
 
     if mismatches:
-        print(f"Found {len(mismatches)} mismatched hashes:\n")
-        for pkg, _, new in mismatches:
-            print(f'  "{pkg}": "{new}",')
-        print(f"\nReplace these in {TARGET_PACKAGES_JSON}")
+        print(f"{len(mismatches)} mismatched hashes:")
+        for pkg, old, new in mismatches:
+            print(f"  {pkg}")
+            if update:
+                ours["third_party"][pkg] = new
 
     if missing:
         print(f"\n{len(missing)} packages not found in any source repo:")
         for pkg in missing:
             print(f"  {pkg}")
+        print("\nThese may come from a repo not yet in CLAUDE.md.")
+        print("Search for them in other Valory repos and add the source.")
+
+    if update and mismatches:
+        with open(TARGET_PACKAGES_JSON, "w", encoding="utf-8") as f:
+            json.dump(ours, f, indent=4)
+            f.write("\n")
+        print(f"\nUpdated {len(mismatches)} hashes in {TARGET_PACKAGES_JSON}")
+    elif mismatches:
+        print(f"\nRe-run with --update to apply fixes.")
 
 
 if __name__ == "__main__":

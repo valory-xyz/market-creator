@@ -22,7 +22,7 @@ contracts:
 - valory/multisend:0.1.0:bafybeiaf3hapi3prgpjeugwhq64k7lqelo6kibhol5rkajt7id3knomp5q
 - valory/realitio:0.1.0:bafybeihvh334x2ywm2v3n2dotxwektmrb7xjykeubvfqnq6j2ugufjxzlu
 - valory/conditional_tokens:0.1.0:bafybeiahmps4nbd3ggbsp6lh7olap7jwvtqdj2iji6agdftz77pdjy6xxq
-- valory/fpmm_deterministic_factory:0.1.0:bafybeiarhkizmh6hmtvhcfzgv65ab3ze5qndekhs7nh4iahlnaxo6hrkby
+- valory/fpmm_deterministic_factory:0.1.0:bafybeibcnyhgmpadtbbu4mwnwarizvpfbgqknwugzpnkcme74izeqj4lc4
 - valory/service_registry:0.1.0:bafybeifc4gpaz6vlpgvghsm64tkbukt744rpeoqpxijglxrv46gb7sbda4
 - valory/fpmm:0.1.0:bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e
 - valory/agreement_store_manager:0.1.0:bafybeihhrzm4rpfq54376hs5zft5g4mvqtv5hzzl67lpw7pgg3ja5dtmsu
@@ -55,9 +55,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeia36n7ci7b6pi2bpa4r4ty6dcb3r4vs46vjftolsdxfl4y5iieyyy
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
-- valory/market_maker_abci:0.1.0:bafybeiaquvq5ektgd6b347sdfswkch3dqsqynl6wvz7fszwzexuz5olc5q
+- valory/market_maker_abci:0.1.0:bafybeiclotph65nmzs3ubljpmpnlwcgrxhfgo7xymnncffikjuhyxw5lga
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
-- valory/market_creation_manager_abci:0.1.0:bafybeigheewiacxayfj25cizhvnheouuyvlocshqz4ideb3alb5bfr5iba
+- valory/market_creation_manager_abci:0.1.0:bafybeie2ofecn35ck2d7wg5bu4n4d4v7hlw7gj4kjbgvwczrfwhg5hnu6m
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
 - valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
@@ -94,11 +94,11 @@ logging_config:
 skill_exception_policy: stop_and_exit
 dependencies:
   open-aea-ledger-cosmos:
-    version: ==2.1.0rc6
+    version: ==2.1.0
   open-aea-ledger-ethereum:
-    version: ==2.1.0rc6
+    version: ==2.1.0
   open-aea-test-autonomy:
-    version: ==0.21.12rc4
+    version: ==0.21.13
   gql:
     version: ==3.5.0
   requests-toolbelt:
