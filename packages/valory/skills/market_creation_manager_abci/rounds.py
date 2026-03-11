@@ -53,6 +53,7 @@ from packages.valory.skills.market_creation_manager_abci.states.final_states imp
     FinishedWithGetPendingQuestionsRound,
     FinishedWithMechRequestRound,
     FinishedWithRedeemBondRound,
+    FinishedWithRedeemWinningsRound,
     FinishedWithRemoveFundingRound,
     FinishedWithoutTxRound,
 )
@@ -67,6 +68,9 @@ from packages.valory.skills.market_creation_manager_abci.states.prepare_transact
 )
 from packages.valory.skills.market_creation_manager_abci.states.redeem_bond import (
     RedeemBondRound,
+)
+from packages.valory.skills.market_creation_manager_abci.states.redeem_winnings import (
+    RedeemWinningsRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
     RemoveFundingRound,
@@ -190,6 +194,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         CollectRandomnessRound,
         DepositDaiRound,
         PostTransactionRound,
+        RedeemWinningsRound,
         SyncMarketsRound,
         GetPendingQuestionsRound,
     }
@@ -209,7 +214,8 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.MECH_REQUEST_DONE: FinishedWithMechRequestRound,
             Event.ANSWER_QUESTION_DONE: CollectRandomnessRound,
             Event.REDEEM_BOND_DONE: CollectProposedMarketsRound,
-            Event.REMOVE_FUNDING_DONE: DepositDaiRound,
+            Event.REMOVE_FUNDING_DONE: RedeemWinningsRound,
+            Event.REDEEM_WINNINGS_DONE: DepositDaiRound,
         },
         GetPendingQuestionsRound: {
             Event.DONE: FinishedWithGetPendingQuestionsRound,
@@ -280,16 +286,23 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         },
         RemoveFundingRound: {
             Event.DONE: FinishedWithRemoveFundingRound,
-            Event.NONE: DepositDaiRound,
+            Event.NONE: RedeemWinningsRound,
+            Event.NO_MAJORITY: RedeemWinningsRound,
+            Event.ROUND_TIMEOUT: RedeemWinningsRound,
+            Event.NO_TX: RedeemWinningsRound,
+            Event.ERROR: RedeemWinningsRound,
+        },
+        RedeemWinningsRound: {
+            Event.DONE: FinishedWithRedeemWinningsRound,
             Event.NO_MAJORITY: DepositDaiRound,
+            Event.NONE: DepositDaiRound,
             Event.ROUND_TIMEOUT: DepositDaiRound,
-            Event.NO_TX: DepositDaiRound,
-            Event.ERROR: DepositDaiRound,
         },
         FinishedMarketCreationManagerRound: {},
         FinishedWithAnswerQuestionsRound: {},
         FinishedWithMechRequestRound: {},
         FinishedWithRemoveFundingRound: {},
+        FinishedWithRedeemWinningsRound: {},
         FinishedWithDepositDaiRound: {},
         FinishedWithGetPendingQuestionsRound: {},
         FinishedWithRedeemBondRound: {},
@@ -300,6 +313,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedWithAnswerQuestionsRound,
         FinishedWithMechRequestRound,
         FinishedWithRemoveFundingRound,
+        FinishedWithRedeemWinningsRound,
         FinishedWithDepositDaiRound,
         FinishedWithGetPendingQuestionsRound,
         FinishedWithRedeemBondRound,
@@ -321,6 +335,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         GetPendingQuestionsRound: set(),
         CollectRandomnessRound: set(),
         PostTransactionRound: set(),
+        RedeemWinningsRound: set(),
         SyncMarketsRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
@@ -337,6 +352,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             get_name(SynchronizedData.most_voted_tx_hash),
         },
         FinishedWithRemoveFundingRound: {
+            get_name(SynchronizedData.most_voted_tx_hash),
+        },
+        FinishedWithRedeemWinningsRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
         FinishedWithMechRequestRound: set(),

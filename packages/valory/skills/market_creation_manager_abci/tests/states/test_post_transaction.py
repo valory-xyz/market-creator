@@ -96,6 +96,10 @@ class TestPostTransactionRound:
             PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
             == "REMOVE_FUNDING_DONE_PAYLOAD"
         )
+        assert (
+            PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
+            == "REDEEM_WINNINGS_DONE_PAYLOAD"
+        )
 
 
 class TestPostTransactionRoundEndBlock:
@@ -118,6 +122,7 @@ class TestPostTransactionRoundEndBlock:
             ("DEPOSIT_DAI_DONE_PAYLOAD", Event.DEPOSIT_DAI_DONE),
             ("ANSWER_QUESTION_DONE_PAYLOAD", Event.ANSWER_QUESTION_DONE),
             ("REMOVE_FUNDING_DONE_PAYLOAD", Event.REMOVE_FUNDING_DONE),
+            ("REDEEM_WINNINGS_DONE_PAYLOAD", Event.REDEEM_WINNINGS_DONE),
             ("some_other_payload", Event.DONE),
         ],
     )
