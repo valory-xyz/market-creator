@@ -130,8 +130,8 @@ class TestRetrieveApprovedMarketBehaviour:
 
         assert result == RetrieveApprovedMarketRound.NO_MARKETS_RETRIEVED_PAYLOAD
 
-    def test_get_process_random_approved_market_error_max_retries(self) -> None:
-        """Test _get_process_random_approved_market with error status and max retries reached."""
+    def test_get_process_random_approved_market_error(self) -> None:
+        """Test _get_process_random_approved_market with error status."""
         mock_response = MagicMock()
         mock_response.status_code = 500
 
@@ -141,8 +141,8 @@ class TestRetrieveApprovedMarketBehaviour:
             gen = self.behaviour._get_process_random_approved_market()
             result = _exhaust_gen(gen)
 
-        # retries=3 >= MAX_RETRIES=3, so should return MAX_RETRIES_PAYLOAD
-        assert result == RetrieveApprovedMarketRound.MAX_RETRIES_PAYLOAD
+        # On HTTP error, should return ERROR_PAYLOAD directly
+        assert result == RetrieveApprovedMarketRound.ERROR_PAYLOAD
 
     def test_not_sender_act(self) -> None:
         """Test _not_sender_act waits for round end."""
@@ -194,21 +194,3 @@ class TestRetrieveApprovedMarketBehaviour:
         ), patch.object(self.behaviour, "_sender_act", new=_make_gen(None)):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
-
-    def test_get_process_random_approved_market_error_below_max_retries(
-        self,
-    ) -> None:
-        """Test _get_process_random_approved_market with error and retries < MAX_RETRIES."""
-        mock_response = MagicMock()
-        mock_response.status_code = 500
-
-        with patch.object(
-            self.behaviour, "get_http_response", new=_make_gen(mock_response)
-        ), patch(
-            "packages.valory.skills.market_creation_manager_abci.behaviours.retrieve_approved_market.MAX_RETRIES",
-            10,
-        ):
-            gen = self.behaviour._get_process_random_approved_market()
-            result = _exhaust_gen(gen)
-
-        assert result == RetrieveApprovedMarketRound.ERROR_PAYLOAD

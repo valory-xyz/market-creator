@@ -69,7 +69,6 @@ class TestRetrieveApprovedMarketRound:
     def test_constants(self) -> None:
         """Test constants."""
         assert RetrieveApprovedMarketRound.ERROR_PAYLOAD == "ERROR_PAYLOAD"
-        assert RetrieveApprovedMarketRound.MAX_RETRIES_PAYLOAD == "MAX_RETRIES_PAYLOAD"
         assert (
             RetrieveApprovedMarketRound.NO_MARKETS_RETRIEVED_PAYLOAD
             == "NO_MARKETS_RETRIEVED_PAYLOAD"

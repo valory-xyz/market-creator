@@ -26,7 +26,6 @@ from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     HTTP_NO_CONTENT,
     HTTP_OK,
-    MAX_RETRIES,
     MarketCreationManagerBaseBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
@@ -112,10 +111,6 @@ class RetrieveApprovedMarketBehaviour(MarketCreationManagerBaseBehaviour):
                 f"Could not retrieve response from {url}."
                 f"Received status code {response.status_code}.\n{response}"
             )
-            retries = 3  # TODO: Make params
-            if retries >= MAX_RETRIES:
-                self.context.logger.error(f"Max retries reached ({MAX_RETRIES}).")
-                return RetrieveApprovedMarketRound.MAX_RETRIES_PAYLOAD
             return RetrieveApprovedMarketRound.ERROR_PAYLOAD
 
         response_data = json.loads(response.body.decode())

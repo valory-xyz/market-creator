@@ -5,7 +5,6 @@ alphabet_in:
 - CHECK_LATE_ARRIVING_MESSAGE
 - CHECK_TIMEOUT
 - DEPOSIT_DAI_DONE
-- DID_NOT_SEND
 - DONE
 - ERROR
 - FINALIZATION_FAILED
@@ -33,9 +32,7 @@ alphabet_in:
 - V2
 - VALIDATE_TIMEOUT
 default_start_state: RegistrationStartupRound
-final_states:
-- FinishedMarketplaceLegacyDetectedRound
-- FinishedMechPurchaseSubscriptionRound
+final_states: []
 label: MarketCreatorAbciApp
 start_states:
 - RegistrationRound
@@ -50,8 +47,6 @@ states:
 - CollectSignatureRound
 - DepositDaiRound
 - FinalizationRound
-- FinishedMarketplaceLegacyDetectedRound
-- FinishedMechPurchaseSubscriptionRound
 - GetPendingQuestionsRound
 - MechInformationRound
 - MechPurchaseSubscriptionRound
@@ -131,7 +126,7 @@ transition_func:
     (MechInformationRound, NONE): MechVersionDetectionRound
     (MechInformationRound, NO_MAJORITY): MechInformationRound
     (MechInformationRound, ROUND_TIMEOUT): MechInformationRound
-    (MechPurchaseSubscriptionRound, DONE): FinishedMechPurchaseSubscriptionRound
+    (MechPurchaseSubscriptionRound, DONE): RandomnessTransactionSubmissionRound
     (MechPurchaseSubscriptionRound, NONE): MechPurchaseSubscriptionRound
     (MechPurchaseSubscriptionRound, NO_MAJORITY): MechPurchaseSubscriptionRound
     (MechPurchaseSubscriptionRound, ROUND_TIMEOUT): MechPurchaseSubscriptionRound
@@ -146,7 +141,7 @@ transition_func:
     (MechVersionDetectionRound, NO_MAJORITY): MechVersionDetectionRound
     (MechVersionDetectionRound, NO_MARKETPLACE): MechRequestRound
     (MechVersionDetectionRound, ROUND_TIMEOUT): MechVersionDetectionRound
-    (MechVersionDetectionRound, V1): FinishedMarketplaceLegacyDetectedRound
+    (MechVersionDetectionRound, V1): MechRequestRound
     (MechVersionDetectionRound, V2): MechInformationRound
     (PostTransactionRound, ANSWER_QUESTION_DONE): CollectRandomnessRound
     (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
@@ -184,7 +179,6 @@ transition_func:
     (ResetRound, DONE): RandomnessTransactionSubmissionRound
     (ResetRound, NO_MAJORITY): ResetAndPauseRound
     (ResetRound, RESET_TIMEOUT): ResetAndPauseRound
-    (RetrieveApprovedMarketRound, DID_NOT_SEND): ResetAndPauseRound
     (RetrieveApprovedMarketRound, DONE): PrepareTransactionRound
     (RetrieveApprovedMarketRound, ERROR): ResetAndPauseRound
     (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): ResetAndPauseRound

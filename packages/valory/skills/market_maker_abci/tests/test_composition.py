@@ -207,7 +207,7 @@ class TestAbciAppTransitionMapping:
 
     def test_mapping_count(self) -> None:
         """Test total mapping count."""
-        assert len(abci_app_transition_mapping) == 20
+        assert len(abci_app_transition_mapping) == 22
 
 
 class TestTerminationConfig:

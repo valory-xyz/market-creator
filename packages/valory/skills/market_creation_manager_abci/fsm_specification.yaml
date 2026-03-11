@@ -1,7 +1,6 @@
 alphabet_in:
 - ANSWER_QUESTION_DONE
 - DEPOSIT_DAI_DONE
-- DID_NOT_SEND
 - DONE
 - ERROR
 - MAX_APPROVED_MARKETS_REACHED
@@ -109,7 +108,6 @@ transition_func:
     (RemoveFundingRound, NO_MAJORITY): DepositDaiRound
     (RemoveFundingRound, NO_TX): DepositDaiRound
     (RemoveFundingRound, ROUND_TIMEOUT): DepositDaiRound
-    (RetrieveApprovedMarketRound, DID_NOT_SEND): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, DONE): PrepareTransactionRound
     (RetrieveApprovedMarketRound, ERROR): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): FinishedWithoutTxRound

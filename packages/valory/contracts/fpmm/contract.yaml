@@ -8,9 +8,9 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   __init__.py: bafybeictqlopm3a4gpjwglmeoiuqxlczz227afw6oo2e2rhhfnukzfup5q
   build/FPMM.json: bafybeidvvevt5hderny4jme6oml4srnm3jf2gwht2hxcxjixjeygejyrvy
-  contract.py: bafybeifrbti3jjsxgasnqxonyiyqw4osn6bv7nvt3g4jhe3fr7qra4pvkq
+  contract.py: bafybeifdhheknloaj6cdjukx4aj5osdtpayzoawquq6ryjuwf5swaba2fu
   tests/__init__.py: bafybeigrnl4bgjh5xbdpvikvf6d5cjmxisntlwmkn2ugwtahk7yspkeiwa
-  tests/test_contract.py: bafybeiac6fkktqyutv3qa2lbmkz5fbzqcxgqv4llrbywrei5t7wzmvlhmq
+  tests/test_contract.py: bafybeifjj635ui5ciy3nv4fxtizmn7vgwkhjbntbua2wc6tvjcshfke564
 fingerprint_ignore_patterns: []
 class_name: FPMMContract
 contract_interface_paths:
