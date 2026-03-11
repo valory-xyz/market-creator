@@ -13,13 +13,13 @@ jobs:
         os: [ubuntu-latest]
         python-version: ["3.10"]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-versions }}
       - uses: addnab/docker-run-action@v3
         with:
-            image: valory/open-autonomy-user:0.21.12rc4
+            image: valory/open-autonomy-user:0.21.13
             options: -v ${{ github.workspace }}:/work
             run: |
               echo "Pushing Packages"
@@ -40,11 +40,11 @@ jobs:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
         DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Set up tag and vars
         uses: addnab/docker-run-action@v3
         with:
-            image: valory/open-autonomy-user:0.21.12rc4
+            image: valory/open-autonomy-user:0.21.13
             options: -v ${{ github.workspace }}:/work
             run: |
               echo "Setting Tag Images"
@@ -68,7 +68,7 @@ jobs:
       - uses: addnab/docker-run-action@v3
         name: Build Images
         with:
-            image: valory/open-autonomy-user:0.21.12rc4
+            image: valory/open-autonomy-user:0.21.13
             options: -v ${{ github.workspace }}:/work
             shell: bash
             run: |
@@ -79,8 +79,8 @@ jobs:
               autonomy init --reset --author $AUTHOR --ipfs --remote
               autonomy fetch $AUTHOR/$SERVICE --service --local || exit 1
               cd $SERVICE || exit 1
-              autonomy build-image -e open-autonomy==0.21.12rc4 || exit 1
-              autonomy build-image -e open-autonomy==0.21.12rc4 --version $VERSION || exit 1
+              autonomy build-image -e open-autonomy==0.21.13 || exit 1
+              autonomy build-image -e open-autonomy==0.21.13 --version $VERSION || exit 1
 
       - name: Docker login
         run: |
@@ -110,8 +110,8 @@ jobs:
     env:
       CMD: "propel -U ${{ vars.PROPEL_BASE_URL }}"
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-versions }}
       - name: Install dependencies

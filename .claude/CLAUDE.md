@@ -262,6 +262,18 @@ See [FSM_AUDIT.md](FSM_AUDIT.md) for the full audit report with all findings and
 - **Composed app**: `market_maker_abci` composes `market_creation_manager_abci` with framework skills (registration, reset/pause, transaction settlement, termination)
 - **`autonomy packages sync --all`**: Fetches all third-party dependencies declared in `packages.json` from IPFS
 
+## Third-party Dependency Repositories
+
+This repo depends on third-party AEA packages sourced from these upstream repositories. When bumping the open-autonomy framework version, each upstream repo must be checked for a compatible release tag:
+
+| Repository | What it provides |
+|------------|-----------------|
+| [open-autonomy](https://github.com/valory-xyz/open-autonomy) | Core framework: abstract_round_abci, registration, transaction_settlement, reset_pause, termination |
+| [open-aea](https://github.com/valory-xyz/open-aea) | AEA framework: protocols (contract_api, ledger_api, http, signing, etc.), connections, base contracts (gnosis_safe, multisend, service_registry) |
+| [mech-interact](https://github.com/valory-xyz/mech-interact) | mech_interact_abci skill, mech/mech_mm/ierc1155 contracts |
+| [genai](https://github.com/valory-xyz/genai) | GenAI-related packages (NVM contracts, subscription, etc.) |
+| [trader](https://github.com/valory-xyz/trader) | realitio, realitio_proxy, conditional_tokens contracts |
+
 ## Commit Conventions
 
 Follow conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`
