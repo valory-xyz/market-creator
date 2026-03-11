@@ -272,6 +272,7 @@ This repo depends on third-party AEA packages sourced from these upstream reposi
 | [open-aea](https://github.com/valory-xyz/open-aea) | AEA framework: protocols (contract_api, ledger_api, http, signing, etc.), connections, base contracts (gnosis_safe, multisend, service_registry) |
 | [mech-interact](https://github.com/valory-xyz/mech-interact) | mech_interact_abci skill, mech/mech_mm/ierc1155 contracts |
 | [genai](https://github.com/valory-xyz/genai) | GenAI-related packages (NVM contracts, subscription, etc.) |
+| [trader](https://github.com/valory-xyz/trader) | realitio, realitio_proxy, conditional_tokens contracts |
 
 ## Commit Conventions
 
