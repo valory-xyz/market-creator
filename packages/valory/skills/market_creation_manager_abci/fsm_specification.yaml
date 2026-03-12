@@ -1,7 +1,6 @@
 alphabet_in:
 - ANSWER_QUESTION_DONE
 - DEPOSIT_DAI_DONE
-- DID_NOT_SEND
 - DONE
 - ERROR
 - MAX_APPROVED_MARKETS_REACHED
@@ -68,6 +67,7 @@ transition_func:
     (CollectProposedMarketsRound, ERROR): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, NONE): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, NO_MAJORITY): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, ROUND_TIMEOUT): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, SKIP_MARKET_APPROVAL): RetrieveApprovedMarketRound
@@ -81,6 +81,7 @@ transition_func:
     (DepositDaiRound, ROUND_TIMEOUT): GetPendingQuestionsRound
     (GetPendingQuestionsRound, DONE): FinishedWithGetPendingQuestionsRound
     (GetPendingQuestionsRound, ERROR): CollectRandomnessRound
+    (GetPendingQuestionsRound, NONE): CollectRandomnessRound
     (GetPendingQuestionsRound, NO_MAJORITY): CollectRandomnessRound
     (GetPendingQuestionsRound, NO_TX): CollectRandomnessRound
     (GetPendingQuestionsRound, ROUND_TIMEOUT): CollectRandomnessRound
@@ -89,6 +90,7 @@ transition_func:
     (PostTransactionRound, DONE): FinishedWithoutTxRound
     (PostTransactionRound, ERROR): DepositDaiRound
     (PostTransactionRound, MECH_REQUEST_DONE): FinishedWithMechRequestRound
+    (PostTransactionRound, NONE): PostTransactionRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound
     (PostTransactionRound, REDEEM_BOND_DONE): CollectProposedMarketsRound
     (PostTransactionRound, REMOVE_FUNDING_DONE): DepositDaiRound
@@ -106,11 +108,8 @@ transition_func:
     (RemoveFundingRound, NO_MAJORITY): DepositDaiRound
     (RemoveFundingRound, NO_TX): DepositDaiRound
     (RemoveFundingRound, ROUND_TIMEOUT): DepositDaiRound
-    (RetrieveApprovedMarketRound, DID_NOT_SEND): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, DONE): PrepareTransactionRound
     (RetrieveApprovedMarketRound, ERROR): FinishedWithoutTxRound
-    (RetrieveApprovedMarketRound, NONE): FinishedWithoutTxRound
-    (RetrieveApprovedMarketRound, NO_MAJORITY): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, NO_MARKETS_RETRIEVED): FinishedWithoutTxRound
     (RetrieveApprovedMarketRound, ROUND_TIMEOUT): FinishedWithoutTxRound
     (SelectKeeperRound, DONE): RedeemBondRound
@@ -119,5 +118,6 @@ transition_func:
     (SelectKeeperRound, ROUND_TIMEOUT): CollectRandomnessRound
     (SyncMarketsRound, DONE): RemoveFundingRound
     (SyncMarketsRound, ERROR): DepositDaiRound
+    (SyncMarketsRound, NONE): DepositDaiRound
     (SyncMarketsRound, NO_MAJORITY): DepositDaiRound
     (SyncMarketsRound, ROUND_TIMEOUT): DepositDaiRound

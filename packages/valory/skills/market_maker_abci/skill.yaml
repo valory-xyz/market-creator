@@ -8,28 +8,34 @@ license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
-  __init__.py: bafybeibn5i47enoott67jc54iihzwb6bxiuts4dzplu2lufh4w4r6emkty
-  behaviours.py: bafybeiazqmufskxjvsc7pscagkukyhiw2jhk52qhatqcn7d43inxmb3ovi
-  composition.py: bafybeidbthjjb5wec2xvi2e6oepxu6ofos37mhu4kkanlrk2qcbvn6fa3m
-  dialogues.py: bafybeicintyylxt4nd5gcufh3rehbxr5jvdn6un7wvaoel7hvj3dmurlpy
-  fsm_specification.yaml: bafybeihtabbvgmughyc5qhg3n3ysr6xsuuxqrdjwsbu36mnsq6bqrmblwa
-  handlers.py: bafybeidl5pzel4ui7m3kipu4tavx6blcxd6yy46jaraqqcpjgh2qtprkra
-  models.py: bafybeibz4ro56s3ovkls3lctqgye7qb5wrflml4j6louqrholq2boj4asm
-  tests/__init__.py: bafybeig7noiiz2y2b2scjeaalby56ft24eqj4o433blm2oze2pu3lljp44
+  __init__.py: bafybeicr7qsikxguag7ozqdriirxxmqbhuxidbgpqjv5galsjmxrr5gbwu
+  behaviours.py: bafybeihxzbxszlpm2u6rsbya3tkp6in537a3mapqrcmct236qzvwuffxre
+  composition.py: bafybeidjlgopea6bc7e7gdld4bt2rzrt5m3ddciyczmkk2jcdka5pu4vsq
+  dialogues.py: bafybeicuditmewgo3w7pcju22rtkzkrmjfxpcqpyils33fy7uzcbontd5m
+  fsm_specification.yaml: bafybeidvbgbl45qpgdya4dt76suvi4nxi6ycyezffhv67ybshrw6vhr77q
+  handlers.py: bafybeib36vtg2ng4mel67liodkku7v6rkjelehsdnw2x7fazq44hfp356u
+  models.py: bafybeibzgwkhnu5jihwtiwgg6cviawtvoljdikklwxczaa6iczj4gha2su
+  tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
+  tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
+  tests/test_behaviours.py: bafybeiaww7je4u5uyyl44ybdi57dpangy4syxcgxuepdiolqeqb4yfpk24
+  tests/test_composition.py: bafybeieyjqgjr6np77fy3cny2alht445edl6lbkoe6fr5p65ouajndc4oi
+  tests/test_dialogues.py: bafybeih7xzdqcg6yjtqhb2aydthhnqgcyjaaar6hqbzcl23ubg5po6qft4
+  tests/test_handlers.py: bafybeif5zhig5fvro4pwx42fng5exbwk45lzyugzcb6uzo5nusbrnhz4au
+  tests/test_models.py: bafybeifv6v4cetxq3h7bgulhhoysinukb2rqugbn2nzrct6nozlj4hv6ve
 fingerprint_ignore_patterns: []
 connections:
-- valory/http_server:0.22.0:bafybeigyjwg6nfwmdkwzt7i56n4zv3oj6hii2mkkgstuaztyunscjifdee
+- valory/http_server:0.22.0:bafybeid4oqsfkqo36lryoecymjnq4whme3tgupqfq6m4l7lbr5r4yxtswu
 contracts: []
 protocols:
-- valory/http:1.0.0:bafybeia4tq7ycivm3dnekelrnlzdwb4qnrjdykk6gf5tizq6djr66adotm
+- valory/http:1.0.0:bafybeidxkp3vga7t6x2pbt2tpkgyaxa5bgpdgryao54py7w3yxyzr7neoy
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeihhadgaitdltynzaq4w7jhgwbdnizsobbaa2riqtqwbml3li2tieq
-- valory/registration_abci:0.1.0:bafybeie3dfore53bxvbokqiarzuwulzlyt4vz5mifb4t3gxl6drwkblfha
-- valory/reset_pause_abci:0.1.0:bafybeicffwijiecbqc6z22nowir2fgwwqzwu6vokzuwgd5wa3zxromxevm
-- valory/market_creation_manager_abci:0.1.0:bafybeibffhpyo7xmi3jgmjc65dquqb4nda7fwpnksle3mptnkzj3t3ubmy
-- valory/termination_abci:0.1.0:bafybeiaylk6haefa2xex55krizafzwo2v5tpkcoflw5hiwaqm3qxice23m
-- valory/transaction_settlement_abci:0.1.0:bafybeifbumqyemwzffxtn3kwucxx55ja57mhmfalo7fqlkq2hnjwqhfp74
-- valory/mech_interact_abci:0.1.0:bafybeifmewonamynusdi3sz5qenlr3f7mu67sic33aub5uzc2w3mpqsyqa
+- valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
+- valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
+- valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
+- valory/market_creation_manager_abci:0.1.0:bafybeie2ofecn35ck2d7wg5bu4n4d4v7hlw7gj4kjbgvwczrfwhg5hnu6m
+- valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
+- valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
+- valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
 behaviours:
   main:
     args: {}
@@ -97,29 +103,18 @@ models:
       newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
       topics:
       - business
-      - cryptocurrency
+      - curiosities
+      - entertainment
+      - finance
+      - health
+      - international
+      - pets
       - politics
       - science
-      - technology
-      - trending
-      - fashion
-      - social
-      - health
       - sustainability
-      - internet
+      - technology
       - travel
-      - food
-      - pets
-      - animals
-      - curiosities
-      - music
-      - economy
-      - arts
-      - entertainment
       - weather
-      - sports
-      - finance
-      - international
       market_fee: 2.0
       initial_funds: 1.0
       market_timeout: 1
@@ -328,5 +323,5 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.21.8
+    version: ==0.21.13
 is_abstract: false

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2023 Valory AG
+#   Copyright 2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,17 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Dymmy test module."""
-
-import pytest
-
-
-def test_dummy() -> None:
-    """Dummy test."""
-    assert True
-
-
-@pytest.mark.e2e
-def test_dummy_integration() -> None:
-    """Dummy test integration."""
-    assert True
+"""This module contains the tests for the behaviours of the market_creation_manager_abci skill."""

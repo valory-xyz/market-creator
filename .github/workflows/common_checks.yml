@@ -1,0 +1,233 @@
+name: Common Checks
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+
+jobs:
+  lock_check:
+    continue-on-error: False
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+        python-version: ["3.10"]
+        poetry-version: ["1.8.0"]
+
+    defaults:
+      run:
+        shell: bash
+
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ matrix.poetry-version }}
+          virtualenvs-create: true
+          virtualenvs-in-project: false
+          virtualenvs-path: ~/my-custom-path
+          installer-parallel: true
+      - name: Check if dependencies can be locked
+        run: poetry lock --check
+      - name: Poetry install requirements and check they can be locked
+        run: poetry install --all-extras --no-interaction -vvv
+
+  copyright_and_dependencies_check:
+    continue-on-error: False
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+        python-version: ["3.10"]
+
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pip install tomte[tox,cli]==0.6.2
+      - name: Check copyright headers
+        run: tox -e copyright-check
+      - name: License compatibility check
+        run: tox -e liccheck
+      - name: Check dependencies
+        run: tox -e check-dependencies
+      - name: Check doc links
+        run: tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git --url-skips https://newsapi.org/v2/everything --url-skips https://newsapi.org/v2/top-headlines --http-skips http://host.docker.internal:8545 --http-skips http://host.docker.internal:5000 --url-skips http://host.docker.internal:5000 --url-skips http://server_ip:5000 --url-skips https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md --url-skips https://github.com/valory-xyz/market-creator/blob/0bab9ff6b41c2f024cc1f0d2aa149347fd0f47a9/packages/valory/agents/market_maker/aea-config.yaml#L149
+      - name: Check doc IPFS hashes
+        run: tox -e check-doc-hashes
+
+  linter_checks:
+    continue-on-error: False
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+        python-version: ["3.10"]
+
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install tomte[tox,cli]==0.6.2
+          pip install marshmallow==3.26.2
+
+          # Install `mdspell` for spelling checks
+          sudo npm install -g markdown-spellcheck
+
+      - name: Security checks
+        run: tomte check-security
+      - name: Check packages
+        run: tox -e check-packages
+      - name: Check hash
+        run: tox -e check-hash
+      - name: Code checks
+        run: tomte check-code
+      - name: Check spelling
+        run: tomte check-spelling
+      - name: AbciApp consistency checks
+        run: |
+          tox -e check-abci-docstrings
+          tox -e check-abciapp-specs
+          tox -e check-handlers
+          # tox -e analyse-service # analyse-service checks do not work properly as it is checking funds manager skill which is not an ABCI skill
+
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - run: |
+          wget https://github.com/zricethezav/gitleaks/releases/download/v8.10.1/gitleaks_8.10.1_linux_x64.tar.gz && \
+          tar -xzf gitleaks_8.10.1_linux_x64.tar.gz && \
+          sudo install gitleaks /usr/bin && \
+          gitleaks detect --report-format json --report-path --log-opts="HEAD" leak_report -v
+  
+  test:
+    continue-on-error: False
+    needs:
+      - lock_check
+      - copyright_and_dependencies_check
+      - linter_checks
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.20.x"
+      - name: Create agent `store_path` (data folder)
+        run: mkdir data
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Install dependencies (ubuntu-24.04)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tomte[tox]==0.6.2
+          pip install --user --upgrade setuptools
+
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v24.3/protoc-24.3-linux-x86_64.zip
+          unzip protoc-24.3-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+
+          # install Tendermint
+          wget -O tendermint.tar.gz https://github.com/tendermint/tendermint/releases/download/v0.34.19/tendermint_0.34.19_linux_amd64.tar.gz
+          tar -xf tendermint.tar.gz
+          sudo mv tendermint /usr/local/bin/tendermint
+
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Packages unit tests ubuntu-24.04
+        run: |
+          tox -e py${{ matrix.python-version }}-linux
+
+      - if: matrix.os == 'macos-15'
+        name: Install dependencies (macos-15)
+        run: |
+          pip install tomte[tox]==0.6.2
+          brew install gcc
+          
+          # protoc: use brew on arm64 (no osx-aarch_64 in 3.19.x), manual download on x86_64
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+          brew install protobuf
+          else
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v24.3/protoc-24.3-osx-x86_64.zip
+          unzip protoc-24.3-osx-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          fi
+          
+          brew tap yoheimuta/protolint
+          brew install protolint
+
+      - if: matrix.os == 'macos-15'
+        name: Packages unit tests macos-15
+        run: |
+          tox -e py${{ matrix.python-version }}-darwin
+
+      - if: matrix.os == 'windows-2025'
+        name: Install dependencies (windows-2025)
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: |
+          python -m pip install -U pip
+          echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
+          choco install wget -y
+          choco install protoc --version 24.3
+          choco install mingw -y
+          choco install make -y
+          # to check make was installed
+          make --version
+          pip install tomte[tox]==0.6.2
+
+      - if: matrix.os == 'windows-2025'
+        name: Packages unit tests windows-2025
+        run: |
+          tox -e py${{ matrix.python-version }}-win
+
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false

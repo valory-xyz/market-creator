@@ -71,7 +71,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, str]:
         """Calculate question ID."""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.realitio_contract,
             contract_id=str(RealitioContract.contract_id),
             contract_callable="calculate_question_id",
@@ -95,7 +95,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
             contract_id=str(RealitioContract.contract_id),
             contract_callable="get_ask_question_tx_data",
@@ -124,7 +124,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
             contract_id=str(ConditionalTokensContract.contract_id),
             contract_callable="get_prepare_condition_tx_data",
@@ -151,7 +151,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.fpmm_deterministic_factory_contract,
             contract_id=str(FPMMDeterministicFactory.contract_id),
             contract_callable="get_create_fpmm_tx_data",
@@ -176,7 +176,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_approve_tx(self, amount: int) -> Generator[None, None, Optional[Dict]]:
         """Prepare a multisend tx for `askQuestionMethod`"""
         response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.collateral_tokens_contract,
             contract_id=str(ERC20TokenContract.contract_id),
             contract_callable=get_callable_name(ERC20TokenContract.build_approval_tx),
@@ -267,7 +267,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
                 return
 
             agent = self.context.agent_address
-            if tx_hash is None:
+            if tx_hash is None:  # pragma: no cover
                 tx_submitter = None
             else:
                 tx_submitter = self.matching_round.auto_round_id()

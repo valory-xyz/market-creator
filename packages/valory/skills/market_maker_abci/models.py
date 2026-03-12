@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023-2024 Valory AG
+#   Copyright 2023-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEv
 from packages.valory.skills.termination_abci.models import TerminationParams
 from packages.valory.skills.transaction_settlement_abci.rounds import Event as TSEvent
 
-
 MARGIN = 5
 MULTIPLIER = 2
 
@@ -84,24 +83,6 @@ class SharedState(BaseSharedState):
         ] = self.context.params.round_timeout_seconds
         MarketCreatorAbciApp.event_to_timeout[TSEvent.ROUND_TIMEOUT] = (
             self.context.params.round_timeout_seconds
-        )
-
-        # The MARKET_PROPOSAL_ROUND_TIMEOUT must be computed based on the "market_proposal_round_timeout_seconds_per_day" parameter.
-        # This parameter represents the maximum timeout it takes to execute the LLM query + proposing the received questions to the
-        # market proposal server for a single day. It should be typically set about 30-45 seconds.
-        MarketCreatorAbciApp.event_to_timeout[
-            MarketCreationManagerEvent.MARKET_PROPOSAL_ROUND_TIMEOUT
-        ] = (
-            max(
-                self.context.params.round_timeout_seconds,
-                self.context.params.market_proposal_round_timeout_seconds_per_day
-                * (
-                    self.context.params.event_offset_end_days
-                    - self.context.params.event_offset_start_days
-                    + 1
-                ),
-            )
-            + MARGIN
         )
 
         MarketCreatorAbciApp.event_to_timeout[ResetPauseEvent.ROUND_TIMEOUT] = (

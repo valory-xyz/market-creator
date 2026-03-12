@@ -19,7 +19,6 @@
 
 """This module contains the final states of the MarketCreationManagerAbciApp."""
 
-
 from packages.valory.skills.abstract_round_abci.base import DegenerateRound
 
 

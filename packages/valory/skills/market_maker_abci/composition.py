@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023-2024 Valory AG
+#   Copyright 2023-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ from packages.valory.skills.termination_abci.rounds import (
     TerminationAbciApp,
 )
 
-
 abci_app_transition_mapping: AbciAppTransitionMapping = {
     FinishedRegistrationRound: MarketCreationManagerAbci.SyncMarketsRound,
     MarketCreationManagerAbci.FinishedWithoutTxRound: ResetAndPauseRound,
@@ -57,10 +56,12 @@ abci_app_transition_mapping: AbciAppTransitionMapping = {
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithRemoveFundingRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound: MechVersionStates.MechVersionDetectionRound,
+    MechFinalStates.FinishedMarketplaceLegacyDetectedRound: MechRequestStates.MechRequestRound,
     MechFinalStates.FinishedMechLegacyDetectedRound: MechRequestStates.MechRequestRound,
     MechFinalStates.FinishedMechInformationRound: MechRequestStates.MechRequestRound,
     MechFinalStates.FailedMechInformationRound: MechVersionStates.MechVersionDetectionRound,
     MechFinalStates.FinishedMechRequestRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    MechFinalStates.FinishedMechPurchaseSubscriptionRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MechFinalStates.FinishedMechResponseRound: MarketCreationManagerAbci.AnswerQuestionsRound,
     MechFinalStates.FinishedMechRequestSkipRound: MarketCreationManagerAbci.CollectRandomnessRound,
     MechFinalStates.FinishedMechResponseTimeoutRound: MarketCreationManagerAbci.CollectRandomnessRound,

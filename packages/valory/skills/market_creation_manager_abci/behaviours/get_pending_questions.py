@@ -37,9 +37,7 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
 )
 from packages.valory.skills.mech_interact_abci.states.base import MechMetadata
 
-
-OPEN_FPMM_QUERY = Template(
-    """{
+OPEN_FPMM_QUERY = Template("""{
     fixedProductMarketMakers(
         where: {
             creator: "$creator"
@@ -67,8 +65,7 @@ OPEN_FPMM_QUERY = Template(
         title
         timeout
     }
-    }"""
-)
+    }""")
 
 
 class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
@@ -111,7 +108,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
         """Get the balance of an account"""
         ledger_api_response = yield from self.get_ledger_api_response(
-            performative=LedgerApiMessage.Performative.GET_STATE,
+            performative=LedgerApiMessage.Performative.GET_STATE,  # type: ignore
             ledger_callable="get_balance",
             account=account,
         )
@@ -119,7 +116,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             # something went wrong
             self.context.logger.error(
                 f"Couldn't get balance for account {account}. "
-                f"Expected response performative {LedgerApiMessage.Performative.STATE.value}, "
+                f"Expected response performative {LedgerApiMessage.Performative.STATE}, "
                 f"Received {ledger_api_response.performative.value}."
             )
             return None
@@ -242,7 +239,7 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         self.context.logger.info(f"new_mech_requests: {new_mech_requests}")
 
-        if len(new_mech_requests) == 0:
+        if len(new_mech_requests) == 0:  # pragma: no cover
             self.context.logger.info("No mech requests")
             return GetPendingQuestionsRound.NO_TX_PAYLOAD
 

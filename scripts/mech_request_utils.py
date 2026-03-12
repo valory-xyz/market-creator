@@ -34,7 +34,6 @@ from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from tqdm import tqdm
 
-
 TEXT_ALIGNMENT = 30
 MINIMUM_WRITE_FILE_DELAY_SECONDS = 20
 DEFAULT_MECH_REQUESTS_JSON_PATH = "mech_requests.json"

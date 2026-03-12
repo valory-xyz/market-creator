@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2023 valory
+#   Copyright 2023-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the class to connect to an Gnosis FixedProductMarketMaker contract."""
+
 import logging
 from typing import Any, List
 
@@ -25,7 +26,6 @@ from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-
 
 PUBLIC_ID = PublicId.from_str("valory/fpmm:0.1.0")
 _logger = logging.getLogger(
@@ -200,6 +200,6 @@ class FPMMContract(Contract):
 
             _logger.info(f"Markets with non-zero funds retrieved: {non_zero_markets}")
             return dict(data=non_zero_markets)
-        except Exception as e:
-            _logger.error("An exception occurred in get_markets_with_funds():", str(e))
+        except Exception as e:  # pragma: no cover
+            _logger.error(f"An exception occurred in get_markets_with_funds(): {e}")
             raise

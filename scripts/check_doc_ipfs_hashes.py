@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022-2024 Valory AG
+#   Copyright 2022-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import yaml
 from aea.cli.packages import get_package_manager
 from aea.configurations.data_types import PackageId
 from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
-
 
 CLI_REGEX = r"(?P<cli>aea|autonomy)"
 # CMD_REGEX should be r"(?P<cmd>(\S+\s(\s--\S+)*)+)",
@@ -172,7 +171,7 @@ class PackageHashManager:
             # No match
             if not m_command and not m_package:
                 print(
-                    f"[{target_file}]: line '{package_line!r}' does not match an autonomy/aea command or package format"
+                    f"[{target_file}]: line {package_line!r} does not match an autonomy/aea command or package format"
                 )
                 return None
             m = m_command or m_package
@@ -189,7 +188,8 @@ class PackageHashManager:
 
                 # This hash does not exist in packages.json
                 print(
-                    f"[{target_file}]: unknown IPFS hash in line '{package_line!r}'. Can't fix because this command just uses the hash"
+                    f"[{target_file}]: unknown IPFS hash in line {package_line!r}. "
+                    "Can't fix because this command just uses the hash"
                 )
                 return None
 
@@ -224,7 +224,8 @@ class PackageHashManager:
 
                 if not package_type:
                     raise ValueError(
-                        f"[{target_file}]: could not infer the package type for line '{package_line!r}'\nPlease update the hash manually."
+                        f"[{target_file}]: could not infer the package type for line {package_line!r}"
+                        "\nPlease update the hash manually."
                     )
 
             return self.package_tree[d["vendor"]][package_type][d["package"]].hash
@@ -232,7 +233,7 @@ class PackageHashManager:
         # Otherwise log the error
         except KeyError:
             print(
-                f"[{target_file}]: could not find the corresponding hash for line '{package_line!r}'"
+                f"[{target_file}]: could not find the corresponding hash for line {package_line!r}"
             )
             return None
 
@@ -356,7 +357,9 @@ def check_ipfs_hashes(  # pylint: disable=too-many-locals,too-many-statements
         sys.exit(1)
 
     if matches == 0:
-        print("No commands were found in the docs.")
+        print(
+            "No commands were found in the docs. The command regex might be outdated."
+        )
 
     print("Checking doc IPFS hashes finished successfully.")
 

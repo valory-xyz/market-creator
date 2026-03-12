@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeiaie6ciebkrr4l64tuxd2fyv3vcp6xf3mvy5fuweimleanvfjb6q4
+agent: valory/market_maker:0.1.0:bafybeiddbylrsdq3slwxy3xm5qjvw46uzmomot2uumh3oaltnrv2solney
 number_of_agents: 1
 deployment:
   agent:
@@ -51,7 +51,7 @@ models:
       market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2}
       newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
-      topics: ${TOPICS:list:["business","cryptocurrency","politics","science","technology","trending","fashion","social","health","sustainability","internet","travel","food","pets","animals","curiosities","music","economy","arts","entertainment","weather","sports","finance","international"]}
+      topics: ${TOPICS:list:["business","curiosities","entertainment","finance","health","international","pets","politics","science","sustainability","technology","travel","weather"]}
       market_fee: ${MARKET_FEE:float:2.0}
       initial_funds: ${INITIAL_FUNDS:float:1.0}
       market_timeout: ${MARKET_TIMEOUT:int:1}
