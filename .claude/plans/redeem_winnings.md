@@ -36,12 +36,18 @@ This placement is logical because:
 
 ## Data Source for Redeemable Markets
 
-**Important:** `SyncMarketsRound` only queries markets where the safe still has LP shares (`amount_gt: "0"`). After `RemoveFundingRound` burns all LP shares, the market disappears from `markets_to_remove_liquidity`. Therefore, `RedeemWinningsBehaviour` needs its **own subgraph query** to discover markets where the safe created markets that are now resolved but may still have residual conditional tokens.
+**Important:** `SyncMarketsRound` only queries markets where the safe still has LP shares (`amount_gt: "0"`). After `RemoveFundingRound` burns all LP shares, the market disappears from `markets_to_remove_liquidity`. Therefore, `RedeemWinningsBehaviour` needs its **own subgraph queries** to discover all markets where the safe may hold residual conditional tokens.
 
-The behaviour will:
-1. Query the Omen subgraph for all markets created by the safe (including those with zero LP shares)
-2. For each resolved market, check on-chain if the safe holds conditional tokens via `get_user_holdings`
-3. Build redemption transactions for markets with redeemable positions
+The behaviour uses **two separate subgraph queries**, then deduplicates by market address:
+1. **LP positions** — `fpmmLiquidities(where: {funder: $safe, type: Add})`: markets where the safe ever added liquidity, regardless of who created the market. Covers the standard market-creator LP flow.
+2. **Trader positions** — `fpmmTrades(where: {creator: $safe, type: Buy})`: markets where the safe bought outcome tokens as a trader. Covers trader services or any hybrid service that also trades.
+
+For each deduplicated market, the behaviour:
+1. Checks on-chain if the condition is resolved (`check_resolved`)
+2. Checks if the safe holds any conditional tokens (`get_user_holdings`)
+3. Builds a `redeemPositions` transaction for markets with non-zero holdings
+
+This design is **service-agnostic**: it works for pure LPs, pure traders, or any combination.
 
 ## Files Created
 
@@ -71,20 +77,25 @@ Core logic. Follows `RedeemBondBehaviour` pattern with `async_act()` → `get_pa
 - `redeem_winnings_batch_size` (default: 5) — max markets to process per cycle (avoids gas limits)
 - Reuses existing: `conditional_tokens_contract`, `collateral_tokens_contract`
 
-**Subgraph query** (new, for resolved markets):
+**Subgraph queries** (two, merged and deduplicated):
 ```python
-RESOLVED_MARKETS_QUERY = Template("""{
-  fixedProductMarketMakers(
-    where: {creator: "$creator", openingTimestamp_lt: "$now"}
+# LP positions: any market where the safe added liquidity
+LP_MARKETS_QUERY = Template("""{
+  fpmmLiquidities(
+    where: {funder: "$safe", type: Add, fpmm_: {openingTimestamp_lt: "$now"}}
     first: $batch_size
   ) {
-    id
-    openingTimestamp
-    conditions {
-      id
-      question { id }
-      outcomeSlotCount
-    }
+    fpmm { id conditions { id outcomeSlotCount } }
+  }
+}""")
+
+# Trader positions: any market where the safe bought outcome tokens
+TRADE_MARKETS_QUERY = Template("""{
+  fpmmTrades(
+    where: {creator: "$safe", type: Buy, fpmm_: {openingTimestamp_lt: "$now"}}
+    first: $batch_size
+  ) {
+    fpmm { id conditions { id outcomeSlotCount } }
   }
 }""")
 ```

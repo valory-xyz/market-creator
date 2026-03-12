@@ -20,7 +20,7 @@
 """Tests for RedeemWinningsBehaviour."""
 
 from typing import Any
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_winnings import (

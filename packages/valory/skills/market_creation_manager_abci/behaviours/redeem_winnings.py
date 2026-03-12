@@ -39,19 +39,41 @@ from packages.valory.skills.market_creation_manager_abci.states.redeem_winnings 
     RedeemWinningsRound,
 )
 
-RESOLVED_MARKETS_QUERY = Template("""{
-    fixedProductMarketMakers(
-      where: {creator: "$creator", openingTimestamp_lt: "$now"}
+# Markets where the safe provided liquidity (LP positions).
+# Covers both: markets the safe created itself, and markets where it
+# added liquidity as a funder without being the creator.
+LP_MARKETS_QUERY = Template("""{
+    fpmmLiquidities(
+      where: {funder: "$safe", type: Add, fpmm_: {openingTimestamp_lt: "$now"}}
       first: $batch_size
+      orderBy: creationTimestamp
+      orderDirection: asc
     ) {
-      id
-      openingTimestamp
-      conditions {
+      fpmm {
         id
-        question {
+        conditions {
           id
+          outcomeSlotCount
         }
-        outcomeSlotCount
+      }
+    }
+  }""")
+
+# Markets where the safe bought outcome tokens as a trader.
+# These positions remain redeemable once the market resolves.
+TRADE_MARKETS_QUERY = Template("""{
+    fpmmTrades(
+      where: {creator: "$safe", type: Buy, fpmm_: {openingTimestamp_lt: "$now"}}
+      first: $batch_size
+      orderBy: creationTimestamp
+      orderDirection: asc
+    ) {
+      fpmm {
+        id
+        conditions {
+          id
+          outcomeSlotCount
+        }
       }
     }
   }""")
@@ -107,42 +129,64 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
     def _get_resolved_markets(
         self,
     ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
-        """Query the Omen subgraph for resolved markets created by the safe."""
-        creator = self.synchronized_data.safe_contract_address.lower()
+        """Query the Omen subgraph for markets where the safe holds redeemable positions.
+
+        Covers both LP positions (liquidity added to a market) and trader positions
+        (outcome tokens bought on any market). Results are deduplicated by market address.
+        """
+        safe = self.synchronized_data.safe_contract_address.lower()
         now = str(self.last_synced_timestamp)
         batch_size = self.params.redeem_winnings_batch_size
 
-        response = yield from self.get_subgraph_result(
-            query=RESOLVED_MARKETS_QUERY.substitute(
-                creator=creator,
-                now=now,
-                batch_size=batch_size,
+        lp_response = yield from self.get_subgraph_result(
+            query=LP_MARKETS_QUERY.substitute(safe=safe, now=now, batch_size=batch_size)
+        )
+        trade_response = yield from self.get_subgraph_result(
+            query=TRADE_MARKETS_QUERY.substitute(
+                safe=safe, now=now, batch_size=batch_size
             )
         )
-        if response is None:
-            self.context.logger.error(
-                "Could not retrieve resolved markets from subgraph."
-            )
+
+        if lp_response is None and trade_response is None:
+            self.context.logger.error("Could not retrieve any markets from subgraph.")
             return None
 
-        markets_data = response.get("data", {}).get("fixedProductMarketMakers", [])
+        def _extract_markets(response: Optional[Dict], key: str) -> List[Dict]:
+            if response is None:
+                return []
+            entries = response.get("data", {}).get(key, [])
+            result = []
+            for entry in entries:
+                fpmm = entry.get("fpmm", {})
+                conditions = fpmm.get("conditions", [])
+                if not conditions:
+                    continue
+                condition = conditions[0]
+                if condition.get("outcomeSlotCount") is None:
+                    continue
+                result.append(
+                    {
+                        "address": fpmm["id"],
+                        "condition_id": condition["id"],
+                        "outcome_slot_count": condition["outcomeSlotCount"],
+                    }
+                )
+            return result
+
+        lp_markets = _extract_markets(lp_response, "fpmmLiquidities")
+        trade_markets = _extract_markets(trade_response, "fpmmTrades")
+
+        # Deduplicate by market address (safe may appear as both LP and trader)
+        seen: set = set()
         markets = []
-        for entry in markets_data:
-            if not entry.get("conditions"):
-                continue
-            condition = entry["conditions"][0]
-            if condition.get("outcomeSlotCount") is None:
-                continue
-            markets.append(
-                {
-                    "address": entry["id"],
-                    "condition_id": condition["id"],
-                    "outcome_slot_count": condition["outcomeSlotCount"],
-                }
-            )
+        for m in lp_markets + trade_markets:
+            if m["address"] not in seen:
+                seen.add(m["address"])
+                markets.append(m)
 
         self.context.logger.info(
-            f"Found {len(markets)} market(s) past opening timestamp."
+            f"Found {len(markets)} unique market(s) past opening timestamp "
+            f"({len(lp_markets)} LP, {len(trade_markets)} trader)."
         )
         return markets
 
