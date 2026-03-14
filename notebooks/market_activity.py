@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
-from omen_subgraph_utils import (
+from omen_markets import (
     MarketState,
     get_fpmms,
     get_market_current_answer,

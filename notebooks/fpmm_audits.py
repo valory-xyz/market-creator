@@ -29,14 +29,15 @@ import uuid
 import webbrowser
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
+from pathlib import Path
 
 # Add repo root to path for .env loading
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import google.genai as genai
 import pandas as pd
 from dotenv import load_dotenv
-from omen_subgraph_utils import (
+from omen_markets import (
     INVALID_ANSWER_HEX,
     MarketState,
     answer_mapping,
@@ -49,7 +50,8 @@ from tqdm import tqdm
 
 
 # Add local Grok-Api repo to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "Grok-Api"))
+_GROK_API_DIR = Path(__file__).resolve().parent.parent.parent / "Grok-Api"
+sys.path.insert(0, str(_GROK_API_DIR))
 from core import Grok
 
 
@@ -161,8 +163,7 @@ def get_openai_audit(fpmm: dict) -> dict | None:
             "timestamp": int(time.time()),
             "response": json.loads(response.output_text),
         }
-        # if result["response"].get("answer").lower() not in [outcome.lower() for outcome in outcomes]:
-        #     return None
+
         return result
     except json.JSONDecodeError:
         return None
@@ -176,12 +177,6 @@ def get_grok_audit(fpmm: dict) -> dict | None:
 
     prompt = create_audit_prompt(question, outcomes)
 
-    # Change to Grok-Api directory for relative path resolution
-    grok_api_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "Grok-Api")
-    )
-    original_cwd = os.getcwd()
-
     response_text = "..."
     # Retry logic for heavy usage
     for attempt in range(N_RETRIES):
@@ -189,14 +184,11 @@ def get_grok_audit(fpmm: dict) -> dict | None:
         response = None
 
         try:
-            os.chdir(grok_api_dir)
             grok = Grok(GROK_MODEL)
             response = grok.start_convo(prompt)
-        except Exception as e:
+        except (ConnectionError, TimeoutError, OSError, ValueError, RuntimeError) as e:
             error_occurred = True
             print(f"[Attempt {attempt + 1}/{N_RETRIES}] Grok exception: {str(e)}")
-        finally:
-            os.chdir(original_cwd)
 
         # Check if an exception occurred or if response contains an error
         if error_occurred or (isinstance(response, dict) and "error" in response):
@@ -641,7 +633,7 @@ def display_audit_results_html(df: pd.DataFrame, fpmms: dict, audits: dict) -> N
         f.write(styled_html)
 
     # Open in browser
-    file_path = os.path.abspath(html_file)
+    file_path = Path(html_file).resolve()
     webbrowser.open(f"file://{file_path}")
     print(f"\nResults saved to: {html_file}")
     print(f"Opening in browser...")
