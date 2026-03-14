@@ -30,6 +30,9 @@ import webbrowser
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 
+# Add repo root to path for .env loading
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import google.genai as genai
 import pandas as pd
 from dotenv import load_dotenv
@@ -464,12 +467,20 @@ def fill_missing_audits(fpmms: dict, audits: dict) -> None:
         print("All markets have complete audits")
 
 
-def get_matching_audits(market: dict, audits: dict) -> tuple[int, int]:
-    """Gets the number of matching audits between market answer and auditor predictions."""
+def get_matching_audits(market: dict, audits: dict) -> tuple[int, int, int]:
+    """Gets the number of matching, valid, and total audits for a market.
+
+    Returns:
+        (matching, valid, total) where:
+        - total: audits with a response
+        - valid: audits whose answer is one of the market outcomes
+        - matching: valid audits that agree with the market answer
+    """
     market_answer_str = get_market_current_answer(market).lower()
     question = market.get("question") or {}
     outcomes = [outcome.lower() for outcome in question.get("outcomes", [])]
 
+    total = 0
     matching = 0
     valid = 0
     for _, audit in audits.items():
@@ -479,6 +490,7 @@ def get_matching_audits(market: dict, audits: dict) -> tuple[int, int]:
         audit_answer = audit.get("response", {}).get("answer")
         if not isinstance(audit_answer, str):
             continue
+        total += 1
 
         audit_answer_str = audit_answer.lower()
         if audit_answer_str not in outcomes:
@@ -487,7 +499,7 @@ def get_matching_audits(market: dict, audits: dict) -> tuple[int, int]:
         if market_answer_str == audit_answer_str:
             matching += 1
 
-    return matching, valid
+    return matching, valid, total
 
 
 def display_audit_results_html(df: pd.DataFrame, fpmms: dict, audits: dict) -> None:
@@ -516,7 +528,7 @@ def display_audit_results_html(df: pd.DataFrame, fpmms: dict, audits: dict) -> N
             invalid_audited_markets += 1
             continue
 
-        matching, valid = get_matching_audits(market, market_audits)
+        matching, valid, _ = get_matching_audits(market, market_audits)
 
         # Initialize nested dict if needed
         if valid not in audit_breakdown:

@@ -66,12 +66,15 @@ query fpmms_query($creator: Bytes, $creationTimestamp_gt: BigInt) {
         first: 1000
     ) {
         question {
+            id
             title
             outcomes
             currentAnswer
+            currentAnswerBond
             currentAnswerTimestamp
             answers {
             answer
+            bondAggregate
             }
         }
         id
@@ -81,6 +84,7 @@ query fpmms_query($creator: Bytes, $creationTimestamp_gt: BigInt) {
         isPendingArbitration
         answerFinalizedTimestamp
         currentAnswer
+        currentAnswerBond
         collateralVolume
     }
 }
