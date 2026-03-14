@@ -24,13 +24,12 @@
 
 import argparse
 import bisect
-from enum import Enum
 import json
 import os
-from re import U
 import sys
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import requests
 from dotenv import dotenv_values
@@ -47,7 +46,7 @@ sys.path.insert(0, os.path.expanduser(trader_quickstart_path))
 sys.path.insert(0, os.path.expanduser(f"{trader_quickstart_path}/scripts"))
 
 import trades  # noqa: E402
-from mech_request_utils import get_mech_requests  # noqa: E402
+from mech_requests import fetch_mech_requests  # noqa: E402
 from trades import INVALID_ANSWER, MarketState  # noqa: E402
 
 RPC = env_file_vars.get("RPC")
@@ -64,11 +63,12 @@ class TradeResult(Enum):
     UNKNOWN = "unknown"
 
     def __str__(self) -> str:
-        """Prints the market status."""
+        """Return the trade result name."""
         return self.name.capitalize()
 
 
 def _get_contract(address: str) -> Any:
+    """Return a web3 contract instance for the given address."""
     w3 = Web3(Web3.HTTPProvider(RPC))
     abi = _get_abi(address)
     contract = w3.eth.contract(address=Web3.to_checksum_address(address), abi=abi)
@@ -76,6 +76,7 @@ def _get_contract(address: str) -> Any:
 
 
 def _get_abi(address: str) -> List:
+    """Fetch the contract ABI from Blockscout."""
     contract_abi_url = (
         "https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}"
     )
@@ -187,7 +188,7 @@ def get_service_safe(service_id: int) -> str:
     return service_safe_address
 
 
-def generate_dataset(service_id: int) -> (Dict[str, Any], Dict[str, Any], List[str]):
+def generate_dataset(service_id: int) -> Tuple[Dict[str, Any], Dict[str, Any], List[str]]:
     """Generates the dataset"""
     dataset_json = f"{DATASET_PREFIX}{service_id}.json"
 
@@ -197,7 +198,7 @@ def generate_dataset(service_id: int) -> (Dict[str, Any], Dict[str, Any], List[s
     print(f"{service_safe_address=}")
     print(service_safe_address.lower())
 
-    mech_requests = get_mech_requests(service_safe_address, dataset_json)
+    mech_requests = fetch_mech_requests(service_safe_address)
 
     fpmm_trades = trades._query_omen_xdai_subgraph(service_safe_address.lower())[
         "data"

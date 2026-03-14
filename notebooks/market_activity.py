@@ -99,12 +99,12 @@ def daily_activity(
     creators: Dict[str, Dict[str, Any]],
     n_days: int = 10,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Compute daily opened/closed/resolved counts per creator.
+    """Compute daily opened/responded/closed counts per creator.
 
     Definitions:
     - opened: creationTimestamp falls on that day
-    - closed (responded): currentAnswerTimestamp falls on that day (first answer submitted)
-    - resolved (finalized): answerFinalizedTimestamp falls on that day and is in the past
+    - responded: currentAnswerTimestamp falls on that day (market received an answer)
+    - closed: answerFinalizedTimestamp falls on that day and is in the past (finalized)
 
     Args:
         markets_by_creator: output of fetch_all_markets
@@ -112,7 +112,7 @@ def daily_activity(
         n_days: number of past days to include
 
     Returns:
-        Tuple of (df_opened, df_closed, df_resolved), each with dates as index
+        Tuple of (df_opened, df_responded, df_closed), each with dates as index
         and creator names as columns
     """
     today = datetime.now(timezone.utc).date()
@@ -120,14 +120,14 @@ def daily_activity(
     date_set = set(dates)
 
     opened: Dict[str, Counter] = {}
+    responded: Dict[str, Counter] = {}
     closed: Dict[str, Counter] = {}
-    resolved: Dict[str, Counter] = {}
 
     for key, markets in markets_by_creator.items():
         name = creators[key]["name"]
         opened[name] = Counter()
+        responded[name] = Counter()
         closed[name] = Counter()
-        resolved[name] = Counter()
 
         for m in markets:
             # Opened
@@ -137,14 +137,14 @@ def daily_activity(
                 if d in date_set:
                     opened[name][d] += 1
 
-            # Closed (answered)
+            # Responded (received an answer)
             answer_ts = (m.get("question") or {}).get("currentAnswerTimestamp")
             if answer_ts:
                 d = _ts_to_date(answer_ts)
                 if d in date_set:
-                    closed[name][d] += 1
+                    responded[name][d] += 1
 
-            # Resolved (finalized)
+            # Closed (finalized)
             finalized_ts = m.get("answerFinalizedTimestamp")
             if finalized_ts and int(finalized_ts) > 0:
                 finalized_dt = datetime.fromtimestamp(
@@ -153,7 +153,7 @@ def daily_activity(
                 if finalized_dt <= datetime.now(timezone.utc):
                     d = finalized_dt.date()
                     if d in date_set:
-                        resolved[name][d] += 1
+                        closed[name][d] += 1
 
     def _to_df(data: Dict[str, Counter]) -> pd.DataFrame:
         df = pd.DataFrame(
@@ -163,7 +163,7 @@ def daily_activity(
         df.index.name = "Date"
         return df
 
-    return _to_df(opened), _to_df(closed), _to_df(resolved)
+    return _to_df(opened), _to_df(responded), _to_df(closed)
 
 
 def answer_distribution(

@@ -32,6 +32,7 @@ import json
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -49,7 +50,7 @@ MAX_WORKERS = 10
 WRITE_INTERVAL_SECONDS = 20
 DELIVER_TIMEOUT_SECONDS = 24 * 60 * 60  # 1 day
 
-_CACHE_DIR = Path(__file__).resolve().parent.parent / "notebooks" / ".cache"
+_CACHE_DIR = Path(__file__).resolve().parent / ".cache"
 
 REQUESTS_QUERY = """
 query requests_query(
@@ -224,15 +225,15 @@ def _populate_ipfs_contents(
 # Cache I/O
 # ---------------------------------------------------------------------------
 
-def _cache_path(creator_key: str) -> Path:
-    """Return the JSON cache path for a creator."""
+def _cache_path(sender: str) -> Path:
+    """Return the JSON cache path for a sender address."""
     _CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    return _CACHE_DIR / f"mech_requests_{creator_key}.json"
+    return _CACHE_DIR / f"mech_requests_{sender.lower()}.json"
 
 
-def _load_cache(creator_key: str) -> Tuple[Dict[str, Any], int]:
+def _load_cache(sender: str) -> Tuple[Dict[str, Any], int]:
     """Load cached requests and the checkpoint timestamp."""
-    path = _cache_path(creator_key)
+    path = _cache_path(sender)
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -273,22 +274,22 @@ def _compute_checkpoint(mech_requests: Dict[str, Any]) -> int:
 _last_write: Dict[str, float] = {}
 
 
-def _make_writer(creator_key: str):
-    """Return a write function bound to the creator's cache file."""
+def _make_writer(sender: str):
+    """Return a write function bound to the sender's cache file."""
 
     def _write(data: Dict[str, Any], force: bool = False) -> None:
         now = time.time()
-        last = _last_write.get(creator_key, 0.0)
+        last = _last_write.get(sender, 0.0)
         if not force and (now - last) < WRITE_INTERVAL_SECONDS:
             return
         checkpoint_ts = _compute_checkpoint(data)
-        path = _cache_path(creator_key)
+        path = _cache_path(sender)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(
                 {"mechRequests": data, "checkpointTimestamp": checkpoint_ts},
                 f, indent=2, sort_keys=True,
             )
-        _last_write[creator_key] = now
+        _last_write[sender] = now
 
     return _write
 
@@ -297,47 +298,41 @@ def _make_writer(creator_key: str):
 # Public API
 # ---------------------------------------------------------------------------
 
-def fetch_mech_requests(
-    creators: Dict[str, Dict[str, Any]],
-) -> Dict[str, Dict[str, Any]]:
-    """Fetch mech requests + delivers + IPFS contents for each creator.
+def fetch_mech_requests(sender: str) -> Dict[str, Any]:
+    """Fetch mech requests + delivers + IPFS contents for a sender address.
 
-    Uses a per-creator JSON cache under ``notebooks/.cache/`` so that
-    already-delivered requests are not re-fetched from IPFS.
+    Uses a JSON cache under ``notebooks/.cache/`` keyed by the lowercase
+    sender address so already-delivered requests are not re-fetched from IPFS.
 
     Args:
-        creators: MARKET_CREATORS config dict
+        sender: Safe contract address (hex string)
 
     Returns:
-        mapping of creator key -> {request_id: request_dict}
+        dict of request_id -> request_dict
     """
-    result = {}
-    for key, cfg in creators.items():
-        sender = cfg["safe_contract_address"].lower()
-        print(f"Fetching mech requests for {cfg['name']}...")
+    sender = sender.lower()
+    print(f"Fetching mech requests for {sender}...")
 
-        mech_requests, checkpoint_ts = _load_cache(key)
-        writer = _make_writer(key)
+    mech_requests, checkpoint_ts = _load_cache(sender)
+    writer = _make_writer(sender)
 
-        if checkpoint_ts > 0:
-            from datetime import datetime, timezone
-            dt = datetime.fromtimestamp(checkpoint_ts, tz=timezone.utc)
-            print(f"  Resuming from checkpoint {dt.strftime('%Y-%m-%d %H:%M UTC')}")
+    if checkpoint_ts > 0:
+        dt = datetime.fromtimestamp(checkpoint_ts, tz=timezone.utc)
+        print(f"  Resuming from checkpoint {dt.strftime('%Y-%m-%d %H:%M UTC')}")
 
-        try:
-            _fetch_requests_from_subgraph(sender, mech_requests, checkpoint_ts=checkpoint_ts)
-            writer(mech_requests, force=True)
-
-            errors = _populate_ipfs_contents(mech_requests, writer)
-            if errors > 0:
-                print(f"  {errors} IPFS errors, retrying...")
-                _populate_ipfs_contents(mech_requests, writer)
-        except Exception as exc:  # pylint: disable=broad-except
-            print(f"  Error: {exc}")
-            traceback.print_exc()
-
+    try:
+        _fetch_requests_from_subgraph(sender, mech_requests, checkpoint_ts=checkpoint_ts)
         writer(mech_requests, force=True)
-        result[key] = mech_requests
-        print(f"  {cfg['name']}: {len(mech_requests)} requests")
 
-    return result
+        errors = _populate_ipfs_contents(mech_requests, writer)
+        if errors > 0:
+            print(f"  {errors} IPFS errors, retrying...")
+            _populate_ipfs_contents(mech_requests, writer)
+    except (OSError, ConnectionError, TimeoutError, ValueError, json.JSONDecodeError) as exc:
+        print(f"  Error: {exc}")
+        traceback.print_exc()
+
+    writer(mech_requests, force=True)
+    print(f"  {len(mech_requests)} requests")
+
+    return mech_requests
