@@ -20,12 +20,58 @@
 """Fetch market creator Safe and owner information from Gnosis Chain."""
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Set
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
-from utils import get_asset_balance, wei_to_unit, web3
+from dotenv import dotenv_values
+from web3 import Web3
 
+
+# --- Constants & web3 setup (formerly in utils.py) ---
 
 NATIVE_TOKEN = "0x0000000000000000000000000000000000000000"
+WXDAI_ADDRESS = "0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d"
+
+# Find .env from repo root (works regardless of CWD)
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_env_values = dotenv_values(_REPO_ROOT / ".env")
+
+_rpc = _env_values.get("GNOSIS_RPC")
+web3 = Web3(Web3.HTTPProvider(_rpc))
+
+
+# --- Balance utilities (formerly in utils.py) ---
+
+def get_asset_balance(address: str, token_address: Optional[str] = None) -> int:
+    """Get the balance of an asset for a given address."""
+    if token_address:
+        erc20 = web3.eth.contract(
+            address=web3.to_checksum_address(token_address),
+            abi=[
+                {
+                    "constant": True,
+                    "inputs": [{"name": "_owner", "type": "address"}],
+                    "name": "balanceOf",
+                    "outputs": [{"name": "", "type": "uint256"}],
+                    "type": "function",
+                }
+            ],
+        )
+        return erc20.functions.balanceOf(web3.to_checksum_address(address)).call()
+    return web3.eth.get_balance(web3.to_checksum_address(address))
+
+
+def wei_to_unit(wei: int) -> float:
+    """Convert WEI to unit token."""
+    return wei / 10**18
+
+
+def wei_to_xdai(wei: int) -> str:
+    """Converts and formats wei to xDAI."""
+    return "{:.2f} xDAI".format(wei_to_unit(wei))
+
+
+# --- Safe / creator info ---
 
 GNOSIS_SAFE_ABI = [
     {
