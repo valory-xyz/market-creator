@@ -404,6 +404,7 @@ def mech_requests_to_dataframe(mech_requests: dict) -> pd.DataFrame:
                 ),
                 "deliver_delay_seconds": (deliver_ts - request_ts) if deliver_ts else None,
                 "result_category": result_category,
+                "is_failed": result_category in ("Error", "No delivery"),
             }
         )
 
