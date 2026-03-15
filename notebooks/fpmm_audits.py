@@ -671,6 +671,8 @@ def load_audits_df(fpmms: dict, audits: dict | None = None) -> pd.DataFrame:
             }
         )
 
+    if not rows:
+        return pd.DataFrame(columns=["market_id", "n_audits", "n_valid_audits", "n_matching_audits"])
     return pd.DataFrame(rows)
 
 
