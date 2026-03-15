@@ -19,7 +19,6 @@
 
 """Script for retrieving Omen markets."""
 
-import argparse
 import json
 import os
 import time
@@ -127,22 +126,22 @@ class MarketState(Enum):
         """Prints the market status."""
         return self.name.capitalize()
 
-    def __lt__(self, other):
+    def __lt__(self, other):  # noqa: D105
         if self.__class__ is other.__class__:
             return self.value < other.value
         return NotImplemented
 
-    def __le__(self, other):
+    def __le__(self, other):  # noqa: D105
         if self.__class__ is other.__class__:
             return self.value <= other.value
         return NotImplemented
 
-    def __gt__(self, other):
+    def __gt__(self, other):  # noqa: D105
         if self.__class__ is other.__class__:
             return self.value > other.value
         return NotImplemented
 
-    def __ge__(self, other):
+    def __ge__(self, other):  # noqa: D105
         if self.__class__ is other.__class__:
             return self.value >= other.value
         return NotImplemented

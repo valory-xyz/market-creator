@@ -31,12 +31,8 @@ from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from pathlib import Path
 
-# Add repo root to path for .env loading
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 import google.genai as genai
 import pandas as pd
-from dotenv import load_dotenv
 from omen_markets import (
     INVALID_ANSWER_HEX,
     MarketState,
@@ -48,10 +44,15 @@ from omen_markets import (
 from openai import OpenAI
 from tqdm import tqdm
 
+# Add repo root to path for .env loading
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from dotenv import load_dotenv  # noqa: E402
+
 # Add local Grok-Api repo to path
 _GROK_API_DIR = Path(__file__).resolve().parent.parent.parent / "Grok-Api"
 sys.path.insert(0, str(_GROK_API_DIR))
-from core import Grok
+from core import Grok  # noqa: E402
 
 load_dotenv()
 
@@ -219,8 +220,6 @@ def get_grok_audit(fpmm: dict) -> dict | None:
                 "timestamp": int(time.time()),
                 "response": parsed_response,
             }
-            # if result["response"].get("answer").lower() not in [outcome.lower() for outcome in outcomes]:
-            #     return None
             return result
         except (json.JSONDecodeError, KeyError, TypeError) as e:
             print(
@@ -309,8 +308,6 @@ def get_gemini_audit(fpmm: dict) -> dict | None:
                 "timestamp": int(time.time()),
                 "response": parsed_response,
             }
-            # if result["response"].get("answer").lower() not in [outcome.lower() for outcome in outcomes]:
-            #     return None
             return result
         except (json.JSONDecodeError, KeyError, TypeError) as e:
             print(
@@ -511,7 +508,6 @@ def display_audit_results_html(df: pd.DataFrame, fpmms: dict, audits: dict) -> N
         print("No audited markets to display.")
         return
 
-    # Structure: {num_valid_audits: {num_matching: count}}
     audit_breakdown: dict = {}
     total_audited_markets = 0
     invalid_audited_markets = 0
