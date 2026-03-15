@@ -26,7 +26,6 @@ from typing import TypedDict
 from dotenv import dotenv_values
 from web3 import Web3
 
-
 # --- Constants & web3 setup (formerly in utils.py) ---
 
 NATIVE_TOKEN = "0x0000000000000000000000000000000000000000"

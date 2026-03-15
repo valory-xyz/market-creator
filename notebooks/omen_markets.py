@@ -20,20 +20,19 @@
 """Script for retrieving Omen markets."""
 
 import argparse
-from collections import defaultdict
 import json
 import os
 import time
+from collections import defaultdict
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict
 
+import pandas as pd
 from dotenv import load_dotenv
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
-import pandas as pd
 from tqdm import tqdm
-
 
 load_dotenv()
 
@@ -176,10 +175,10 @@ def get_market_state(market: Dict[str, Any]) -> MarketState:
 def get_market_current_answer(market: dict) -> str:
     """Get market current answer"""
     current_answer = market.get("currentAnswer", "")
-    
+
     if not current_answer:
         return NA_ANSWER
-    
+
     if current_answer.lower() == INVALID_ANSWER_HEX.lower():
         return INVALID_ANSWER
 
@@ -354,33 +353,3 @@ def _ts_to_datetime(ts) -> datetime | None:
         return datetime.fromtimestamp(float(ts), tz=timezone.utc)
     except (ValueError, TypeError, OSError):
         return None
-
-
-# def main() -> None:
-#     """Main entry point for command-line execution."""
-    
-#     parser = argparse.ArgumentParser(
-#         description="Fetch Fixed Product Market Makers from the Omen subgraph."
-#     )
-#     parser.add_argument(
-#         "creators",
-#         type=str,
-#         nargs="+",
-#         help="One or more creator addresses to filter FPMMs"
-#     )
-#     parser.add_argument(
-#         "--no-trades",
-#         action="store_true",
-#         help="Skip fetching buy trades (faster execution)"
-#     )
-
-#     args = parser.parse_args()
-
-#     print(f"Fetching FPMMs for {len(args.creators)} creator(s)...")
-#     fpmms = get_fpmms(args.creators, populate_trades=not args.no_trades)
-#     print(f"\nTotal FPMMs in database: {len(fpmms)}")
-#     print(f"Results written to: {FPMMS_JSON_PATH}")
-
-
-# if __name__ == "__main__":
-#     main()

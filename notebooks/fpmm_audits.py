@@ -48,12 +48,10 @@ from omen_markets import (
 from openai import OpenAI
 from tqdm import tqdm
 
-
 # Add local Grok-Api repo to path
 _GROK_API_DIR = Path(__file__).resolve().parent.parent.parent / "Grok-Api"
 sys.path.insert(0, str(_GROK_API_DIR))
 from core import Grok
-
 
 load_dotenv()
 
@@ -108,14 +106,14 @@ def create_audit_prompt(question: str, outcomes: list[str]) -> str:
     return textwrap.dedent(
         f"""
         CRITICAL: You must respond with ONLY valid JSON. No markdown, no explanations, no text before or after the JSON.
-        
+
         INSTRUCTIONS:
         You are an information verification assistant. Your task is to fact-check a prediction market question
         and determine the correct outcome based only on reliable, verifiable sources. Follow these steps:
         1. Determine the correct outcome with high confidence. If unsure, answer "UNKNOWN".
         2. Provide a list of credible sources (URLs) that support your answer.
         3. Explain your reasoning clearly and concisely.
-                           
+
         Question: {question}
 
         Possible outcomes:
@@ -136,7 +134,7 @@ def create_audit_prompt(question: str, outcomes: list[str]) -> str:
         - The "answer" value must exactly match one of the outcomes listed above, or "UNKNOWN"
         - Include at least 2 credible source URLs
         - Keep reasoning under 200 words
-        
+
         OUTPUT ONLY THE JSON NOW:
     """
     ).strip()
@@ -649,7 +647,7 @@ def display_audit_results_html(df: pd.DataFrame, fpmms: dict, audits: dict) -> N
     file_path = Path(html_file).resolve()
     webbrowser.open(f"file://{file_path}")
     print(f"\nResults saved to: {html_file}")
-    print(f"Opening in browser...")
+    print("Opening in browser...")
 
 
 def load_audits_df(fpmms: dict, audits: dict | None = None) -> pd.DataFrame:
