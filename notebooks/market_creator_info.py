@@ -21,7 +21,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import TypedDict
 
 from dotenv import dotenv_values
 from web3 import Web3
@@ -42,20 +42,12 @@ web3 = Web3(Web3.HTTPProvider(_rpc))
 
 # --- Balance utilities (formerly in utils.py) ---
 
-def get_asset_balance(address: str, token_address: Optional[str] = None) -> int:
+def get_asset_balance(address: str, token_address: str | None = None) -> int:
     """Get the balance of an asset for a given address."""
     if token_address:
         erc20 = web3.eth.contract(
             address=web3.to_checksum_address(token_address),
-            abi=[
-                {
-                    "constant": True,
-                    "inputs": [{"name": "_owner", "type": "address"}],
-                    "name": "balanceOf",
-                    "outputs": [{"name": "", "type": "uint256"}],
-                    "type": "function",
-                }
-            ],
+            abi=ERC20_ABI,
         )
         return erc20.functions.balanceOf(web3.to_checksum_address(address)).call()
     return web3.eth.get_balance(web3.to_checksum_address(address))
@@ -69,6 +61,17 @@ def wei_to_unit(wei: int) -> float:
 def wei_to_xdai(wei: int) -> str:
     """Converts and formats wei to xDAI."""
     return "{:.2f} xDAI".format(wei_to_unit(wei))
+
+
+ERC20_ABI = [
+    {
+        "constant": True,
+        "inputs": [{"name": "_owner", "type": "address"}],
+        "name": "balanceOf",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "type": "function",
+    }
+]
 
 
 # --- Safe / creator info ---
@@ -91,18 +94,27 @@ GNOSIS_SAFE_ABI = [
 ]
 
 
+class MarketCreatorConfig(TypedDict):
+    """Configuration for a single market creator."""
+
+    name: str
+    safe_contract_address: str
+    markets_to_approve_per_day: int
+    thresholds: dict
+
+
 @dataclass
 class MarketCreatorInfo:
     """Information about a market creator."""
 
     label: str
     safe_contract_address: str
-    owners: List[str]
+    owners: list[str]
     threshold: int
-    balances: Dict[str, Dict[str, float]]  # address -> {token_address -> balance}
+    balances: dict  # address -> {token_address -> balance}
 
 
-def _get_balances(address: str, token_addresses: Set[str]) -> Dict[str, float]:
+def _get_balances(address: str, token_addresses: set) -> dict:
     """Get balances for a set of token addresses.
 
     Args:
@@ -121,11 +133,11 @@ def _get_balances(address: str, token_addresses: Set[str]) -> Dict[str, float]:
     return result
 
 
-def get_creator_info(config: Dict[str, Any]) -> MarketCreatorInfo:
+def get_creator_info(config: MarketCreatorConfig) -> MarketCreatorInfo:
     """Get Safe owner and balance info for a market creator.
 
     Args:
-        config: dict with "name", "safe_contract_address", and "thresholds" keys
+        config: market creator configuration
 
     Returns:
         MarketCreatorInfo with balances for all tokens referenced in thresholds
@@ -158,12 +170,12 @@ def get_creator_info(config: Dict[str, Any]) -> MarketCreatorInfo:
 
 
 def get_all_creators_info(
-    creators: Dict[str, Dict[str, Any]],
-) -> List[MarketCreatorInfo]:
+    creators: dict[str, MarketCreatorConfig],
+) -> list[MarketCreatorInfo]:
     """Get info for multiple market creators.
 
     Args:
-        creators: mapping of label -> config dict
+        creators: mapping of label -> market creator configuration
 
     Returns:
         List of MarketCreatorInfo

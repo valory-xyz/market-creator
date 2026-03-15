@@ -70,7 +70,8 @@ class AuditProvider(str, Enum):
         return self.value.lower()
 
 
-AUDITS_JSON_PATH = "fpmm_audits.json"
+_CACHE_DIR = Path(__file__).resolve().parent / ".cache"
+AUDITS_JSON_PATH = str(_CACHE_DIR / "fpmm_audits.json")
 OPENAI_MODEL = "gpt-5.2"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GROK_MODEL = "grok-3-fast"
@@ -93,6 +94,7 @@ def load_existing_audits() -> dict:
 
 def save_results(results: dict) -> None:
     """Save audit results under the `fpmmAudits` root element."""
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
     with open(AUDITS_JSON_PATH, "w", encoding="utf-8") as file:
         json.dump({"fpmmAudits": results}, file, indent=2, sort_keys=True)
 
@@ -637,6 +639,39 @@ def display_audit_results_html(df: pd.DataFrame, fpmms: dict, audits: dict) -> N
     webbrowser.open(f"file://{file_path}")
     print(f"\nResults saved to: {html_file}")
     print(f"Opening in browser...")
+
+
+def load_audits_df(fpmms: dict, audits: dict | None = None) -> pd.DataFrame:
+    """Build a per-market audit summary DataFrame.
+
+    Args:
+        fpmms: mapping of market_id -> market dict (needed for valid/matching)
+        audits: mapping of market_id -> audit_dict. If None, loads from cache.
+
+    Returns:
+        DataFrame with columns: market_id, n_audits, n_valid_audits, n_matching_audits
+    """
+    if audits is None:
+        audits = load_existing_audits().get("fpmmAudits", {})
+
+    rows = []
+    for market_id, market_audits in audits.items():
+        market = fpmms.get(market_id)
+        if not isinstance(market, dict):
+            continue
+
+        matching, valid, total = get_matching_audits(market, market_audits)
+
+        rows.append(
+            {
+                "market_id": market_id,
+                "n_audits": total,
+                "n_valid_audits": valid,
+                "n_matching_audits": matching,
+            }
+        )
+
+    return pd.DataFrame(rows)
 
 
 def main() -> None:

@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import pandas as pd
 import requests as http_requests
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
@@ -336,3 +337,74 @@ def fetch_mech_requests(sender: str) -> Dict[str, Any]:
     print(f"  {len(mech_requests)} requests")
 
     return mech_requests
+
+
+# ---------------------------------------------------------------------------
+# Result categorization & DataFrame builder
+# ---------------------------------------------------------------------------
+
+def categorize_mech_result(result_str: str) -> str:
+    """Categorize a mech deliver result into a human-readable label."""
+    try:
+        parsed = json.loads(result_str)
+        if isinstance(parsed, dict) and parsed:
+            first_key = list(parsed.keys())[0]
+            first_val = parsed[first_key]
+            return f"{first_key}={first_val}"
+        return "Valid (other)"
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return "Error"
+
+
+def mech_requests_to_dataframe(mech_requests: dict) -> pd.DataFrame:
+    """Convert a dict of mech request dicts into a DataFrame.
+
+    Args:
+        mech_requests: mapping of request_id -> request dict as returned
+            by ``fetch_mech_requests()``
+
+    Returns:
+        DataFrame with one row per request and pre-computed columns for
+        nonce, deliver status, delay, and result category.
+    """
+    rows = []
+    for request_id, req in mech_requests.items():
+        request_ts = int(req.get("blockTimestamp", 0))
+
+        # Extract nonce from parsedRequest.content JSON
+        nonce = None
+        try:
+            content = json.loads(req["parsedRequest"]["content"])
+            nonce = content.get("nonce")
+        except (json.JSONDecodeError, KeyError, TypeError):
+            pass
+
+        deliver = req.get("deliver")
+        has_deliver = deliver is not None
+        deliver_ts = int(deliver["blockTimestamp"]) if has_deliver else None
+
+        # Result categorization
+        if not has_deliver or "ipfsContents" not in (deliver or {}):
+            result_category = "No delivery"
+        else:
+            result_str = str(deliver["ipfsContents"].get("result", ""))
+            result_category = categorize_mech_result(result_str)
+
+        rows.append(
+            {
+                "request_id": request_id,
+                "sender": req.get("sender", {}).get("id"),
+                "request_ts": datetime.fromtimestamp(request_ts, tz=timezone.utc) if request_ts else None,
+                "nonce": nonce,
+                "has_deliver": has_deliver,
+                "deliver_ts": (
+                    datetime.fromtimestamp(deliver_ts, tz=timezone.utc)
+                    if deliver_ts
+                    else None
+                ),
+                "deliver_delay_seconds": (deliver_ts - request_ts) if deliver_ts else None,
+                "result_category": result_category,
+            }
+        )
+
+    return pd.DataFrame(rows)
