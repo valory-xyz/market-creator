@@ -248,11 +248,10 @@ def get_fpmms(creator: str) -> dict:
 
     fpmms = {}
 
-    print(f"Fetching fpmms for creator {creator}...")
-
     transport = RequestsHTTPTransport(url=THEGRAPH_ENDPOINT)
     client = Client(transport=transport, fetch_schema_from_transport=True)
 
+    spinner = tqdm(desc=f"Fetching fpmms for {creator[:10]}…", unit=" markets", bar_format="{desc}: {n}{unit} {elapsed}")
     creation_timestamp_gt = 0
     while True:
         variables = {
@@ -269,8 +268,11 @@ def get_fpmms(creator: str) -> dict:
             if fpmm["id"] not in fpmms:
                 fpmms[fpmm["id"]] = fpmm
 
+        spinner.n = len(fpmms)
+        spinner.refresh()
         creation_timestamp_gt = items[-1]["creationTimestamp"]
-    
+
+    spinner.close()
     return {"fixedProductMarketMakers": fpmms}
 
 

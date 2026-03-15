@@ -188,9 +188,9 @@ def get_grok_audit(fpmm: dict) -> dict | None:
         try:
             grok = Grok(GROK_MODEL)
             response = grok.start_convo(prompt)
-        except (ConnectionError, TimeoutError, OSError, ValueError, RuntimeError) as e:
+        except Exception as e:
             error_occurred = True
-            print(f"[Attempt {attempt + 1}/{N_RETRIES}] Grok exception: {str(e)}")
+            print(f"[Attempt {attempt + 1}/{N_RETRIES}] Grok exception: {type(e).__name__}: {e}")
 
         # Check if an exception occurred or if response contains an error
         if error_occurred or (isinstance(response, dict) and "error" in response):
@@ -333,9 +333,9 @@ def get_gemini_audit(fpmm: dict) -> dict | None:
 
 # Mapping between AuditProvider and corresponding audit method
 AUDIT_METHODS = {
-    AuditProvider.GROK: get_grok_audit,
+    # AuditProvider.GROK: get_grok_audit,
     AuditProvider.OPENAI: get_openai_audit,
-    AuditProvider.GEMINI: get_gemini_audit,
+    # AuditProvider.GEMINI: get_gemini_audit,
 }
 
 
@@ -378,22 +378,33 @@ def create_audit_dataframe(fpmms: dict, audits: dict) -> pd.DataFrame:
 
 
 def get_markets_to_audit(
-    fpmms: dict, current_audits: dict, num_markets: int
+    fpmms: dict,
+    current_audits: dict,
+    num_markets: int,
+    finalizing_only: bool = False,
 ) -> list[dict]:
-    """Returns the latest num_markets closed markets that have not been audited yet."""
+    """Returns the latest num_markets unaudited markets.
 
+    By default selects closed markets. When *finalizing_only* is True,
+    selects finalizing markets instead.
+    """
+
+    target_state = MarketState.FINALIZING if finalizing_only else MarketState.CLOSED
     already_analyzed_ids = current_audits.keys()
     output = []
 
     for _, fpmm in fpmms.items():
         state = get_market_state(fpmm)
-        if state != MarketState.CLOSED or not fpmm.get("resolutionTimestamp"):
+        if state != target_state:
+            continue
+        if not finalizing_only and not fpmm.get("resolutionTimestamp"):
             continue
         if fpmm["id"] in already_analyzed_ids:
             continue
         output.append(fpmm)
 
-    output.sort(key=lambda x: int(x.get("resolutionTimestamp", 0)), reverse=True)
+    sort_key = "answerFinalizedTimestamp" if finalizing_only else "resolutionTimestamp"
+    output.sort(key=lambda x: int(x.get(sort_key) or 0), reverse=True)
 
     return output[:num_markets]
 
@@ -701,14 +712,21 @@ def main() -> None:
         action="store_true",
         help="Fill in missing audits for markets that lack any provider audit results.",
     )
+    parser.add_argument(
+        "--finalizing-only",
+        action="store_true",
+        help="Audit finalizing markets instead of closed ones.",
+    )
 
     args = parser.parse_args()
     fpmms_data = get_fpmms(args.creator)
     fpmms = fpmms_data.get("fixedProductMarketMakers", {})
     audits = load_existing_audits().get("fpmmAudits", {})
-    markets_to_audit = get_markets_to_audit(fpmms, audits, args.num_markets)
+    markets_to_audit = get_markets_to_audit(fpmms, audits, args.num_markets, finalizing_only=args.finalizing_only)
 
-    print(f"Found {len(markets_to_audit)} closed markets to analyze")
+    states_label = "finalizing" if args.finalizing_only else "closed"
+    print(f"Collected {len(fpmms)} markets, {len(audits)} already audited")
+    print(f"Found {len(markets_to_audit)} {states_label} markets to analyze")
 
     for fpmm in tqdm(markets_to_audit, desc="Auditing market resolution"):
         audit = audit_market(fpmm)
