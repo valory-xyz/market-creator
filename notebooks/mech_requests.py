@@ -42,7 +42,7 @@ from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from tqdm import tqdm
 
-SUBGRAPH_URL = (
+MECH_MARKETPLACE_SUBGRAPH_URL = (
     "https://api.subgraph.autonolas.tech/api/proxy/marketplace-gnosis"
 )
 IPFS_GATEWAY = "https://gateway.autonolas.tech/ipfs/"
@@ -145,7 +145,7 @@ def _fetch_requests_from_subgraph(
     checkpoint_ts: int = 0,
 ) -> None:
     """Page through requests for *sender* from *checkpoint_ts* and merge into *existing*."""
-    transport = RequestsHTTPTransport(url=SUBGRAPH_URL)
+    transport = RequestsHTTPTransport(url=MECH_MARKETPLACE_SUBGRAPH_URL)
     client = Client(transport=transport, fetch_schema_from_transport=True)
 
     id_gt = "0x00"
