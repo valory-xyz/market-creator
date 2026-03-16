@@ -59,3 +59,4 @@ market_approval_server/market_approval_server.log
 market_approval_server/server_config.json
 creator_service
 .idea
+notebooks/.cache/

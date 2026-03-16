@@ -27,8 +27,9 @@ import bisect
 import json
 import os
 import sys
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import requests
 from dotenv import dotenv_values
@@ -45,15 +46,29 @@ sys.path.insert(0, os.path.expanduser(trader_quickstart_path))
 sys.path.insert(0, os.path.expanduser(f"{trader_quickstart_path}/scripts"))
 
 import trades  # noqa: E402
-from mech_request_utils import get_mech_requests  # noqa: E402
-from trades import INVALID_ANSWER, MarketState, TradeResult  # noqa: E402
+from subgraph_mech import fetch_mech_requests  # noqa: E402
+from trades import INVALID_ANSWER, MarketState  # noqa: E402
 
 RPC = env_file_vars.get("RPC")
 SERVICE_REGISTRY_ADDRESS = "0x9338b5153AE39BB89f50468E608eD9d764B755fD"
 DATASET_PREFIX = "trader_dataset_"
 
 
+class TradeResult(Enum):
+    """TradeResult"""
+
+    WIN = "win"
+    LOSE = "lose"
+    INVALID = "invalid"
+    UNKNOWN = "unknown"
+
+    def __str__(self) -> str:
+        """Return the trade result name."""
+        return self.name.capitalize()
+
+
 def _get_contract(address: str) -> Any:
+    """Return a web3 contract instance for the given address."""
     w3 = Web3(Web3.HTTPProvider(RPC))
     abi = _get_abi(address)
     contract = w3.eth.contract(address=Web3.to_checksum_address(address), abi=abi)
@@ -61,6 +76,7 @@ def _get_contract(address: str) -> Any:
 
 
 def _get_abi(address: str) -> List:
+    """Fetch the contract ABI from Blockscout."""
     contract_abi_url = (
         "https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}"
     )
@@ -90,13 +106,16 @@ def _populate_mech_requests(
 
     # Sort mech requests by timestamp
     dumped_mech_requests = list(mech_requests.values())
+    # Filter out mech requests with None blockTimestamp
+    dumped_mech_requests = [r for r in dumped_mech_requests if r.get("blockTimestamp") is not None]
     sorted_mech_requests = sorted(
         dumped_mech_requests, key=lambda x: int(x["blockTimestamp"])
     )
     timestamps = [int(x["blockTimestamp"]) for x in sorted_mech_requests]
 
     # TODO shallow copy for efficiency, be careful
-    outstanding_mech_requests = mech_requests.copy()
+    # Filter out requests with None blockTimestamp
+    outstanding_mech_requests = {k: v for k, v in mech_requests.items() if v.get("blockTimestamp") is not None}
 
     for trade in fpmm_trades:
         creation_timestamp = int(trade["creationTimestamp"])
@@ -151,6 +170,7 @@ def _populate_market_states(fpmm_trades: Dict[str, Any]) -> None:
         if state == MarketState.CLOSED:
             outcome_index = int(trade["outcomeIndex"])
             current_answer = int(fpmm["currentAnswer"], 16)
+
             if current_answer == INVALID_ANSWER:
                 trade["result"] = TradeResult.INVALID.value
             elif current_answer == outcome_index:
@@ -168,7 +188,7 @@ def get_service_safe(service_id: int) -> str:
     return service_safe_address
 
 
-def generate_dataset(service_id: int) -> (Dict[str, Any], Dict[str, Any], List[str]):
+def generate_dataset(service_id: int) -> Tuple[Dict[str, Any], Dict[str, Any], List[str]]:
     """Generates the dataset"""
     dataset_json = f"{DATASET_PREFIX}{service_id}.json"
 
@@ -178,7 +198,7 @@ def generate_dataset(service_id: int) -> (Dict[str, Any], Dict[str, Any], List[s
     print(f"{service_safe_address=}")
     print(service_safe_address.lower())
 
-    mech_requests = get_mech_requests(service_safe_address, dataset_json)
+    mech_requests = fetch_mech_requests(service_safe_address)
 
     fpmm_trades = trades._query_omen_xdai_subgraph(service_safe_address.lower())[
         "data"
