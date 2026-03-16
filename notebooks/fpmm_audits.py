@@ -33,7 +33,8 @@ from pathlib import Path
 
 import google.genai as genai
 import pandas as pd
-from omen_markets import (
+from openai import OpenAI
+from subgraph_omen import (
     INVALID_ANSWER_HEX,
     MarketState,
     answer_mapping,
@@ -41,7 +42,6 @@ from omen_markets import (
     get_market_current_answer,
     get_market_state,
 )
-from openai import OpenAI
 from tqdm import tqdm
 
 # Add repo root to path for .env loading

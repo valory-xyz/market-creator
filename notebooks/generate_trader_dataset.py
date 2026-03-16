@@ -46,7 +46,7 @@ sys.path.insert(0, os.path.expanduser(trader_quickstart_path))
 sys.path.insert(0, os.path.expanduser(f"{trader_quickstart_path}/scripts"))
 
 import trades  # noqa: E402
-from mech_requests import fetch_mech_requests  # noqa: E402
+from subgraph_mech import fetch_mech_requests  # noqa: E402
 from trades import INVALID_ANSWER, MarketState  # noqa: E402
 
 RPC = env_file_vars.get("RPC")

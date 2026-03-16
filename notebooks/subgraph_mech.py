@@ -229,7 +229,7 @@ def _populate_ipfs_contents(
 def _cache_path(sender: str) -> Path:
     """Return the JSON cache path for a sender address."""
     _CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    return _CACHE_DIR / f"mech_requests_{sender.lower()}.json"
+    return _CACHE_DIR / f"subgraph_mech_{sender.lower()}.json"
 
 
 def _load_cache(sender: str) -> Tuple[Dict[str, Any], int]:
