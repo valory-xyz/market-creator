@@ -71,10 +71,6 @@ query fpmms_query($creator: Bytes, $creationTimestamp_gt: BigInt) {
             currentAnswer
             currentAnswerBond
             currentAnswerTimestamp
-            answers {
-            answer
-            bondAggregate
-            }
         }
         id
         openingTimestamp
@@ -278,9 +274,6 @@ def get_fpmms(creator: str) -> dict:
 # DataFrame builder
 # ---------------------------------------------------------------------------
 
-INITIAL_BOND_WEI = 1_000_000_000_000_000  # 0.001 xDAI
-
-
 def markets_to_dataframe(fpmms_dict: dict) -> pd.DataFrame:
     """Convert a dict of FPMM market dicts into a DataFrame.
 
@@ -290,12 +283,12 @@ def markets_to_dataframe(fpmms_dict: dict) -> pd.DataFrame:
 
     Returns:
         DataFrame with one row per market and pre-computed columns for
-        state, challenge status, answer info, etc.
+        state, answer info, etc.  Challenge fields (is_challenged,
+        is_flipped, n_responses) come from ``realitio_questions.py``.
     """
     rows = []
     for market_id, m in fpmms_dict.items():
         question = m.get("question") or {}
-        answers = question.get("answers") or []
         current_answer_hex = m.get("currentAnswer") or question.get("currentAnswer")
         bond = int(
             m.get("currentAnswerBond")
@@ -303,9 +296,6 @@ def markets_to_dataframe(fpmms_dict: dict) -> pd.DataFrame:
             or 0
         )
 
-        n_answers = len(answers)
-        first_answer_hex = answers[0]["answer"] if answers else None
-        is_challenged = n_answers > 1 or bond > INITIAL_BOND_WEI
         is_invalid = (
             isinstance(current_answer_hex, str)
             and current_answer_hex.lower() == INVALID_ANSWER_HEX.lower()
@@ -325,17 +315,6 @@ def markets_to_dataframe(fpmms_dict: dict) -> pd.DataFrame:
                 "current_answer": get_market_current_answer(m),
                 "current_answer_hex": current_answer_hex,
                 "is_invalid": is_invalid,
-                "n_answers": n_answers,
-                "first_answer_hex": first_answer_hex,
-                "is_challenged": is_challenged,
-                "is_flipped": (
-                    is_challenged
-                    and n_answers >= 2
-                    and current_answer_hex is not None
-                    and first_answer_hex is not None
-                    and current_answer_hex != first_answer_hex
-                ),
-                "n_challenges": max(n_answers - 1, 1) if is_challenged else 0,
                 "current_answer_bond": bond,
                 "collateral_volume": float(m.get("collateralVolume") or 0) / 1e18,
             }
