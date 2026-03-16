@@ -39,10 +39,27 @@ from packages.valory.skills.market_creation_manager_abci.states.redeem_winnings 
     RedeemWinningsRound,
 )
 
-# Markets where the safe provided liquidity (LP positions).
-# Covers both: markets the safe created itself, and markets where it
-# added liquidity as a funder without being the creator.
+# Markets created by the safe.
+# Uses fixedProductMarketMakers(creator:) because initial liquidity is added
+# by the factory contract, so fpmmLiquidities(funder:) would not match the safe.
 LP_MARKETS_QUERY = Template("""{
+    fixedProductMarketMakers(
+      where: {creator: "$safe", openingTimestamp_lt: "$now"}
+      first: $batch_size
+      orderBy: creationTimestamp
+      orderDirection: asc
+    ) {
+      id
+      conditions {
+        id
+        outcomeSlotCount
+      }
+    }
+  }""")
+
+# Markets where the safe directly added liquidity (not via factory).
+# Covers cases where the safe funds an existing market it did not create.
+DIRECT_LP_QUERY = Template("""{
     fpmmLiquidities(
       where: {funder: "$safe", type: Add, fpmm_: {openingTimestamp_lt: "$now"}}
       first: $batch_size
@@ -131,15 +148,22 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
     ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
         """Query the Omen subgraph for markets where the safe holds redeemable positions.
 
-        Covers both LP positions (liquidity added to a market) and trader positions
-        (outcome tokens bought on any market). Results are deduplicated by market address.
+        Uses three queries to cover all sources of conditional tokens:
+        1. Markets created by the safe (factory-funded LP positions)
+        2. Markets where the safe directly added liquidity (non-factory LP)
+        3. Markets where the safe bought outcome tokens (trader positions)
+
+        Results are deduplicated by market address.
         """
         safe = self.synchronized_data.safe_contract_address.lower()
         now = str(self.last_synced_timestamp)
         batch_size = self.params.redeem_winnings_batch_size
 
-        lp_response = yield from self.get_subgraph_result(
+        created_response = yield from self.get_subgraph_result(
             query=LP_MARKETS_QUERY.substitute(safe=safe, now=now, batch_size=batch_size)
+        )
+        direct_lp_response = yield from self.get_subgraph_result(
+            query=DIRECT_LP_QUERY.substitute(safe=safe, now=now, batch_size=batch_size)
         )
         trade_response = yield from self.get_subgraph_result(
             query=TRADE_MARKETS_QUERY.substitute(
@@ -147,17 +171,21 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
             )
         )
 
-        if lp_response is None and trade_response is None:
+        if all(
+            r is None for r in (created_response, direct_lp_response, trade_response)
+        ):
             self.context.logger.error("Could not retrieve any markets from subgraph.")
             return None
 
-        def _extract_markets(response: Optional[Dict], key: str) -> List[Dict]:
+        def _extract_markets(
+            response: Optional[Dict], key: str, nested: bool = False
+        ) -> List[Dict]:
             if response is None:
                 return []
             entries = response.get("data", {}).get(key, [])
             result = []
             for entry in entries:
-                fpmm = entry.get("fpmm", {})
+                fpmm = entry.get("fpmm", {}) if nested else entry
                 conditions = fpmm.get("conditions", [])
                 if not conditions:
                     continue
@@ -173,20 +201,26 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
                 )
             return result
 
-        lp_markets = _extract_markets(lp_response, "fpmmLiquidities")
-        trade_markets = _extract_markets(trade_response, "fpmmTrades")
+        created_markets = _extract_markets(
+            created_response, "fixedProductMarketMakers", nested=False
+        )
+        direct_lp_markets = _extract_markets(
+            direct_lp_response, "fpmmLiquidities", nested=True
+        )
+        trade_markets = _extract_markets(trade_response, "fpmmTrades", nested=True)
 
-        # Deduplicate by market address (safe may appear as both LP and trader)
+        # Deduplicate by market address (safe may appear in multiple queries)
         seen: set = set()
         markets = []
-        for m in lp_markets + trade_markets:
+        for m in created_markets + direct_lp_markets + trade_markets:
             if m["address"] not in seen:
                 seen.add(m["address"])
                 markets.append(m)
 
         self.context.logger.info(
             f"Found {len(markets)} unique market(s) past opening timestamp "
-            f"({len(lp_markets)} LP, {len(trade_markets)} trader)."
+            f"({len(created_markets)} created, {len(direct_lp_markets)} direct LP, "
+            f"{len(trade_markets)} trader)."
         )
         return markets
 
