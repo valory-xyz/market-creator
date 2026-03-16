@@ -116,12 +116,9 @@ class MarketCreatorInfo:
 def _get_balances(address: str, token_addresses: set) -> dict:
     """Get balances for a set of token addresses.
 
-    Args:
-        address: the wallet address to query
-        token_addresses: set of token contract addresses (use NATIVE_TOKEN for native)
-
-    Returns:
-        mapping of token_address -> balance in token units
+    :param address: the wallet address to query.
+    :param token_addresses: set of token contract addresses (use NATIVE_TOKEN for native).
+    :return: mapping of token_address -> balance in token units.
     """
     result = {}
     for token in token_addresses:
@@ -135,11 +132,8 @@ def _get_balances(address: str, token_addresses: set) -> dict:
 def get_creator_info(config: MarketCreatorConfig) -> MarketCreatorInfo:
     """Get Safe owner and balance info for a market creator.
 
-    Args:
-        config: market creator configuration
-
-    Returns:
-        MarketCreatorInfo with balances for all tokens referenced in thresholds
+    :param config: market creator configuration.
+    :return: MarketCreatorInfo with balances for all tokens referenced in thresholds.
     """
     label = config["name"]
     safe_contract_address = config["safe_contract_address"]
@@ -173,10 +167,7 @@ def get_all_creators_info(
 ) -> list[MarketCreatorInfo]:
     """Get info for multiple market creators.
 
-    Args:
-        creators: mapping of label -> market creator configuration
-
-    Returns:
-        List of MarketCreatorInfo
+    :param creators: mapping of label -> market creator configuration.
+    :return: List of MarketCreatorInfo.
     """
     return [get_creator_info(cfg) for cfg in creators.values()]

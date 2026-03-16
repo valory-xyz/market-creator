@@ -277,12 +277,9 @@ def get_fpmms(creator: str) -> dict:
 def markets_to_dataframe(fpmms_dict: dict) -> pd.DataFrame:
     """Convert a dict of FPMM market dicts into a DataFrame.
 
-    Args:
-        fpmms_dict: mapping of market_id -> market dict (the value of
-            ``get_fpmms(...)["fixedProductMarketMakers"]``)
-
-    Returns:
-        DataFrame with one row per market and pre-computed columns for
+    :param fpmms_dict: mapping of market_id -> market dict (the value of
+        ``get_fpmms(...)["fixedProductMarketMakers"]``)
+    :return: DataFrame with one row per market and pre-computed columns for
         state, answer info, etc.  Challenge fields (is_challenged,
         is_flipped, n_responses) come from ``realitio_questions.py``.
     """

@@ -187,7 +187,9 @@ def _populate_ipfs_contents(
 ) -> int:
     """Fetch missing IPFS contents for requests and delivers.
 
-    Returns the number of errors encountered.
+    :param mech_requests: mapping of request_id -> request dict.
+    :param _write_fn: callback to persist cache after each batch.
+    :return: the number of errors encountered.
     """
     pending = []
     for req in mech_requests.values():
@@ -250,6 +252,9 @@ def _compute_checkpoint(mech_requests: Dict[str, Any]) -> int:
     blockTimestamp among all settled requests, minus the timeout window.  On the
     next run we query from this timestamp onward, which re-checks any unsettled
     requests and discovers new ones.
+
+    :param mech_requests: mapping of request_id -> request dict.
+    :return: checkpoint timestamp (int).
     """
     if not mech_requests:
         return 0
@@ -305,11 +310,8 @@ def fetch_mech_requests(sender: str) -> Dict[str, Any]:
     Uses a JSON cache under ``notebooks/.cache/`` keyed by the lowercase
     sender address so already-delivered requests are not re-fetched from IPFS.
 
-    Args:
-        sender: Safe contract address (hex string)
-
-    Returns:
-        dict of request_id -> request_dict
+    :param sender: Safe contract address (hex string).
+    :return: dict of request_id -> request_dict.
     """
     sender = sender.lower()
     print(f"Fetching mech requests for {sender}...")
@@ -359,12 +361,9 @@ def categorize_mech_result(result_str: str) -> str:
 def mech_requests_to_dataframe(mech_requests: dict) -> pd.DataFrame:
     """Convert a dict of mech request dicts into a DataFrame.
 
-    Args:
-        mech_requests: mapping of request_id -> request dict as returned
-            by ``fetch_mech_requests()``
-
-    Returns:
-        DataFrame with one row per request and pre-computed columns for
+    :param mech_requests: mapping of request_id -> request dict as returned
+        by ``fetch_mech_requests()``.
+    :return: DataFrame with one row per request and pre-computed columns for
         nonce, deliver status, delay, and result category.
     """
     rows = []

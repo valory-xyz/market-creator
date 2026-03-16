@@ -382,6 +382,12 @@ def get_markets_to_audit(
 
     By default selects closed markets. When *finalizing_only* is True,
     selects finalizing markets instead.
+
+    :param fpmms: mapping of market_id -> market dict.
+    :param current_audits: mapping of market_id -> audit dict.
+    :param num_markets: maximum number of markets to return.
+    :param finalizing_only: if True, select finalizing markets instead of closed.
+    :return: list of market dicts.
     """
 
     target_state = MarketState.FINALIZING if finalizing_only else MarketState.CLOSED
@@ -470,8 +476,9 @@ def fill_missing_audits(fpmms: dict, audits: dict) -> None:
 def get_matching_audits(market: dict, audits: dict) -> tuple[int, int, int]:
     """Gets the number of matching, valid, and total audits for a market.
 
-    Returns:
-        (matching, valid, total) where:
+    :param market: market dict.
+    :param audits: mapping of audit_key -> audit dict.
+    :return: (matching, valid, total) where:
         - total: audits with a response
         - valid: audits whose answer is one of the market outcomes
         - matching: valid audits that agree with the market answer
@@ -649,12 +656,10 @@ def display_audit_results_html(df: pd.DataFrame, fpmms: dict, audits: dict) -> N
 def load_audits_df(fpmms: dict, audits: dict | None = None) -> pd.DataFrame:
     """Build a per-market audit summary DataFrame.
 
-    Args:
-        fpmms: mapping of market_id -> market dict (needed for valid/matching)
-        audits: mapping of market_id -> audit_dict. If None, loads from cache.
-
-    Returns:
-        DataFrame with columns: market_id, n_audits, n_valid_audits, n_matching_audits
+    :param fpmms: mapping of market_id -> market dict (needed for valid/matching).
+    :param audits: mapping of market_id -> audit_dict. If None, loads from cache.
+    :return: DataFrame with columns: market_id, n_audits, n_valid_audits,
+        n_matching_audits.
     """
     if audits is None:
         audits = load_existing_audits().get("fpmmAudits", {})

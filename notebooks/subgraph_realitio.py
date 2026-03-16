@@ -78,11 +78,8 @@ def fetch_realitio_responses(
     ``questionId_in`` and key the result dict by ``questionId`` so it
     matches the Omen DataFrame's ``question_id`` column.
 
-    Args:
-        question_ids: list of Realitio question hashes (from Omen subgraph)
-
-    Returns:
-        dict of question_id -> question data with responses
+    :param question_ids: list of Realitio question hashes (from Omen subgraph)
+    :return: dict of question_id -> question data with responses
     """
     transport = RequestsHTTPTransport(url=REALITIO_SUBGRAPH_URL)
     client = Client(transport=transport, fetch_schema_from_transport=True)
@@ -109,12 +106,9 @@ def fetch_realitio_responses(
 def realitio_to_dataframe(questions: Dict[str, Any]) -> pd.DataFrame:
     """Convert Realitio question data to a DataFrame.
 
-    Args:
-        questions: dict of question_id -> question data as returned by
-            ``fetch_realitio_responses()``
-
-    Returns:
-        DataFrame with one row per question and columns for response
+    :param questions: dict of question_id -> question data as returned by
+        ``fetch_realitio_responses()``
+    :return: DataFrame with one row per question and columns for response
         count, challenge status, and flip detection.
     """
     rows = []
