@@ -39,13 +39,19 @@ from packages.valory.skills.market_creation_manager_abci.states.redeem_winnings 
     RedeemWinningsRound,
 )
 
+# Maximum number of markets to fetch per subgraph query.
+# This is deliberately large (subgraph max per page) because subgraph queries
+# are cheap; the on-chain checks (check_resolved, get_user_holdings) are the
+# bottleneck and are separately limited by redeem_winnings_batch_size.
+SUBGRAPH_PAGE_SIZE = 1000
+
 # Markets created by the safe.
 # Uses fixedProductMarketMakers(creator:) because initial liquidity is added
 # by the factory contract, so fpmmLiquidities(funder:) would not match the safe.
 LP_MARKETS_QUERY = Template("""{
     fixedProductMarketMakers(
       where: {creator: "$safe", openingTimestamp_lt: "$now"}
-      first: $batch_size
+      first: $page_size
       orderBy: creationTimestamp
       orderDirection: asc
     ) {
@@ -62,7 +68,7 @@ LP_MARKETS_QUERY = Template("""{
 DIRECT_LP_QUERY = Template("""{
     fpmmLiquidities(
       where: {funder: "$safe", type: Add, fpmm_: {openingTimestamp_lt: "$now"}}
-      first: $batch_size
+      first: $page_size
       orderBy: creationTimestamp
       orderDirection: asc
     ) {
@@ -81,7 +87,7 @@ DIRECT_LP_QUERY = Template("""{
 TRADE_MARKETS_QUERY = Template("""{
     fpmmTrades(
       where: {creator: "$safe", type: Buy, fpmm_: {openingTimestamp_lt: "$now"}}
-      first: $batch_size
+      first: $page_size
       orderBy: creationTimestamp
       orderDirection: asc
     ) {
@@ -125,11 +131,14 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No resolved markets to redeem winnings from.")
             return None
 
+        batch_size = self.params.redeem_winnings_batch_size
         transactions: List[Dict[str, Any]] = []
         for market in markets:
             redeem_txs = yield from self._build_redeem_txs_for_market(market)
             if redeem_txs is not None:
                 transactions.extend(redeem_txs)
+                if len(transactions) >= batch_size:
+                    break
 
         if len(transactions) == 0:
             self.context.logger.info("No redeemable positions found.")
@@ -157,17 +166,17 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
         """
         safe = self.synchronized_data.safe_contract_address.lower()
         now = str(self.last_synced_timestamp)
-        batch_size = self.params.redeem_winnings_batch_size
+        page_size = SUBGRAPH_PAGE_SIZE
 
         created_response = yield from self.get_subgraph_result(
-            query=LP_MARKETS_QUERY.substitute(safe=safe, now=now, batch_size=batch_size)
+            query=LP_MARKETS_QUERY.substitute(safe=safe, now=now, page_size=page_size)
         )
         direct_lp_response = yield from self.get_subgraph_result(
-            query=DIRECT_LP_QUERY.substitute(safe=safe, now=now, batch_size=batch_size)
+            query=DIRECT_LP_QUERY.substitute(safe=safe, now=now, page_size=page_size)
         )
         trade_response = yield from self.get_subgraph_result(
             query=TRADE_MARKETS_QUERY.substitute(
-                safe=safe, now=now, batch_size=batch_size
+                safe=safe, now=now, page_size=page_size
             )
         )
 
