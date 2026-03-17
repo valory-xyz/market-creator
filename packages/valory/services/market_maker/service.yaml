@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeifpxmog2vk2jz7lwpam3ofqo7o4zk5ecmm55hjy4dyhtihazj5tli
+agent: valory/market_maker:0.1.0:bafybeiaxkwxtrx55sjkgbbczqu7gmmo4hk3kfn4tsyh6en2wysdmvm72g4
 number_of_agents: 1
 deployment:
   agent:
@@ -115,6 +115,7 @@ models:
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
       service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
+      redeem_winnings_batch_size: ${REDEEM_WINNINGS_BATCH_SIZE:int:5}
       irrelevant_tools:
       - openai-text-davinci-002
       - openai-text-davinci-003
