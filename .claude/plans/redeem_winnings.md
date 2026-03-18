@@ -17,7 +17,7 @@ When traders buy/sell on a market, the liquidity pool becomes imbalanced. When t
 SyncMarkets -> RemoveFunding -> [TxSettlement] -> PostTx(REMOVE_FUNDING_DONE) -> DepositDai
 ```
 
-**Proposed flow:**
+**Implemented flow:**
 ```
 SyncMarkets -> RemoveFunding
   -> [if tx (DONE)] -> [TxSettlement] -> PostTx(REMOVE_FUNDING_DONE) -> RedeemWinnings
@@ -34,65 +34,66 @@ This placement is logical because:
 - Like all other rounds, errors in RedeemWinnings skip ahead to DepositDai (never blocks)
 - RemoveFunding errors/no-ops also proceed to RedeemWinnings (not DepositDai), so winnings can always be checked regardless of whether liquidity was removed
 
-## Data Source for Redeemable Markets
+## Data Source — Two-Subgraph Strategy
 
-**Important:** `SyncMarketsRound` only queries markets where the safe still has LP shares (`amount_gt: "0"`). After `RemoveFundingRound` burns all LP shares, the market disappears from `markets_to_remove_liquidity`. Therefore, `RedeemWinningsBehaviour` needs its **own subgraph queries** to discover all markets where the safe may hold residual conditional tokens.
+The behaviour uses **two subgraphs** to determine what to redeem, eliminating unnecessary on-chain calls:
 
-The behaviour uses **three separate subgraph queries**, then deduplicates by market address:
-1. **Created markets** — `fixedProductMarketMakers(where: {creator: $safe})`: markets the safe created via the factory. Initial liquidity is added by the factory contract (not the safe directly), so `fpmmLiquidities(funder:)` would not match the safe for these.
-2. **Direct LP positions** — `fpmmLiquidities(where: {funder: $safe, type: Add})`: markets where the safe directly added liquidity to an existing market it did not create.
-3. **Trader positions** — `fpmmTrades(where: {creator: $safe, type: Buy})`: markets where the safe bought outcome tokens as a trader.
+### Step 1: ConditionalTokens subgraph — held positions
 
-This design is **service-agnostic**: it works for pure LPs, pure traders, or any combination.
+Query `userPositions(balance_gt: "0")` to find ALL conditions where the safe holds non-zero conditional token balances. This returns:
+- `conditionIds` — which condition the position belongs to
+- `indexSets` — which outcome side the tokens are on (e.g., `1` = outcome 0, `2` = outcome 1)
 
-### Subgraph-first optimization
+Result: `Dict[condition_id → Set[held_index_sets]]`
 
-The original design made 3 on-chain calls per market (`check_resolved`, `get_user_holdings`, `get_payout_numerators`), which caused **round timeouts** with 1000+ markets.
+### Step 2: Omen subgraph — finalized markets matching held conditions
 
-The optimized design uses subgraph filters to eliminate 2 of 3 on-chain calls:
+Query `fixedProductMarketMakers` filtered by `conditions_: {id_in: [...]}` using the condition IDs from Step 1. This uses a **targeted join** — the Omen subgraph only returns markets where the safe actually holds tokens. No cursor or pagination through all markets needed.
 
-| Check | Before | After |
-|-------|--------|-------|
-| Is condition resolved? | On-chain `payoutDenominator` | **Subgraph**: `answerFinalizedTimestamp_not: null` |
-| Which outcome won? | On-chain `payoutNumerators` | **Subgraph**: `payouts` field on FPMM entity |
-| Does safe hold tokens? | On-chain `get_user_holdings` | On-chain `get_user_holdings` (still needed) |
+Additional filters: `answerFinalizedTimestamp_not: null` (market is resolved).
 
-The `payouts` field from the Omen subgraph returns payout numerators directly (e.g., `["1", "0"]` means outcome 0 won). Combined with `get_user_holdings` (which returns shares per outcome), the behaviour can determine redeemability locally:
-- `shares[i] > 0 AND payouts[i] > 0` → winning tokens, redeem
-- `shares[i] > 0 AND payouts[i] == 0` → losing tokens, skip (saves gas)
+Result: list of `{address, condition_id, payouts, outcome_slot_count}`
 
-### Cursor-based pagination
+### Step 3: Local cross-reference — winning positions only
 
-All three queries use `id_gt: "$cursor"` with `orderBy: id, orderDirection: asc` for cursor-based pagination. The cursor is stored on `self.context.state` (SharedState), which persists across periods within the agent process lifetime.
+For each market from Step 2, check if the held index sets contain a **winning** outcome:
+- `payouts = ["1", "0"]` and `held_index_sets = {1}` → index set 1 = outcome 0, payout[0] = "1" → **winning**
+- `payouts = ["1", "0"]` and `held_index_sets = {2}` → index set 2 = outcome 1, payout[1] = "0" → **losing, skip**
 
-Each cycle:
-1. Fetches up to `SUBGRAPH_PAGE_SIZE` (1000) markets from the cursor position
-2. Iterates through markets, making on-chain `get_user_holdings` calls
-3. Stops after building `batch_size` redeem transactions
-4. Advances cursor to the last checked market
-5. When reaching the end (partial page), resets cursor to `""` and wraps around
+### Step 4: Build redeem transactions
 
-This ensures all markets are eventually checked, even with thousands of markets and small batch sizes.
+For each winning market (up to `batch_size`), call `ConditionalTokensContract.build_redeem_positions_tx(...)` and bundle into a multisend.
+
+### Why this design
+
+| Check | Method | Why |
+|-------|--------|-----|
+| Safe holds tokens? | **CT subgraph** (`balance_gt: "0"`) | Automatically excludes already-redeemed positions |
+| Is market resolved? | **Omen subgraph** (`answerFinalizedTimestamp_not: null`) | Subgraph filter, no on-chain call |
+| Which outcome won? | **Omen subgraph** (`payouts` field) | Subgraph data, no on-chain call |
+| Which side does safe hold? | **CT subgraph** (`indexSets`) | Subgraph data, no on-chain call |
+| Build redeem tx | **On-chain** (`build_redeem_positions_tx`) | Only for winning positions |
+
+**On-chain calls per cycle:** only `batch_size` (default: 5) calls to build redeem transactions. Zero on-chain calls for discovery/filtering.
+
+### Why not cursor-based pagination
+
+Earlier iterations used cursor-based pagination through all Omen markets, but this had problems:
+1. The service would check the same markets every cycle (cursor reset issues)
+2. With 2500+ markets, iterating through all and making on-chain calls caused round timeouts
+3. The `conditions_: {id_in: [...]}` filter eliminates the need for pagination entirely — it returns only markets where the safe has tokens
 
 ## Algorithm
 
-1. Query Omen subgraph for finalized markets where the safe has positions (3 queries, deduplicated)
-   - Filter: `answerFinalizedTimestamp_not: null, answerFinalizedTimestamp_lt: "$now"`
-   - Fetch: `id`, `payouts`, `conditions { id outcomeSlotCount }`
-   - Paginate: `id_gt: "$cursor"`, `orderBy: id`, `first: 1000`
-2. Filter locally: skip markets where all payouts are 0 (no winning outcome)
-3. For each market (up to `batch_size` redeemable ones found):
-   a. Call `ConditionalTokensContract.get_user_holdings(...)` — get shares per outcome
-   b. Cross-reference shares with subgraph `payouts` — skip if safe only holds losing tokens
-   c. If winning tokens found, build `ConditionalTokensContract.build_redeem_positions_tx(...)`
-4. Bundle all redeem txs into multisend via `self._to_multisend()`
-5. Advance pagination cursor
-6. Return `None` if nothing to redeem (FSM moves forward via `Event.NONE`)
-
-**Contracts used** (all already synced as third-party):
-- `conditional_tokens` — `get_user_holdings`, `build_redeem_positions_tx`
-
-**On-chain calls per cycle:** `batch_size` × 2 (get_user_holdings + build_redeem_positions_tx) = ~10 calls at default batch_size=5. Well under the round timeout.
+1. Query CT subgraph for all positions with `balance_gt: "0"` (paginated by `id_gt`)
+2. Build lookup: `{condition_id: Set[index_sets]}`
+3. Batch condition IDs into chunks of 100 (avoids subgraph query size limits)
+4. For each batch, query Omen subgraph: `conditions_: {id_in: [...]}, answerFinalizedTimestamp_not: null`
+5. Filter locally: skip markets with null/zero payouts, skip if held index sets are all on losing side
+6. For each winning market (up to `batch_size`):
+   - Build `ConditionalTokensContract.build_redeem_positions_tx(collateral, ZERO_HASH, condition_id, index_sets)`
+7. Bundle into multisend via `_to_multisend()`
+8. Return `None` if nothing to redeem (FSM emits `Event.NONE`)
 
 ## Configurable Parameters
 
@@ -110,14 +111,28 @@ Reuses existing params: `conditional_tokens_contract`, `collateral_tokens_contra
 ## Subgraph Queries
 
 ```python
-# 1. Markets created by the safe (factory-funded LP positions)
-LP_MARKETS_QUERY = Template("""{
+# ConditionalTokens subgraph: positions the safe holds with non-zero balance
+USER_POSITIONS_QUERY = Template("""{
+    user(id: "$safe") {
+      userPositions(
+        first: $page_size
+        where: { balance_gt: "0", id_gt: "$cursor" }
+        orderBy: id
+      ) {
+        id
+        balance
+        position { conditionIds indexSets }
+      }
+    }
+  }""")
+
+# Omen subgraph: finalized markets filtered by specific condition IDs
+MARKETS_BY_CONDITIONS_QUERY = Template("""{
     fixedProductMarketMakers(
       where: {
-        creator: "$safe"
+        conditions_: {id_in: [$condition_ids]}
         answerFinalizedTimestamp_not: null
         answerFinalizedTimestamp_lt: "$now"
-        id_gt: "$cursor"
       }
       first: $page_size
       orderBy: id
@@ -126,44 +141,6 @@ LP_MARKETS_QUERY = Template("""{
       id
       payouts
       conditions { id outcomeSlotCount }
-    }
-  }""")
-
-# 2. Markets where the safe directly added liquidity (non-factory)
-DIRECT_LP_QUERY = Template("""{
-    fpmmLiquidities(
-      where: {
-        funder: "$safe", type: Add
-        fpmm_: {
-          answerFinalizedTimestamp_not: null
-          answerFinalizedTimestamp_lt: "$now"
-          id_gt: "$cursor"
-        }
-      }
-      first: $page_size
-      orderBy: fpmm__id
-      orderDirection: asc
-    ) {
-      fpmm { id payouts conditions { id outcomeSlotCount } }
-    }
-  }""")
-
-# 3. Markets where the safe bought outcome tokens as a trader
-TRADE_MARKETS_QUERY = Template("""{
-    fpmmTrades(
-      where: {
-        creator: "$safe", type: Buy
-        fpmm_: {
-          answerFinalizedTimestamp_not: null
-          answerFinalizedTimestamp_lt: "$now"
-          id_gt: "$cursor"
-        }
-      }
-      first: $page_size
-      orderBy: fpmm__id
-      orderDirection: asc
-    ) {
-      fpmm { id payouts conditions { id outcomeSlotCount } }
     }
   }""")
 ```
@@ -180,29 +157,32 @@ class RedeemWinningsRound(TxPreparationRound):
 ### 2. `behaviours/redeem_winnings.py`
 Core logic. Follows `RedeemBondBehaviour` pattern with `async_act()` -> `get_payload()`.
 
+### 3. `models.py` — `ConditionalTokensSubgraph`
+New `ApiSpecs` model for the ConditionalTokens subgraph, configured via `conditional_tokens_subgraph_url`.
+
 ## Files Modified
 
-### 3. `states/base.py`
+### 4. `states/base.py`
 Added to `Event` enum:
 ```python
 REDEEM_WINNINGS_DONE = "redeem_winnings_done"
 ```
 
-### 4. `states/final_states.py`
+### 5. `states/final_states.py`
 Added:
 ```python
 class FinishedWithRedeemWinningsRound(DegenerateRound):
     """FinishedWithRedeemWinningsRound"""
 ```
 
-### 5. `states/post_transaction.py`
+### 6. `states/post_transaction.py`
 Added constant `REDEEM_WINNINGS_DONE_PAYLOAD = "REDEEM_WINNINGS_DONE_PAYLOAD"` and added handling in `end_block()`:
 ```python
 if self.most_voted_payload == self.REDEEM_WINNINGS_DONE_PAYLOAD:
     return self.synchronized_data, Event.REDEEM_WINNINGS_DONE
 ```
 
-### 6. `rounds.py` (FSM transition function)
+### 7. `rounds.py` (FSM transition function)
 - Imported `RedeemWinningsRound` and `FinishedWithRedeemWinningsRound`
 - Added `RedeemWinningsRound` to `initial_states` (it's an entry from PostTransactionRound)
 - **Changed** `PostTransactionRound` routing: `REMOVE_FUNDING_DONE -> RedeemWinningsRound` (was DepositDaiRound)
@@ -219,32 +199,36 @@ if self.most_voted_payload == self.REDEEM_WINNINGS_DONE_PAYLOAD:
 - Added `FinishedWithRedeemWinningsRound: {}` to transition_function
 - Added to `final_states`, `db_pre_conditions`, `db_post_conditions` (with `most_voted_tx_hash`)
 
-### 7. `behaviours/post_transaction.py`
+### 8. `behaviours/post_transaction.py`
 Imported `RedeemWinningsRound`. Added routing in `get_payload()`:
 ```python
 if self.synchronized_data.tx_submitter == RedeemWinningsRound.auto_round_id():
     return PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
 ```
 
-### 8. `behaviours/round_behaviour.py`
+### 9. `behaviours/round_behaviour.py`
 Imported and added `RedeemWinningsBehaviour` to the `behaviours` set.
 
-### 9. `market_maker_abci/composition.py`
+### 10. `behaviours/base.py`
+Added `get_conditional_tokens_subgraph_result()` method for querying the CT subgraph.
+
+### 11. `market_maker_abci/composition.py`
 Added composition mapping:
 ```python
 MarketCreationManagerAbci.FinishedWithRedeemWinningsRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
 ```
 
-### 10. `models.py` (market_creation_manager_abci)
-Added `redeem_winnings_batch_size` parameter.
+### 12. `models.py` (market_creation_manager_abci)
+- Added `redeem_winnings_batch_size` parameter
+- Added `ConditionalTokensSubgraph` model
 
-### 11. Config files
-- `market_creation_manager_abci/skill.yaml` — added `redeem_winnings_batch_size: 5`
-- `market_maker_abci/skill.yaml` — added `redeem_winnings_batch_size: 5`
+### 13. Config files
+- `market_creation_manager_abci/skill.yaml` — added `redeem_winnings_batch_size`, `ConditionalTokensSubgraph` model
+- `market_maker_abci/skill.yaml` — added `redeem_winnings_batch_size`, `ConditionalTokensSubgraph` model
 - `agents/market_maker/aea-config.yaml` — added `redeem_winnings_batch_size: ${int:5}`
 - `services/market_maker/service.yaml` — added `redeem_winnings_batch_size: ${REDEEM_WINNINGS_BATCH_SIZE:int:5}`
 
-### 12. FSM specifications
+### 14. FSM specifications
 Regenerated via `autonomy analyse fsm-specs --update`. Changes:
 - Added `redeem_winnings_done` to `alphabet_in`
 - Added `RedeemWinningsRound` and `FinishedWithRedeemWinningsRound` to `states`
@@ -254,6 +238,9 @@ Regenerated via `autonomy analyse fsm-specs --update`. Changes:
 
 Both `market_creation_manager_abci/fsm_specification.yaml` and `market_maker_abci/fsm_specification.yaml` updated.
 
+### 15. `contracts/fpmm/contract.py`
+Added `get_payout_numerators()` method with inline ConditionalTokens ABI (`CT_PAYOUT_NUMERATORS_ABI`). Used by analysis scripts; the behaviour uses subgraph `payouts` instead.
+
 ## Verification
 
 After implementation:
@@ -262,28 +249,22 @@ After implementation:
 autonomy analyse fsm-specs --package packages/valory/skills/market_creation_manager_abci
 autonomy analyse fsm-specs --package packages/valory/skills/market_maker_abci
 
-# 2. Lock packages
-autonomy packages lock
+# 2. Run linter pipeline
+/oa-linters
 
-# 3. Run tests
+# 3. Run tests with coverage
 tox -e unit-tests
-
-# 4. Run mypy
-tox -e mypy
-
-# 5. Run formatting
-tox -e black && tox -e isort
 ```
 
 ## Resolved Decisions
 
 1. **Scope**: v1 is `redeemPositions` only (no `claimWinnings`/`resolve`). This simplifies the behaviour and avoids needing `realitio`/`realitio_proxy` contracts.
-2. **Three subgraph queries**: Created markets, direct LP, and trader positions — covers all sources of conditional tokens. Deduplicated by market address.
-3. **Subgraph-first filtering**: Use `answerFinalizedTimestamp` and `payouts` from the Omen subgraph to eliminate `check_resolved` and `get_payout_numerators` on-chain calls. Only `get_user_holdings` remains on-chain.
-4. **Losing-side filtering**: Cross-reference `shares` (on-chain) with `payouts` (subgraph) to skip markets where the safe only holds losing tokens. Saves gas by not including worthless redemptions in the multisend.
-5. **Cursor-based pagination**: `id_gt` cursor stored on SharedState ensures all markets are eventually checked across cycles. Wraps around when reaching the end.
-6. **realitio_proxy**: Not needed for v1. Can be added in a future iteration when `claimWinnings`/`resolve` is implemented.
-7. **wxDAI handling**: After `redeemPositions`, the collateral (wxDAI) stays in the safe. No unwrap step needed — wxDAI is directly usable for market creation. The existing `DepositDaiRound` wraps additional xDAI when needed.
+2. **Two-subgraph approach**: CT subgraph for held positions + Omen subgraph filtered by `conditions_: {id_in: [...]}`. No cursor needed — the CT subgraph naturally excludes redeemed positions (`balance_gt: "0"`), and the Omen query is targeted, not paginated.
+3. **Losing-side filtering**: Cross-reference held `indexSets` (CT subgraph) with `payouts` (Omen subgraph) to skip markets where the safe only holds losing tokens. Saves gas by not including worthless redemptions in the multisend.
+4. **No cursor persistence needed**: Unlike the earlier designs that paginated through all markets, the `conditions_: {id_in: [...]}` approach queries exactly the relevant markets. Already-redeemed positions disappear from the CT subgraph automatically.
+5. **realitio_proxy**: Not needed for v1. Can be added in a future iteration when `claimWinnings`/`resolve` is implemented.
+6. **wxDAI handling**: After `redeemPositions`, the collateral (wxDAI) stays in the safe. No unwrap step needed — wxDAI is directly usable for market creation. The existing `DepositDaiRound` wraps additional xDAI when needed.
+7. **Condition ID batching**: The `conditions_: {id_in: [...]}` query is batched into chunks of 100 IDs to avoid subgraph query size limits. With 1400 held conditions, this means ~14 subgraph queries — all fast and cacheable.
 
 ## Key Findings from On-Chain Investigation
 
@@ -311,19 +292,19 @@ The canonical address on Gnosis chain is `0xCeAfDD6bc0bEF976fdCd1112955828E00543
 ### Production bugs found and fixed
 
 1. **Wrong subgraph query for LP positions**: The original `fpmmLiquidities(funder: $safe)` query returned 0 results because the factory contract (not the safe) is the `funder` during market creation. Fixed by using `fixedProductMarketMakers(creator: $safe)` as the primary LP query, with `fpmmLiquidities` as a secondary query for direct (non-factory) funding.
-2. **Pagination stuck on same markets**: The original design used `batch_size` as the subgraph `first:` limit with `orderBy: creationTimestamp`. This returned the same N markets every cycle. Fixed with `id_gt` cursor pagination that advances across cycles.
-3. **Round timeout with 1000+ markets**: 3 on-chain calls per market (check_resolved + get_user_holdings + get_payout_numerators) caused timeouts. Fixed by using subgraph `answerFinalizedTimestamp` and `payouts` fields, reducing to 1 on-chain call per market.
+2. **Pagination stuck on same markets**: The original design used `batch_size` as the subgraph `first:` limit with `orderBy: creationTimestamp`. This returned the same N markets every cycle. Eliminated by switching to the two-subgraph approach.
+3. **Round timeout with 1000+ markets**: Making on-chain calls per market caused timeouts. Eliminated by moving all filtering to subgraph queries — zero on-chain calls for discovery.
 
 ## Potential v2 Enhancements
 
-1. **Add `check_redeemed`**: The ConditionalTokens contract has a `PayoutRedemption` event. Filtering for already-redeemed positions would avoid repeated (harmless but gas-wasting) `redeemPositions` calls on positions that were already claimed.
-2. **Add lazy resolution**: Like the trader, call `realitio_proxy.resolve()` before `redeemPositions` for conditions not yet resolved. This would capture the ~small percentage of markets where no one has resolved the condition yet.
-3. **Batch optimization**: With ~4,780+ redeemable markets accumulated over time, the `redeem_winnings_batch_size` parameter (default: 5) means it will take many cycles to clear the backlog. Consider a one-time cleanup script or increasing the batch size for initial catch-up.
-4. **Multicall3 batching**: Like the utility scripts, use Multicall3 to batch `get_user_holdings` calls into a single RPC round-trip. This would allow checking hundreds of markets per cycle instead of `batch_size`.
+1. **Add lazy resolution**: Like the trader, call `realitio_proxy.resolve()` before `redeemPositions` for conditions not yet resolved. This would capture the ~small percentage of markets where no one has resolved the condition yet.
+2. **Multicall3 batching**: Like the utility scripts, use Multicall3 to batch `build_redeem_positions_tx` calls into a single RPC round-trip. This would allow larger batch sizes per cycle.
+3. **Notebook integration**: The `get_redeemable_positions()` function in `notebooks/subgraph_omen.py` exposes redeemable data as a DataFrame, merged into the market dashboard with a `redeemable_xdai` column.
 
 ## Utility Scripts
 
-- `analysis/check_redeemable_positions.py` — (v1) Queries subgraph for ALL markets + on-chain checks via Multicall3 (payoutDenominator, getCollectionId, balanceOf, payoutNumerators). Reports total redeemable xDAI.
+- `analysis/check_redeemable_positions.py` — (v1) Queries subgraph for ALL markets + on-chain checks via Multicall3 (payoutDenominator, getCollectionId, balanceOf, payoutNumerators). Reports total redeemable xDAI. Serves as a ground-truth checkpoint.
 - `analysis/check_redeemable_positions2.py` — (v2, efficient) Uses the subgraph-first approach: filters for finalized markets with `answerFinalizedTimestamp`, gets `payouts` from subgraph, only checks `balanceOf` on-chain for winning outcomes. Fewer RPC calls, includes timing comparison.
+- `analysis/check_redeemable_positions3.py` — (v3, behaviour simulation) Mirrors the exact two-subgraph strategy used by the behaviour. Logs each step (CT subgraph → Omen subgraph → cross-reference → build txs). Useful for debugging the service without deploying.
 
-Both scripts accept an optional safe address CLI argument and require `OMEN_SUBGRAPH_URL` in `.env`; `GNOSIS_RPC` defaults to a public endpoint.
+All scripts accept a safe address CLI argument and read subgraph URLs from `.env`.
