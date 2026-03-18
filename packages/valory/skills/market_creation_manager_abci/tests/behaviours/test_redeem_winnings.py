@@ -64,6 +64,7 @@ class TestRedeemWinningsBehaviour:
         context_mock.params.conditional_tokens_contract = "0xcondtokens"
         context_mock.params.collateral_tokens_contract = "0xcollateral"
         context_mock.params.redeem_winnings_batch_size = 5
+        context_mock.params.realitio_oracle_proxy_contract = "0xproxy"
         self.behaviour = RedeemWinningsBehaviour(
             name="test", skill_context=context_mock
         )
@@ -314,6 +315,100 @@ class TestRedeemWinningsBehaviour:
         assert result[0]["address"] == "0xmarket1"
         assert result[0]["payouts"] == ["1", "0"]
 
+    # --- _check_resolved tests ---
+
+    def test_check_resolved_true(self) -> None:
+        """Test _check_resolved when condition is resolved."""
+        mock_response = MagicMock()
+        mock_response.performative = ContractApiMessage.Performative.STATE
+        mock_response.state.body = {"resolved": True}
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
+        ):
+            gen = self.behaviour._check_resolved("0xcond1")
+            result = _exhaust_gen(gen)
+        assert result is True
+
+    def test_check_resolved_false(self) -> None:
+        """Test _check_resolved when condition is not resolved."""
+        mock_response = MagicMock()
+        mock_response.performative = ContractApiMessage.Performative.STATE
+        mock_response.state.body = {"resolved": False}
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
+        ):
+            gen = self.behaviour._check_resolved("0xcond1")
+            result = _exhaust_gen(gen)
+        assert result is False
+
+    def test_check_resolved_error(self) -> None:
+        """Test _check_resolved with error response."""
+        mock_response = MagicMock()
+        mock_response.performative = ContractApiMessage.Performative.ERROR
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
+        ):
+            gen = self.behaviour._check_resolved("0xcond1")
+            result = _exhaust_gen(gen)
+        assert result is False
+
+    # --- _get_resolve_tx tests ---
+
+    def test_get_resolve_tx_success(self) -> None:
+        """Test _get_resolve_tx with successful response."""
+        market = {
+            "address": "0xmarket1",
+            "condition_id": "0xcond1",
+            "outcome_slot_count": 2,
+            "question_id": "0xabcd",
+            "question_data": "Will X happen?",
+            "template_id": 2,
+        }
+        mock_response = MagicMock()
+        mock_response.performative = ContractApiMessage.Performative.STATE
+        mock_response.state.body = {"data": "0xresolvedata"}
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
+        ):
+            gen = self.behaviour._get_resolve_tx(market)
+            result = _exhaust_gen(gen)
+        assert result is not None
+        assert result["to"] == "0xproxy"
+        assert result["data"] == "0xresolvedata"
+
+    def test_get_resolve_tx_no_question_id(self) -> None:
+        """Test _get_resolve_tx when question_id is missing."""
+        market = {
+            "address": "0xmarket1",
+            "condition_id": "0xcond1",
+            "outcome_slot_count": 2,
+            "question_id": "",
+            "question_data": "Will X?",
+            "template_id": 2,
+        }
+        gen = self.behaviour._get_resolve_tx(market)
+        result = _exhaust_gen(gen)
+        assert result is None
+
+    def test_get_resolve_tx_error(self) -> None:
+        """Test _get_resolve_tx with error response."""
+        market = {
+            "address": "0xmarket1",
+            "condition_id": "0xcond1",
+            "outcome_slot_count": 2,
+            "question_id": "0xabcd",
+            "question_data": "Will X?",
+            "template_id": 2,
+        }
+        mock_response = MagicMock()
+        mock_response.performative = ContractApiMessage.Performative.ERROR
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
+        ):
+            gen = self.behaviour._get_resolve_tx(market)
+            result = _exhaust_gen(gen)
+        assert result is None
+
     # --- _get_redeem_positions_tx tests ---
 
     def test_get_redeem_positions_tx_success(self) -> None:
@@ -401,11 +496,73 @@ class TestRedeemWinningsBehaviour:
         ), patch.object(
             self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
         ), patch.object(
+            self.behaviour, "_check_resolved", new=_make_gen(True)
+        ), patch.object(
             self.behaviour, "_get_redeem_positions_tx", new=_make_gen(None)
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
         assert result is None
+
+    def test_get_payload_resolve_needed_and_fails(self) -> None:
+        """Test get_payload when resolve is needed but build_resolve_tx fails."""
+        held = {"0xcond1": {1}}
+        markets = [
+            {
+                "address": "0xmarket1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["1", "0"],
+                "question_id": "0xq1",
+                "question_data": "Will X?",
+                "template_id": 2,
+            }
+        ]
+        with patch.object(
+            self.behaviour, "_get_held_positions", new=_make_gen(held)
+        ), patch.object(
+            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+        ), patch.object(
+            self.behaviour, "_check_resolved", new=_make_gen(False)
+        ), patch.object(
+            self.behaviour, "_get_resolve_tx", new=_make_gen(None)
+        ):
+            gen = self.behaviour.get_payload()
+            result = _exhaust_gen(gen)
+        assert result is None
+
+    def test_get_payload_resolve_needed_success(self) -> None:
+        """Test get_payload when resolve is needed and succeeds."""
+        held = {"0xcond1": {1}}
+        markets = [
+            {
+                "address": "0xmarket1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["1", "0"],
+                "question_id": "0xq1",
+                "question_data": "Will X?",
+                "template_id": 2,
+            }
+        ]
+        resolve_tx = {"to": "0xproxy", "data": "0xresolve", "value": 0}
+        redeem_tx = {"to": "0xcondtokens", "data": "0xredeem", "value": 0}
+        with patch.object(
+            self.behaviour, "_get_held_positions", new=_make_gen(held)
+        ), patch.object(
+            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+        ), patch.object(
+            self.behaviour, "_check_resolved", new=_make_gen(False)
+        ), patch.object(
+            self.behaviour, "_get_resolve_tx", new=_make_gen(resolve_tx)
+        ), patch.object(
+            self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
+        ), patch.object(
+            self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
+        ):
+            gen = self.behaviour.get_payload()
+            result = _exhaust_gen(gen)
+        assert result == "0xmultisend_hash"
 
     def test_get_payload_multisend_fails(self) -> None:
         """Test get_payload when _to_multisend returns None."""
@@ -423,6 +580,8 @@ class TestRedeemWinningsBehaviour:
             self.behaviour, "_get_held_positions", new=_make_gen(held)
         ), patch.object(
             self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+        ), patch.object(
+            self.behaviour, "_check_resolved", new=_make_gen(True)
         ), patch.object(
             self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
         ), patch.object(
@@ -448,6 +607,8 @@ class TestRedeemWinningsBehaviour:
             self.behaviour, "_get_held_positions", new=_make_gen(held)
         ), patch.object(
             self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+        ), patch.object(
+            self.behaviour, "_check_resolved", new=_make_gen(True)
         ), patch.object(
             self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
         ), patch.object(
