@@ -25,6 +25,7 @@ from typing import Any, Dict, Generator, List, Optional, Set
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
+from packages.valory.contracts.realitio_proxy.contract import RealitioProxyContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     ETHER_VALUE,
@@ -82,6 +83,11 @@ MARKETS_BY_CONDITIONS_QUERY = Template("""{
     ) {
       id
       payouts
+      templateId
+      question {
+        id
+        data
+      }
       conditions {
         id
         outcomeSlotCount
@@ -160,19 +166,38 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No redeemable positions found.")
             return None
 
-        # Step 4: Build redeem txs
+        # Step 4: Check resolution and build txs
         batch_size = self.params.redeem_winnings_batch_size
         transactions: List[Dict[str, Any]] = []
         for market in redeemable[:batch_size]:
+            condition_id = market["condition_id"]
+            # Check if condition is resolved on ConditionalTokens
+            is_resolved = yield from self._check_resolved(condition_id)
+            if not is_resolved:
+                # Build resolve tx to prepend before redeem
+                resolve_tx = yield from self._get_resolve_tx(market)
+                if resolve_tx is not None:
+                    self.context.logger.info(
+                        f"Prepending resolve tx for market "
+                        f"{market['address']} (not yet resolved on-chain)"
+                    )
+                    transactions.append(resolve_tx)
+                else:
+                    self.context.logger.warning(
+                        f"Failed to build resolve tx for market "
+                        f"{market['address']} — skipping"
+                    )
+                    continue
+
             self.context.logger.info(
                 f"Building redeemPositions tx for market {market['address']} "
-                f"with condition {market['condition_id']}"
+                f"with condition {condition_id}"
             )
             index_sets = ConditionalTokensContract.get_partitions(
                 market["outcome_slot_count"]
             )
             redeem_tx = yield from self._get_redeem_positions_tx(
-                condition_id=market["condition_id"],
+                condition_id=condition_id,
                 index_sets=index_sets,
             )
             if redeem_tx is not None:
@@ -283,12 +308,16 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
                 address = entry["id"]
                 if address not in seen:
                     seen.add(address)
+                    question = entry.get("question", {}) or {}
                     all_markets.append(
                         {
                             "address": address,
                             "condition_id": condition["id"],
                             "outcome_slot_count": condition["outcomeSlotCount"],
                             "payouts": payouts,
+                            "question_id": question.get("id", ""),
+                            "question_data": question.get("data", ""),
+                            "template_id": int(entry.get("templateId", 0) or 0),
                         }
                     )
 
@@ -298,6 +327,71 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
             f"batch(es): {len(all_markets)} finalized market(s) with payouts."
         )
         return all_markets
+
+    def _check_resolved(self, condition_id: str) -> Generator[None, None, bool]:
+        """Check if a condition is resolved on ConditionalTokens.
+
+        :param condition_id: the condition ID to check.
+        :yield: None
+        :return: True if resolved, False otherwise.
+        """
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.conditional_tokens_contract,
+            contract_id=str(ConditionalTokensContract.contract_id),
+            contract_callable=get_callable_name(
+                ConditionalTokensContract.check_resolved
+            ),
+            condition_id=condition_id,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"check_resolved unsuccessful for {condition_id}: {response}"
+            )
+            return False
+        return bool(response.state.body.get("resolved", False))
+
+    def _get_resolve_tx(
+        self, market: Dict[str, Any]
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
+        """Build a resolve transaction via RealitioProxy.
+
+        :param market: market dict with question_id, template_id, etc.
+        :yield: None
+        :return: transaction dict or None on failure.
+        """
+        question_id = market.get("question_id", "")
+        question_data = market.get("question_data", "")
+        template_id = market.get("template_id", 0)
+        num_outcomes = market.get("outcome_slot_count", 2)
+
+        if not question_id:
+            self.context.logger.warning(
+                f"No question_id for market {market['address']} — "
+                f"cannot build resolve tx"
+            )
+            return None
+
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.realitio_oracle_proxy_contract,
+            contract_id=str(RealitioProxyContract.contract_id),
+            contract_callable=get_callable_name(RealitioProxyContract.build_resolve_tx),
+            question_id=bytes.fromhex(question_id[2:]),
+            template_id=template_id,
+            question=question_data,
+            num_outcomes=num_outcomes,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(
+                f"RealitioProxyContract.build_resolve_tx " f"unsuccessful! : {response}"
+            )
+            return None
+        return {
+            "to": self.params.realitio_oracle_proxy_contract,
+            "data": response.state.body["data"],
+            "value": ETHER_VALUE,
+        }
 
     def _get_redeem_positions_tx(
         self,

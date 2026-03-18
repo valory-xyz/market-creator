@@ -74,7 +74,7 @@ For each winning market (up to `batch_size`), call `ConditionalTokensContract.bu
 | Which side does safe hold? | **CT subgraph** (`indexSets`) | Subgraph data, no on-chain call |
 | Build redeem tx | **On-chain** (`build_redeem_positions_tx`) | Only for winning positions |
 
-**On-chain calls per cycle:** only `batch_size` (default: 5) calls to build redeem transactions. Zero on-chain calls for discovery/filtering.
+**On-chain calls per cycle:** `batch_size` × 2 (check_resolved + build_redeem_positions_tx), plus 1 extra (build_resolve_tx) for each unresolved condition. Typically ~10-15 calls at default batch_size=5. Well under the round timeout.
 
 ### Why not cursor-based pagination
 
@@ -89,11 +89,22 @@ Earlier iterations used cursor-based pagination through all Omen markets, but th
 2. Build lookup: `{condition_id: Set[index_sets]}`
 3. Batch condition IDs into chunks of 100 (avoids subgraph query size limits)
 4. For each batch, query Omen subgraph: `conditions_: {id_in: [...]}, answerFinalizedTimestamp_not: null`
+   - Also fetches `question { id data }` and `templateId` for the resolve call
 5. Filter locally: skip markets with null/zero payouts, skip if held index sets are all on losing side
 6. For each winning market (up to `batch_size`):
-   - Build `ConditionalTokensContract.build_redeem_positions_tx(collateral, ZERO_HASH, condition_id, index_sets)`
-7. Bundle into multisend via `_to_multisend()`
+   a. Call `ConditionalTokensContract.check_resolved(condition_id)` — check if already resolved on-chain
+   b. If **not resolved**: build `RealitioProxyContract.build_resolve_tx(question_id, template_id, question, num_outcomes)` and prepend to multisend
+   c. Build `ConditionalTokensContract.build_redeem_positions_tx(collateral, ZERO_HASH, condition_id, index_sets)`
+7. Bundle all txs (resolve + redeem pairs) into multisend via `_to_multisend()`
 8. Return `None` if nothing to redeem (FSM emits `Event.NONE`)
+
+### Lazy resolution
+
+The v1 assumption was that conditions are already resolved by traders. This holds for ~99% of markets, but the remaining ~1% would silently get 0 payout.
+
+The behaviour now checks `payoutDenominator` on-chain for each redeemable market. If the condition is not yet resolved, it prepends a `RealitioProxy.resolve()` call in the same multisend. This ensures the condition is resolved and redeemed atomically in a single Safe transaction.
+
+The `resolve` call reads the finalized Realitio answer and reports it to ConditionalTokens (`reportPayouts`). Parameters come from the Omen subgraph: `question.id`, `question.data`, `templateId`, and `outcomeSlotCount`.
 
 ## Configurable Parameters
 
@@ -144,6 +155,10 @@ MARKETS_BY_CONDITIONS_QUERY = Template("""{
     }
   }""")
 ```
+
+**Contracts used** (all already synced as third-party):
+- `conditional_tokens` — `check_resolved`, `build_redeem_positions_tx`
+- `realitio_proxy` — `build_resolve_tx` (for lazy resolution of unresolved conditions)
 
 ## Files Created
 
@@ -223,7 +238,7 @@ MarketCreationManagerAbci.FinishedWithRedeemWinningsRound: TransactionSettlement
 - Added `ConditionalTokensSubgraph` model
 
 ### 13. Config files
-- `market_creation_manager_abci/skill.yaml` — added `redeem_winnings_batch_size`, `ConditionalTokensSubgraph` model
+- `market_creation_manager_abci/skill.yaml` — added `redeem_winnings_batch_size`, `ConditionalTokensSubgraph` model, `realitio_proxy` contract dependency
 - `market_maker_abci/skill.yaml` — added `redeem_winnings_batch_size`, `ConditionalTokensSubgraph` model
 - `agents/market_maker/aea-config.yaml` — added `redeem_winnings_batch_size: ${int:5}`
 - `services/market_maker/service.yaml` — added `redeem_winnings_batch_size: ${REDEEM_WINNINGS_BATCH_SIZE:int:5}`
@@ -258,11 +273,11 @@ tox -e unit-tests
 
 ## Resolved Decisions
 
-1. **Scope**: v1 is `redeemPositions` only (no `claimWinnings`/`resolve`). This simplifies the behaviour and avoids needing `realitio`/`realitio_proxy` contracts.
+1. **Scope**: `redeemPositions` with lazy `resolve`. The behaviour calls `RealitioProxy.resolve()` when a condition hasn't been resolved on-chain yet, then `redeemPositions` — both in the same multisend. The more complex `claimWinnings` flow (claiming Realitio bonds from answer history) is handled by the separate `RedeemBondRound`.
 2. **Two-subgraph approach**: CT subgraph for held positions + Omen subgraph filtered by `conditions_: {id_in: [...]}`. No cursor needed — the CT subgraph naturally excludes redeemed positions (`balance_gt: "0"`), and the Omen query is targeted, not paginated.
 3. **Losing-side filtering**: Cross-reference held `indexSets` (CT subgraph) with `payouts` (Omen subgraph) to skip markets where the safe only holds losing tokens. Saves gas by not including worthless redemptions in the multisend.
 4. **No cursor persistence needed**: Unlike the earlier designs that paginated through all markets, the `conditions_: {id_in: [...]}` approach queries exactly the relevant markets. Already-redeemed positions disappear from the CT subgraph automatically.
-5. **realitio_proxy**: Not needed for v1. Can be added in a future iteration when `claimWinnings`/`resolve` is implemented.
+5. **realitio_proxy**: Used for lazy resolution via `build_resolve_tx`. The contract was already synced as a third-party dependency; only needed to add it to the skill's contract dependencies.
 6. **wxDAI handling**: After `redeemPositions`, the collateral (wxDAI) stays in the safe. No unwrap step needed — wxDAI is directly usable for market creation. The existing `DepositDaiRound` wraps additional xDAI when needed.
 7. **Condition ID batching**: The `conditions_: {id_in: [...]}` query is batched into chunks of 100 IDs to avoid subgraph query size limits. With 1400 held conditions, this means ~14 subgraph queries — all fast and cacheable.
 
@@ -297,9 +312,8 @@ The canonical address on Gnosis chain is `0xCeAfDD6bc0bEF976fdCd1112955828E00543
 
 ## Potential v2 Enhancements
 
-1. **Add lazy resolution**: Like the trader, call `realitio_proxy.resolve()` before `redeemPositions` for conditions not yet resolved. This would capture the ~small percentage of markets where no one has resolved the condition yet.
-2. **Multicall3 batching**: Like the utility scripts, use Multicall3 to batch `build_redeem_positions_tx` calls into a single RPC round-trip. This would allow larger batch sizes per cycle.
-3. **Notebook integration**: The `get_redeemable_positions()` function in `notebooks/subgraph_omen.py` exposes redeemable data as a DataFrame, merged into the market dashboard with a `redeemable_xdai` column.
+1. **Multicall3 batching**: Like the utility scripts, use Multicall3 to batch `check_resolved` and `build_redeem_positions_tx` calls into a single RPC round-trip. This would allow larger batch sizes per cycle.
+2. **Notebook integration**: The `get_redeemable_positions()` function in `notebooks/subgraph_omen.py` exposes redeemable data as a DataFrame, merged into the market dashboard with a `redeemable_xdai` column.
 
 ## Utility Scripts
 

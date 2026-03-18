@@ -21,7 +21,7 @@ fingerprint:
   behaviours/post_transaction.py: bafybeihjjggivjulknhi7xipovvyflq4frgdwrkhmdmmaalnq6pxfc7d5a
   behaviours/prepare_transaction.py: bafybeia4ivej3givyfauneb2pvjhjhwenj4krvqmk4t4loslibmjnm4ps4
   behaviours/redeem_bond.py: bafybeidqouhjjorqvsrqwxg7b2icchbct7eib4fgqvq6ak2eoiwss43xci
-  behaviours/redeem_winnings.py: bafybeia7lkzh3iz3fg3zwegtcz5dhkriqdvcfyoied5nvpyatyi4owdxmy
+  behaviours/redeem_winnings.py: bafybeih6i4rgtqvzdbmpmiw666ekfz2pqqtahqsg4ocdunodagoyzovxti
   behaviours/remove_funding.py: bafybeihueoo6z2fy54nqui5lrzwovhddi7cfk6ecktwe3z6fscckjqunxy
   behaviours/retrieve_approved_market.py: bafybeicjf222ubg3jd4fqndgdh532g6i2uhmioly2hzuilfgd2svsvc4o4
   behaviours/round_behaviour.py: bafybeifvdbdpinjezoooi26noergatktmif27afnetzdr5rxfs74gdggje
@@ -64,7 +64,7 @@ fingerprint:
   tests/behaviours/test_post_transaction.py: bafybeicdarjeszbcsywwoexpjeulsizc2m63gk5rlpjeoz4hwbt2z3oylu
   tests/behaviours/test_prepare_transaction.py: bafybeidk4zz647o6bqhtfmymucwag4t5tjafkyh3pusyxmmsmprur43vlu
   tests/behaviours/test_redeem_bond.py: bafybeidte4s6ywvgulpypw3ljuen7olbyf3g5cyozbxaa2hqflcqyd3imm
-  tests/behaviours/test_redeem_winnings.py: bafybeiax67zdr3fc5g7qakxieq3od5ewj4f3acpeyuc4c5my43bmofc65u
+  tests/behaviours/test_redeem_winnings.py: bafybeidifj5ckrsqgla43pznpvv5d5o3zndgqjg24hr57lzp3ai5zkxduq
   tests/behaviours/test_remove_funding.py: bafybeibys5quz5o5kbeo5bpvbg23jyayam2xlc33naglxtlkklo5la5u5i
   tests/behaviours/test_retrieve_approved_market.py: bafybeibvgx4yjth3tz7xr27jyjsrdsb4yyibsnwgauh4qs7onennaa5rli
   tests/behaviours/test_sync_markets.py: bafybeigpbcusciz2jgwuqnt25hijowbgbaei4d33tq33rril7wlk6avk6e
@@ -91,6 +91,7 @@ contracts:
 - valory/multisend:0.1.0:bafybeiaf3hapi3prgpjeugwhq64k7lqelo6kibhol5rkajt7id3knomp5q
 - valory/realitio:0.1.0:bafybeihvh334x2ywm2v3n2dotxwektmrb7xjykeubvfqnq6j2ugufjxzlu
 - valory/conditional_tokens:0.1.0:bafybeiahmps4nbd3ggbsp6lh7olap7jwvtqdj2iji6agdftz77pdjy6xxq
+- valory/realitio_proxy:0.1.0:bafybeibsink25xdxk2yt7tx2aaznmqaidxs22gknb5alqnkhlqahazlydm
 - valory/fpmm_deterministic_factory:0.1.0:bafybeibcnyhgmpadtbbu4mwnwarizvpfbgqknwugzpnkcme74izeqj4lc4
 - valory/erc20:0.1.0:bafybeif37n2xmh6xkn3vzybty7q37fq4f5rsey5ep33vvobh2yofeao5ae
 - valory/fpmm:0.1.0:bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e
