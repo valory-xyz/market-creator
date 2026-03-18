@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeiaxkwxtrx55sjkgbbczqu7gmmo4hk3kfn4tsyh6en2wysdmvm72g4
+agent: valory/market_maker:0.1.0:bafybeiebosuvn7mctlxcqzdc2r2yhkb3zeohfgssacrldk52eekrvycmci
 number_of_agents: 1
 deployment:
   agent:
@@ -144,6 +144,15 @@ models:
       response_type: ${MECH_RESPONSE_API_RESPONSE_TYPE:str:str}
       retries: ${MECH_RESPONSE_API_RETRIES:int:5}
       url: ${MECH_RESPONSE_API_URL:str:''}
+  conditional_tokens_subgraph:
+    args:
+      headers:
+        Content-Type: ${CT_SUBGRAPH_CONTENT_TYPE:str:application/json}
+      method: ${CT_SUBGRAPH_METHOD:str:POST}
+      response_key: ${CT_SUBGRAPH_RESPONSE_KEY:str:data}
+      response_type: ${CT_SUBGRAPH_RESPONSE_TYPE:str:list}
+      retries: ${CT_SUBGRAPH_RETRIES:int:5}
+      url: ${CT_SUBGRAPH_URL:str:https://conditional-tokens.subgraph.autonolas.tech}
   omen_subgraph:
     args:
       headers:

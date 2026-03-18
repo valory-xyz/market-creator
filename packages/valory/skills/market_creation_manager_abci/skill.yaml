@@ -13,7 +13,7 @@ fingerprint:
   behaviours/__init__.py: bafybeifp3hykazw2qx32t2lg2mwehcyjdekq3tywde26pm77imco45xz3a
   behaviours/answer_questions.py: bafybeigju4ds3clnx2pto3lupfsivv36vzb5es3qggdk5kfokcpmlh5xsi
   behaviours/approve_markets.py: bafybeidhss62y6pybyit4fqq2ygkccr7jlv6ty2yg6cq3yehqy7xmendhe
-  behaviours/base.py: bafybeiaarpv36eh2yvcb4zsxgjra5t26txvkrh3guekqsxum2codb4yugi
+  behaviours/base.py: bafybeian7zw5qwx6pwyo4gbmysn7tfpnr5pc327yuu7shxl4e4jyibbh4e
   behaviours/collect_proposed_markets.py: bafybeibjhkningmccsdet7lnpnnmf77fgvcumflbfcfeikji3ytechlxc4
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
   behaviours/deposit_dai.py: bafybeig6f4oyha7lukqnursw64hdspu3tnrodjnbljacd2np7ze2gbgrye
@@ -21,7 +21,7 @@ fingerprint:
   behaviours/post_transaction.py: bafybeihjjggivjulknhi7xipovvyflq4frgdwrkhmdmmaalnq6pxfc7d5a
   behaviours/prepare_transaction.py: bafybeia4ivej3givyfauneb2pvjhjhwenj4krvqmk4t4loslibmjnm4ps4
   behaviours/redeem_bond.py: bafybeidqouhjjorqvsrqwxg7b2icchbct7eib4fgqvq6ak2eoiwss43xci
-  behaviours/redeem_winnings.py: bafybeicdzbucjmdsnvqr57pbyaspywfivqhjqhxssamvrsswpd6zn65qru
+  behaviours/redeem_winnings.py: bafybeia7lkzh3iz3fg3zwegtcz5dhkriqdvcfyoied5nvpyatyi4owdxmy
   behaviours/remove_funding.py: bafybeihueoo6z2fy54nqui5lrzwovhddi7cfk6ecktwe3z6fscckjqunxy
   behaviours/retrieve_approved_market.py: bafybeicjf222ubg3jd4fqndgdh532g6i2uhmioly2hzuilfgd2svsvc4o4
   behaviours/round_behaviour.py: bafybeifvdbdpinjezoooi26noergatktmif27afnetzdr5rxfs74gdggje
@@ -30,7 +30,7 @@ fingerprint:
   dialogues.py: bafybeihp6k73otltjqeyluqizrhtbepcmjqcemz4adgug3rqtc4ysry4ve
   fsm_specification.yaml: bafybeiddl25octqtoscbralovqipimobtavauj4ifpbcicmxd5umh35suu
   handlers.py: bafybeifjipvibmq77gavlncqrbbmlfokp7axk3sjemouxaewgolp3nfbey
-  models.py: bafybeidyfkkrpvvyzrnneauqtya7n4dzayd6yxj6djiuwckappyprcetm4
+  models.py: bafybeigxycewlxlwo7cmthgemqd2s2vzrpxgbi6sy343vcleqrpw7snbxu
   payloads.py: bafybeibbvv2rpzrs77vl45eac7bjownr3abrms3pg7orqpqzob2pglwqhm
   propose_questions.py: bafybeifl3az6sfloymavhklb26l7owj4e3qdyvxupzjtzvmkza57266zna
   rounds.py: bafybeiaimkueq244hvd2vx6da3mlweslwbnv6qfeeksyxpi372wheym6ii
@@ -309,6 +309,18 @@ models:
       retries: 5
       url: ''
     class_name: MechResponseSpecs
+  conditional_tokens_subgraph:
+    args:
+      api_id: conditional_tokens
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://conditional-tokens.subgraph.autonolas.tech
+    class_name: ConditionalTokensSubgraph
   omen_subgraph:
     args:
       api_id: omen

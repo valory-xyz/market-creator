@@ -20,7 +20,7 @@
 """This module contains the RedeemWinningsBehaviour of the 'market_creation_manager_abci' skill."""
 
 from string import Template
-from typing import Any, Dict, Generator, List, Optional, cast
+from typing import Any, Dict, Generator, List, Optional, Set
 
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
@@ -42,18 +42,39 @@ from packages.valory.skills.market_creation_manager_abci.states.redeem_winnings 
 # Subgraph max per page.
 SUBGRAPH_PAGE_SIZE = 1000
 
-# Markets created by the safe, filtered for finalized answers.
-# The answerFinalizedTimestamp filter ensures only resolved markets are returned,
-# eliminating the need for on-chain check_resolved calls.
-# The payouts field provides payout numerators, eliminating on-chain payout checks.
-# id_gt enables cursor-based pagination across cycles.
-LP_MARKETS_QUERY = Template("""{
+# Max condition IDs per Omen subgraph id_in query to avoid query size limits.
+CONDITION_ID_BATCH_SIZE = 100
+
+# ConditionalTokens subgraph: user positions with non-zero balance.
+USER_POSITIONS_QUERY = Template("""{
+    user(id: "$safe") {
+      userPositions(
+        first: $page_size
+        where: {
+          balance_gt: "0"
+          id_gt: "$cursor"
+        }
+        orderBy: id
+      ) {
+        id
+        balance
+        position {
+          conditionIds
+          indexSets
+        }
+      }
+    }
+  }""")
+
+# Omen subgraph: finalized markets filtered by specific condition IDs.
+# Uses conditions_: {id_in: [...]} to only return markets where the safe
+# holds tokens, avoiding pagination through all markets.
+MARKETS_BY_CONDITIONS_QUERY = Template("""{
     fixedProductMarketMakers(
       where: {
-        creator: "$safe"
+        conditions_: {id_in: [$condition_ids]}
         answerFinalizedTimestamp_not: null
         answerFinalizedTimestamp_lt: "$now"
-        id_gt: "$cursor"
       }
       first: $page_size
       orderBy: id
@@ -68,75 +89,20 @@ LP_MARKETS_QUERY = Template("""{
     }
   }""")
 
-# Markets where the safe directly added liquidity (not via factory).
-DIRECT_LP_QUERY = Template("""{
-    fpmmLiquidities(
-      where: {
-        funder: "$safe"
-        type: Add
-        fpmm_: {
-          answerFinalizedTimestamp_not: null
-          answerFinalizedTimestamp_lt: "$now"
-          id_gt: "$cursor"
-        }
-      }
-      first: $page_size
-      orderBy: fpmm__id
-      orderDirection: asc
-    ) {
-      fpmm {
-        id
-        payouts
-        conditions {
-          id
-          outcomeSlotCount
-        }
-      }
-    }
-  }""")
-
-# Markets where the safe bought outcome tokens as a trader.
-TRADE_MARKETS_QUERY = Template("""{
-    fpmmTrades(
-      where: {
-        creator: "$safe"
-        type: Buy
-        fpmm_: {
-          answerFinalizedTimestamp_not: null
-          answerFinalizedTimestamp_lt: "$now"
-          id_gt: "$cursor"
-        }
-      }
-      first: $page_size
-      orderBy: fpmm__id
-      orderDirection: asc
-    ) {
-      fpmm {
-        id
-        payouts
-        conditions {
-          id
-          outcomeSlotCount
-        }
-      }
-    }
-  }""")
-
 
 class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
     """RedeemWinningsBehaviour"""
 
     matching_round = RedeemWinningsRound
 
-    @property
-    def _cursor(self) -> str:
-        """Get the pagination cursor from shared state."""
-        return getattr(self.context.state, "redeem_winnings_cursor", "")
-
-    @_cursor.setter
-    def _cursor(self, value: str) -> None:
-        """Set the pagination cursor on shared state."""
-        self.context.state.redeem_winnings_cursor = value  # type: ignore
+    @staticmethod
+    def _has_winning_position(payouts: List[str], held_index_sets: Set[int]) -> bool:
+        """Check if any held index set corresponds to a winning payout."""
+        for idx_set in held_index_sets:
+            for i, payout in enumerate(payouts):
+                if idx_set == (1 << i) and float(payout) > 0:
+                    return True
+        return False
 
     def async_act(self) -> Generator:
         """Implement the act."""
@@ -157,25 +123,47 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def get_payload(self) -> Generator[None, None, Optional[str]]:
         """Get the payload."""
-        markets = yield from self._get_redeemable_candidates()
-        if markets is None or len(markets) == 0:
-            self.context.logger.info("No resolved markets to redeem winnings from.")
+        # Step 1: Get positions where the safe holds non-zero balances
+        held_positions = yield from self._get_held_positions()
+        if not held_positions:
+            self.context.logger.info(
+                "No non-zero positions found in ConditionalTokens subgraph."
+            )
             return None
 
+        self.context.logger.info(
+            f"Safe holds non-zero positions for " f"{len(held_positions)} condition(s)."
+        )
+
+        # Step 2: Query Omen subgraph for ONLY markets matching held conditions
+        markets = yield from self._get_markets_for_conditions(
+            list(held_positions.keys())
+        )
+        if not markets:
+            self.context.logger.info("No finalized markets found for held conditions.")
+            return None
+
+        # Step 3: Filter for winning positions
+        redeemable = [
+            m
+            for m in markets
+            if self._has_winning_position(
+                m["payouts"], held_positions[m["condition_id"].lower()]
+            )
+        ]
+        self.context.logger.info(
+            f"Cross-reference: {len(redeemable)} redeemable market(s) "
+            f"out of {len(markets)} finalized with held positions."
+        )
+
+        if not redeemable:
+            self.context.logger.info("No redeemable positions found.")
+            return None
+
+        # Step 4: Build redeem txs
         batch_size = self.params.redeem_winnings_batch_size
         transactions: List[Dict[str, Any]] = []
-        checked = 0
-        for market in markets:
-            checked += 1
-            has_holdings = yield from self._check_holdings(
-                market_address=market["address"],
-                condition_id=market["condition_id"],
-                outcome_slot_count=market["outcome_slot_count"],
-                payouts=market["payouts"],
-            )
-            if not has_holdings:
-                continue
-
+        for market in redeemable[:batch_size]:
             self.context.logger.info(
                 f"Building redeemPositions tx for market {market['address']} "
                 f"with condition {market['condition_id']}"
@@ -189,180 +177,127 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             if redeem_tx is not None:
                 transactions.append(redeem_tx)
-                if len(transactions) >= batch_size:
-                    break
-
-        # Advance cursor to last checked market for next cycle
-        if markets:
-            last_checked_id = markets[min(checked, len(markets)) - 1]["address"]
-            if checked >= len(markets):
-                # Reached end of page — if page was full, advance cursor;
-                # if page was partial, we've seen all markets, reset cursor.
-                if len(markets) < SUBGRAPH_PAGE_SIZE:
-                    self._cursor = ""
-                else:
-                    self._cursor = last_checked_id
-            else:
-                # Stopped early (found enough txs) — resume from here next cycle
-                self._cursor = last_checked_id
-            self.context.logger.info(
-                f"Pagination cursor advanced to {self._cursor!r} "
-                f"(checked {checked}/{len(markets)} markets)."
-            )
 
         if len(transactions) == 0:
-            self.context.logger.info("No redeemable positions found.")
+            self.context.logger.info("Failed to build any redeem transactions.")
             return None
 
         self.context.logger.info(
-            f"Building multisend with {len(transactions)} redeem transaction(s)."
+            f"Building multisend with {len(transactions)} " f"redeem transaction(s)."
         )
         tx_hash = yield from self._to_multisend(transactions=transactions)
         if tx_hash is None:
             return None
         return tx_hash
 
-    def _get_redeemable_candidates(
+    def _get_held_positions(
         self,
-    ) -> Generator[None, None, Optional[List[Dict[str, Any]]]]:
-        """Query the Omen subgraph for finalized markets with winning payouts.
+    ) -> Generator[None, None, Dict[str, Set[int]]]:
+        """Query the ConditionalTokens subgraph for positions the safe holds.
 
-        Uses subgraph filters to only return markets whose answers have been
-        finalized (answerFinalizedTimestamp). This eliminates on-chain
-        check_resolved calls. The payouts field provides payout numerators,
-        eliminating on-chain payout checks.
+        Paginates through all userPositions with balance > 0 and returns a
+        mapping from condition_id to the set of index_sets the safe holds.
 
-        Uses id_gt cursor-based pagination to advance through markets across
-        cycles, ensuring all markets are eventually checked.
+        :yield: None
+        :return: mapping from condition_id to set of held index_sets.
         """
         safe = self.synchronized_data.safe_contract_address.lower()
-        now = str(self.last_synced_timestamp)
-        cursor = self._cursor
-        page_size = SUBGRAPH_PAGE_SIZE
+        held: Dict[str, Set[int]] = {}
+        cursor = ""
 
-        created_response = yield from self.get_subgraph_result(
-            query=LP_MARKETS_QUERY.substitute(
-                safe=safe, now=now, cursor=cursor, page_size=page_size
+        while True:
+            response = yield from self.get_conditional_tokens_subgraph_result(
+                query=USER_POSITIONS_QUERY.substitute(
+                    safe=safe, page_size=SUBGRAPH_PAGE_SIZE, cursor=cursor
+                )
             )
-        )
-        direct_lp_response = yield from self.get_subgraph_result(
-            query=DIRECT_LP_QUERY.substitute(
-                safe=safe, now=now, cursor=cursor, page_size=page_size
-            )
-        )
-        trade_response = yield from self.get_subgraph_result(
-            query=TRADE_MARKETS_QUERY.substitute(
-                safe=safe, now=now, cursor=cursor, page_size=page_size
-            )
-        )
-
-        if all(
-            r is None for r in (created_response, direct_lp_response, trade_response)
-        ):
-            self.context.logger.error("Could not retrieve any markets from subgraph.")
-            return None
-
-        def _extract_markets(
-            response: Optional[Dict], key: str, nested: bool = False
-        ) -> List[Dict]:
             if response is None:
-                return []
-            entries = response.get("data", {}).get(key, [])
-            result = []
+                self.context.logger.warning(
+                    "Failed to query ConditionalTokens subgraph."
+                )
+                break
+
+            positions = (response.get("data", {}).get("user", {}) or {}).get(
+                "userPositions", []
+            )
+            if not positions:
+                break
+
+            for pos in positions:
+                position = pos.get("position", {})
+                condition_ids = position.get("conditionIds", [])
+                index_sets = position.get("indexSets", [])
+                for cid in condition_ids:
+                    cid_lower = cid.lower()
+                    if cid_lower not in held:
+                        held[cid_lower] = set()
+                    for idx_set in index_sets:
+                        held[cid_lower].add(int(idx_set))
+
+            cursor = positions[-1]["id"]
+            if len(positions) < SUBGRAPH_PAGE_SIZE:
+                break
+
+        return held
+
+    def _get_markets_for_conditions(
+        self, condition_ids: List[str]
+    ) -> Generator[None, None, List[Dict[str, Any]]]:
+        """Query the Omen subgraph for finalized markets matching given conditions.
+
+        Batches condition IDs into chunks to avoid query size limits.
+        Only returns markets with at least one positive payout.
+
+        :param condition_ids: list of condition IDs to query for.
+        :yield: None
+        :return: list of market dicts with address, condition_id, payouts, etc.
+        """
+        now = str(self.last_synced_timestamp)
+        all_markets: List[Dict[str, Any]] = []
+        seen: set = set()
+
+        for i in range(0, len(condition_ids), CONDITION_ID_BATCH_SIZE):
+            batch = condition_ids[i : i + CONDITION_ID_BATCH_SIZE]
+            ids_str = ", ".join(f'"{cid}"' for cid in batch)
+            response = yield from self.get_subgraph_result(
+                query=MARKETS_BY_CONDITIONS_QUERY.substitute(
+                    condition_ids=ids_str,
+                    now=now,
+                    page_size=SUBGRAPH_PAGE_SIZE,
+                )
+            )
+            if response is None:
+                continue
+
+            entries = response.get("data", {}).get("fixedProductMarketMakers", [])
             for entry in entries:
-                fpmm = entry.get("fpmm", {}) if nested else entry
-                conditions = fpmm.get("conditions", [])
+                conditions = entry.get("conditions", [])
                 if not conditions:
                     continue
                 condition = conditions[0]
                 if condition.get("outcomeSlotCount") is None:
                     continue
-                payouts = fpmm.get("payouts")
+                payouts = entry.get("payouts")
                 if not payouts or not any(float(p) > 0 for p in payouts):
                     continue
-                result.append(
-                    {
-                        "address": fpmm["id"],
-                        "condition_id": condition["id"],
-                        "outcome_slot_count": condition["outcomeSlotCount"],
-                        "payouts": payouts,
-                    }
-                )
-            return result
-
-        created_markets = _extract_markets(
-            created_response, "fixedProductMarketMakers", nested=False
-        )
-        direct_lp_markets = _extract_markets(
-            direct_lp_response, "fpmmLiquidities", nested=True
-        )
-        trade_markets = _extract_markets(trade_response, "fpmmTrades", nested=True)
-
-        # Deduplicate by market address, sorted by id for deterministic cursor
-        seen: set = set()
-        markets = []
-        for m in created_markets + direct_lp_markets + trade_markets:
-            if m["address"] not in seen:
-                seen.add(m["address"])
-                markets.append(m)
-        markets.sort(key=lambda m: m["address"])
+                address = entry["id"]
+                if address not in seen:
+                    seen.add(address)
+                    all_markets.append(
+                        {
+                            "address": address,
+                            "condition_id": condition["id"],
+                            "outcome_slot_count": condition["outcomeSlotCount"],
+                            "payouts": payouts,
+                        }
+                    )
 
         self.context.logger.info(
-            f"Found {len(markets)} finalized market(s) with payouts "
-            f"(cursor={cursor!r}, {len(created_markets)} created, "
-            f"{len(direct_lp_markets)} direct LP, {len(trade_markets)} trader)."
+            f"Queried Omen subgraph for {len(condition_ids)} conditions "
+            f"in {(len(condition_ids) - 1) // CONDITION_ID_BATCH_SIZE + 1} "
+            f"batch(es): {len(all_markets)} finalized market(s) with payouts."
         )
-        return markets
-
-    def _check_holdings(
-        self,
-        market_address: str,
-        condition_id: str,
-        outcome_slot_count: int,
-        payouts: List[str],
-    ) -> Generator[None, None, bool]:
-        """Check if the safe holds redeemable conditional tokens for a market.
-
-        Uses the payouts from the subgraph to determine which outcomes won.
-        Only reports holdings as redeemable if tokens are on a winning side.
-        """
-        response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            contract_address=self.params.conditional_tokens_contract,
-            contract_id=str(ConditionalTokensContract.contract_id),
-            contract_callable=get_callable_name(
-                ConditionalTokensContract.get_user_holdings
-            ),
-            outcome_slot_count=outcome_slot_count,
-            condition_id=condition_id,
-            creator=self.synchronized_data.safe_contract_address,
-            collateral_token=self.params.collateral_tokens_contract,
-            market=market_address,
-            parent_collection_id=ZERO_HASH,
-        )
-        if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.warning(
-                f"ConditionalTokensContract.get_user_holdings unsuccessful! : {response}"
-            )
-            return False
-
-        shares = cast(list, response.state.body["shares"])
-        has_winnings = any(
-            s > 0 and float(payouts[i]) > 0
-            for i, s in enumerate(shares)
-            if i < len(payouts)
-        )
-        if has_winnings:
-            self.context.logger.info(
-                f"Safe holds winning tokens for market {market_address}: "
-                f"shares={shares}, payouts={payouts}"
-            )
-        elif any(s > 0 for s in shares):
-            self.context.logger.info(
-                f"Safe holds only losing tokens for market {market_address}: "
-                f"shares={shares}, payouts={payouts} — skipping"
-            )
-        return has_winnings
+        return all_markets
 
     def _get_redeem_positions_tx(
         self,
@@ -384,7 +319,8 @@ class RedeemWinningsBehaviour(MarketCreationManagerBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"ConditionalTokensContract.build_redeem_positions_tx unsuccessful! : {response}"
+                f"ConditionalTokensContract.build_redeem_positions_tx "
+                f"unsuccessful! : {response}"
             )
             return None
         return {

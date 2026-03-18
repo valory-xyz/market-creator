@@ -191,5 +191,9 @@ class OmenSubgraph(ApiSpecs):
     """A model that wraps ApiSpecs for the OMEN's subgraph specifications."""
 
 
+class ConditionalTokensSubgraph(ApiSpecs):
+    """A model that wraps ApiSpecs for the ConditionalTokens subgraph."""
+
+
 Requests = BaseRequests
 BenchmarkTool = BaseBenchmarkTool
