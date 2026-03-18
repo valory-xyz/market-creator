@@ -252,6 +252,31 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
 
         return json.loads(response.body.decode())
 
+    def get_conditional_tokens_subgraph_result(
+        self,
+        query: str,
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
+        """Query the ConditionalTokens subgraph."""
+        response = yield from self.get_http_response(
+            content=to_content(query),
+            **self.context.conditional_tokens_subgraph.get_spec(),
+        )
+
+        if response is None:
+            self.context.logger.error(
+                "Could not retrieve response from ConditionalTokens subgraph. "
+                "Response was None."
+            )
+            return None
+        if response.status_code != HTTP_OK:
+            self.context.logger.error(
+                f"Could not retrieve response from ConditionalTokens subgraph. "
+                f"Received status code {response.status_code}.\n{response}"
+            )
+            return None
+
+        return json.loads(response.body.decode())
+
     def do_llm_request(
         self,
         llm_message: LlmMessage,

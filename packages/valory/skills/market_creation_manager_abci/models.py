@@ -177,6 +177,9 @@ class MarketCreationManagerParams(BaseParams):
             key="answer_retry_intervals", kwargs=kwargs, type_=List[int]
         )
         self.service_endpoint_base = self._ensure("service_endpoint_base", kwargs, str)
+        self.redeem_winnings_batch_size = self._ensure(
+            "redeem_winnings_batch_size", kwargs, type_=int
+        )
         super().__init__(*args, **kwargs)
 
 
@@ -186,6 +189,10 @@ class RandomnessApi(ApiSpecs):
 
 class OmenSubgraph(ApiSpecs):
     """A model that wraps ApiSpecs for the OMEN's subgraph specifications."""
+
+
+class ConditionalTokensSubgraph(ApiSpecs):
+    """A model that wraps ApiSpecs for the ConditionalTokens subgraph."""
 
 
 Requests = BaseRequests

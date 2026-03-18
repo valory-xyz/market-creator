@@ -101,7 +101,7 @@ def save_results(results: dict) -> None:
 def create_audit_prompt(question: str, outcomes: list[str]) -> str:
     """Create a unified audit prompt for all AI providers."""
     outcomes_str = "\n".join(
-        [f"{i+1}. {outcome}" for i, outcome in enumerate(outcomes)]
+        [f"{i + 1}. {outcome}" for i, outcome in enumerate(outcomes)]
     )
 
     return textwrap.dedent(
@@ -585,7 +585,7 @@ def display_audit_results_html(df: pd.DataFrame, fpmms: dict, audits: dict) -> N
         <h3>Accuracy Calculation</h3>
         <p>X = Number of valid markets with &gt;0 valid audits AND matches 0 audits: <strong>{X}</strong></p>
         <p>Y = Number of valid markets with &gt;0 valid audits AND matching audits = num audits: <strong>{Y}</strong></p>
-        <p><strong>Accuracy = {Y} / ({X} + {Y}) = {accuracy:.4f} ({accuracy*100:.2f}%)</strong></p>
+        <p><strong>Accuracy = {Y} / ({X} + {Y}) = {accuracy:.4f} ({accuracy * 100:.2f}%)</strong></p>
     """
 
     html_file = "market_resolution_audits.html"

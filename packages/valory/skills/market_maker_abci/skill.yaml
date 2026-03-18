@@ -10,15 +10,15 @@ fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeicr7qsikxguag7ozqdriirxxmqbhuxidbgpqjv5galsjmxrr5gbwu
   behaviours.py: bafybeihxzbxszlpm2u6rsbya3tkp6in537a3mapqrcmct236qzvwuffxre
-  composition.py: bafybeidjlgopea6bc7e7gdld4bt2rzrt5m3ddciyczmkk2jcdka5pu4vsq
+  composition.py: bafybeieywufdjmaam4vf5ovqxikt5eqizzg2vddpwojurk27xpvxikxyh4
   dialogues.py: bafybeicuditmewgo3w7pcju22rtkzkrmjfxpcqpyils33fy7uzcbontd5m
-  fsm_specification.yaml: bafybeidvbgbl45qpgdya4dt76suvi4nxi6ycyezffhv67ybshrw6vhr77q
+  fsm_specification.yaml: bafybeihjb7vpg6gwwm3ue3lpywdped62xmlg4xjobvmqbzyggoyqeoembu
   handlers.py: bafybeib36vtg2ng4mel67liodkku7v6rkjelehsdnw2x7fazq44hfp356u
-  models.py: bafybeibzgwkhnu5jihwtiwgg6cviawtvoljdikklwxczaa6iczj4gha2su
+  models.py: bafybeih6b7z4jjtqutrcas5moei33a3yorcpapc5wmrwxd4kegsnlq6jyu
   tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
   tests/test_behaviours.py: bafybeiaww7je4u5uyyl44ybdi57dpangy4syxcgxuepdiolqeqb4yfpk24
-  tests/test_composition.py: bafybeieyjqgjr6np77fy3cny2alht445edl6lbkoe6fr5p65ouajndc4oi
+  tests/test_composition.py: bafybeibkr4bswosvbgvxvobhys65j36xzyglgsn47sv6mjibygmkdpkx3q
   tests/test_dialogues.py: bafybeih7xzdqcg6yjtqhb2aydthhnqgcyjaaar6hqbzcl23ubg5po6qft4
   tests/test_handlers.py: bafybeif5zhig5fvro4pwx42fng5exbwk45lzyugzcb6uzo5nusbrnhz4au
   tests/test_models.py: bafybeifv6v4cetxq3h7bgulhhoysinukb2rqugbn2nzrct6nozlj4hv6ve
@@ -32,7 +32,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
-- valory/market_creation_manager_abci:0.1.0:bafybeie2ofecn35ck2d7wg5bu4n4d4v7hlw7gj4kjbgvwczrfwhg5hnu6m
+- valory/market_creation_manager_abci:0.1.0:bafybeicmyyog47d7qbdutm7edgogorf57p7sxopzmzbe5y2l7hhjr6vr7m
 - valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
 - valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
@@ -232,6 +232,7 @@ models:
       - 604800
       - 1209600
       service_endpoint_base: https://dummy_service.autonolas.tech/
+      redeem_winnings_batch_size: 5
       irrelevant_tools:
       - openai-text-davinci-002
       - openai-text-davinci-003
@@ -269,6 +270,18 @@ models:
       retries: 5
       url: ''
     class_name: MechResponseSpecs
+  conditional_tokens_subgraph:
+    args:
+      api_id: conditional_tokens
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://conditional-tokens.subgraph.autonolas.tech
+    class_name: ConditionalTokensSubgraph
   omen_subgraph:
     args:
       api_id: omen

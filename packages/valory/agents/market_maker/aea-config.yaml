@@ -55,9 +55,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeia36n7ci7b6pi2bpa4r4ty6dcb3r4vs46vjftolsdxfl4y5iieyyy
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
-- valory/market_maker_abci:0.1.0:bafybeihygk6bnocfmthrxt4qlecdtnvarx4lkzmv5iw2lbcrvcqrmnwazq
+- valory/market_maker_abci:0.1.0:bafybeidqutv2bzzmheprccglvycgifvmgt4ip5gtlg54veeqoil3ug4w2a
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
-- valory/market_creation_manager_abci:0.1.0:bafybeie2ofecn35ck2d7wg5bu4n4d4v7hlw7gj4kjbgvwczrfwhg5hnu6m
+- valory/market_creation_manager_abci:0.1.0:bafybeicmyyog47d7qbdutm7edgogorf57p7sxopzmzbe5y2l7hhjr6vr7m
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
 - valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
@@ -92,6 +92,7 @@ logging_config:
       - console
       propagate: true
 skill_exception_policy: stop_and_exit
+connection_exception_policy: just_log
 dependencies:
   open-aea-ledger-cosmos:
     version: ==2.1.0
@@ -150,7 +151,7 @@ cert_requests:
   not_before: '2022-01-01'
   public_key: ${str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
   save_path: .certs/acn_cosmos_11000.txt
-is_abstract: false
+is_abstract: true
 ---
 public_id: valory/market_maker_abci:0.1.0
 type: skill
@@ -251,6 +252,7 @@ models:
       mech_tool_resolve_market: ${str:resolve-market-reasoning-gpt-4.1}
       answer_retry_intervals: ${list:[0, 86400, 259200, 604800, 1209600]}
       service_endpoint_base: ${str:https://dummy_service.autonolas.tech/}
+      redeem_winnings_batch_size: ${int:5}
       irrelevant_tools:
       - openai-text-davinci-002
       - openai-text-davinci-003
@@ -301,6 +303,15 @@ models:
       response_type: ${str:str}
       retries: ${int:5}
       url: ${str:''}
+  conditional_tokens_subgraph:
+    args:
+      headers:
+        Content-Type: ${str:application/json}
+      method: ${str:POST}
+      response_key: ${str:data}
+      response_type: ${str:list}
+      retries: ${int:5}
+      url: ${str:https://conditional-tokens.subgraph.autonolas.tech}
   omen_subgraph:
     args:
       headers:

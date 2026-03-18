@@ -205,9 +205,18 @@ class TestAbciAppTransitionMapping:
             == RegistrationRound
         )
 
+    def test_finished_with_redeem_winnings_round(self) -> None:
+        """Test FinishedWithRedeemWinningsRound maps to TransactionSettlement."""
+        assert (
+            abci_app_transition_mapping[
+                MarketCreationManagerAbci.FinishedWithRedeemWinningsRound
+            ]
+            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+        )
+
     def test_mapping_count(self) -> None:
         """Test total mapping count."""
-        assert len(abci_app_transition_mapping) == 22
+        assert len(abci_app_transition_mapping) == 23
 
 
 class TestTerminationConfig:

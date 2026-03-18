@@ -24,6 +24,9 @@ from packages.valory.skills.abstract_round_abci.models import (
 )
 from packages.valory.skills.abstract_round_abci.models import Requests as BaseRequests
 from packages.valory.skills.market_creation_manager_abci.models import (
+    ConditionalTokensSubgraph as BaseConditionalTokensSubgraph,
+)
+from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
 )
 from packages.valory.skills.market_creation_manager_abci.models import (
@@ -64,6 +67,7 @@ MechResponseSpecs = BaseMechResponseSpecs
 Requests = BaseRequests
 BenchmarkTool = BaseBenchmarkTool
 RandomnessApi = MarketCreationManagerRandomnessApi
+ConditionalTokensSubgraph = BaseConditionalTokensSubgraph
 OmenSubgraph = BaseOmenSubgraph
 MechInteractParams = MechInteractAbciParams
 MechToolsSpecs = BaseMechToolsSpecs

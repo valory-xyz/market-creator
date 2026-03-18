@@ -38,10 +38,9 @@ from tqdm import tqdm
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 REALITIO_SUBGRAPH_ID = "E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh"
-_API_KEY = os.getenv("SUBGRAPH_API_KEY", "")
-REALITIO_SUBGRAPH_URL = os.getenv(
-    "REALITIO_SUBGRAPH_URL",
-    f"https://gateway.thegraph.com/api/{_API_KEY}/subgraphs/id/{REALITIO_SUBGRAPH_ID}",
+_API_KEY = os.getenv("THEGRAPH_API_KEY", "")
+REALITIO_SUBGRAPH_URL = (
+    f"https://gateway.thegraph.com/api/{_API_KEY}/subgraphs/id/{REALITIO_SUBGRAPH_ID}"
 )
 
 RESPONSES_QUERY = """

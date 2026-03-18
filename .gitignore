@@ -48,6 +48,7 @@ leak_report
 __pycache__
 temp/
 agent/
+logs/
 .env
 
 ethereum_private_key.txt

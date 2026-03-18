@@ -58,6 +58,7 @@ class Event(Enum):
     DEPOSIT_DAI_DONE = "deposit_dai_done"
     ANSWER_QUESTION_DONE = "answer_question_done"
     REMOVE_FUNDING_DONE = "remove_funding_done"
+    REDEEM_WINNINGS_DONE = "redeem_winnings_done"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
 
 

@@ -38,6 +38,10 @@ class FinishedWithRedeemBondRound(DegenerateRound):
     """FinishedWithRedeemBondRound"""
 
 
+class FinishedWithRedeemWinningsRound(DegenerateRound):
+    """FinishedWithRedeemWinningsRound"""
+
+
 class FinishedWithoutTxRound(DegenerateRound):
     """FinishedWithoutTxRound"""
 
