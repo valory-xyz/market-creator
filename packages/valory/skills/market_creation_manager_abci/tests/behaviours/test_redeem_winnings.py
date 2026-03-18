@@ -72,82 +72,36 @@ class TestRedeemWinningsBehaviour:
         """Test matching_round is correctly set."""
         assert self.behaviour.matching_round == RedeemWinningsRound
 
-    def test_get_payload_no_markets(self) -> None:
-        """Test get_payload when no resolved markets are found."""
-        with patch.object(self.behaviour, "_get_resolved_markets", new=_make_gen(None)):
-            gen = self.behaviour.get_payload()
-            result = _exhaust_gen(gen)
-        assert result is None
+    # --- _has_winning_position tests ---
 
-    def test_get_payload_empty_markets(self) -> None:
-        """Test get_payload when resolved markets list is empty."""
-        with patch.object(self.behaviour, "_get_resolved_markets", new=_make_gen([])):
-            gen = self.behaviour.get_payload()
-            result = _exhaust_gen(gen)
-        assert result is None
+    def test_has_winning_position_true(self) -> None:
+        """Test _has_winning_position when held index set matches winning payout."""
+        # indexSet 1 = outcome 0, payouts[0] = "1" → winning
+        assert RedeemWinningsBehaviour._has_winning_position(["1", "0"], {1}) is True
 
-    def test_get_payload_no_redeemable_positions(self) -> None:
-        """Test get_payload when markets exist but none are redeemable."""
-        markets = [
-            {
-                "address": "0xmarket1",
-                "condition_id": "0xcond1",
-                "outcome_slot_count": 2,
-            }
-        ]
-        with patch.object(
-            self.behaviour, "_get_resolved_markets", new=_make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_build_redeem_txs_for_market", new=_make_gen(None)
-        ):
-            gen = self.behaviour.get_payload()
-            result = _exhaust_gen(gen)
-        assert result is None
+    def test_has_winning_position_false(self) -> None:
+        """Test _has_winning_position when held index set is on losing side."""
+        # indexSet 2 = outcome 1, payouts[1] = "0" → losing
+        assert RedeemWinningsBehaviour._has_winning_position(["1", "0"], {2}) is False
 
-    def test_get_payload_multisend_fails(self) -> None:
-        """Test get_payload when _to_multisend returns None."""
-        markets = [
-            {
-                "address": "0xmarket1",
-                "condition_id": "0xcond1",
-                "outcome_slot_count": 2,
-            }
-        ]
-        redeem_txs = [{"to": "0xcondtokens", "data": "0xdata", "value": 0}]
-        with patch.object(
-            self.behaviour, "_get_resolved_markets", new=_make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_build_redeem_txs_for_market", new=_make_gen(redeem_txs)
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen(None)
-        ):
-            gen = self.behaviour.get_payload()
-            result = _exhaust_gen(gen)
-        assert result is None
+    def test_has_winning_position_outcome1_wins(self) -> None:
+        """Test _has_winning_position when outcome 1 wins and safe holds it."""
+        # indexSet 2 = outcome 1, payouts[1] = "1" → winning
+        assert RedeemWinningsBehaviour._has_winning_position(["0", "1"], {2}) is True
 
-    def test_get_payload_success(self) -> None:
-        """Test get_payload happy path."""
-        markets = [
-            {
-                "address": "0xmarket1",
-                "condition_id": "0xcond1",
-                "outcome_slot_count": 2,
-            }
-        ]
-        redeem_txs = [{"to": "0xcondtokens", "data": "0xdata", "value": 0}]
-        with patch.object(
-            self.behaviour, "_get_resolved_markets", new=_make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_build_redeem_txs_for_market", new=_make_gen(redeem_txs)
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
-        ):
-            gen = self.behaviour.get_payload()
-            result = _exhaust_gen(gen)
-        assert result == "0xmultisend_hash"
+    def test_has_winning_position_both_held(self) -> None:
+        """Test _has_winning_position when both outcomes held, one winning."""
+        assert RedeemWinningsBehaviour._has_winning_position(["1", "0"], {1, 2}) is True
 
-    def test_get_resolved_markets_subgraph_error(self) -> None:
-        """Test _get_resolved_markets when subgraph returns None."""
+    def test_has_winning_position_empty_held(self) -> None:
+        """Test _has_winning_position with empty held set."""
+        assert RedeemWinningsBehaviour._has_winning_position(["1", "0"], set()) is False
+
+    # --- _get_held_positions tests ---
+
+    def test_get_held_positions_empty(self) -> None:
+        """Test _get_held_positions when CT subgraph returns no positions."""
+        ct_response: Any = {"data": {"user": {"userPositions": []}}}
         with patch.object(
             type(self.behaviour),
             "synchronized_data",
@@ -155,169 +109,212 @@ class TestRedeemWinningsBehaviour:
                 lambda self: MagicMock(safe_contract_address="0xSafe")
             ),
         ), patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=_make_gen(ct_response),
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = _exhaust_gen(gen)
+        assert result == {}
+
+    def test_get_held_positions_subgraph_error(self) -> None:
+        """Test _get_held_positions when CT subgraph returns None."""
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(
+                lambda self: MagicMock(safe_contract_address="0xSafe")
+            ),
+        ), patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=_make_gen(None),
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = _exhaust_gen(gen)
+        assert result == {}
+
+    def test_get_held_positions_pagination(self) -> None:
+        """Test _get_held_positions paginates when a full page is returned."""
+        from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_winnings import (
+            SUBGRAPH_PAGE_SIZE,
+        )
+
+        # First page: full page triggers pagination
+        page1_positions = [
+            {
+                "id": f"0xpos{i}",
+                "balance": "100",
+                "position": {"conditionIds": [f"0xcond{i}"], "indexSets": ["1"]},
+            }
+            for i in range(SUBGRAPH_PAGE_SIZE)
+        ]
+        page1 = {"data": {"user": {"userPositions": page1_positions}}}
+        # Second page: partial → stops
+        page2 = {
+            "data": {
+                "user": {
+                    "userPositions": [
+                        {
+                            "id": "0xpos_extra",
+                            "balance": "50",
+                            "position": {
+                                "conditionIds": ["0xcond_extra"],
+                                "indexSets": ["2"],
+                            },
+                        }
+                    ]
+                }
+            }
+        }
+        call_count = 0
+
+        def _mock_ct_subgraph(*args: Any, **kwargs: Any) -> Any:
+            nonlocal call_count
+            call_count += 1
+            return page1 if call_count == 1 else page2
+            yield  # noqa: unreachable
+
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(
+                lambda self: MagicMock(safe_contract_address="0xSafe")
+            ),
+        ), patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=_mock_ct_subgraph,
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = _exhaust_gen(gen)
+        assert call_count == 2
+        assert "0xcond_extra" in result
+
+    def test_get_held_positions_success(self) -> None:
+        """Test _get_held_positions with valid data."""
+        ct_response = {
+            "data": {
+                "user": {
+                    "userPositions": [
+                        {
+                            "id": "0xpos1",
+                            "balance": "100",
+                            "position": {
+                                "conditionIds": ["0xcond1"],
+                                "indexSets": ["1"],
+                            },
+                        },
+                        {
+                            "id": "0xpos2",
+                            "balance": "200",
+                            "position": {
+                                "conditionIds": ["0xcond1"],
+                                "indexSets": ["2"],
+                            },
+                        },
+                        {
+                            "id": "0xpos3",
+                            "balance": "50",
+                            "position": {
+                                "conditionIds": ["0xcond2"],
+                                "indexSets": ["1"],
+                            },
+                        },
+                    ]
+                }
+            }
+        }
+        with patch.object(
+            type(self.behaviour),
+            "synchronized_data",
+            new_callable=lambda: property(
+                lambda self: MagicMock(safe_contract_address="0xSafe")
+            ),
+        ), patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=_make_gen(ct_response),
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = _exhaust_gen(gen)
+        assert len(result) == 2
+        assert result["0xcond1"] == {1, 2}
+        assert result["0xcond2"] == {1}
+
+    # --- _get_markets_for_conditions tests ---
+
+    def test_get_markets_for_conditions_empty(self) -> None:
+        """Test _get_markets_for_conditions with empty condition list."""
+        with patch.object(
             type(self.behaviour),
             "last_synced_timestamp",
             new_callable=lambda: property(lambda self: 1000000),
-        ), patch.object(
-            self.behaviour, "get_subgraph_result", new=_make_gen(None)
         ):
-            gen = self.behaviour._get_resolved_markets()
+            gen = self.behaviour._get_markets_for_conditions([])
             result = _exhaust_gen(gen)
-        assert result is None
+        assert result == []
 
-    def test_get_resolved_markets_success(self) -> None:
-        """Test _get_resolved_markets with valid data."""
-        subgraph_response = {
+    def test_get_markets_for_conditions_subgraph_error(self) -> None:
+        """Test _get_markets_for_conditions when subgraph returns None."""
+        with patch.object(
+            type(self.behaviour),
+            "last_synced_timestamp",
+            new_callable=lambda: property(lambda self: 1000000),
+        ), patch.object(self.behaviour, "get_subgraph_result", new=_make_gen(None)):
+            gen = self.behaviour._get_markets_for_conditions(["0xcond1"])
+            result = _exhaust_gen(gen)
+        assert result == []
+
+    def test_get_markets_for_conditions_success(self) -> None:
+        """Test _get_markets_for_conditions with valid data and edge cases."""
+        omen_response = {
             "data": {
                 "fixedProductMarketMakers": [
                     {
                         "id": "0xmarket1",
-                        "openingTimestamp": "1000000",
-                        "conditions": [
-                            {
-                                "id": "0xcond1",
-                                "question": {"id": "0xq1"},
-                                "outcomeSlotCount": 2,
-                            }
-                        ],
+                        "payouts": ["1", "0"],
+                        "conditions": [{"id": "0xcond1", "outcomeSlotCount": 2}],
                     },
                     {
                         "id": "0xmarket2",
-                        "openingTimestamp": "2000000",
-                        "conditions": [],
+                        "payouts": None,
+                        "conditions": [{"id": "0xcond2", "outcomeSlotCount": 2}],
                     },
                     {
                         "id": "0xmarket3",
-                        "openingTimestamp": "1500000",
-                        "conditions": [
-                            {
-                                "id": "0xcond3",
-                                "question": {"id": "0xq3"},
-                                "outcomeSlotCount": None,
-                            }
-                        ],
+                        "payouts": ["0", "1"],
+                        "conditions": [],
+                    },
+                    {
+                        "id": "0xmarket4",
+                        "payouts": ["1", "0"],
+                        "conditions": [{"id": "0xcond4", "outcomeSlotCount": None}],
+                    },
+                    {
+                        "id": "0xmarket1",
+                        "payouts": ["1", "0"],
+                        "conditions": [{"id": "0xcond1", "outcomeSlotCount": 2}],
                     },
                 ]
             }
         }
         with patch.object(
             type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xSafe")
-            ),
-        ), patch.object(
-            type(self.behaviour),
             "last_synced_timestamp",
             new_callable=lambda: property(lambda self: 3000000),
         ), patch.object(
-            self.behaviour, "get_subgraph_result", new=_make_gen(subgraph_response)
+            self.behaviour, "get_subgraph_result", new=_make_gen(omen_response)
         ):
-            gen = self.behaviour._get_resolved_markets()
+            gen = self.behaviour._get_markets_for_conditions(["0xcond1", "0xcond2"])
             result = _exhaust_gen(gen)
-        assert result is not None
+        # market1 passes; market2 has None payouts; market3 has no conditions;
+        # market4 has None outcomeSlotCount; duplicate market1 is deduplicated
         assert len(result) == 1
         assert result[0]["address"] == "0xmarket1"
+        assert result[0]["payouts"] == ["1", "0"]
 
-    def test_check_resolved_success(self) -> None:
-        """Test _check_resolved with successful response."""
-        mock_response = MagicMock()
-        mock_response.performative = ContractApiMessage.Performative.STATE
-        mock_response.state.body = {"resolved": True}
-
-        with patch.object(
-            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
-        ):
-            gen = self.behaviour._check_resolved("0xcond1")
-            result = _exhaust_gen(gen)
-        assert result is True
-
-    def test_check_resolved_not_resolved(self) -> None:
-        """Test _check_resolved when condition is not resolved."""
-        mock_response = MagicMock()
-        mock_response.performative = ContractApiMessage.Performative.STATE
-        mock_response.state.body = {"resolved": False}
-
-        with patch.object(
-            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
-        ):
-            gen = self.behaviour._check_resolved("0xcond1")
-            result = _exhaust_gen(gen)
-        assert result is False
-
-    def test_check_resolved_error(self) -> None:
-        """Test _check_resolved with error response."""
-        mock_response = MagicMock()
-        mock_response.performative = ContractApiMessage.Performative.ERROR
-
-        with patch.object(
-            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
-        ):
-            gen = self.behaviour._check_resolved("0xcond1")
-            result = _exhaust_gen(gen)
-        assert result is None
-
-    def test_check_holdings_has_shares(self) -> None:
-        """Test _check_holdings when safe holds conditional tokens."""
-        mock_response = MagicMock()
-        mock_response.performative = ContractApiMessage.Performative.STATE
-        mock_response.state.body = {
-            "shares": [100, 200],
-            "holdings": [50, 50],
-        }
-
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
-            ),
-        ), patch.object(
-            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
-        ):
-            gen = self.behaviour._check_holdings("0xmarket1", "0xcond1", 2)
-            result = _exhaust_gen(gen)
-        assert result is True
-
-    def test_check_holdings_no_shares(self) -> None:
-        """Test _check_holdings when safe has no conditional tokens."""
-        mock_response = MagicMock()
-        mock_response.performative = ContractApiMessage.Performative.STATE
-        mock_response.state.body = {
-            "shares": [0, 0],
-            "holdings": [50, 50],
-        }
-
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
-            ),
-        ), patch.object(
-            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
-        ):
-            gen = self.behaviour._check_holdings("0xmarket1", "0xcond1", 2)
-            result = _exhaust_gen(gen)
-        assert result is False
-
-    def test_check_holdings_error(self) -> None:
-        """Test _check_holdings with error response."""
-        mock_response = MagicMock()
-        mock_response.performative = ContractApiMessage.Performative.ERROR
-
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
-            ),
-        ), patch.object(
-            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
-        ):
-            gen = self.behaviour._check_holdings("0xmarket1", "0xcond1", 2)
-            result = _exhaust_gen(gen)
-        assert result is False
+    # --- _get_redeem_positions_tx tests ---
 
     def test_get_redeem_positions_tx_success(self) -> None:
         """Test _get_redeem_positions_tx with successful response."""
@@ -347,70 +344,120 @@ class TestRedeemWinningsBehaviour:
             result = _exhaust_gen(gen)
         assert result is None
 
-    def test_build_redeem_txs_not_resolved(self) -> None:
-        """Test _build_redeem_txs_for_market when condition is not resolved."""
-        market = {
-            "address": "0xmarket1",
-            "condition_id": "0xcond1",
-            "outcome_slot_count": 2,
-        }
-        with patch.object(self.behaviour, "_check_resolved", new=_make_gen(False)):
-            gen = self.behaviour._build_redeem_txs_for_market(market)
+    # --- get_payload tests ---
+
+    def test_get_payload_no_held_positions(self) -> None:
+        """Test get_payload when CT subgraph returns no held positions."""
+        with patch.object(self.behaviour, "_get_held_positions", new=_make_gen({})):
+            gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
         assert result is None
 
-    def test_build_redeem_txs_no_holdings(self) -> None:
-        """Test _build_redeem_txs_for_market when no holdings."""
-        market = {
-            "address": "0xmarket1",
-            "condition_id": "0xcond1",
-            "outcome_slot_count": 2,
-        }
+    def test_get_payload_no_finalized_markets(self) -> None:
+        """Test get_payload when Omen subgraph returns no markets for held conditions."""
+        held = {"0xcond1": {1}}
         with patch.object(
-            self.behaviour, "_check_resolved", new=_make_gen(True)
-        ), patch.object(self.behaviour, "_check_holdings", new=_make_gen(False)):
-            gen = self.behaviour._build_redeem_txs_for_market(market)
-            result = _exhaust_gen(gen)
-        assert result is None
-
-    def test_build_redeem_txs_success(self) -> None:
-        """Test _build_redeem_txs_for_market happy path."""
-        market = {
-            "address": "0xmarket1",
-            "condition_id": "0xcond1",
-            "outcome_slot_count": 2,
-        }
-        redeem_tx = {"to": "0xcondtokens", "data": "0xdata", "value": 0}
-        with patch.object(
-            self.behaviour, "_check_resolved", new=_make_gen(True)
+            self.behaviour, "_get_held_positions", new=_make_gen(held)
         ), patch.object(
-            self.behaviour, "_check_holdings", new=_make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
+            self.behaviour, "_get_markets_for_conditions", new=_make_gen([])
         ):
-            gen = self.behaviour._build_redeem_txs_for_market(market)
+            gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
-        assert result is not None
-        assert len(result) == 1
-        assert result[0] == redeem_tx
+        assert result is None
 
-    def test_build_redeem_txs_redeem_tx_fails(self) -> None:
-        """Test _build_redeem_txs_for_market when redeem tx build fails."""
-        market = {
-            "address": "0xmarket1",
-            "condition_id": "0xcond1",
-            "outcome_slot_count": 2,
-        }
+    def test_get_payload_no_winning_positions(self) -> None:
+        """Test get_payload when markets exist but all held positions are losing."""
+        held = {"0xcond1": {2}}  # holds outcome 1
+        markets = [
+            {
+                "address": "0xmarket1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["1", "0"],  # outcome 0 won → losing
+            }
+        ]
         with patch.object(
-            self.behaviour, "_check_resolved", new=_make_gen(True)
+            self.behaviour, "_get_held_positions", new=_make_gen(held)
         ), patch.object(
-            self.behaviour, "_check_holdings", new=_make_gen(True)
+            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+        ):
+            gen = self.behaviour.get_payload()
+            result = _exhaust_gen(gen)
+        assert result is None
+
+    def test_get_payload_redeem_tx_build_fails(self) -> None:
+        """Test get_payload when all redeem tx builds fail."""
+        held = {"0xcond1": {1}}  # holds outcome 0
+        markets = [
+            {
+                "address": "0xmarket1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["1", "0"],  # outcome 0 won → winning
+            }
+        ]
+        with patch.object(
+            self.behaviour, "_get_held_positions", new=_make_gen(held)
+        ), patch.object(
+            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
         ), patch.object(
             self.behaviour, "_get_redeem_positions_tx", new=_make_gen(None)
         ):
-            gen = self.behaviour._build_redeem_txs_for_market(market)
+            gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
         assert result is None
+
+    def test_get_payload_multisend_fails(self) -> None:
+        """Test get_payload when _to_multisend returns None."""
+        held = {"0xcond1": {1}}
+        markets = [
+            {
+                "address": "0xmarket1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["1", "0"],
+            }
+        ]
+        redeem_tx = {"to": "0xcondtokens", "data": "0xdata", "value": 0}
+        with patch.object(
+            self.behaviour, "_get_held_positions", new=_make_gen(held)
+        ), patch.object(
+            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+        ), patch.object(
+            self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
+        ), patch.object(
+            self.behaviour, "_to_multisend", new=_make_gen(None)
+        ):
+            gen = self.behaviour.get_payload()
+            result = _exhaust_gen(gen)
+        assert result is None
+
+    def test_get_payload_success(self) -> None:
+        """Test get_payload happy path."""
+        held = {"0xcond1": {1}}
+        markets = [
+            {
+                "address": "0xmarket1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["1", "0"],
+            }
+        ]
+        redeem_tx = {"to": "0xcondtokens", "data": "0xdata", "value": 0}
+        with patch.object(
+            self.behaviour, "_get_held_positions", new=_make_gen(held)
+        ), patch.object(
+            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+        ), patch.object(
+            self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
+        ), patch.object(
+            self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
+        ):
+            gen = self.behaviour.get_payload()
+            result = _exhaust_gen(gen)
+        assert result == "0xmultisend_hash"
+
+    # --- async_act tests ---
 
     def test_async_act_with_tx_hash(self) -> None:
         """Test async_act when get_payload returns a tx hash."""

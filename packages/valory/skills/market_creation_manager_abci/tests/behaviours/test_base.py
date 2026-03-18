@@ -416,6 +416,75 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
 
         assert result is None
 
+    def test_get_ct_subgraph_result_success(self) -> None:
+        """Test get_conditional_tokens_subgraph_result returns parsed JSON."""
+        import json
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.body = json.dumps({"data": {"user": {}}}).encode()
+        self.behaviour.context.conditional_tokens_subgraph = MagicMock()
+        self.behaviour.context.conditional_tokens_subgraph.get_spec.return_value = {
+            "method": "POST",
+            "url": "http://ct-subgraph.example.com",
+        }
+
+        with patch.object(
+            self.behaviour,
+            "get_http_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour.get_conditional_tokens_subgraph_result(
+                query="{ user {} }"
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is not None
+        assert "data" in result
+
+    def test_get_ct_subgraph_result_none_response(self) -> None:
+        """Test get_conditional_tokens_subgraph_result returns None when response is None."""
+        self.behaviour.context.conditional_tokens_subgraph = MagicMock()
+        self.behaviour.context.conditional_tokens_subgraph.get_spec.return_value = {
+            "method": "POST",
+            "url": "http://ct-subgraph.example.com",
+        }
+
+        with patch.object(
+            self.behaviour,
+            "get_http_response",
+            new=_make_gen(None),
+        ):
+            gen = self.behaviour.get_conditional_tokens_subgraph_result(
+                query="{ user {} }"
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_get_ct_subgraph_result_non_200(self) -> None:
+        """Test get_conditional_tokens_subgraph_result returns None on non-200."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 500
+        mock_resp.body = b"Server Error"
+        self.behaviour.context.conditional_tokens_subgraph = MagicMock()
+        self.behaviour.context.conditional_tokens_subgraph.get_spec.return_value = {
+            "method": "POST",
+            "url": "http://ct-subgraph.example.com",
+        }
+
+        with patch.object(
+            self.behaviour,
+            "get_http_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour.get_conditional_tokens_subgraph_result(
+                query="{ user {} }"
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
     def test_synchronized_data_property(self) -> None:
         """Test the synchronized_data property."""
         from packages.valory.skills.market_creation_manager_abci.rounds import (
