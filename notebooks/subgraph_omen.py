@@ -25,6 +25,7 @@ import time
 from collections import defaultdict
 from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
 from typing import Any, Dict
 
 import pandas as pd
@@ -33,7 +34,7 @@ from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from tqdm import tqdm
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 
 answer_mapping = defaultdict(
@@ -52,8 +53,10 @@ FPMMS_JSON_PATH = "fpmms.json"
 INVALID_ANSWER_HEX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 INVALID_ANSWER = "Invalid"
 NA_ANSWER = "N/A"
-THEGRAPH_ENDPOINT = os.getenv(
-    "OMEN_SUBGRAPH_URL", "https://api.thegraph.com/subgraphs/name/protofire/omen-xdai"
+OMEN_SUBGRAPH_ID = "9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz"
+_API_KEY = os.getenv("THEGRAPH_API_KEY", "")
+THEGRAPH_ENDPOINT = (
+    f"https://gateway.thegraph.com/api/{_API_KEY}/subgraphs/id/{OMEN_SUBGRAPH_ID}"
 )
 
 FPMMS_QUERY = """
