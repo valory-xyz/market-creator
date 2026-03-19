@@ -18,3 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the funds_forwarder_abci skill."""
+
+from aea.configurations.base import PublicId
+
+PUBLIC_ID = PublicId.from_str("valory/funds_forwarder_abci:0.1.0")

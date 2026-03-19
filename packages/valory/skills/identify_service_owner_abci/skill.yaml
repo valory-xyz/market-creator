@@ -8,7 +8,7 @@ description: A reusable skill that resolves the real service owner, handling sta
 license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
-  __init__.py: bafybeicabdo34vcipgbpnocc3ps2smdu4bsh66khv64dzvxe444icyjg6q
+  __init__.py: bafybeifzj5vb6xopmwug4aetixasmykfm2tek3ahsqxbe6qrxswxdgxoza
   behaviours.py: bafybeihognjxrh6ndmmbbt524qf5ogkkvcxagtof3xn2hjefyscdg3dtq4
   dialogues.py: bafybeib2jbaaoasdqak3j6w3fxvetum2rtvikazjr62meab3hzibjhasau
   fsm_specification.yaml: bafybeiagifua7cmu6c5jvu3szxs76qz7ugpml747wqeqaqe7wdsmhoi3o4

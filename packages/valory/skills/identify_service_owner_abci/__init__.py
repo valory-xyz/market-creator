@@ -18,3 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the identify_service_owner_abci skill."""
+
+from aea.configurations.base import PublicId
+
+PUBLIC_ID = PublicId.from_str("valory/identify_service_owner_abci:0.1.0")

@@ -8,7 +8,7 @@ description: A reusable skill that sweeps excess token balances from the service
 license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
-  __init__.py: bafybeidvhnpxh7nk2kymghqmkh7ou7htswkf4ff6cu7pnxxpq2h6vmkowa
+  __init__.py: bafybeiebvj5ccuw4fw2cx2lo4ztyxnl3trun72fmgg56uudimxd3iuyrcu
   behaviours.py: bafybeickwdikwe3rxprufpup7hc2z6ouvlu5a5l23hbdtxzl2xoerw5f4a
   dialogues.py: bafybeigkezilmzhhr4wmgixm5rfxvpfqpyqdbfupr6eny7ped5poxi7lya
   fsm_specification.yaml: bafybeie7sfar3lex7j6ke4z4pjpduycvrve44jwaz6hubabbaluvvyfbhu
