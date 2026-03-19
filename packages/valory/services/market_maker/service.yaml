@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeicoctcmjo4w7lbdwosyvvgizo323xbfa57v4uswcools3usv6yvwq
+agent: valory/market_maker:0.1.0:bafybeif2py7bjlmkrzmjejx77g7gosso7fs737gx54w7tdspwwu5ib4wru
 number_of_agents: 1
 deployment:
   agent:
@@ -117,7 +117,7 @@ models:
       service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
       redeem_winnings_batch_size: ${REDEEM_WINNINGS_BATCH_SIZE:int:5}
       expected_service_owner_address: ${EXPECTED_SERVICE_OWNER_ADDRESS:str:0x0000000000000000000000000000000000000000}
-      funds_forwarder_token_limits: ${FUNDS_FORWARDER_TOKEN_LIMITS:str:'{"0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d":{"retain":300000000000000000000,"max_transfer":100000000000000000}}'}
+      funds_forwarder_token_limits: ${FUNDS_FORWARDER_TOKEN_LIMITS:dict:{"0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d":{"retain":300000000000000000000,"max_transfer":100000000000000000}}}
       irrelevant_tools:
       - openai-text-davinci-002
       - openai-text-davinci-003

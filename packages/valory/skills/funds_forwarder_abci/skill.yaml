@@ -13,7 +13,7 @@ fingerprint:
   dialogues.py: bafybeigkezilmzhhr4wmgixm5rfxvpfqpyqdbfupr6eny7ped5poxi7lya
   fsm_specification.yaml: bafybeie7sfar3lex7j6ke4z4pjpduycvrve44jwaz6hubabbaluvvyfbhu
   handlers.py: bafybeihd62qcitfqo42kermoo34slepsjzdmse22p7qtkuinddtfqvxvny
-  models.py: bafybeih5joagtdhwlxm43aslhwmwymrpekpqo63bukbgnliqu7mgnjdeyq
+  models.py: bafybeiaauyuraalao45y3kvxg4gqihugg454uabmphuyxkn33wbeputz2i
   payloads.py: bafybeibz4jgsk7bcwe4tdvxjhuh6czdqpx53wgkb3su4miitvlbxxalg2u
   rounds.py: bafybeihdgefox3wsuyhovaqapeevcgjl7iqiss2xebawqkch44ex5g45wq
   tests/__init__.py: bafybeiafq7ewp4rdjoedxrfqvcmoepyk2hs4a4pz7jplgiocj6m6lir444
@@ -87,7 +87,7 @@ models:
       on_chain_service_id: null
       service_registry_address: null
       expected_service_owner_address: '0x0000000000000000000000000000000000000000'
-      funds_forwarder_token_limits: '{}'
+      funds_forwarder_token_limits: {}
       cleanup_history_depth: 1
       cleanup_history_depth_current: null
       drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31

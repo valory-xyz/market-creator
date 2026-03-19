@@ -56,7 +56,7 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeia36n7ci7b6pi2bpa4r4ty6dcb3r4vs46vjftolsdxfl4y5iieyyy
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
-- valory/market_maker_abci:0.1.0:bafybeietas55jf6lv2263cldev67m6wdq7urfkb5cxlbxjpti5shcmnw7e
+- valory/market_maker_abci:0.1.0:bafybeih354pitiitqjs3awsf4nkepw3d6mvrm6fgpumjpvtvd5iwi7ahey
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
 - valory/market_creation_manager_abci:0.1.0:bafybeiho7kt4go7sxvv7ruzuiurph25xbj7qdic7i3qlsquslbiig6kkti
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
@@ -64,7 +64,7 @@ skills:
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
 - valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
 - valory/identify_service_owner_abci:0.1.0:bafybeig3oy5jlxfzzbshwuyswftujqj56zxbjhmtex2estpdiy2hxoyuya
-- valory/funds_forwarder_abci:0.1.0:bafybeifzpjid4gfcx7kkuk7eb6xdro2uxuyyt3m6gnmlwt55zzwnkzfdaa
+- valory/funds_forwarder_abci:0.1.0:bafybeigdmru474ragvwt3oa4j3gnzxv4pv3jv7q5nawclc6zv4tlairj7e
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -257,7 +257,7 @@ models:
       service_endpoint_base: ${str:https://dummy_service.autonolas.tech/}
       redeem_winnings_batch_size: ${int:5}
       expected_service_owner_address: ${str:0x0000000000000000000000000000000000000000}
-      funds_forwarder_token_limits: ${str:'{}'}
+      funds_forwarder_token_limits: ${dict:{}}
       irrelevant_tools:
       - openai-text-davinci-002
       - openai-text-davinci-003

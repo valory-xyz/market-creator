@@ -71,7 +71,6 @@ PATH_TO_VAR = {
     "models/params/args/on_chain_service_id": "ON_CHAIN_SERVICE_ID",
     # Funds forwarder
     "models/params/args/expected_service_owner_address": "EXPECTED_SERVICE_OWNER_ADDRESS",
-    "models/params/args/funds_forwarder_token_limits": "FUNDS_FORWARDER_TOKEN_LIMITS",  # nosec B105
 }
 
 CONFIG_REGEX = r"\${.*?:(.*)}"

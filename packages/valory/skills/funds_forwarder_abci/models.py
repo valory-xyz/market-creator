@@ -19,7 +19,6 @@
 
 """This module contains the shared state for the FundsForwarderAbciApp."""
 
-import json
 from typing import Any, Dict, Type
 
 from packages.valory.skills.abstract_round_abci.base import AbciApp
@@ -54,11 +53,8 @@ class FundsForwarderParams(BaseParams):
         self.expected_service_owner_address: str = self._ensure(
             "expected_service_owner_address", kwargs, type_=str
         )
-        token_limits_raw = self._ensure(
-            "funds_forwarder_token_limits", kwargs, type_=str
-        )
-        self.funds_forwarder_token_limits: Dict[str, Dict[str, int]] = json.loads(
-            token_limits_raw
+        self.funds_forwarder_token_limits: Dict[str, Dict[str, int]] = self._ensure(
+            "funds_forwarder_token_limits", kwargs, type_=Dict[str, Dict[str, int]]
         )
         super().__init__(*args, **kwargs)
 
