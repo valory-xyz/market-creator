@@ -76,3 +76,5 @@ c2227ab5ee37dd1a2392ac9880af8329afb04ffc:market_approval_server/templates/index.
 af9837782f2045b19cb0b7410ceb19b34e24ddfb:notebooks/roi_analysis.ipynb:easypost-api-token:774
 733e08465d68cf1d31bf16cf960b8df93c1ba024:notebooks/subgraph_omen.py:generic-api-key:65
 68c774fece4cce85936867584606847ea0defc32:notebooks/subgraph_omen.py:generic-api-key:65
+901efc0718b4769fc1427e24e09989317668fc3f:packages/valory/skills/identify_service_owner_abci/skill.yaml:generic-api-key:80
+901efc0718b4769fc1427e24e09989317668fc3f:packages/valory/skills/funds_forwarder_abci/skill.yaml:generic-api-key:87
