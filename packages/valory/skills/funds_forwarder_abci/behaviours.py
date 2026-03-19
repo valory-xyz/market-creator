@@ -322,8 +322,8 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=token_address,
             contract_id=str(ERC20TokenContract.contract_id),
-            contract_callable="build_transfer_tx",
-            to_address=to_address,
+            contract_callable="get_transfer_tx_data",
+            receiver=to_address,
             amount=amount,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
@@ -331,7 +331,8 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
                 f"Couldn't build ERC20 transfer tx for {token_address}."
             )
             return None
-        return cast(bytes, response.state.body["data"])
+        data_hex = cast(str, response.state.body["data"])
+        return bytes.fromhex(data_hex[2:])
 
 
 class FundsForwarderRoundBehaviour(AbstractRoundBehaviour):

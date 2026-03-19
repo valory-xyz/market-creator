@@ -86,15 +86,15 @@ class IdentifyServiceOwnerAbciApp(AbciApp[Event]):
         0. IdentifyServiceOwnerRound
             - done: 1.
             - error: 2.
-            - no_majority: 0.
-            - round_timeout: 0.
+            - no majority: 0.
+            - round timeout: 0.
         1. FinishedIdentifyServiceOwnerRound
         2. FinishedIdentifyServiceOwnerErrorRound
 
-    Final states: {FinishedIdentifyServiceOwnerRound, FinishedIdentifyServiceOwnerErrorRound}
+    Final states: {FinishedIdentifyServiceOwnerErrorRound, FinishedIdentifyServiceOwnerRound}
 
     Timeouts:
-        round_timeout: 30.0
+        round timeout: 30.0
     """
 
     initial_round_cls: Type[AppState] = IdentifyServiceOwnerRound

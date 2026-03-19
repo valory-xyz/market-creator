@@ -110,6 +110,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             - redeem bond done: 7.
             - remove funding done: 13.
             - redeem winnings done: 0.
+            - fund sweep done: 11.
         2. GetPendingQuestionsRound
             - done: 20.
             - no tx: 4.

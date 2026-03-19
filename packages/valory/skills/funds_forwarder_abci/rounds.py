@@ -101,15 +101,15 @@ class FundsForwarderAbciApp(AbciApp[Event]):
         0. FundsForwarderRound
             - done: 1.
             - none: 2.
-            - no_majority: 0.
-            - round_timeout: 0.
+            - no majority: 0.
+            - round timeout: 0.
         1. FinishedFundsForwarderWithTxRound
         2. FinishedFundsForwarderNoTxRound
 
-    Final states: {FinishedFundsForwarderWithTxRound, FinishedFundsForwarderNoTxRound}
+    Final states: {FinishedFundsForwarderNoTxRound, FinishedFundsForwarderWithTxRound}
 
     Timeouts:
-        round_timeout: 30.0
+        round timeout: 30.0
     """
 
     initial_round_cls: Type[AppState] = FundsForwarderRound

@@ -32,12 +32,12 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
-- valory/market_creation_manager_abci:0.1.0:bafybeiddt43wjhzuq72hst637uymqpdhxz6eghikf3pxz7c53bno4wwpoe
+- valory/market_creation_manager_abci:0.1.0:bafybeicfjzvpitxoupynavgvuj5xbojgvgwocgwy6utoaeuungypfqmzhe
 - valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
 - valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
-- valory/identify_service_owner_abci:0.1.0:bafybeid5ndte4vhplh4vqfepswqoaumc6lkq2wxjbwhtzn7jycvtonfaue
-- valory/funds_forwarder_abci:0.1.0:bafybeibwcudp5lm6cn2mctdfzldyke2oza7yotmwmqz5hhnbqnqvo7m6be
+- valory/identify_service_owner_abci:0.1.0:bafybeia3gitpyowf3pv333azqik3xbqnwaqv7d6w5olpjnkceww6icdaum
+- valory/funds_forwarder_abci:0.1.0:bafybeifynz2di7vb2rvajl6s7pqaxm5md74dpcjlwwr5ih2ec43why35uu
 behaviours:
   main:
     args: {}
