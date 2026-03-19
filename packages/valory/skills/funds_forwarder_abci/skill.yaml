@@ -9,11 +9,11 @@ license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   __init__.py: bafybeidvhnpxh7nk2kymghqmkh7ou7htswkf4ff6cu7pnxxpq2h6vmkowa
-  behaviours.py: bafybeiajdegkli6mqou4rqfjlggrzb66jnr5zmtp6p65iqfucmjo6gvgam
+  behaviours.py: bafybeickwdikwe3rxprufpup7hc2z6ouvlu5a5l23hbdtxzl2xoerw5f4a
   dialogues.py: bafybeigkezilmzhhr4wmgixm5rfxvpfqpyqdbfupr6eny7ped5poxi7lya
   fsm_specification.yaml: bafybeie7sfar3lex7j6ke4z4pjpduycvrve44jwaz6hubabbaluvvyfbhu
   handlers.py: bafybeihd62qcitfqo42kermoo34slepsjzdmse22p7qtkuinddtfqvxvny
-  models.py: bafybeicqbwtimkpve5er334zpwfjxhy7ulrhzpe7diufmbdzkequiidv2m
+  models.py: bafybeih5joagtdhwlxm43aslhwmwymrpekpqo63bukbgnliqu7mgnjdeyq
   payloads.py: bafybeibz4jgsk7bcwe4tdvxjhuh6czdqpx53wgkb3su4miitvlbxxalg2u
   rounds.py: bafybeihdgefox3wsuyhovaqapeevcgjl7iqiss2xebawqkch44ex5g45wq
   tests/__init__.py: bafybeiafq7ewp4rdjoedxrfqvcmoepyk2hs4a4pz7jplgiocj6m6lir444
@@ -79,7 +79,7 @@ models:
     args:
       on_chain_service_id: null
       service_registry_address: null
-      expected_service_owner: '0x0000000000000000000000000000000000000000'
+      expected_service_owner_address: '0x0000000000000000000000000000000000000000'
       funds_forwarder_token_limits: '{}'
       cleanup_history_depth: 1
       cleanup_history_depth_current: null

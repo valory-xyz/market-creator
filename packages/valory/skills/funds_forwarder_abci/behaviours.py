@@ -177,7 +177,7 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
             )
             return None
 
-        expected_owner = self.params.expected_service_owner
+        expected_owner = self.params.expected_service_owner_address
         if service_owner.lower() != expected_owner.lower():
             self.context.logger.warning(
                 f"Service owner {service_owner} does not match "

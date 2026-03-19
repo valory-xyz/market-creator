@@ -37,7 +37,7 @@ skills:
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
 - valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
 - valory/identify_service_owner_abci:0.1.0:bafybeia3gitpyowf3pv333azqik3xbqnwaqv7d6w5olpjnkceww6icdaum
-- valory/funds_forwarder_abci:0.1.0:bafybeifynz2di7vb2rvajl6s7pqaxm5md74dpcjlwwr5ih2ec43why35uu
+- valory/funds_forwarder_abci:0.1.0:bafybeihts7udk6wqncaq4jhp5m6wewhpvtzs5mpqoyx4q3twsxc6euzqom
 behaviours:
   main:
     args: {}
@@ -235,7 +235,7 @@ models:
       - 1209600
       service_endpoint_base: https://dummy_service.autonolas.tech/
       redeem_winnings_batch_size: 5
-      expected_service_owner: '0x0000000000000000000000000000000000000000'
+      expected_service_owner_address: '0x0000000000000000000000000000000000000000'
       funds_forwarder_token_limits: '{}'
       irrelevant_tools:
       - openai-text-davinci-002

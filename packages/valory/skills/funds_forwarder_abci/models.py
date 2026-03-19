@@ -51,8 +51,8 @@ class FundsForwarderParams(BaseParams):
         Note: on_chain_service_id and service_registry_address are inherited
         from BaseParams as Optional fields.
         """
-        self.expected_service_owner: str = self._ensure(
-            "expected_service_owner", kwargs, type_=str
+        self.expected_service_owner_address: str = self._ensure(
+            "expected_service_owner_address", kwargs, type_=str
         )
         token_limits_raw = self._ensure(
             "funds_forwarder_token_limits", kwargs, type_=str
