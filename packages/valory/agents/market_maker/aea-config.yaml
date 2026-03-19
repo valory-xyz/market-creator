@@ -56,15 +56,15 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeia36n7ci7b6pi2bpa4r4ty6dcb3r4vs46vjftolsdxfl4y5iieyyy
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
-- valory/market_maker_abci:0.1.0:bafybeicb2ovnta5hxxgyw2le33xe3knckkl4vjuild27foxbk2umhsrf6a
+- valory/market_maker_abci:0.1.0:bafybeibbm62y4ledkldcjhrzccu2jxt2zcsdnykcr337w34q2ya4ea2nsa
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
 - valory/market_creation_manager_abci:0.1.0:bafybeiddt43wjhzuq72hst637uymqpdhxz6eghikf3pxz7c53bno4wwpoe
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
 - valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
 - valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
-- valory/identify_service_owner_abci:0.1.0:bafybeicororoxpspf3pds46wdbx7imrttiwh4qfpnhivoqiphle3x2jjyy
-- valory/funds_forwarder_abci:0.1.0:bafybeigwnlmwhcctumoci6d4bfrvlhkf6glupz6lvyglfd4oeibrjywwxq
+- valory/identify_service_owner_abci:0.1.0:bafybeid5ndte4vhplh4vqfepswqoaumc6lkq2wxjbwhtzn7jycvtonfaue
+- valory/funds_forwarder_abci:0.1.0:bafybeibwcudp5lm6cn2mctdfzldyke2oza7yotmwmqz5hhnbqnqvo7m6be
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -220,7 +220,7 @@ models:
       mech_marketplace_config: ${dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","use_dynamic_mech_selection":false,"response_timeout":300}}
       service_id: market_maker
       agent_registry_address: ${str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
-      service_registry_address: ${str:0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a}
+      service_registry_address: ${str:0x9338b5153AE39BB89f50468E608eD9d764B755fD}
       setup:
         all_participants: ${list:["0x0000000000000000000000000000000000000000"]}
         safe_contract_address: ${str:0x0000000000000000000000000000000000000000}

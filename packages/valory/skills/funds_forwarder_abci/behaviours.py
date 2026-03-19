@@ -31,9 +31,6 @@ from packages.valory.contracts.multisend.contract import (
     MultiSendContract,
     MultiSendOperation,
 )
-from packages.valory.contracts.service_registry.contract import (
-    ServiceRegistryContract,
-)
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.abstract_round_abci.behaviours import (
@@ -172,24 +169,26 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
 
     def _get_tx_hash(self) -> Generator[None, None, Optional[str]]:
         """Get the transaction hash for funds forwarding."""
-        if self.params.on_chain_service_id is None:
+        # Step 1: Validate service owner
+        service_owner = self.synchronized_data.service_owner
+        if not service_owner or service_owner == ZERO_ADDRESS:
             self.context.logger.warning(
-                "on_chain_service_id not configured. Skipping funds forwarding."
+                "Service owner is empty or zero address. Skipping funds forwarding."
             )
             return None
 
-        # Step 1: Verify safe matches on-chain registry
-        safe_ok = yield from self._verify_safe()
-        if not safe_ok:
-            return None
-
-        # Step 2: Verify service owner matches expected
-        service_owner = self.synchronized_data.service_owner
         expected_owner = self.params.expected_service_owner
         if service_owner.lower() != expected_owner.lower():
             self.context.logger.warning(
                 f"Service owner {service_owner} does not match "
-                f"expected owner {expected_owner}. Skipping fund sweep."
+                f"expected owner {expected_owner}. Skipping funds forwarding."
+            )
+            return None
+
+        # Step 2: Check token limits are configured
+        if not self.params.funds_forwarder_token_limits:
+            self.context.logger.info(
+                "No token limits configured. Skipping funds forwarding."
             )
             return None
 
@@ -198,7 +197,7 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
         # Step 3: Build transfer transactions
         transactions = yield from self._build_transfer_txs(target_address)
         if not transactions:
-            self.context.logger.info("No excess funds to sweep.")
+            self.context.logger.info("No excess funds to forward.")
             return None
 
         # Step 4: Build the safe transaction
@@ -220,35 +219,6 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
             )
 
         return (yield from self._to_multisend(transactions))
-
-    def _verify_safe(self) -> Generator[None, None, bool]:
-        """Verify the service safe matches the on-chain registry."""
-        response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            contract_address=self.params.service_registry_address,
-            contract_id=str(ServiceRegistryContract.contract_id),
-            contract_callable="get_service_information",
-            token_id=self.params.on_chain_service_id,
-        )
-        if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                "Could not get service information from registry."
-            )
-            return False
-
-        # ServiceInfo tuple: (security_deposit, multisig, config_hash, ...)
-        service_info = response.state.body
-        on_chain_multisig = service_info[1]
-        safe_address = self.synchronized_data.safe_contract_address
-
-        if on_chain_multisig.lower() != safe_address.lower():
-            self.context.logger.error(
-                f"Safe mismatch: on-chain={on_chain_multisig}, "
-                f"local={safe_address}. Skipping fund sweep."
-            )
-            return False
-
-        return True
 
     def _build_transfer_txs(
         self, target_address: str
