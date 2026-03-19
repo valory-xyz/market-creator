@@ -2,10 +2,12 @@
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeibcnyhgmpadtbbu4mwnwarizvpfbgqknwugzpnkcme74izeqj4lc4",
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeicmyyog47d7qbdutm7edgogorf57p7sxopzmzbe5y2l7hhjr6vr7m",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeidqutv2bzzmheprccglvycgifvmgt4ip5gtlg54veeqoil3ug4w2a",
-        "agent/valory/market_maker/0.1.0": "bafybeietvxdl6xvn42x3ic3n7xonj7rd7fa3sbq7y2fdgcmserkvu2ep64",
-        "service/valory/market_maker/0.1.0": "bafybeihosudhy5zq5mbeisehuwcjqfgxpxw2nslz2pbypb6r72xz4atsam"
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiddt43wjhzuq72hst637uymqpdhxz6eghikf3pxz7c53bno4wwpoe",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeicb2ovnta5hxxgyw2le33xe3knckkl4vjuild27foxbk2umhsrf6a",
+        "skill/valory/identify_service_owner_abci/0.1.0": "bafybeicororoxpspf3pds46wdbx7imrttiwh4qfpnhivoqiphle3x2jjyy",
+        "skill/valory/funds_forwarder_abci/0.1.0": "bafybeigwnlmwhcctumoci6d4bfrvlhkf6glupz6lvyglfd4oeibrjywwxq",
+        "agent/valory/market_maker/0.1.0": "bafybeif33rmd7cbsw2d2vyeubqp7pufpi3nsvhk6bllofrvssv23bqfgze",
+        "service/valory/market_maker/0.1.0": "bafybeickal6mpk3zhrc7bdk3b2kvtozd6dgm5aqrv2zz66oo5ola3ie4mm"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
@@ -41,6 +43,7 @@
         "contract/valory/agent_mech/0.1.0": "bafybeielgw42wh6sucnquowlqqf3dbvzd7gj4r6vfn322t3i5pkxbbrwz4",
         "contract/valory/agent_registry/0.1.0": "bafybeiera7snkcp4p356vcicc33zmphajj54ajxlb5kmhphfx7bb7qttxa",
         "contract/valory/erc20/0.1.0": "bafybeif37n2xmh6xkn3vzybty7q37fq4f5rsey5ep33vvobh2yofeao5ae",
+        "contract/valory/service_staking_token/0.1.0": "bafybeiehjvxdb6mur7ujcftff3xoxtnnr3cvxlgnfxqn7ejdy3cxzng4ea",
         "connection/valory/p2p_libp2p_client/0.1.0": "bafybeielj3jso3wvrarp5n5rq7llpw4vgxybqiyensgjalb5ubfiawwhhu",
         "connection/valory/ledger/0.19.0": "bafybeid5uwx4uqxkiibw6kazr7my5mk5kcqg2dx2owtcf7kcpbs2jrns2e",
         "connection/valory/http_client/0.23.0": "bafybeihel6sg2yayxu7lqygaswdgciaxpqrgsbl5rwx74c6znu5qz2edd4",

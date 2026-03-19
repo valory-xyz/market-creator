@@ -19,6 +19,8 @@
 
 """This module contains the price estimation ABCI application."""
 
+import packages.valory.skills.funds_forwarder_abci.rounds as FundsForwarderAbci
+import packages.valory.skills.identify_service_owner_abci.rounds as IdentifyServiceOwnerAbci
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
 import packages.valory.skills.mech_interact_abci.rounds as MechInteractAbci
 import packages.valory.skills.mech_interact_abci.states.final_states as MechFinalStates
@@ -49,7 +51,11 @@ from packages.valory.skills.termination_abci.rounds import (
 )
 
 abci_app_transition_mapping: AbciAppTransitionMapping = {
-    FinishedRegistrationRound: MarketCreationManagerAbci.SyncMarketsRound,
+    FinishedRegistrationRound: IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound,
+    IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound: FundsForwarderAbci.FundsForwarderRound,
+    IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound: MarketCreationManagerAbci.SyncMarketsRound,
+    FundsForwarderAbci.FinishedFundsForwarderNoTxRound: MarketCreationManagerAbci.SyncMarketsRound,
+    FundsForwarderAbci.FinishedFundsForwarderWithTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithoutTxRound: ResetAndPauseRound,
     MarketCreationManagerAbci.FinishedWithDepositDaiRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithRedeemBondRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
@@ -83,6 +89,8 @@ termination_config = BackgroundAppConfig(
 MarketCreatorAbciApp = chain(
     (
         AgentRegistrationAbciApp,
+        IdentifyServiceOwnerAbci.IdentifyServiceOwnerAbciApp,
+        FundsForwarderAbci.FundsForwarderAbciApp,
         MarketCreationManagerAbci.MarketCreationManagerAbciApp,
         TransactionSettlementAbci.TransactionSubmissionAbciApp,
         ResetPauseAbciApp,

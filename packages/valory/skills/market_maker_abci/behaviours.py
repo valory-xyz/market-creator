@@ -25,6 +25,12 @@ from packages.valory.skills.abstract_round_abci.behaviours import (
     AbstractRoundBehaviour,
     BaseBehaviour,
 )
+from packages.valory.skills.funds_forwarder_abci.behaviours import (
+    FundsForwarderRoundBehaviour,
+)
+from packages.valory.skills.identify_service_owner_abci.behaviours import (
+    IdentifyServiceOwnerRoundBehaviour,
+)
 from packages.valory.skills.market_creation_manager_abci.behaviours.round_behaviour import (
     MarketCreationManagerRoundBehaviour,
 )
@@ -55,6 +61,8 @@ class MarketCreatorRoundBehaviour(AbstractRoundBehaviour):
     abci_app_cls = MarketCreatorAbciApp  # type: ignore
     behaviours: Set[Type[BaseBehaviour]] = {
         *AgentRegistrationRoundBehaviour.behaviours,
+        *IdentifyServiceOwnerRoundBehaviour.behaviours,
+        *FundsForwarderRoundBehaviour.behaviours,
         *MarketCreationManagerRoundBehaviour.behaviours,
         *TransactionSettlementRoundBehaviour.behaviours,
         *ResetPauseABCIConsensusBehaviour.behaviours,

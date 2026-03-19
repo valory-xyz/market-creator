@@ -9,12 +9,12 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeicr7qsikxguag7ozqdriirxxmqbhuxidbgpqjv5galsjmxrr5gbwu
-  behaviours.py: bafybeihxzbxszlpm2u6rsbya3tkp6in537a3mapqrcmct236qzvwuffxre
-  composition.py: bafybeieywufdjmaam4vf5ovqxikt5eqizzg2vddpwojurk27xpvxikxyh4
+  behaviours.py: bafybeibcijcl5kef57zkpmgtw6o7hjdwp2i5f4ot6y6pebgzgp5gbfca54
+  composition.py: bafybeift2h4aagtmnxzsgfopocgyscqy36npwv2sqvxpihspqlfoqinxpi
   dialogues.py: bafybeicuditmewgo3w7pcju22rtkzkrmjfxpcqpyils33fy7uzcbontd5m
-  fsm_specification.yaml: bafybeihjb7vpg6gwwm3ue3lpywdped62xmlg4xjobvmqbzyggoyqeoembu
+  fsm_specification.yaml: bafybeib2l3wrbon6sjjjdojgcjptmqfkrbxituxez4n2edtdedun5kdblu
   handlers.py: bafybeib36vtg2ng4mel67liodkku7v6rkjelehsdnw2x7fazq44hfp356u
-  models.py: bafybeih6b7z4jjtqutrcas5moei33a3yorcpapc5wmrwxd4kegsnlq6jyu
+  models.py: bafybeifkqvoig743gz5gjtufcxsw3zdwxv7p5aw7olhoj2fqaq5xv5xukm
   tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
   tests/test_behaviours.py: bafybeiaww7je4u5uyyl44ybdi57dpangy4syxcgxuepdiolqeqb4yfpk24
@@ -32,10 +32,12 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
-- valory/market_creation_manager_abci:0.1.0:bafybeicmyyog47d7qbdutm7edgogorf57p7sxopzmzbe5y2l7hhjr6vr7m
+- valory/market_creation_manager_abci:0.1.0:bafybeiddt43wjhzuq72hst637uymqpdhxz6eghikf3pxz7c53bno4wwpoe
 - valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
 - valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
+- valory/identify_service_owner_abci:0.1.0:bafybeicororoxpspf3pds46wdbx7imrttiwh4qfpnhivoqiphle3x2jjyy
+- valory/funds_forwarder_abci:0.1.0:bafybeigwnlmwhcctumoci6d4bfrvlhkf6glupz6lvyglfd4oeibrjywwxq
 behaviours:
   main:
     args: {}
@@ -233,6 +235,8 @@ models:
       - 1209600
       service_endpoint_base: https://dummy_service.autonolas.tech/
       redeem_winnings_batch_size: 5
+      expected_service_owner: '0x0000000000000000000000000000000000000000'
+      funds_forwarder_token_limits: '{}'
       irrelevant_tools:
       - openai-text-davinci-002
       - openai-text-davinci-003

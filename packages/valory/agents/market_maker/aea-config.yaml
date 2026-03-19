@@ -24,6 +24,7 @@ contracts:
 - valory/conditional_tokens:0.1.0:bafybeiahmps4nbd3ggbsp6lh7olap7jwvtqdj2iji6agdftz77pdjy6xxq
 - valory/fpmm_deterministic_factory:0.1.0:bafybeibcnyhgmpadtbbu4mwnwarizvpfbgqknwugzpnkcme74izeqj4lc4
 - valory/service_registry:0.1.0:bafybeifc4gpaz6vlpgvghsm64tkbukt744rpeoqpxijglxrv46gb7sbda4
+- valory/service_staking_token:0.1.0:bafybeiehjvxdb6mur7ujcftff3xoxtnnr3cvxlgnfxqn7ejdy3cxzng4ea
 - valory/fpmm:0.1.0:bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e
 - valory/agreement_store_manager:0.1.0:bafybeihhrzm4rpfq54376hs5zft5g4mvqtv5hzzl67lpw7pgg3ja5dtmsu
 - valory/did_registry:0.1.0:bafybeidxeah5o3dcah2vhowbi7tzczqgein2ugpbykgzwht7dgdc6gigj4
@@ -55,13 +56,15 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeia36n7ci7b6pi2bpa4r4ty6dcb3r4vs46vjftolsdxfl4y5iieyyy
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
-- valory/market_maker_abci:0.1.0:bafybeidqutv2bzzmheprccglvycgifvmgt4ip5gtlg54veeqoil3ug4w2a
+- valory/market_maker_abci:0.1.0:bafybeicb2ovnta5hxxgyw2le33xe3knckkl4vjuild27foxbk2umhsrf6a
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
-- valory/market_creation_manager_abci:0.1.0:bafybeicmyyog47d7qbdutm7edgogorf57p7sxopzmzbe5y2l7hhjr6vr7m
+- valory/market_creation_manager_abci:0.1.0:bafybeiddt43wjhzuq72hst637uymqpdhxz6eghikf3pxz7c53bno4wwpoe
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
 - valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
 - valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
+- valory/identify_service_owner_abci:0.1.0:bafybeicororoxpspf3pds46wdbx7imrttiwh4qfpnhivoqiphle3x2jjyy
+- valory/funds_forwarder_abci:0.1.0:bafybeigwnlmwhcctumoci6d4bfrvlhkf6glupz6lvyglfd4oeibrjywwxq
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -253,6 +256,8 @@ models:
       answer_retry_intervals: ${list:[0, 86400, 259200, 604800, 1209600]}
       service_endpoint_base: ${str:https://dummy_service.autonolas.tech/}
       redeem_winnings_batch_size: ${int:5}
+      expected_service_owner: ${str:0x0000000000000000000000000000000000000000}
+      funds_forwarder_token_limits: ${str:'{}'}
       irrelevant_tools:
       - openai-text-davinci-002
       - openai-text-davinci-003

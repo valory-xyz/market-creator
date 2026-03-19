@@ -67,6 +67,11 @@ PATH_TO_VAR = {
     "models/params/args/subgraph_api_key": "SUBGRAPH_API_KEY",
     # Serper
     "models/params/args/serper_api_key": "SERPER_API_KEY",
+    # Service
+    "models/params/args/on_chain_service_id": "ON_CHAIN_SERVICE_ID",
+    # Funds forwarder
+    "models/params/args/expected_service_owner": "EXPECTED_SERVICE_OWNER",
+    "models/params/args/funds_forwarder_token_limits": "FUNDS_FORWARDER_TOKEN_LIMITS",
 }
 
 CONFIG_REGEX = r"\${.*?:(.*)}"
