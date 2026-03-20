@@ -56,15 +56,15 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeia36n7ci7b6pi2bpa4r4ty6dcb3r4vs46vjftolsdxfl4y5iieyyy
 - valory/abstract_round_abci:0.1.0:bafybeiaalla55aprhvoumv4u7qt4v6l53fjmgln6wgyjr5e5tw7u4kscja
-- valory/market_maker_abci:0.1.0:bafybeih7xamwlw3mzpbucaxrnjdgykrugpw32bcrl4gzyvlduozjflfsau
+- valory/market_maker_abci:0.1.0:bafybeidr4r4qwbbldn5b53xatxmlazb5lysiz6cjm6mftc2ketzkcjj4ka
 - valory/registration_abci:0.1.0:bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4
 - valory/market_creation_manager_abci:0.1.0:bafybeiho7kt4go7sxvv7ruzuiurph25xbj7qdic7i3qlsquslbiig6kkti
 - valory/reset_pause_abci:0.1.0:bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy
 - valory/termination_abci:0.1.0:bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a
 - valory/transaction_settlement_abci:0.1.0:bafybeigspkourznaiagdkedyxjbjl6svhuhdwbvejr3jv3e3dil2hslose
 - valory/mech_interact_abci:0.1.0:bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le
-- valory/identify_service_owner_abci:0.1.0:bafybeig3oy5jlxfzzbshwuyswftujqj56zxbjhmtex2estpdiy2hxoyuya
-- valory/funds_forwarder_abci:0.1.0:bafybeihfdrygio36e2ccpzb75bywlqt6bs2vplroadfgdhoniojnbpcq64
+- valory/identify_service_owner_abci:0.1.0:bafybeigytafzikayuh3fovpxqxetejrrk3lwydlhlxa7uoqerskyi3d2zu
+- valory/funds_forwarder_abci:0.1.0:bafybeids3py4zbvh2rc3sortbcfngrwvvo6v6zxkqwoky2ms3dnipd245e
 default_ledger: ethereum
 required_ledgers:
 - ethereum
