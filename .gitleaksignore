@@ -79,3 +79,4 @@ af9837782f2045b19cb0b7410ceb19b34e24ddfb:notebooks/roi_analysis.ipynb:easypost-a
 901efc0718b4769fc1427e24e09989317668fc3f:packages/valory/skills/identify_service_owner_abci/skill.yaml:generic-api-key:80
 901efc0718b4769fc1427e24e09989317668fc3f:packages/valory/skills/funds_forwarder_abci/skill.yaml:generic-api-key:87
 0bba880fb65a9806eab6b2a317a9e3a5f0334bf0:packages/valory/skills/funds_forwarder_abci/tests/test_behaviours.py:generic-api-key:41
+e2acd61bb65d83d7b5ad6eda57517ccc738d4fb8:packages/valory/skills/funds_forwarder_abci/tests/test_behaviours.py:generic-api-key:41
