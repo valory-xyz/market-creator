@@ -3,11 +3,11 @@
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeibcnyhgmpadtbbu4mwnwarizvpfbgqknwugzpnkcme74izeqj4lc4",
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiho7kt4go7sxvv7ruzuiurph25xbj7qdic7i3qlsquslbiig6kkti",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeidr4r4qwbbldn5b53xatxmlazb5lysiz6cjm6mftc2ketzkcjj4ka",
-        "skill/valory/identify_service_owner_abci/0.1.0": "bafybeigytafzikayuh3fovpxqxetejrrk3lwydlhlxa7uoqerskyi3d2zu",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeiacgdm2buhefkckbvgme6oy62milencgcinczxbjicw7zjothaeea",
+        "skill/valory/identify_service_owner_abci/0.1.0": "bafybeieg4e67x43jernke3ot2476o4hiu4yy6teaj6alsabxkal4jiogdm",
         "skill/valory/funds_forwarder_abci/0.1.0": "bafybeids3py4zbvh2rc3sortbcfngrwvvo6v6zxkqwoky2ms3dnipd245e",
-        "agent/valory/market_maker/0.1.0": "bafybeid4c2xa26myymw5mcyibcqxzefawglffwpf6s7lvy5yktus6gc5ou",
-        "service/valory/market_maker/0.1.0": "bafybeidb3ustkbunhw3yoqkrmrvmnjgqbzevejkit3msajolswd2chiuvi"
+        "agent/valory/market_maker/0.1.0": "bafybeiflpmzw26edcrsfh24pzmcavzddcsuvi6eijseefbbuhrrqzmjrfi",
+        "service/valory/market_maker/0.1.0": "bafybeif37lap46nw4tt5vkwlbhlqggvyq5lzt45zfwfzgio7war6wcgh7e"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
@@ -43,7 +43,7 @@
         "contract/valory/agent_mech/0.1.0": "bafybeielgw42wh6sucnquowlqqf3dbvzd7gj4r6vfn322t3i5pkxbbrwz4",
         "contract/valory/agent_registry/0.1.0": "bafybeiera7snkcp4p356vcicc33zmphajj54ajxlb5kmhphfx7bb7qttxa",
         "contract/valory/erc20/0.1.0": "bafybeif37n2xmh6xkn3vzybty7q37fq4f5rsey5ep33vvobh2yofeao5ae",
-        "contract/valory/service_staking_token/0.1.0": "bafybeiehjvxdb6mur7ujcftff3xoxtnnr3cvxlgnfxqn7ejdy3cxzng4ea",
+        "contract/valory/staking_token/0.1.0": "bafybeiat655krp6joe7rvt4ycuxpynzl5oraib7jkeo6tennevugxf7x7m",
         "connection/valory/p2p_libp2p_client/0.1.0": "bafybeielj3jso3wvrarp5n5rq7llpw4vgxybqiyensgjalb5ubfiawwhhu",
         "connection/valory/ledger/0.19.0": "bafybeid5uwx4uqxkiibw6kazr7my5mk5kcqg2dx2owtcf7kcpbs2jrns2e",
         "connection/valory/http_client/0.23.0": "bafybeihel6sg2yayxu7lqygaswdgciaxpqrgsbl5rwx74c6znu5qz2edd4",
