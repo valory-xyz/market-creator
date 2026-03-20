@@ -56,7 +56,22 @@ class FundsForwarderParams(BaseParams):
         self.funds_forwarder_token_limits: Dict[str, Dict[str, int]] = self._ensure(
             "funds_forwarder_token_limits", kwargs, type_=Dict[str, Dict[str, int]]
         )
+        self._validate_token_limits()
         super().__init__(*args, **kwargs)
+
+    def _validate_token_limits(self) -> None:
+        """Validate token limit configuration.
+
+        :raises ValueError: if min_transfer > max_transfer for any token.
+        """
+        for token, limits in self.funds_forwarder_token_limits.items():
+            min_transfer = limits.get("min_transfer", 0)
+            max_transfer = limits["max_transfer"]
+            if min_transfer > max_transfer:
+                raise ValueError(
+                    f"Token {token}: min_transfer ({min_transfer}) "
+                    f"> max_transfer ({max_transfer})"
+                )
 
 
 Requests = BaseRequests

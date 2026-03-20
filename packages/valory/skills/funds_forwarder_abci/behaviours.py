@@ -243,7 +243,9 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
                 )
                 continue
 
-            if balance <= retain:
+            min_transfer = limits.get("min_transfer", 0)
+
+            if balance < retain + min_transfer:
                 continue
 
             transfer_amount = min(max_transfer, balance - retain)
