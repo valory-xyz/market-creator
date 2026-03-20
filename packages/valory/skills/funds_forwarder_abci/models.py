@@ -53,8 +53,8 @@ class FundsForwarderParams(BaseParams):
         self.expected_service_owner_address: str = self._ensure(
             "expected_service_owner_address", kwargs, type_=str
         )
-        self.funds_forwarder_token_limits: Dict[str, Dict[str, int]] = self._ensure(
-            "funds_forwarder_token_limits", kwargs, type_=Dict[str, Dict[str, int]]
+        self.funds_forwarder_token_config: Dict[str, Dict[str, int]] = self._ensure(
+            "funds_forwarder_token_config", kwargs, type_=Dict[str, Dict[str, int]]
         )
         self._validate_token_limits()
         super().__init__(*args, **kwargs)
@@ -64,7 +64,7 @@ class FundsForwarderParams(BaseParams):
 
         :raises ValueError: if min_transfer > max_transfer for any token.
         """
-        for token, limits in self.funds_forwarder_token_limits.items():
+        for token, limits in self.funds_forwarder_token_config.items():
             min_transfer = limits.get("min_transfer", 0)
             max_transfer = limits["max_transfer"]
             if min_transfer > max_transfer:

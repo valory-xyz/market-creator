@@ -186,7 +186,7 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
             return None
 
         # Step 2: Check token limits are configured
-        if not self.params.funds_forwarder_token_limits:
+        if not self.params.funds_forwarder_token_config:
             self.context.logger.info(
                 "No token limits configured. Skipping funds forwarding."
             )
@@ -226,8 +226,8 @@ class FundsForwarderBehaviour(FundsForwarderBaseBehaviour):
         """Build transfer transactions for all tokens exceeding thresholds."""
         transactions: List[Dict] = []
 
-        for token_address, limits in self.params.funds_forwarder_token_limits.items():
-            retain = limits["retain"]
+        for token_address, limits in self.params.funds_forwarder_token_config.items():
+            retain = limits["retain_balance"]
             max_transfer = limits["max_transfer"]
 
             if token_address.lower() == ZERO_ADDRESS.lower():
