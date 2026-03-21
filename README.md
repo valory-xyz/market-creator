@@ -227,6 +227,20 @@ For convenience, we provide a template script [run_service.sh](https://github.co
 
 Note: Ensure all environment variables in `run_service.sh` are properly set before launching services.
 
+## Third-party Dependencies
+
+This service depends on third-party AEA packages sourced from the following upstream repositories (all under [valory-xyz](https://github.com/valory-xyz) on GitHub):
+
+| Repository | What it provides |
+| ---------- | --------------- |
+| [open-aea](https://github.com/valory-xyz/open-aea) | AEA framework: protocols (contract_api, ledger_api, http, signing, etc.), connections, base contracts (gnosis_safe, multisend, service_registry) |
+| [open-autonomy](https://github.com/valory-xyz/open-autonomy) | Core framework: abstract_round_abci, registration, transaction_settlement, reset_pause, termination |
+| [mech-interact](https://github.com/valory-xyz/mech-interact) | mech_interact_abci skill, mech/mech_mm/ierc1155 contracts |
+| [genai](https://github.com/valory-xyz/genai) | GenAI-related packages (NVM contracts, subscription, etc.) |
+| [trader](https://github.com/valory-xyz/trader) | realitio, realitio_proxy, conditional_tokens contracts |
+
+These packages are synced from IPFS via `autonomy packages sync --all` and are not committed to the repository.
+
 ## For advanced users
 
 The market maker agent is configured to work with the Gnosis chain by default, if you want to use the agent with other chains you can figure out what contracts to use from [here](https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md)

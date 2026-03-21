@@ -44,6 +44,7 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
     ANSWER_QUESTION_DONE_PAYLOAD = "ANSWER_QUESTION_DONE_PAYLOAD"
     REMOVE_FUNDING_DONE_PAYLOAD = "REMOVE_FUNDING_DONE_PAYLOAD"
     REDEEM_WINNINGS_DONE_PAYLOAD = "REDEEM_WINNINGS_DONE_PAYLOAD"
+    FUND_SWEEP_DONE_PAYLOAD = "FUND_SWEEP_DONE_PAYLOAD"
 
     payload_class = PostTxPayload
     synchronized_data_class = SynchronizedData
@@ -76,6 +77,9 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
 
             if self.most_voted_payload == self.REDEEM_WINNINGS_DONE_PAYLOAD:
                 return self.synchronized_data, Event.REDEEM_WINNINGS_DONE
+
+            if self.most_voted_payload == self.FUND_SWEEP_DONE_PAYLOAD:
+                return self.synchronized_data, Event.FUND_SWEEP_DONE
 
             # no database update is required
             return self.synchronized_data, Event.DONE

@@ -3,6 +3,7 @@ alphabet_in:
 - DEPOSIT_DAI_DONE
 - DONE
 - ERROR
+- FUND_SWEEP_DONE
 - MAX_APPROVED_MARKETS_REACHED
 - MAX_RETRIES_REACHED
 - MECH_REQUEST_DONE
@@ -94,6 +95,7 @@ transition_func:
     (PostTransactionRound, DEPOSIT_DAI_DONE): GetPendingQuestionsRound
     (PostTransactionRound, DONE): FinishedWithoutTxRound
     (PostTransactionRound, ERROR): DepositDaiRound
+    (PostTransactionRound, FUND_SWEEP_DONE): SyncMarketsRound
     (PostTransactionRound, MECH_REQUEST_DONE): FinishedWithMechRequestRound
     (PostTransactionRound, NONE): PostTransactionRound
     (PostTransactionRound, NO_MAJORITY): PostTransactionRound

@@ -2,10 +2,10 @@
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeibcnyhgmpadtbbu4mwnwarizvpfbgqknwugzpnkcme74izeqj4lc4",
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeicmyyog47d7qbdutm7edgogorf57p7sxopzmzbe5y2l7hhjr6vr7m",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeidqutv2bzzmheprccglvycgifvmgt4ip5gtlg54veeqoil3ug4w2a",
-        "agent/valory/market_maker/0.1.0": "bafybeietvxdl6xvn42x3ic3n7xonj7rd7fa3sbq7y2fdgcmserkvu2ep64",
-        "service/valory/market_maker/0.1.0": "bafybeihosudhy5zq5mbeisehuwcjqfgxpxw2nslz2pbypb6r72xz4atsam"
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiho7kt4go7sxvv7ruzuiurph25xbj7qdic7i3qlsquslbiig6kkti",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeibdrlfhruvbng5ewvtlpxby2tezhtwyql7izrvajwbkczuwrtbso4",
+        "agent/valory/market_maker/0.1.0": "bafybeibjt2phqqdfwrl3vmjzlhuemg6amokeodzaoojd63ojwzg6icufz4",
+        "service/valory/market_maker/0.1.0": "bafybeibifbkywemxhyzsgszqziic6pugafx6cvkkwgcx3aa4davy2kj5te"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
@@ -54,6 +54,8 @@
         "skill/valory/registration_abci/0.1.0": "bafybeiayry7tzttlivibbfnwikilbgdl54g3btvc4uhl4x5qqdv6a673o4",
         "skill/valory/reset_pause_abci/0.1.0": "bafybeibsdhil35py7zjhielonaycxo7gp34jfufe2ynprjv2etwxnzcxqy",
         "skill/valory/termination_abci/0.1.0": "bafybeic3jppoya7jkmylbl5evcssl5qhppl6hadxebfxcxmi5o7qysce6a",
-        "skill/valory/mech_interact_abci/0.1.0": "bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le"
+        "skill/valory/mech_interact_abci/0.1.0": "bafybeiduf3h73xhv4q5vbdn6ek2tyal3haym5of4mq2ucm2zhqbclr35le",
+        "skill/valory/identify_service_owner_abci/0.1.0": "bafybeiaw3zemusoanuqzjswvoro2cjbr2kfregmrxfb5isivofu7k2jwdy",
+        "skill/valory/funds_forwarder_abci/0.1.0": "bafybeicmonxiplkgoxa2zperxrlj76mhuw6snvallx2xreaf5inqhgmfuq"
     }
 }
