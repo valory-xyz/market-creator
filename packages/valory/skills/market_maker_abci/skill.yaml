@@ -14,7 +14,7 @@ fingerprint:
   dialogues.py: bafybeicuditmewgo3w7pcju22rtkzkrmjfxpcqpyils33fy7uzcbontd5m
   fsm_specification.yaml: bafybeidxd63dvupmfhfs3kk3iypalrrbe2tge3zbrsp6fvcqv4nz75l5gu
   handlers.py: bafybeib36vtg2ng4mel67liodkku7v6rkjelehsdnw2x7fazq44hfp356u
-  models.py: bafybeifkqvoig743gz5gjtufcxsw3zdwxv7p5aw7olhoj2fqaq5xv5xukm
+  models.py: bafybeifos2q32h5y2iyue5v47yg5yugvx2ujranbkxjfhobq2tkkwlnnxu
   tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
   tests/test_behaviours.py: bafybeiaww7je4u5uyyl44ybdi57dpangy4syxcgxuepdiolqeqb4yfpk24
@@ -32,7 +32,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeigzfvbwdm7b3y7s6ft7rwdqmzrafltz7imvczcptfgwah7lfsyupe
 - valory/registration_abci:0.1.0:bafybeiggcghpx2nncrvofqpu6khhqcu3irigu3jangd3e7dzv6aw6jtse4
 - valory/reset_pause_abci:0.1.0:bafybeidxfy3gyjjahke7gftbakecdlwr5gng5ccnvlshjpgppp7b6pu2ea
-- valory/market_creation_manager_abci:0.1.0:bafybeibwsrnurgyfa3v4t2zryzzc76ck4fke24mw6g5nkunoteonyg7l64
+- valory/market_creation_manager_abci:0.1.0:bafybeica2zsijy7dogzmypllenbqc7p3oqx6lr4thibgmfhxlam2hbeu7a
 - valory/termination_abci:0.1.0:bafybeif43h3yc4e6cqieqi2dj7oa55lrircamorkcrgt2kjofua7y2vcgu
 - valory/transaction_settlement_abci:0.1.0:bafybeiezf3kh5f4jmxnwoylc4krghzrkfknkc2r6vve3rgb5eumloco33e
 - valory/mech_interact_abci:0.1.0:bafybeig7o3fonhmstrvbimsof6h6ihtht44rr7wxozmtedltdmyyqzi5ue
@@ -340,5 +340,5 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.21.13
+    version: ==0.21.14
 is_abstract: false

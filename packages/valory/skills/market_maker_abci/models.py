@@ -27,9 +27,6 @@ from packages.valory.skills.funds_forwarder_abci.models import FundsForwarderPar
 from packages.valory.skills.funds_forwarder_abci.rounds import (
     Event as FundsForwarderEvent,
 )
-from packages.valory.skills.identify_service_owner_abci.models import (
-    IdentifyServiceOwnerParams,
-)
 from packages.valory.skills.identify_service_owner_abci.rounds import (
     Event as IdentifyServiceOwnerEvent,
 )
@@ -130,7 +127,6 @@ class SharedState(BaseSharedState):
 
 class Params(
     MarketCreationManagerParams,
-    IdentifyServiceOwnerParams,
     FundsForwarderParams,
     MechInteractParams,
     TerminationParams,
