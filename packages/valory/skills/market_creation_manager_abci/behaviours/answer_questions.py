@@ -20,12 +20,16 @@
 """This module contains the AnswerQuestionsBehaviour of the 'market_creation_manager_abci' skill."""
 
 import json
-from typing import Any, Dict, Generator, Optional, cast
+from typing import Any, Dict, Generator, List, Optional, cast
 
+from packages.valory.contracts.erc20.contract import ERC20TokenContract
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
+from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    ETHER_VALUE,
     MarketCreationManagerBaseBehaviour,
+    get_callable_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     MultisigTxPayload,
@@ -173,6 +177,9 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
 
+        # Check if we need to unwrap wxDAI to cover the bond
+        txs = yield from self._prepend_wxdai_unwrap_if_needed(txs)
+
         multisend_tx_str = yield from self._to_multisend(txs)
         if multisend_tx_str is None:
             # something went wrong, respond with ERROR payload for now
@@ -213,4 +220,97 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             "to": self.params.realitio_contract,
             "value": self.params.realitio_answer_question_bond,
             "data": data,
+        }
+
+    def _prepend_wxdai_unwrap_if_needed(
+        self, txs: List[Dict[str, Any]]
+    ) -> Generator[None, None, List[Dict[str, Any]]]:
+        """If native xDAI is insufficient for bonds, prepend a wxDAI withdraw tx."""
+        total_bond = sum(tx["value"] for tx in txs)
+        if total_bond == 0:
+            return txs
+
+        safe_address = self.synchronized_data.safe_contract_address
+        native_balance = yield from self._get_native_balance(safe_address)
+        if native_balance is None:
+            self.context.logger.warning(
+                "Could not get native balance. Proceeding without wxDAI unwrap."
+            )
+            return txs
+
+        if native_balance >= total_bond:
+            self.context.logger.info(
+                f"Native balance ({native_balance}) sufficient for bonds ({total_bond})."
+            )
+            return txs
+
+        shortfall = total_bond - native_balance
+        self.context.logger.info(
+            f"Native balance ({native_balance}) insufficient for bonds ({total_bond}). "
+            f"Need to unwrap {shortfall} wxDAI."
+        )
+
+        # Check wxDAI balance
+        wxdai_balance = yield from self._get_wxdai_balance(safe_address)
+        if wxdai_balance is None or wxdai_balance < shortfall:
+            self.context.logger.error(
+                f"wxDAI balance ({wxdai_balance}) insufficient to cover shortfall ({shortfall})."
+            )
+            return txs
+
+        # Build withdraw tx and prepend
+        withdraw_tx = yield from self._get_wxdai_withdraw_tx(shortfall)
+        if withdraw_tx is None:
+            self.context.logger.error("Could not build wxDAI withdraw tx.")
+            return txs
+
+        self.context.logger.info(
+            f"Prepending wxDAI withdraw({shortfall}) to answer txs."
+        )
+        return [withdraw_tx] + txs
+
+    def _get_native_balance(self, address: str) -> Generator[None, None, Optional[int]]:
+        """Get native xDAI balance."""
+        response = yield from self.get_ledger_api_response(
+            performative=LedgerApiMessage.Performative.GET_STATE,  # type: ignore
+            ledger_callable="get_balance",
+            account=address,
+        )
+        if response.performative != LedgerApiMessage.Performative.STATE:
+            return None
+        return cast(int, response.state.body.get("get_balance_result"))
+
+    def _get_wxdai_balance(self, address: str) -> Generator[None, None, Optional[int]]:
+        """Get wxDAI balance of the safe."""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.collateral_tokens_contract,
+            contract_id=str(ERC20TokenContract.contract_id),
+            contract_callable=get_callable_name(ERC20TokenContract.check_balance),
+            account=address,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            return None
+        return cast(int, response.state.body.get("token"))
+
+    def _get_wxdai_withdraw_tx(
+        self, amount: int
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
+        """Build a wxDAI withdraw(amount) transaction."""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.collateral_tokens_contract,
+            contract_id=str(ERC20TokenContract.contract_id),
+            contract_callable=get_callable_name(ERC20TokenContract.build_withdraw_tx),
+            amount=amount,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.error(
+                f"Could not build wxDAI withdraw tx: {response.performative.value}"
+            )
+            return None
+        return {
+            "to": self.params.collateral_tokens_contract,
+            "data": response.state.body["data"],
+            "value": ETHER_VALUE,
         }
