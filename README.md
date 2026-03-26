@@ -169,7 +169,35 @@ You can access the root address http://server_ip:5000 and examine the different 
     autonomy deploy run --build-dir abci_build/
     ```
 
-For convenience, we provide a template script [run_service.sh](https://github.com/valory-xyz/market-creator/blob/main/run_service.sh) that you can modify and experiment with different values.
+## Running the agent
+
+### Prerequisites
+
+```bash
+pip install aea-helpers
+```
+
+### Run as a local agent (development)
+
+1. Set up your `.env` file with required environment variables
+2. Place your `ethereum_private_key.txt` in the repo root
+3. Run:
+
+```bash
+aea-helpers run-agent \
+  --name valory/market_maker \
+  --config-replace \
+  --config-mapping config-mapping.json \
+  --connection-key
+```
+
+To run multiple agents on the same machine, add `--free-ports`.
+
+### Run as a service (Docker deployment)
+
+```bash
+aea-helpers run-service --name valory/market_maker --env-file .env
+```
 
 ## Local Testing Setup
 
@@ -184,11 +212,11 @@ For convenience, we provide a template script [run_service.sh](https://github.co
    - Create an OpenAI account
    - Generate an API key
    - Fund account with minimum $5
-   - Add key to `run_service.sh`
+   - Add key to `.env`
 
 3. **The Graph Integration**
    - Generate an API key from The Graph platform
-   - Set `SUBGRAPH_API_KEY` in `run_service.sh`
+   - Set `SUBGRAPH_API_KEY` in `.env`
 
 4. **Market Approval Server**
    - Generate a server API key
@@ -196,7 +224,7 @@ For convenience, we provide a template script [run_service.sh](https://github.co
      ```bash
      echo -n "your_api_key_here" | sha256sum
      ```
-   - Create a file `market_approval_server/server_config.json` with content of 
+   - Create a file `market_approval_server/server_config.json` with content of
    ```json
     {
         "proposed_markets": {},
@@ -209,7 +237,7 @@ For convenience, we provide a template script [run_service.sh](https://github.co
     }
    ```
    - Add hash to `market_approval_server/server_config.json`
-   - Configure server URL in `run_service.sh`:
+   - Configure server URL in `.env`:
      ```bash
      MARKET_APPROVAL_SERVER_URL=http://host.docker.internal:5000
      ```
@@ -217,7 +245,7 @@ For convenience, we provide a template script [run_service.sh](https://github.co
 5. **Blockchain Connection**
    - Create Tenderly account
    - Generate virtual RPC endpoint
-   - Update `ETHEREUM_LEDGER_RPC` in `run_service.sh`
+   - Update `ETHEREUM_LEDGER_RPC` in `.env`
 
 ### 2. Launch Services
 
@@ -225,7 +253,7 @@ For convenience, we provide a template script [run_service.sh](https://github.co
 2. Launch market maker service
 3. Monitor service operation through logs
 
-Note: Ensure all environment variables in `run_service.sh` are properly set before launching services.
+Note: Ensure all environment variables in `.env` are properly set before launching services.
 
 ## For advanced users
 
