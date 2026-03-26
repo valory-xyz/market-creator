@@ -19,6 +19,8 @@
 
 """Tests for the market_maker_abci composition."""
 
+import packages.valory.skills.funds_forwarder_abci.rounds as FundsForwarderAbci
+import packages.valory.skills.identify_service_owner_abci.rounds as IdentifyServiceOwnerAbci
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
 import packages.valory.skills.mech_interact_abci.states.final_states as MechFinalStates
 import packages.valory.skills.mech_interact_abci.states.mech_version as MechVersionStates
@@ -46,10 +48,10 @@ class TestAbciAppTransitionMapping:
     """Test abci_app_transition_mapping entries."""
 
     def test_finished_registration_round(self) -> None:
-        """Test FinishedRegistrationRound maps to SyncMarketsRound."""
+        """Test FinishedRegistrationRound maps to IdentifyServiceOwnerRound."""
         assert (
             abci_app_transition_mapping[FinishedRegistrationRound]
-            == MarketCreationManagerAbci.SyncMarketsRound
+            == IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound
         )
 
     def test_finished_without_tx_round(self) -> None:
@@ -192,10 +194,10 @@ class TestAbciAppTransitionMapping:
         )
 
     def test_finished_reset_and_pause(self) -> None:
-        """Test FinishedResetAndPauseRound maps to SyncMarketsRound."""
+        """Test FinishedResetAndPauseRound maps to IdentifyServiceOwnerRound."""
         assert (
             abci_app_transition_mapping[FinishedResetAndPauseRound]
-            == MarketCreationManagerAbci.SyncMarketsRound
+            == IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound
         )
 
     def test_finished_reset_and_pause_error(self) -> None:
@@ -214,9 +216,45 @@ class TestAbciAppTransitionMapping:
             == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
         )
 
+    def test_identify_service_owner_done(self) -> None:
+        """Test FinishedIdentifyServiceOwnerRound maps to FundsForwarderRound."""
+        assert (
+            abci_app_transition_mapping[
+                IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound
+            ]
+            == FundsForwarderAbci.FundsForwarderRound
+        )
+
+    def test_identify_service_owner_error(self) -> None:
+        """Test FinishedIdentifyServiceOwnerErrorRound maps to SyncMarketsRound."""
+        assert (
+            abci_app_transition_mapping[
+                IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound
+            ]
+            == MarketCreationManagerAbci.SyncMarketsRound
+        )
+
+    def test_funds_forwarder_no_tx(self) -> None:
+        """Test FinishedFundsForwarderNoTxRound maps to SyncMarketsRound."""
+        assert (
+            abci_app_transition_mapping[
+                FundsForwarderAbci.FinishedFundsForwarderNoTxRound
+            ]
+            == MarketCreationManagerAbci.SyncMarketsRound
+        )
+
+    def test_funds_forwarder_with_tx(self) -> None:
+        """Test FinishedFundsForwarderWithTxRound maps to TransactionSettlement."""
+        assert (
+            abci_app_transition_mapping[
+                FundsForwarderAbci.FinishedFundsForwarderWithTxRound
+            ]
+            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+        )
+
     def test_mapping_count(self) -> None:
         """Test total mapping count."""
-        assert len(abci_app_transition_mapping) == 23
+        assert len(abci_app_transition_mapping) == 27
 
 
 class TestTerminationConfig:

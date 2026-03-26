@@ -155,6 +155,16 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
 
+    def test_get_payload_funds_forwarder_submitter(self) -> None:
+        """Test get_payload when tx_submitter is funds_forwarder_round."""
+        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
+        self.behaviour.synchronized_data.tx_submitter = "funds_forwarder_round"
+
+        gen = self.behaviour.get_payload()
+        result = _exhaust_gen(gen)
+
+        assert result == PostTransactionRound.FUND_SWEEP_DONE_PAYLOAD
+
     def test_get_payload_no_approved_question_data(self) -> None:
         """Test get_payload when is_approved_question_data_set is False."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"

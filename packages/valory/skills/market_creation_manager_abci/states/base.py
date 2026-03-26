@@ -60,6 +60,7 @@ class Event(Enum):
     REMOVE_FUNDING_DONE = "remove_funding_done"
     REDEEM_WINNINGS_DONE = "redeem_winnings_done"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
+    FUND_SWEEP_DONE = "fund_sweep_done"
 
 
 DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
