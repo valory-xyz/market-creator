@@ -49,31 +49,94 @@ from packages.valory.skills.termination_abci.rounds import BackgroundRound, Even
 EXPECTED_TRANSITIONS = [
     (FinishedRegistrationRound, IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound),
     (MarketCreationManagerAbci.FinishedWithoutTxRound, ResetAndPauseRound),
-    (MarketCreationManagerAbci.FinishedWithDepositDaiRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
-    (MarketCreationManagerAbci.FinishedWithRedeemBondRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
-    (MarketCreationManagerAbci.FinishedMarketCreationManagerRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
-    (MarketCreationManagerAbci.FinishedWithRemoveFundingRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
-    (MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound, MechVersionStates.MechVersionDetectionRound),
-    (MechFinalStates.FinishedMarketplaceLegacyDetectedRound, MechRequestStates.MechRequestRound),
-    (MechFinalStates.FinishedMechLegacyDetectedRound, MechRequestStates.MechRequestRound),
+    (
+        MarketCreationManagerAbci.FinishedWithDepositDaiRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithRedeemBondRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedMarketCreationManagerRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithRemoveFundingRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound,
+        MechVersionStates.MechVersionDetectionRound,
+    ),
+    (
+        MechFinalStates.FinishedMarketplaceLegacyDetectedRound,
+        MechRequestStates.MechRequestRound,
+    ),
+    (
+        MechFinalStates.FinishedMechLegacyDetectedRound,
+        MechRequestStates.MechRequestRound,
+    ),
     (MechFinalStates.FinishedMechInformationRound, MechRequestStates.MechRequestRound),
-    (MechFinalStates.FailedMechInformationRound, MechVersionStates.MechVersionDetectionRound),
-    (MechFinalStates.FinishedMechRequestRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
-    (MechFinalStates.FinishedMechPurchaseSubscriptionRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
-    (MechFinalStates.FinishedMechResponseRound, MarketCreationManagerAbci.AnswerQuestionsRound),
-    (MechFinalStates.FinishedMechRequestSkipRound, MarketCreationManagerAbci.CollectRandomnessRound),
-    (MechFinalStates.FinishedMechResponseTimeoutRound, MarketCreationManagerAbci.CollectRandomnessRound),
-    (MarketCreationManagerAbci.FinishedWithMechRequestRound, MechResponseStates.MechResponseRound),
-    (MarketCreationManagerAbci.FinishedWithRedeemWinningsRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
-    (MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
-    (TransactionSettlementAbci.FinishedTransactionSubmissionRound, MarketCreationManagerAbci.PostTransactionRound),
+    (
+        MechFinalStates.FailedMechInformationRound,
+        MechVersionStates.MechVersionDetectionRound,
+    ),
+    (
+        MechFinalStates.FinishedMechRequestRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MechFinalStates.FinishedMechPurchaseSubscriptionRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MechFinalStates.FinishedMechResponseRound,
+        MarketCreationManagerAbci.AnswerQuestionsRound,
+    ),
+    (
+        MechFinalStates.FinishedMechRequestSkipRound,
+        MarketCreationManagerAbci.CollectRandomnessRound,
+    ),
+    (
+        MechFinalStates.FinishedMechResponseTimeoutRound,
+        MarketCreationManagerAbci.CollectRandomnessRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithMechRequestRound,
+        MechResponseStates.MechResponseRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithRedeemWinningsRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        TransactionSettlementAbci.FinishedTransactionSubmissionRound,
+        MarketCreationManagerAbci.PostTransactionRound,
+    ),
     (TransactionSettlementAbci.FailedRound, ResetAndPauseRound),
     (FinishedResetAndPauseRound, IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound),
     (FinishedResetAndPauseErrorRound, RegistrationRound),
-    (IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound, FundsForwarderAbci.FundsForwarderRound),
-    (IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound, MarketCreationManagerAbci.SyncMarketsRound),
-    (FundsForwarderAbci.FinishedFundsForwarderNoTxRound, MarketCreationManagerAbci.SyncMarketsRound),
-    (FundsForwarderAbci.FinishedFundsForwarderWithTxRound, TransactionSettlementAbci.RandomnessTransactionSubmissionRound),
+    (
+        IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound,
+        FundsForwarderAbci.FundsForwarderRound,
+    ),
+    (
+        IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound,
+        MarketCreationManagerAbci.SyncMarketsRound,
+    ),
+    (
+        FundsForwarderAbci.FinishedFundsForwarderNoTxRound,
+        MarketCreationManagerAbci.SyncMarketsRound,
+    ),
+    (
+        FundsForwarderAbci.FinishedFundsForwarderWithTxRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
 ]
 
 

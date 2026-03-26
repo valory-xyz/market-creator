@@ -23,7 +23,6 @@ from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.get_pending_questions import (
     GetPendingQuestionsBehaviour,
     OPEN_FPMM_QUERY,
