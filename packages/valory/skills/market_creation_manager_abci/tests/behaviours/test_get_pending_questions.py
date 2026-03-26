@@ -135,7 +135,7 @@ class TestGetPendingQuestionsBehaviour:
         """Test get_wxdai_balance with correct performative and balance result."""
         mock_resp = MagicMock()
         mock_resp.performative = ContractApiMessage.Performative.STATE
-        mock_resp.state.body = {"token": 1000}
+        mock_resp.state.body = {"token": 1000}  # nosec B105
 
         with patch.object(
             self.behaviour,
