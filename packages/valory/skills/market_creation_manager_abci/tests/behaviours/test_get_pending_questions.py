@@ -22,6 +22,7 @@
 from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
+from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.get_pending_questions import (
     GetPendingQuestionsBehaviour,
@@ -131,33 +132,33 @@ class TestGetPendingQuestionsBehaviour:
 
         assert result == []
 
-    def test_get_balance_success(self) -> None:
-        """Test _get_balance with correct performative and balance result."""
+    def test_get_wxdai_balance_success(self) -> None:
+        """Test get_wxdai_balance with correct performative and balance result."""
         mock_resp = MagicMock()
-        mock_resp.performative = LedgerApiMessage.Performative.STATE
-        mock_resp.state.body = {"get_balance_result": 1000}
+        mock_resp.performative = ContractApiMessage.Performative.STATE
+        mock_resp.state.body = {"token": 1000}
 
         with patch.object(
             self.behaviour,
-            "get_ledger_api_response",
+            "get_contract_api_response",
             new=_make_gen(mock_resp),
         ):
-            gen = self.behaviour._get_balance("0xAccount")
+            gen = self.behaviour.get_wxdai_balance("0xAccount")
             result = _exhaust_gen(gen)
 
         assert result == 1000
 
-    def test_get_balance_error(self) -> None:
-        """Test _get_balance when performative is wrong."""
+    def test_get_wxdai_balance_error(self) -> None:
+        """Test get_wxdai_balance when performative is wrong."""
         mock_resp = MagicMock()
-        mock_resp.performative = LedgerApiMessage.Performative.ERROR
+        mock_resp.performative = ContractApiMessage.Performative.ERROR
 
         with patch.object(
             self.behaviour,
-            "get_ledger_api_response",
+            "get_contract_api_response",
             new=_make_gen(mock_resp),
         ):
-            gen = self.behaviour._get_balance("0xAccount")
+            gen = self.behaviour.get_wxdai_balance("0xAccount")
             result = _exhaust_gen(gen)
 
         assert result is None
@@ -310,7 +311,7 @@ class TestGetPendingQuestionsBehaviour:
             return_value=["q1"],
         ), patch.object(
             self.behaviour,
-            "_get_balance",
+            "get_wxdai_balance",
             new=_make_gen(10),
         ):
             # bond_required = 100 * 1 = 100, balance = 10
@@ -345,7 +346,7 @@ class TestGetPendingQuestionsBehaviour:
             return_value=["q1"],
         ), patch.object(
             self.behaviour,
-            "_get_balance",
+            "get_wxdai_balance",
             new=_make_gen(None),
         ):
             self.behaviour.params.questions_to_close_batch_size = 5
@@ -370,7 +371,7 @@ class TestGetPendingQuestionsBehaviour:
             return_value=["q1"],
         ), patch.object(
             self.behaviour,
-            "_get_balance",
+            "get_wxdai_balance",
             new=_make_gen(10000),
         ), patch.object(
             type(self.behaviour),

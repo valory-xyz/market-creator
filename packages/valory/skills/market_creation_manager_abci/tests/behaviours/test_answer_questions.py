@@ -142,6 +142,12 @@ def _make_gen(return_value: Any) -> Any:
     return gen
 
 
+def _passthrough_gen(txs: Any) -> Any:
+    """Generator that returns its argument unchanged (for mocking _prepend_wxdai_unwrap)."""
+    yield  # noqa: unreachable - makes this a generator function
+    return txs
+
+
 def _exhaust_gen(gen: Any) -> Any:
     """Exhaust a generator and return its value."""
     try:
@@ -319,6 +325,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
         ), patch.object(
             self.behaviour,
+            "_prepend_wxdai_unwrap",
+            new=_passthrough_gen,
+        ), patch.object(
+            self.behaviour,
             "_to_multisend",
             new=_make_gen("0xmultisend_hash"),
         ):
@@ -392,6 +402,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             self.behaviour,
             "_get_answer_tx",
             new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_prepend_wxdai_unwrap",
+            new=_passthrough_gen,
         ), patch.object(
             self.behaviour,
             "_to_multisend",
@@ -472,6 +486,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             self.behaviour,
             "_get_answer_tx",
             new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_prepend_wxdai_unwrap",
+            new=_passthrough_gen,
         ), patch.object(
             self.behaviour,
             "_to_multisend",
@@ -571,6 +589,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             self.behaviour,
             "_get_answer_tx",
             new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_prepend_wxdai_unwrap",
+            new=_passthrough_gen,
         ), patch.object(
             self.behaviour,
             "_to_multisend",
