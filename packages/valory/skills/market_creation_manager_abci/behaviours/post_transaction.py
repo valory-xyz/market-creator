@@ -89,6 +89,10 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         if self.synchronized_data.tx_submitter == RedeemWinningsRound.auto_round_id():
             return PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
 
+        # Funds forwarder round from funds_forwarder_abci skill (string to avoid cross-skill import)
+        if self.synchronized_data.tx_submitter == "funds_forwarder_round":
+            return PostTransactionRound.FUND_SWEEP_DONE_PAYLOAD
+
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set
         )

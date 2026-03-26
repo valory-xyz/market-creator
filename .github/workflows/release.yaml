@@ -7,10 +7,10 @@ on:
 jobs:
   publish-packages:
     name: Push Packages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         python-version: ["3.10"]
     steps:
       - uses: actions/checkout@v6
@@ -19,7 +19,7 @@ jobs:
           python-version: ${{ matrix.python-versions }}
       - uses: addnab/docker-run-action@v3
         with:
-            image: valory/open-autonomy-user:0.21.16rc1
+            image: valory/open-autonomy-user:0.21.14
             options: -v ${{ github.workspace }}:/work
             run: |
               echo "Pushing Packages"
@@ -34,7 +34,7 @@ jobs:
       - "publish-packages"
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         python-version: ["3.10"]
     env:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
@@ -44,7 +44,7 @@ jobs:
       - name: Set up tag and vars
         uses: addnab/docker-run-action@v3
         with:
-            image: valory/open-autonomy-user:0.21.16rc1
+            image: valory/open-autonomy-user:0.21.14
             options: -v ${{ github.workspace }}:/work
             run: |
               echo "Setting Tag Images"
@@ -68,7 +68,7 @@ jobs:
       - uses: addnab/docker-run-action@v3
         name: Build Images
         with:
-            image: valory/open-autonomy-user:0.21.16rc1
+            image: valory/open-autonomy-user:0.21.14
             options: -v ${{ github.workspace }}:/work
             shell: bash
             run: |
@@ -79,8 +79,8 @@ jobs:
               autonomy init --reset --author $AUTHOR --ipfs --remote
               autonomy fetch $AUTHOR/$SERVICE --service --local || exit 1
               cd $SERVICE || exit 1
-              autonomy build-image -e open-autonomy==0.21.16rc1 || exit 1
-              autonomy build-image -e open-autonomy==0.21.16rc1 --version $VERSION || exit 1
+              autonomy build-image -e open-autonomy==0.21.14 || exit 1
+              autonomy build-image -e open-autonomy==0.21.14 --version $VERSION || exit 1
 
       - name: Docker login
         run: |
@@ -104,7 +104,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        os: [ubuntu-latest]        
+        os: [ubuntu-24.04]        
         environment: [production, production_pearl]
         python-version: ["3.10"]
     env:

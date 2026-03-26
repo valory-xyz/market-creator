@@ -170,6 +170,7 @@ class TestPostTransactionTransitions:
             (Event.REDEEM_BOND_DONE, CollectProposedMarketsRound),
             (Event.REMOVE_FUNDING_DONE, RedeemWinningsRound),
             (Event.REDEEM_WINNINGS_DONE, DepositDaiRound),
+            (Event.FUND_SWEEP_DONE, SyncMarketsRound),
         ],
     )
     def test_transitions(

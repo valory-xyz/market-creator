@@ -23,6 +23,13 @@ from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
 )
 from packages.valory.skills.abstract_round_abci.models import Requests as BaseRequests
+from packages.valory.skills.funds_forwarder_abci.models import FundsForwarderParams
+from packages.valory.skills.funds_forwarder_abci.rounds import (
+    Event as FundsForwarderEvent,
+)
+from packages.valory.skills.identify_service_owner_abci.rounds import (
+    Event as IdentifyServiceOwnerEvent,
+)
 from packages.valory.skills.market_creation_manager_abci.models import (
     ConditionalTokensSubgraph as BaseConditionalTokensSubgraph,
 )
@@ -110,10 +117,17 @@ class SharedState(BaseSharedState):
         MarketCreatorAbciApp.event_to_timeout[MechInteractEvent.ROUND_TIMEOUT] = (
             self.context.params.mech_interact_round_timeout_seconds
         )
+        MarketCreatorAbciApp.event_to_timeout[
+            IdentifyServiceOwnerEvent.ROUND_TIMEOUT
+        ] = self.context.params.round_timeout_seconds
+        MarketCreatorAbciApp.event_to_timeout[FundsForwarderEvent.ROUND_TIMEOUT] = (
+            self.context.params.round_timeout_seconds
+        )
 
 
 class Params(
     MarketCreationManagerParams,
+    FundsForwarderParams,
     MechInteractParams,
     TerminationParams,
 ):
