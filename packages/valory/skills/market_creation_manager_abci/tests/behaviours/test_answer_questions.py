@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.answer_questions import (
     ANSWER_INVALID,
     ANSWER_NO,
@@ -140,6 +141,12 @@ def _make_gen(return_value: Any) -> Any:
         yield  # noqa: unreachable - makes this a generator function
 
     return gen
+
+
+def _passthrough_gen(txs: Any) -> Any:
+    """Generator that returns its argument unchanged (for mocking _prepend_wxdai_unwrap)."""
+    yield  # noqa: unreachable - makes this a generator function
+    return txs
 
 
 def _exhaust_gen(gen: Any) -> Any:
@@ -319,6 +326,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
         ), patch.object(
             self.behaviour,
+            "_prepend_wxdai_unwrap",
+            new=_passthrough_gen,
+        ), patch.object(
+            self.behaviour,
             "_to_multisend",
             new=_make_gen("0xmultisend_hash"),
         ):
@@ -392,6 +403,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             self.behaviour,
             "_get_answer_tx",
             new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_prepend_wxdai_unwrap",
+            new=_passthrough_gen,
         ), patch.object(
             self.behaviour,
             "_to_multisend",
@@ -472,6 +487,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             self.behaviour,
             "_get_answer_tx",
             new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+        ), patch.object(
+            self.behaviour,
+            "_prepend_wxdai_unwrap",
+            new=_passthrough_gen,
         ), patch.object(
             self.behaviour,
             "_to_multisend",
@@ -573,6 +592,10 @@ class TestAnswerQuestionsBehaviourGenerators:
             new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
         ), patch.object(
             self.behaviour,
+            "_prepend_wxdai_unwrap",
+            new=_passthrough_gen,
+        ), patch.object(
+            self.behaviour,
             "_to_multisend",
             new=_make_gen("0xmultisend_hash"),
         ):
@@ -585,3 +608,107 @@ class TestAnswerQuestionsBehaviourGenerators:
         assert "0xquestion1" not in mock_shared_state.questions_requested_mech
         # question2 should still be in requested (loop broke before processing it)
         assert "0xquestion2" in mock_shared_state.questions_requested_mech
+
+
+class TestPrependWxdaiUnwrap:
+    """Test _prepend_wxdai_unwrap method."""
+
+    def setup_method(self) -> None:
+        """Setup method."""
+        context_mock = MagicMock()
+        context_mock.params.collateral_tokens_contract = "0xwxdai"
+        self.behaviour = AnswerQuestionsBehaviour(
+            name="test", skill_context=context_mock
+        )
+        self.behaviour._synchronized_data = MagicMock()
+        self.behaviour._synchronized_data.safe_contract_address = "0xsafe"
+
+    def test_zero_bond_returns_txs_unchanged(self) -> None:
+        """Test that zero total bond returns txs as-is."""
+        txs = [{"to": "0x1", "value": 0, "data": b"\x00"}]
+        gen = self.behaviour._prepend_wxdai_unwrap(txs)
+        result = _exhaust_gen(gen)
+        assert result == txs
+
+    def test_insufficient_wxdai_balance(self) -> None:
+        """Test that insufficient wxDAI balance returns txs unchanged."""
+        txs = [{"to": "0x1", "value": 100, "data": b"\x00"}]
+        with patch.object(self.behaviour, "get_wxdai_balance", new=_make_gen(50)):
+            gen = self.behaviour._prepend_wxdai_unwrap(txs)
+            result = _exhaust_gen(gen)
+        assert result == txs
+
+    def test_none_wxdai_balance(self) -> None:
+        """Test that None wxDAI balance returns txs unchanged."""
+        txs = [{"to": "0x1", "value": 100, "data": b"\x00"}]
+        with patch.object(self.behaviour, "get_wxdai_balance", new=_make_gen(None)):
+            gen = self.behaviour._prepend_wxdai_unwrap(txs)
+            result = _exhaust_gen(gen)
+        assert result == txs
+
+    def test_withdraw_tx_fails(self) -> None:
+        """Test that failed withdraw tx build returns txs unchanged."""
+        txs = [{"to": "0x1", "value": 100, "data": b"\x00"}]
+        with patch.object(
+            self.behaviour, "get_wxdai_balance", new=_make_gen(200)
+        ), patch.object(self.behaviour, "_get_wxdai_withdraw_tx", new=_make_gen(None)):
+            gen = self.behaviour._prepend_wxdai_unwrap(txs)
+            result = _exhaust_gen(gen)
+        assert result == txs
+
+    def test_success_prepends_withdraw(self) -> None:
+        """Test successful unwrap prepends withdraw tx."""
+        txs = [{"to": "0x1", "value": 100, "data": b"\x00"}]
+        withdraw_tx = {"to": "0xwxdai", "value": 0, "data": b"\x01"}
+        with patch.object(
+            self.behaviour, "get_wxdai_balance", new=_make_gen(200)
+        ), patch.object(
+            self.behaviour, "_get_wxdai_withdraw_tx", new=_make_gen(withdraw_tx)
+        ):
+            gen = self.behaviour._prepend_wxdai_unwrap(txs)
+            result = _exhaust_gen(gen)
+        assert len(result) == 2
+        assert result[0] == withdraw_tx
+        assert result[1] == txs[0]
+
+
+class TestGetWxdaiWithdrawTx:
+    """Test _get_wxdai_withdraw_tx method."""
+
+    def setup_method(self) -> None:
+        """Setup method."""
+        context_mock = MagicMock()
+        context_mock.params.collateral_tokens_contract = "0xwxdai"
+        self.behaviour = AnswerQuestionsBehaviour(
+            name="test", skill_context=context_mock
+        )
+
+    def test_success(self) -> None:
+        """Test successful withdraw tx build."""
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.STATE
+        mock_resp.state.body = {"data": b"\x01\x02"}
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._get_wxdai_withdraw_tx(100)
+            result = _exhaust_gen(gen)
+        assert result is not None
+        assert result["to"] == "0xwxdai"
+        assert result["data"] == b"\x01\x02"
+
+    def test_error(self) -> None:
+        """Test withdraw tx build error."""
+        mock_resp = MagicMock()
+        mock_resp.performative = MagicMock()
+        mock_resp.performative.value = "error"
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour._get_wxdai_withdraw_tx(100)
+            result = _exhaust_gen(gen)
+        assert result is None

@@ -19,6 +19,8 @@
 
 """Tests for the market_maker_abci composition."""
 
+import pytest
+
 import packages.valory.skills.funds_forwarder_abci.rounds as FundsForwarderAbci
 import packages.valory.skills.identify_service_owner_abci.rounds as IdentifyServiceOwnerAbci
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
@@ -43,218 +45,116 @@ from packages.valory.skills.reset_pause_abci.rounds import (
 )
 from packages.valory.skills.termination_abci.rounds import BackgroundRound, Event
 
+# All expected (source_round, target_round) pairs in the transition mapping.
+EXPECTED_TRANSITIONS = [
+    (FinishedRegistrationRound, IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound),
+    (MarketCreationManagerAbci.FinishedWithoutTxRound, ResetAndPauseRound),
+    (
+        MarketCreationManagerAbci.FinishedWithDepositDaiRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithRedeemBondRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedMarketCreationManagerRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithRemoveFundingRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound,
+        MechVersionStates.MechVersionDetectionRound,
+    ),
+    (
+        MechFinalStates.FinishedMarketplaceLegacyDetectedRound,
+        MechRequestStates.MechRequestRound,
+    ),
+    (
+        MechFinalStates.FinishedMechLegacyDetectedRound,
+        MechRequestStates.MechRequestRound,
+    ),
+    (MechFinalStates.FinishedMechInformationRound, MechRequestStates.MechRequestRound),
+    (
+        MechFinalStates.FailedMechInformationRound,
+        MechVersionStates.MechVersionDetectionRound,
+    ),
+    (
+        MechFinalStates.FinishedMechRequestRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MechFinalStates.FinishedMechPurchaseSubscriptionRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MechFinalStates.FinishedMechResponseRound,
+        MarketCreationManagerAbci.AnswerQuestionsRound,
+    ),
+    (
+        MechFinalStates.FinishedMechRequestSkipRound,
+        MarketCreationManagerAbci.CollectRandomnessRound,
+    ),
+    (
+        MechFinalStates.FinishedMechResponseTimeoutRound,
+        MarketCreationManagerAbci.CollectRandomnessRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithMechRequestRound,
+        MechResponseStates.MechResponseRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithRedeemWinningsRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    (
+        TransactionSettlementAbci.FinishedTransactionSubmissionRound,
+        MarketCreationManagerAbci.PostTransactionRound,
+    ),
+    (TransactionSettlementAbci.FailedRound, ResetAndPauseRound),
+    (FinishedResetAndPauseRound, IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound),
+    (FinishedResetAndPauseErrorRound, RegistrationRound),
+    (
+        IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound,
+        FundsForwarderAbci.FundsForwarderRound,
+    ),
+    (
+        IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound,
+        MarketCreationManagerAbci.SyncMarketsRound,
+    ),
+    (
+        FundsForwarderAbci.FinishedFundsForwarderNoTxRound,
+        MarketCreationManagerAbci.SyncMarketsRound,
+    ),
+    (
+        FundsForwarderAbci.FinishedFundsForwarderWithTxRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+]
+
 
 class TestAbciAppTransitionMapping:
     """Test abci_app_transition_mapping entries."""
 
-    def test_finished_registration_round(self) -> None:
-        """Test FinishedRegistrationRound maps to IdentifyServiceOwnerRound."""
-        assert (
-            abci_app_transition_mapping[FinishedRegistrationRound]
-            == IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound
-        )
-
-    def test_finished_without_tx_round(self) -> None:
-        """Test FinishedWithoutTxRound maps to ResetAndPauseRound."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedWithoutTxRound
-            ]
-            == ResetAndPauseRound
-        )
-
-    def test_finished_with_deposit_dai_round(self) -> None:
-        """Test FinishedWithDepositDaiRound maps to TransactionSettlement."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedWithDepositDaiRound
-            ]
-            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
-        )
-
-    def test_finished_with_redeem_bond_round(self) -> None:
-        """Test FinishedWithRedeemBondRound maps to TransactionSettlement."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedWithRedeemBondRound
-            ]
-            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
-        )
-
-    def test_finished_market_creation_manager_round(self) -> None:
-        """Test FinishedMarketCreationManagerRound maps to TransactionSettlement."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedMarketCreationManagerRound
-            ]
-            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
-        )
-
-    def test_finished_with_remove_funding_round(self) -> None:
-        """Test FinishedWithRemoveFundingRound maps to TransactionSettlement."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedWithRemoveFundingRound
-            ]
-            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
-        )
-
-    def test_finished_with_get_pending_questions_round(self) -> None:
-        """Test FinishedWithGetPendingQuestionsRound maps to MechVersionDetection."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound
-            ]
-            == MechVersionStates.MechVersionDetectionRound
-        )
-
-    def test_mech_legacy_detected(self) -> None:
-        """Test FinishedMechLegacyDetectedRound maps to MechRequestRound."""
-        assert (
-            abci_app_transition_mapping[MechFinalStates.FinishedMechLegacyDetectedRound]
-            == MechRequestStates.MechRequestRound
-        )
-
-    def test_mech_information_finished(self) -> None:
-        """Test FinishedMechInformationRound maps to MechRequestRound."""
-        assert (
-            abci_app_transition_mapping[MechFinalStates.FinishedMechInformationRound]
-            == MechRequestStates.MechRequestRound
-        )
-
-    def test_mech_information_failed(self) -> None:
-        """Test FailedMechInformationRound maps to MechVersionDetection."""
-        assert (
-            abci_app_transition_mapping[MechFinalStates.FailedMechInformationRound]
-            == MechVersionStates.MechVersionDetectionRound
-        )
-
-    def test_mech_request_finished(self) -> None:
-        """Test FinishedMechRequestRound maps to TransactionSettlement."""
-        assert (
-            abci_app_transition_mapping[MechFinalStates.FinishedMechRequestRound]
-            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
-        )
-
-    def test_mech_response_finished(self) -> None:
-        """Test FinishedMechResponseRound maps to AnswerQuestionsRound."""
-        assert (
-            abci_app_transition_mapping[MechFinalStates.FinishedMechResponseRound]
-            == MarketCreationManagerAbci.AnswerQuestionsRound
-        )
-
-    def test_mech_request_skip_finished(self) -> None:
-        """Test FinishedMechRequestSkipRound maps to CollectRandomnessRound."""
-        assert (
-            abci_app_transition_mapping[MechFinalStates.FinishedMechRequestSkipRound]
-            == MarketCreationManagerAbci.CollectRandomnessRound
-        )
-
-    def test_mech_response_timeout_finished(self) -> None:
-        """Test FinishedMechResponseTimeoutRound maps to CollectRandomnessRound."""
-        assert (
-            abci_app_transition_mapping[
-                MechFinalStates.FinishedMechResponseTimeoutRound
-            ]
-            == MarketCreationManagerAbci.CollectRandomnessRound
-        )
-
-    def test_finished_with_mech_request_round(self) -> None:
-        """Test FinishedWithMechRequestRound maps to MechResponseRound."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedWithMechRequestRound
-            ]
-            == MechResponseStates.MechResponseRound
-        )
-
-    def test_finished_with_answer_questions_round(self) -> None:
-        """Test FinishedWithAnswerQuestionsRound maps to TransactionSettlement."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound
-            ]
-            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
-        )
-
-    def test_transaction_settlement_finished(self) -> None:
-        """Test FinishedTransactionSubmissionRound maps to PostTransactionRound."""
-        assert (
-            abci_app_transition_mapping[
-                TransactionSettlementAbci.FinishedTransactionSubmissionRound
-            ]
-            == MarketCreationManagerAbci.PostTransactionRound
-        )
-
-    def test_transaction_settlement_failed(self) -> None:
-        """Test FailedRound maps to ResetAndPauseRound."""
-        assert (
-            abci_app_transition_mapping[TransactionSettlementAbci.FailedRound]
-            == ResetAndPauseRound
-        )
-
-    def test_finished_reset_and_pause(self) -> None:
-        """Test FinishedResetAndPauseRound maps to IdentifyServiceOwnerRound."""
-        assert (
-            abci_app_transition_mapping[FinishedResetAndPauseRound]
-            == IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound
-        )
-
-    def test_finished_reset_and_pause_error(self) -> None:
-        """Test FinishedResetAndPauseErrorRound maps to RegistrationRound."""
-        assert (
-            abci_app_transition_mapping[FinishedResetAndPauseErrorRound]
-            == RegistrationRound
-        )
-
-    def test_finished_with_redeem_winnings_round(self) -> None:
-        """Test FinishedWithRedeemWinningsRound maps to TransactionSettlement."""
-        assert (
-            abci_app_transition_mapping[
-                MarketCreationManagerAbci.FinishedWithRedeemWinningsRound
-            ]
-            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
-        )
-
-    def test_identify_service_owner_done(self) -> None:
-        """Test FinishedIdentifyServiceOwnerRound maps to FundsForwarderRound."""
-        assert (
-            abci_app_transition_mapping[
-                IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound
-            ]
-            == FundsForwarderAbci.FundsForwarderRound
-        )
-
-    def test_identify_service_owner_error(self) -> None:
-        """Test FinishedIdentifyServiceOwnerErrorRound maps to SyncMarketsRound."""
-        assert (
-            abci_app_transition_mapping[
-                IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound
-            ]
-            == MarketCreationManagerAbci.SyncMarketsRound
-        )
-
-    def test_funds_forwarder_no_tx(self) -> None:
-        """Test FinishedFundsForwarderNoTxRound maps to SyncMarketsRound."""
-        assert (
-            abci_app_transition_mapping[
-                FundsForwarderAbci.FinishedFundsForwarderNoTxRound
-            ]
-            == MarketCreationManagerAbci.SyncMarketsRound
-        )
-
-    def test_funds_forwarder_with_tx(self) -> None:
-        """Test FinishedFundsForwarderWithTxRound maps to TransactionSettlement."""
-        assert (
-            abci_app_transition_mapping[
-                FundsForwarderAbci.FinishedFundsForwarderWithTxRound
-            ]
-            == TransactionSettlementAbci.RandomnessTransactionSubmissionRound
-        )
+    @pytest.mark.parametrize(
+        "source, target",
+        EXPECTED_TRANSITIONS,
+        ids=[src.__name__ for src, _ in EXPECTED_TRANSITIONS],
+    )
+    def test_transition(self, source: type, target: type) -> None:
+        """Test that source round maps to the expected target round."""
+        assert abci_app_transition_mapping[source] == target
 
     def test_mapping_count(self) -> None:
-        """Test total mapping count."""
-        assert len(abci_app_transition_mapping) == 27
+        """Test total mapping count matches expected transitions."""
+        assert len(abci_app_transition_mapping) == len(EXPECTED_TRANSITIONS)
 
 
 class TestTerminationConfig:

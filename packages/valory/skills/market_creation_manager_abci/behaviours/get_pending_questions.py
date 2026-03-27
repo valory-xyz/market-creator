@@ -23,9 +23,8 @@ import json
 import random
 from dataclasses import asdict
 from string import Template
-from typing import Any, Dict, Generator, List, Optional, cast
+from typing import Any, Dict, Generator, List
 
-from packages.valory.protocols.ledger_api import LedgerApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     MarketCreationManagerBaseBehaviour,
 )
@@ -105,24 +104,6 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
         return questions
 
-    def _get_balance(self, account: str) -> Generator[None, None, Optional[int]]:
-        """Get the balance of an account"""
-        ledger_api_response = yield from self.get_ledger_api_response(
-            performative=LedgerApiMessage.Performative.GET_STATE,  # type: ignore
-            ledger_callable="get_balance",
-            account=account,
-        )
-        if ledger_api_response.performative != LedgerApiMessage.Performative.STATE:
-            # something went wrong
-            self.context.logger.error(
-                f"Couldn't get balance for account {account}. "
-                f"Expected response performative {LedgerApiMessage.Performative.STATE}, "
-                f"Received {ledger_api_response.performative.value}."
-            )
-            return None
-        balance = cast(int, ledger_api_response.state.body.get("get_balance_result"))
-        return balance
-
     def _eligible_questions_to_answer(
         self, unanswered_questions: List[Dict[str, Any]]
     ) -> List[str]:
@@ -194,22 +175,24 @@ class GetPendingQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         )
 
         safe_address = self.synchronized_data.safe_contract_address
-        balance = yield from self._get_balance(safe_address)
+        balance = yield from self.get_wxdai_balance(safe_address)
         if balance is None:
-            self.context.logger.info("Couldn't get balance")
+            self.context.logger.info("Couldn't get wxDAI balance")
             return GetPendingQuestionsRound.NO_TX_PAYLOAD
 
-        self.context.logger.info(f"Address {safe_address!r} has balance {balance}.")
+        self.context.logger.info(
+            f"Address {safe_address!r} has wxDAI balance {balance}."
+        )
         max_num_questions = min(
             len(eligible_questions_id), self.params.questions_to_close_batch_size
         )
         bond_required = self.params.realitio_answer_question_bond * max_num_questions
 
         if balance < bond_required:
-            # Not enough balance to close questions
+            # Not enough wxDAI to cover bonds
             self.context.logger.info(
-                f"Not enough balance to close {max_num_questions} questions. "
-                f"Balance {balance}, required {bond_required}"
+                f"Not enough wxDAI to close {max_num_questions} questions. "
+                f"wxDAI balance {balance}, required {bond_required}"
             )
             return GetPendingQuestionsRound.NO_TX_PAYLOAD
 
