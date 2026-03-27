@@ -43,6 +43,9 @@ packages/valory/skills/registration_abci
 packages/valory/skills/reset_pause_abci
 packages/valory/skills/termination_abci
 packages/valory/skills/transaction_settlement_abci
+packages/valory/skills/funds_forwarder_abci
+packages/valory/skills/identify_service_owner_abci
+packages/valory/contracts/staking_token
 
 leak_report
 __pycache__
