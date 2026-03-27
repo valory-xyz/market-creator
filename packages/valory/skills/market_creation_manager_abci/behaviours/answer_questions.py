@@ -20,12 +20,15 @@
 """This module contains the AnswerQuestionsBehaviour of the 'market_creation_manager_abci' skill."""
 
 import json
-from typing import Any, Dict, Generator, Optional, cast
+from typing import Any, Dict, Generator, List, Optional, cast
 
+from packages.valory.contracts.erc20.contract import ERC20TokenContract
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
+    ETHER_VALUE,
     MarketCreationManagerBaseBehaviour,
+    get_callable_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     MultisigTxPayload,
@@ -173,6 +176,9 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             )
             return None
 
+        # Always unwrap wxDAI to cover the bond
+        txs = yield from self._prepend_wxdai_unwrap(txs)
+
         multisend_tx_str = yield from self._to_multisend(txs)
         if multisend_tx_str is None:
             # something went wrong, respond with ERROR payload for now
@@ -213,4 +219,55 @@ class AnswerQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             "to": self.params.realitio_contract,
             "value": self.params.realitio_answer_question_bond,
             "data": data,
+        }
+
+    def _prepend_wxdai_unwrap(
+        self, txs: List[Dict[str, Any]]
+    ) -> Generator[None, None, List[Dict[str, Any]]]:
+        """Always prepend a wxDAI withdraw tx to cover the bond amount."""
+        total_bond = sum(tx["value"] for tx in txs)
+        if total_bond == 0:
+            return txs
+
+        safe_address = self.synchronized_data.safe_contract_address
+
+        # Check wxDAI balance
+        wxdai_balance = yield from self.get_wxdai_balance(safe_address)
+        if wxdai_balance is None or wxdai_balance < total_bond:
+            self.context.logger.error(
+                f"wxDAI balance ({wxdai_balance}) insufficient for bonds ({total_bond})."
+            )
+            return txs
+
+        # Build withdraw tx and prepend
+        withdraw_tx = yield from self._get_wxdai_withdraw_tx(total_bond)
+        if withdraw_tx is None:
+            self.context.logger.error("Could not build wxDAI withdraw tx.")
+            return txs
+
+        self.context.logger.info(
+            f"Prepending wxDAI withdraw({total_bond}) to answer txs."
+        )
+        return [withdraw_tx] + txs
+
+    def _get_wxdai_withdraw_tx(
+        self, amount: int
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
+        """Build a wxDAI withdraw(amount) transaction."""
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.collateral_tokens_contract,
+            contract_id=str(ERC20TokenContract.contract_id),
+            contract_callable=get_callable_name(ERC20TokenContract.build_withdraw_tx),
+            amount=amount,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.error(
+                f"Could not build wxDAI withdraw tx: {response.performative.value}"
+            )
+            return None
+        return {
+            "to": self.params.collateral_tokens_contract,
+            "data": response.state.body["data"],
+            "value": ETHER_VALUE,
         }
