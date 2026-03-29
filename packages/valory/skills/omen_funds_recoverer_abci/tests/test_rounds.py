@@ -69,7 +69,7 @@ class TestSynchronizedData:
     ) -> None:
         """Test recovery_txs property returns empty list by default."""
         mocked_db.get.return_value = "[]"
-        assert sync_data.recovery_txs == []
+        assert sync_data.funds_recovery_txs == []
 
     def test_recovery_txs_with_data(
         self, sync_data: SynchronizedData, mocked_db: MagicMock
@@ -77,7 +77,7 @@ class TestSynchronizedData:
         """Test recovery_txs property with stored JSON data."""
         txs = [{"to": "0xAddr", "data": "0x1234", "value": 0}]
         mocked_db.get.return_value = json.dumps(txs)
-        assert sync_data.recovery_txs == txs
+        assert sync_data.funds_recovery_txs == txs
 
     def test_recovery_txs_with_list_data(
         self, sync_data: SynchronizedData, mocked_db: MagicMock
@@ -85,7 +85,7 @@ class TestSynchronizedData:
         """Test recovery_txs property when db returns a list directly."""
         txs = [{"to": "0xAddr", "data": "0x1234", "value": 0}]
         mocked_db.get.return_value = txs
-        assert sync_data.recovery_txs == txs
+        assert sync_data.funds_recovery_txs == txs
 
     def test_recovery_txs_multiple(
         self, sync_data: SynchronizedData, mocked_db: MagicMock
@@ -97,7 +97,7 @@ class TestSynchronizedData:
             {"to": "0xAddr3", "data": "0xcc", "value": 0},
         ]
         mocked_db.get.return_value = json.dumps(txs)
-        assert sync_data.recovery_txs == txs
+        assert sync_data.funds_recovery_txs == txs
 
     def test_most_voted_tx_hash(
         self, sync_data: SynchronizedData, mocked_db: MagicMock
@@ -116,18 +116,18 @@ class TestSynchronizedData:
     @patch(
         "packages.valory.skills.omen_funds_recoverer_abci.rounds.CollectionRound.deserialize_collection"
     )
-    def test_participant_to_recovery_txs(
+    def test_participant_to_funds_recovery_txs(
         self,
         mock_deserialize: MagicMock,
         sync_data: SynchronizedData,
         mocked_db: MagicMock,
     ) -> None:
-        """Test participant_to_recovery_txs property with deserialization."""
+        """Test participant_to_funds_recovery_txs property with deserialization."""
         serialized = '{"agent_0": "payload_0"}'
         expected = {"agent_0": "payload_0"}
         mocked_db.get_strict.return_value = serialized
         mock_deserialize.return_value = expected
-        result = sync_data.participant_to_recovery_txs
+        result = sync_data.participant_to_funds_recovery_txs
         mock_deserialize.assert_called_once_with(serialized)
         assert result == expected
 
@@ -183,18 +183,25 @@ class TestRecoveryTxsRound:
         assert RecoveryTxsRound.no_majority_event == Event.NO_MAJORITY
 
     def test_selection_key(self) -> None:
-        """Test selection key is empty tuple."""
-        assert RecoveryTxsRound.selection_key == ()
+        """Test selection key writes to funds_recovery_txs."""
+        assert RecoveryTxsRound.selection_key == (
+            get_name(SynchronizedData.funds_recovery_txs),
+        )
 
     def test_collection_key(self) -> None:
         """Test collection key."""
         assert RecoveryTxsRound.collection_key == get_name(
-            SynchronizedData.participant_to_recovery_txs
+            SynchronizedData.participant_to_funds_recovery_txs
         )
 
 
 class TestRecoveryTxsRoundEndBlock:
-    """Tests for RecoveryTxsRound.end_block accumulation logic."""
+    """Tests for RecoveryTxsRound default end_block behaviour.
+
+    RecoveryTxsRound uses the framework's default end_block via selection_key.
+    The accumulation logic is in the behaviours, not the round.
+    Only no_majority and majority_possible paths are tested here.
+    """
 
     @pytest.fixture
     def setup_round(self) -> RemoveLiquidityRound:
@@ -203,91 +210,6 @@ class TestRecoveryTxsRoundEndBlock:
         synced_data = MagicMock(spec=SynchronizedData)
         synced_data.nb_participants = 4
         return RemoveLiquidityRound(synchronized_data=synced_data, context=context)
-
-    def test_empty_payload_empty_existing(
-        self, setup_round: RemoveLiquidityRound
-    ) -> None:
-        """Test empty payload + empty existing recovery_txs => combined is []."""
-        setup_round.synchronized_data.recovery_txs = []  # type: ignore[attr-defined]
-        updated_data = MagicMock(spec=SynchronizedData)
-        setup_round.synchronized_data.update.return_value = updated_data  # type: ignore[attr-defined]
-
-        with patch.object(
-            type(setup_round),
-            "threshold_reached",
-            new_callable=PropertyMock,
-            return_value=True,
-        ), patch.object(
-            type(setup_round),
-            "most_voted_payload",
-            new_callable=PropertyMock,
-            return_value="[]",
-        ):
-            result = setup_round.end_block()
-            assert result is not None
-            result_data, event = result
-            assert event == Event.DONE
-            assert result_data is updated_data
-            call_kwargs = setup_round.synchronized_data.update.call_args  # type: ignore[attr-defined]
-            stored_txs = json.loads(call_kwargs.kwargs["recovery_txs"])
-            assert stored_txs == []
-
-    def test_payload_with_txs_empty_existing(
-        self, setup_round: RemoveLiquidityRound
-    ) -> None:
-        """Test payload with txs + empty existing => combined has the new txs."""
-        setup_round.synchronized_data.recovery_txs = []  # type: ignore[attr-defined]
-        new_txs = [{"to": "0xA", "data": "0x01", "value": 0}]
-        updated_data = MagicMock(spec=SynchronizedData)
-        setup_round.synchronized_data.update.return_value = updated_data  # type: ignore[attr-defined]
-
-        with patch.object(
-            type(setup_round),
-            "threshold_reached",
-            new_callable=PropertyMock,
-            return_value=True,
-        ), patch.object(
-            type(setup_round),
-            "most_voted_payload",
-            new_callable=PropertyMock,
-            return_value=json.dumps(new_txs),
-        ):
-            result = setup_round.end_block()
-            assert result is not None
-            result_data, event = result
-            assert event == Event.DONE
-            call_kwargs = setup_round.synchronized_data.update.call_args  # type: ignore[attr-defined]
-            stored_txs = json.loads(call_kwargs.kwargs["recovery_txs"])
-            assert stored_txs == new_txs
-
-    def test_payload_with_txs_existing_txs(
-        self, setup_round: RemoveLiquidityRound
-    ) -> None:
-        """Test payload with txs + existing txs => combined has both."""
-        existing_txs = [{"to": "0xOld", "data": "0xff", "value": 0}]
-        new_txs = [{"to": "0xNew", "data": "0xaa", "value": 0}]
-        setup_round.synchronized_data.recovery_txs = existing_txs  # type: ignore[attr-defined]
-        updated_data = MagicMock(spec=SynchronizedData)
-        setup_round.synchronized_data.update.return_value = updated_data  # type: ignore[attr-defined]
-
-        with patch.object(
-            type(setup_round),
-            "threshold_reached",
-            new_callable=PropertyMock,
-            return_value=True,
-        ), patch.object(
-            type(setup_round),
-            "most_voted_payload",
-            new_callable=PropertyMock,
-            return_value=json.dumps(new_txs),
-        ):
-            result = setup_round.end_block()
-            assert result is not None
-            result_data, event = result
-            assert event == Event.DONE
-            call_kwargs = setup_round.synchronized_data.update.call_args  # type: ignore[attr-defined]
-            stored_txs = json.loads(call_kwargs.kwargs["recovery_txs"])
-            assert stored_txs == existing_txs + new_txs
 
     def test_no_threshold_no_majority(self, setup_round: RemoveLiquidityRound) -> None:
         """Test no threshold and no majority possible."""
@@ -409,9 +331,9 @@ class TestBuildMultisendRound:
             SynchronizedData.participant_to_tx_prep
         )
 
-    def test_no_tx_payload_constant(self) -> None:
-        """Test NO_TX_PAYLOAD constant."""
-        assert BuildMultisendRound.NO_TX_PAYLOAD == "NO_TX"
+    def test_none_event(self) -> None:
+        """Test none event routes to FinishedWithoutRecoveryTxRound."""
+        assert BuildMultisendRound.none_event == Event.NONE
 
 
 # ---------------------------------------------------------------------------
@@ -539,7 +461,7 @@ class TestBuildMultisendTransitions:
         "event,expected_next",
         [
             (Event.DONE, FinishedWithRecoveryTxRound),
-            (Event.NO_TX, FinishedWithoutRecoveryTxRound),
+            (Event.NONE, FinishedWithoutRecoveryTxRound),
             (Event.NO_MAJORITY, FinishedWithoutRecoveryTxRound),
             (Event.ROUND_TIMEOUT, FinishedWithoutRecoveryTxRound),
         ],

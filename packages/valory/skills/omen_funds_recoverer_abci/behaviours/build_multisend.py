@@ -35,7 +35,7 @@ from packages.valory.skills.omen_funds_recoverer_abci.rounds import (
 class BuildMultisendBehaviour(OmenFundsRecovererBaseBehaviour):
     """BuildMultisendBehaviour
 
-    Reads recovery_txs from SynchronizedData and bundles all accumulated
+    Reads funds_recovery_txs from SynchronizedData and bundles all accumulated
     raw tx dicts into a single multisend safe transaction.
     """
 
@@ -59,12 +59,12 @@ class BuildMultisendBehaviour(OmenFundsRecovererBaseBehaviour):
         self.set_done()
 
     def _build_multisend(self) -> Generator[None, None, Optional[str]]:
-        """Bundle all accumulated recovery_txs into a single multisend.
+        """Bundle all accumulated funds_recovery_txs into a single multisend.
 
         :yield: None
         :return: the multisend payload hash, or None if no txs to bundle.
         """
-        txs = self.synchronized_data.recovery_txs
+        txs = self.synchronized_data.funds_recovery_txs
         if not txs:
             self.context.logger.info("No recovery transactions to submit.")
             return None

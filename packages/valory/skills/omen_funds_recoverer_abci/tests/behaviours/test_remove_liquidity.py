@@ -335,6 +335,7 @@ class TestRemoveLiquidityBehaviour:
 
     def test_async_act(self) -> None:
         """Test async_act wraps _get_recovery_txs correctly."""
+        self.behaviour.synchronized_data.funds_recovery_txs = []
         with patch.object(
             self.behaviour,
             "_get_recovery_txs",

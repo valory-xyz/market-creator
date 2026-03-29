@@ -50,15 +50,15 @@ class TestBuildMultisendBehaviour:
         )
 
     def test_build_multisend_no_txs(self) -> None:
-        """Test _build_multisend returns None when recovery_txs is empty."""
-        self.behaviour.synchronized_data.recovery_txs = []
+        """Test _build_multisend returns None when funds_recovery_txs is empty."""
+        self.behaviour.synchronized_data.funds_recovery_txs = []
         gen = self.behaviour._build_multisend()
         result = exhaust_gen(gen)
         assert result is None
 
     def test_build_multisend_success_with_hex_data(self) -> None:
         """Test _build_multisend converts hex string data to bytes and calls _to_multisend."""
-        self.behaviour.synchronized_data.recovery_txs = [
+        self.behaviour.synchronized_data.funds_recovery_txs = [
             {"to": "0xAddr", "data": "abcd", "value": 0},
         ]
         with patch.object(
@@ -70,7 +70,7 @@ class TestBuildMultisendBehaviour:
 
     def test_build_multisend_success_with_0x_prefix(self) -> None:
         """Test _build_multisend strips 0x prefix from hex data."""
-        self.behaviour.synchronized_data.recovery_txs = [
+        self.behaviour.synchronized_data.funds_recovery_txs = [
             {"to": "0xAddr", "data": "0xabcd", "value": 0},
         ]
         with patch.object(self.behaviour, "_to_multisend", new=make_gen("0xHash123")):
@@ -80,7 +80,7 @@ class TestBuildMultisendBehaviour:
 
     def test_build_multisend_success_with_bytes_data(self) -> None:
         """Test _build_multisend leaves bytes data as-is."""
-        self.behaviour.synchronized_data.recovery_txs = [
+        self.behaviour.synchronized_data.funds_recovery_txs = [
             {"to": "0xAddr", "data": b"\xab\xcd", "value": 0},
         ]
         with patch.object(self.behaviour, "_to_multisend", new=make_gen("0xHash456")):
@@ -90,7 +90,7 @@ class TestBuildMultisendBehaviour:
 
     def test_build_multisend_multiple_txs(self) -> None:
         """Test _build_multisend with multiple transactions."""
-        self.behaviour.synchronized_data.recovery_txs = [
+        self.behaviour.synchronized_data.funds_recovery_txs = [
             {"to": "0xA", "data": "aa", "value": 0},
             {"to": "0xB", "data": "bb", "value": 0},
             {"to": "0xC", "data": "cc", "value": 0},
@@ -102,7 +102,7 @@ class TestBuildMultisendBehaviour:
 
     def test_build_multisend_to_multisend_fails(self) -> None:
         """Test _build_multisend returns None when _to_multisend fails."""
-        self.behaviour.synchronized_data.recovery_txs = [
+        self.behaviour.synchronized_data.funds_recovery_txs = [
             {"to": "0xAddr", "data": "abcd", "value": 0},
         ]
         with patch.object(self.behaviour, "_to_multisend", new=make_gen(None)):

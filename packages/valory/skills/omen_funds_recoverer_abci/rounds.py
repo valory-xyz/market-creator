@@ -27,7 +27,6 @@ from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
     AbciAppTransitionFunction,
     AppState,
-    BaseSynchronizedData,
     CollectSameUntilThresholdRound,
     CollectionRound,
     DegenerateRound,
@@ -47,7 +46,6 @@ class Event(Enum):
     """OmenFundsRecovererAbciApp Events"""
 
     DONE = "done"
-    NO_TX = "no_tx"
     NO_MAJORITY = "no_majority"
     NONE = "none"
     ROUND_TIMEOUT = "round_timeout"
@@ -65,9 +63,9 @@ class SynchronizedData(TxSynchronizedData):
         return CollectionRound.deserialize_collection(serialized)
 
     @property
-    def recovery_txs(self) -> List[Dict[str, Any]]:
+    def funds_recovery_txs(self) -> List[Dict[str, Any]]:
         """Get the accumulated recovery transactions to bundle into a single multisend."""
-        raw = self.db.get("recovery_txs", "[]")
+        raw = self.db.get("funds_recovery_txs", "[]")
         if isinstance(raw, str):
             return json.loads(raw)
         return cast(List[Dict[str, Any]], raw)
@@ -83,9 +81,9 @@ class SynchronizedData(TxSynchronizedData):
         return cast(str, self.db.get_strict("tx_submitter"))
 
     @property
-    def participant_to_recovery_txs(self) -> DeserializedCollection:
-        """Get the participant_to_recovery_txs."""
-        return self._get_deserialized("participant_to_recovery_txs")
+    def participant_to_funds_recovery_txs(self) -> DeserializedCollection:
+        """Get the participant_to_funds_recovery_txs."""
+        return self._get_deserialized("participant_to_funds_recovery_txs")
 
     @property
     def participant_to_tx_prep(self) -> DeserializedCollection:
@@ -96,8 +94,9 @@ class SynchronizedData(TxSynchronizedData):
 class RecoveryTxsRound(CollectSameUntilThresholdRound):
     """Base round for recovery stages that accumulate txs.
 
-    Each recovery round queries its subgraph, builds tx dicts, and appends
-    them to recovery_txs in SynchronizedData. Then moves to the next round.
+    Each behaviour reads existing funds_recovery_txs, appends its new txs,
+    and sends the full combined list as the payload. The round simply stores
+    whatever the agents agree on — no custom end_block needed.
     """
 
     payload_class = RecoveryTxsPayload
@@ -105,28 +104,10 @@ class RecoveryTxsRound(CollectSameUntilThresholdRound):
     done_event = Event.DONE
     none_event = Event.NONE
     no_majority_event = Event.NO_MAJORITY
-    selection_key: Tuple[str, ...] = ()
-    collection_key = get_name(SynchronizedData.participant_to_recovery_txs)
-
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
-        """Process the end of the block."""
-        if self.threshold_reached:
-            payload = self.most_voted_payload
-            existing = self.synchronized_data.recovery_txs
-            new_txs = json.loads(payload) if payload else []
-            combined = existing + new_txs
-            synchronized_data = self.synchronized_data.update(
-                synchronized_data_class=SynchronizedData,
-                **{
-                    get_name(SynchronizedData.recovery_txs): json.dumps(combined),
-                },
-            )
-            return synchronized_data, Event.DONE
-        if not self.is_majority_possible(
-            self.collection, self.synchronized_data.nb_participants
-        ):
-            return self.synchronized_data, Event.NO_MAJORITY
-        return None
+    selection_key: Tuple[str, ...] = (
+        get_name(SynchronizedData.funds_recovery_txs),
+    )
+    collection_key = get_name(SynchronizedData.participant_to_funds_recovery_txs)
 
 
 # --- Active Rounds ---
@@ -145,13 +126,12 @@ class ClaimBondsRound(RecoveryTxsRound):
 
 
 class BuildMultisendRound(CollectSameUntilThresholdRound):
-    """A round that bundles all accumulated recovery_txs into a single multisend.
+    """A round that bundles all accumulated funds_recovery_txs into a single multisend.
 
-    If recovery_txs is empty, emits NO_TX. Otherwise builds the safe multisend
-    tx hash and emits DONE.
+    If funds_recovery_txs is empty, the behaviour sends tx_submitter=None and
+    tx_hash=None, which triggers none_event (NONE). Otherwise the behaviour
+    builds the safe multisend tx hash and sends it, triggering done_event (DONE).
     """
-
-    NO_TX_PAYLOAD = "NO_TX"
 
     payload_class = BuildMultisendPayload
     synchronized_data_class = SynchronizedData
@@ -198,7 +178,7 @@ class OmenFundsRecovererAbciApp(AbciApp[Event]):
             - round timeout: BuildMultisendRound
         3. BuildMultisendRound
             - done: FinishedWithRecoveryTxRound
-            - no tx: FinishedWithoutRecoveryTxRound
+            - none: FinishedWithoutRecoveryTxRound
             - no majority: FinishedWithoutRecoveryTxRound
             - round timeout: FinishedWithoutRecoveryTxRound
         4. FinishedWithRecoveryTxRound - Loss
@@ -230,7 +210,7 @@ class OmenFundsRecovererAbciApp(AbciApp[Event]):
         },
         BuildMultisendRound: {
             Event.DONE: FinishedWithRecoveryTxRound,
-            Event.NO_TX: FinishedWithoutRecoveryTxRound,
+            Event.NONE: FinishedWithoutRecoveryTxRound,
             Event.NO_MAJORITY: FinishedWithoutRecoveryTxRound,
             Event.ROUND_TIMEOUT: FinishedWithoutRecoveryTxRound,
         },

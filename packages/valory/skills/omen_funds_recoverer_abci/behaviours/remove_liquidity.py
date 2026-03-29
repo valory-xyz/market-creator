@@ -85,8 +85,12 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            txs = yield from self._get_recovery_txs()
-            payload = RecoveryTxsPayload(sender=sender, content=json.dumps(txs))
+            new_txs = yield from self._get_recovery_txs()
+            existing = self.synchronized_data.funds_recovery_txs
+            combined = existing + new_txs
+            payload = RecoveryTxsPayload(
+                sender=sender, content=json.dumps(combined)
+            )
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()

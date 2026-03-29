@@ -1,7 +1,6 @@
 alphabet_in:
 - DONE
 - NO_MAJORITY
-- NO_TX
 - NONE
 - ROUND_TIMEOUT
 default_start_state: RemoveLiquidityRound
@@ -21,7 +20,7 @@ states:
 transition_func:
   (BuildMultisendRound, DONE): FinishedWithRecoveryTxRound
   (BuildMultisendRound, NO_MAJORITY): FinishedWithoutRecoveryTxRound
-  (BuildMultisendRound, NO_TX): FinishedWithoutRecoveryTxRound
+  (BuildMultisendRound, NONE): FinishedWithoutRecoveryTxRound
   (BuildMultisendRound, ROUND_TIMEOUT): FinishedWithoutRecoveryTxRound
   (ClaimBondsRound, DONE): BuildMultisendRound
   (ClaimBondsRound, NO_MAJORITY): BuildMultisendRound
