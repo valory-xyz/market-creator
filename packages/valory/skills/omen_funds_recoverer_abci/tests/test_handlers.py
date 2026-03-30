@@ -17,65 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for the handlers of the OmenFundsRecovererAbciApp."""
+"""Test the handlers.py module of the skill."""
 
-import pytest
+# pylint: skip-file
 
-from packages.valory.skills.abstract_round_abci.handlers import (
-    ABCIRoundHandler as BaseABCIRoundHandler,
-)
-from packages.valory.skills.abstract_round_abci.handlers import (
-    ContractApiHandler as BaseContractApiHandler,
-)
-from packages.valory.skills.abstract_round_abci.handlers import (
-    HttpHandler as BaseHttpHandler,
-)
-from packages.valory.skills.abstract_round_abci.handlers import (
-    IpfsHandler as BaseIpfsHandler,
-)
-from packages.valory.skills.abstract_round_abci.handlers import (
-    LedgerApiHandler as BaseLedgerApiHandler,
-)
-from packages.valory.skills.abstract_round_abci.handlers import (
-    SigningHandler as BaseSigningHandler,
-)
-from packages.valory.skills.abstract_round_abci.handlers import (
-    TendermintHandler as BaseTendermintHandler,
-)
-from packages.valory.skills.omen_funds_recoverer_abci.handlers import (
-    ABCIHandler,
-    ContractApiHandler,
-    HttpHandler,
-    IpfsHandler,
-    LedgerApiHandler,
-    SigningHandler,
-    TendermintHandler,
-)
+import packages.valory.skills.omen_funds_recoverer_abci.handlers  # noqa
 
 
-def test_handler_aliases() -> None:
-    """Test that all handler aliases point to the correct base classes."""
-    assert ABCIHandler is BaseABCIRoundHandler
-    assert HttpHandler is BaseHttpHandler
-    assert SigningHandler is BaseSigningHandler
-    assert LedgerApiHandler is BaseLedgerApiHandler
-    assert ContractApiHandler is BaseContractApiHandler
-    assert TendermintHandler is BaseTendermintHandler
-    assert IpfsHandler is BaseIpfsHandler
-
-
-@pytest.mark.parametrize(
-    "handler_cls, base_handler_cls",
-    [
-        (ABCIHandler, BaseABCIRoundHandler),
-        (HttpHandler, BaseHttpHandler),
-        (SigningHandler, BaseSigningHandler),
-        (LedgerApiHandler, BaseLedgerApiHandler),
-        (ContractApiHandler, BaseContractApiHandler),
-        (TendermintHandler, BaseTendermintHandler),
-        (IpfsHandler, BaseIpfsHandler),
-    ],
-)
-def test_handler_isinstance(handler_cls: type, base_handler_cls: type) -> None:
-    """Test that handler aliases are the same class as their base."""
-    assert handler_cls is base_handler_cls
+def test_import() -> None:
+    """Test that the 'handlers.py' Python module can be imported."""

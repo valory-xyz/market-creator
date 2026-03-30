@@ -18,3 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the omen_funds_recoverer_abci skill."""
+
+from aea.configurations.base import PublicId
+
+PUBLIC_ID = PublicId.from_str("valory/omen_funds_recoverer_abci:0.1.0")

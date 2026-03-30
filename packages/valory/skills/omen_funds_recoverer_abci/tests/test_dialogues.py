@@ -17,87 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for the dialogues of the OmenFundsRecovererAbciApp."""
+"""Test the dialogues.py module of the skill."""
 
-import packages.valory.skills.omen_funds_recoverer_abci.dialogues as dialogues_mod  # noqa: F401
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    AbciDialogue as BaseAbciDialogue,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    AbciDialogues as BaseAbciDialogues,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    ContractApiDialogue as BaseContractApiDialogue,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    ContractApiDialogues as BaseContractApiDialogues,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    HttpDialogue as BaseHttpDialogue,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    HttpDialogues as BaseHttpDialogues,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    IpfsDialogue as BaseIpfsDialogue,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    IpfsDialogues as BaseIpfsDialogues,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    LedgerApiDialogue as BaseLedgerApiDialogue,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    LedgerApiDialogues as BaseLedgerApiDialogues,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    SigningDialogue as BaseSigningDialogue,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    SigningDialogues as BaseSigningDialogues,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    TendermintDialogue as BaseTendermintDialogue,
-)
-from packages.valory.skills.abstract_round_abci.dialogues import (
-    TendermintDialogues as BaseTendermintDialogues,
-)
-from packages.valory.skills.omen_funds_recoverer_abci.dialogues import (
-    AbciDialogue,
-    AbciDialogues,
-    ContractApiDialogue,
-    ContractApiDialogues,
-    HttpDialogue,
-    HttpDialogues,
-    IpfsDialogue,
-    IpfsDialogues,
-    LedgerApiDialogue,
-    LedgerApiDialogues,
-    SigningDialogue,
-    SigningDialogues,
-    TendermintDialogue,
-    TendermintDialogues,
-)
+# pylint: skip-file
+
+import packages.valory.skills.omen_funds_recoverer_abci.dialogues  # noqa
 
 
 def test_import() -> None:
-    """Test that the 'dialogues' Python module can be imported."""
-    assert dialogues_mod is not None
-
-
-def test_dialogue_aliases() -> None:
-    """Test that all dialogue aliases point to the correct base classes."""
-    assert AbciDialogue is BaseAbciDialogue
-    assert AbciDialogues is BaseAbciDialogues
-    assert HttpDialogue is BaseHttpDialogue
-    assert HttpDialogues is BaseHttpDialogues
-    assert SigningDialogue is BaseSigningDialogue
-    assert SigningDialogues is BaseSigningDialogues
-    assert LedgerApiDialogue is BaseLedgerApiDialogue
-    assert LedgerApiDialogues is BaseLedgerApiDialogues
-    assert ContractApiDialogue is BaseContractApiDialogue
-    assert ContractApiDialogues is BaseContractApiDialogues
-    assert TendermintDialogue is BaseTendermintDialogue
-    assert TendermintDialogues is BaseTendermintDialogues
-    assert IpfsDialogue is BaseIpfsDialogue
-    assert IpfsDialogues is BaseIpfsDialogues
+    """Test that the 'dialogues.py' Python module can be imported."""

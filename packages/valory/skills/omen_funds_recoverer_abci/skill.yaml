@@ -7,7 +7,7 @@ description: A reusable ABCI skill that recovers all types of locked funds from 
 license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
-  __init__.py: bafybeie2bxmyb6sh3da5alzzchue6343dxafzv4asernnx4wu5vs3ldc7e
+  __init__.py: bafybeidm34esyjpfz32yvivqqsblkxnvcrm4sr4wlj42ka3ljqa3fowcde
   behaviours/__init__.py: bafybeicqhvq2rz2r22bhd3roxtl3kekrycnvskbzvhenxlrdduvnmgxuoe
   behaviours/base.py: bafybeib332vepqunqjt3jbhbytkqw56q22kvq4bp72iiy3l7o2hao4gycu
   behaviours/build_multisend.py: bafybeigna4az64vq5vizdpdz3sy3dyv2p3p3cgfg26mfbo2y6gquaf2kzi
@@ -30,10 +30,10 @@ fingerprint:
   tests/behaviours/test_remove_liquidity.py: bafybeifcrx3aeaylqqaek6thj2bidyjgjdyyc4prqpru2hxuavb2j5cbba
   tests/behaviours/test_round_behaviour.py: bafybeibndp4ouudfjnbuamm2nhz4ozyxrqbedjh3vmhd5a6j43qqwzjumm
   tests/conftest.py: bafybeidqcv2jyx64csuyqm5hs2l7nshct2lt5iv7ezb63zvedxxchiby2e
-  tests/test_dialogues.py: bafybeien44d7ipfht4xcxybmpjeiw43lwxcsmuik7vqvgnwetpuqorm7wm
-  tests/test_handlers.py: bafybeihkmq7fkgb7tk2ujkoooslk6zm3jv3sxo76rdkaekg2spk7f6bcvu
-  tests/test_models.py: bafybeiht55ylcrzdgno7nsvc3ji4d5vcfd7idjpci7wruf4ldclaizaeme
-  tests/test_payloads.py: bafybeiegpr55vuaijfapdzfnnstxlvrt7nmcbifkutuuwwnk3hf3lchug4
+  tests/test_dialogues.py: bafybeifdyv2ipdzfr4ywhoq5ewzfjfih7w4llb4lsvoitrbecz7obgxgxi
+  tests/test_handlers.py: bafybeifd2zwao77y6d7pudekwu5u2xd36tlpilcs3v3tq7z5tguken6caq
+  tests/test_models.py: bafybeia53lruunpoiuv4onhdln4dm6i2khgaw3idhj7acsz2oqr22yejvm
+  tests/test_payloads.py: bafybeibm7dmckzkx4pdll25avhgqxaet7hyrtcyxlnmwljv6umxqg3rbsm
   tests/test_rounds.py: bafybeidz7ga4syp2vjirlgs7r7e7zy5uxjvuyxv3xgyqpylwirdbcy3tnm
 fingerprint_ignore_patterns: []
 connections: []
