@@ -1265,3 +1265,4 @@ packages/valory/
 3. ~~**Should SyncLockedFundsRound do ALL queries or delegate discovery to each round?**~~ **RESOLVED**: Each round does its own discovery (self-contained subgraph queries). Subgraph queries are fast (<1s) for safe-filtered results, so the overhead is negligible.
 
 4. ~~**How to handle TxSettlement routing when both fund_recovery and the action skill produce txs?**~~ **RESOLVED**: The tx accumulation pattern eliminates this problem. Recovery produces ONE multisend, so the parent's PostTransaction only needs one `tx_submitter` string check. No PostRecoveryRound or shared router needed.
+
