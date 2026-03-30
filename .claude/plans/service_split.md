@@ -133,13 +133,13 @@ RemoveLiquidity -> RedeemPositions -> ClaimBonds -> BuildMultisend
 ScanMarkets
   |
   v
-PrepareResolutions --DONE--> [MechInteract] -.
-  |--- NO_TX ------.                         |
-  v                 |                         |
-SubmitResolutions <-+-------------------------'
+EvaluateAnswers ---DONE---> [MechInteract] -.
+  |--- NONE -------.                         |
+  v                |                         |
+BuildChallengesTx <+-------------------------'
   |
   v
-SubmitResolutions ---DONE---> [TxSettlement] -> PostResolution
+BuildChallengesTx ---DONE---> [TxSettlement] -> CleanupTracking
   |--- NO_TX ------.                               |
   v                 |                               |
 [FinishedNoTx] <----+-------------------------------'
@@ -154,7 +154,7 @@ Background: TerminationAbci
 
 **Key observations:**
 - Both services have the IDENTICAL `omen_funds_recoverer_abci` block. The market creator won't typically have Realitio bonds (it doesn't answer questions), so ClaimBonds produces no txs. The resolver won't typically have LP tokens, so RemoveLiquidity produces no txs. Each round's subgraph query returns empty and it appends nothing to `funds_recovery_txs`. If no round finds work, BuildMultisend sees an empty list and emits NONE (no TxSettlement needed).
-- The resolver's `PrepareResolutions -> [MechInteract] -> SubmitResolutions` is a single linear path. ScanMarkets classifies everything (new answers, challenges, escalations) upfront. PrepareResolutions builds Mech requests for all of them. SubmitResolutions builds `submitAnswer` transactions for all -- answering and challenging are the SAME Realitio call, just with different bond amounts.
+- The resolver's `ScanMarkets -> EvaluateAnswers -> [MechInteract] -> BuildChallengesTx -> CleanupTracking` is a linear path. ScanMarkets classifies markets by whitelist. EvaluateAnswers builds Mech requests for non-whitelisted answers. BuildChallengesTx compares Mech responses and builds `submitAnswer` txs for disagreements. Answering and challenging are the SAME Realitio call, just with different bond amounts.
 
 ---
 
@@ -312,7 +312,7 @@ collateral_tokens_contract: "0x..."         # wxDAI
 | `RedeemWinningsRound` | omen_funds_recoverer_abci -> RedeemPositionsRound |
 | `DepositDaiRound` | Removed (capital management, not recovery) |
 | `GetPendingQuestionsRound` | market_resolution_manager_abci -> ScanMarketsRound |
-| `AnswerQuestionsRound` | market_resolution_manager_abci -> SubmitResolutionsRound |
+| `AnswerQuestionsRound` | market_resolution_manager_abci -> BuildChallengesTxRound |
 | `RedeemBondRound` | omen_funds_recoverer_abci -> ClaimBondsRound (includes withdraw) |
 | `PostTransactionRound` | Recovery routing eliminated (tx accumulation pattern). Creation routing stays as PostCreationRound |
 
@@ -443,132 +443,243 @@ Transition mapping:
 
 ---
 
-## 5. New Skill: `market_resolution_manager_abci`
+## 5. New Skill: `market_resolution_manager_abci` (Watchdog)
 
 ### Purpose
 
-Autonomously resolves Omen prediction markets by:
-1. Discovering markets needing answers (unanswered, incorrectly answered, re-challenged)
-2. Evaluating ALL discovered questions using Mech in a single pass
-3. Submitting answers/challenges to Realitio in a single multisend
+Autonomous market watchdog — monitors Omen prediction markets for incorrect or malicious Realitio answers, and challenges them. Inspired by the manual [watchdog](https://github.com/valory-xyz/watchdog) CLI tool, but fully autonomous as an ABCI skill.
 
-Answering and challenging are the SAME Realitio operation (`submitAnswer`), just with different bond amounts. The FSM treats them identically.
+### Core logic (watchdog flow)
+
+```
+For each cycle:
+
+0. SCAN: Fetch all pending (unfinalized) markets from watched creators
+         (Omen subgraph: creator_in: $watched_addresses, answerFinalizedTimestamp: null)
+
+1. FILTER by latest answerer:
+   - If latest response is from a WHITELISTED address → skip (trusted answer)
+     Whitelist = our safe, market creators, other configurable addresses
+   - If NO answer yet → needs initial answer (standard resolve)
+   - If answer from NON-whitelisted address → needs evaluation (potential attack)
+
+2. EVALUATE via Mech:
+   - Query Mech with the market question + current answer context
+   - Compare Mech's answer vs the on-chain answer:
+
+     a) Mech AGREES with on-chain answer:
+        → Mark as "verified_ok" in local tracking DB
+        → Do NOT challenge — the answer is correct even if from unknown address
+        → Store this verdict locally so we don't re-query Mech on subsequent cycles
+
+     b) Mech DISAGREES with on-chain answer:
+        → Store Mech response + metadata locally
+        → CHALLENGE: build submitAnswer tx with 2x bond and Mech's answer
+
+3. SUBMIT: Build multisend with all challenge txs for this cycle
+
+4. CLEANUP: Purge local tracking DB entries for markets that have been
+   definitively finalized (answerFinalizedTimestamp != null)
+```
+
+### Why this flow matters
+
+The watchdog protects against the attack pattern where an adversary:
+1. Buys cheap outcome tokens on the "wrong" side
+2. Posts a small-bond answer that contradicts market consensus
+3. If unchallenged, the wrong answer finalizes and the attacker profits
+
+By continuously monitoring and challenging, the watchdog:
+- Defends the market creator's LP positions
+- Earns bond profits when challenges succeed (attacker loses their bond)
+- Acts as a "good samaritan" for the ecosystem
+
+### Local tracking database
+
+The skill needs persistent cross-period state to avoid redundant Mech queries:
+
+```python
+# Stored in SynchronizedData (cross_period_persisted_keys)
+verified_markets: Dict[str, VerifiedMarketEntry] = {
+    "question_id_hex": {
+        "verified_at": 1711900000,           # timestamp of verification
+        "on_chain_answer": "0x00...00",      # the answer that was verified as correct
+        "mech_agrees": True,                 # Mech confirmed the answer
+    }
+}
+```
+
+**Lifecycle:**
+- Added when Mech agrees with a non-whitelisted answer (step 2a)
+- Consulted on each scan to skip already-verified markets
+- Purged when the market finalizes (answer accepted, timeout expired)
+- If someone re-challenges a verified market (new answer appears), the entry is invalidated and re-evaluated
+
+### Whitelist rationale
+
+The whitelist avoids unnecessary Mech queries for trusted answerers:
+- **Our own safe**: We trust our own answers
+- **Market creators**: They have skin in the game (LP positions at risk)
+- **Configurable addresses**: Other trusted resolvers in the ecosystem
+
+If a whitelisted address answered, we trust it and move on. Only non-whitelisted answers trigger Mech evaluation.
 
 ### FSM specification
 
 ```
 Rounds:
-  0. ScanMarketsRound
-  1. PrepareResolutionsRound
-  2. SubmitResolutionsRound
-  3. PostResolutionRound
-  4. FinishedWithMechRequestRound     (degenerate -> MechInteract)
-  5. FinishedResolutionWithTxRound    (degenerate -> TxSettlement)
-  6. FinishedResolutionRound          (degenerate -> ResetPause)
+  0. ScanMarketsRound           # scan pending markets, filter by whitelist
+  1. EvaluateAnswersRound       # query Mech for non-whitelisted answers
+  2. BuildChallengesTxRound     # build submitAnswer txs for disagreements
+  3. CleanupTrackingRound       # purge finalized markets from local DB
+  4. FinishedWithMechRequestRound      (degenerate -> MechInteract)
+  5. FinishedWithChallengeTxRound      (degenerate -> TxSettlement)
+  6. FinishedResolutionRound           (degenerate -> ResetPause)
 
 Initial state: ScanMarketsRound
-Initial states: {ScanMarketsRound, SubmitResolutionsRound, PostResolutionRound}
+Initial states: {ScanMarketsRound, BuildChallengesTxRound}
 
 Transition function:
   ScanMarketsRound:
-    DONE          -> PrepareResolutionsRound
-    NONE          -> FinishedResolutionRound       # nothing to do
-    ERROR         -> FinishedResolutionRound
+    DONE          -> EvaluateAnswersRound     # found markets needing evaluation
+    NONE          -> CleanupTrackingRound     # nothing to evaluate this cycle
     NO_MAJORITY   -> ScanMarketsRound
     ROUND_TIMEOUT -> ScanMarketsRound
 
-  PrepareResolutionsRound:
-    DONE          -> FinishedWithMechRequestRound   # -> MechInteract -> SubmitResolutions
-    NO_TX         -> FinishedResolutionRound        # escalations only, no mech needed
-    ERROR         -> FinishedResolutionRound
-    NO_MAJORITY   -> FinishedResolutionRound
-    ROUND_TIMEOUT -> FinishedResolutionRound
+  EvaluateAnswersRound:
+    DONE          -> FinishedWithMechRequestRound  # -> MechInteract -> BuildChallenges
+    NONE          -> CleanupTrackingRound           # all verified ok, nothing to challenge
+    NO_MAJORITY   -> CleanupTrackingRound
+    ROUND_TIMEOUT -> CleanupTrackingRound
 
-  SubmitResolutionsRound:
-    DONE          -> FinishedResolutionWithTxRound  # -> TxSettlement -> PostResolution
-    NO_TX         -> FinishedResolutionRound        # mech said don't answer/challenge
-    ERROR         -> FinishedResolutionRound
-    NO_MAJORITY   -> FinishedResolutionRound
-    ROUND_TIMEOUT -> FinishedResolutionRound
+  BuildChallengesTxRound:
+    DONE          -> FinishedWithChallengeTxRound  # -> TxSettlement -> Cleanup
+    NONE          -> CleanupTrackingRound           # Mech agreed with all, no challenges
+    NO_MAJORITY   -> CleanupTrackingRound
+    ROUND_TIMEOUT -> CleanupTrackingRound
 
-  PostResolutionRound:
+  CleanupTrackingRound:
     DONE          -> FinishedResolutionRound
-    ERROR         -> FinishedResolutionRound
-    NO_MAJORITY   -> PostResolutionRound
-    NONE          -> PostResolutionRound
+    NO_MAJORITY   -> FinishedResolutionRound
+    ROUND_TIMEOUT -> FinishedResolutionRound
 ```
 
-### Linearized flow diagram
+### Flow diagram
 
 ```
-ScanMarkets ──DONE──> PrepareResolutions ──DONE──> [MechInteract]
-    |                       |                            |
-    |--NONE--> [Done]       |--NO_TX--> [Done]           |
-                                                         v
-                                                  SubmitResolutions
-                                                         |
-                                              ──DONE──> [TxSettlement]
-                                                         |
-                                                         v
-                                                   PostResolution
-                                                         |
-                                                         v
-                                                      [Done]
+ScanMarkets ──DONE──► EvaluateAnswers ──DONE──► [MechInteract]
+    |                       |                         |
+    |──NONE──┐              |──NONE──┐                v
+             |                       |         BuildChallengesTx
+             |                       |                |
+             |                       |     ──DONE──► [TxSettlement]
+             |                       |                |
+             v                       v                v
+         CleanupTracking ◄────────────────────────────┘
+             |
+             v
+       [FinishedResolution]
 ```
 
 ### Round details
 
 #### `ScanMarketsRound`
-- **Adapted from**: current `GetPendingQuestionsBehaviour` (expanded scope)
-- **Purpose**: Discover ALL markets needing resolution attention in a single pass
-- **Queries**:
-  1. **Omen subgraph** -- markets past openingTimestamp, answer not finalized, no bond posted yet (need initial answer)
-  2. **Omen subgraph** -- markets with existing answers where we haven't yet evaluated (potential challenges)
-  3. **Realitio subgraph** -- questions where WE are a previous answerer but someone else posted a newer answer (we've been challenged / re-challenged)
-- **Configurable scope**:
-  - `resolution_scope: "own" | "all"` -- track specific creators or any Omen market
-  - `creator_addresses: List[str]` -- creator safe addresses to track (if scope is "own")
-  - `min_market_liquidity: int` -- minimum liquidity to consider a market worth resolving
-- **Classification** (all stored in SynchronizedData, processed linearly later):
-  - `questions_to_answer: List[Dict]` -- unanswered questions
-  - `questions_to_evaluate: List[Dict]` -- existing answers to check via Mech
-  - `questions_to_escalate: List[Dict]` -- we've been re-challenged, need to re-assert or abandon
-- **Priority**: Escalations first (time-sensitive, bonds at risk), then challenges, then new answers
-- **Events**: `DONE` (work found), `NONE` (nothing to do), `ERROR`
 
-#### `PrepareResolutionsRound`
-- **Adapted from**: current `GetPendingQuestionsBehaviour` (Mech prep portion)
-- **Purpose**: Build Mech metadata requests for ALL questions that need AI evaluation
-- **Logic**:
-  1. Read classified questions from SynchronizedData
-  2. Check safe balance -- enough xDAI for all planned bonds?
-  3. Apply retry policy (exponential backoff via `answer_retry_intervals`)
-  4. For each question to answer: build standard Mech request (same as current)
-  5. For each question to evaluate (challenge candidate): build Mech request with added context (current answer, current bond, market data)
-  6. For escalations where we already know our answer: either skip Mech (emit NO_TX to go directly to SubmitResolutions) or re-evaluate with Mech for safety
-  7. Combine into single mech_requests list
-- **Events**: `DONE` (mech requests ready), `NO_TX` (only escalations, skip Mech), `ERROR`
+**Purpose**: Discover pending markets from watched creators and classify by answerer.
 
-#### `SubmitResolutionsRound`
-- **Adapted from**: current `AnswerQuestionsBehaviour`
-- **Purpose**: Build `submitAnswer` transactions for ALL resolution actions
-- **Logic**:
-  1. Parse mech_responses (or escalation data from SynchronizedData)
-  2. For each question:
-     - **New answer**: `submitAnswer(question_id, answer, 0)` with `value = initial_bond`
-     - **Challenge**: `submitAnswer(question_id, our_answer, current_bond)` with `value = 2 * current_bond`
-       - Only if Mech disagrees with existing answer AND confidence >= threshold
-     - **Escalation**: `submitAnswer(question_id, our_answer, current_bond)` with `value = 2 * current_bond`
-       - Only if bond < `max_challenge_bond` AND Mech still agrees with our answer
-     - **Abandon**: skip -- Mech changed its mind, don't re-escalate
-  3. Unwrap wxDAI to xDAI if needed for bond payments
-  4. Build multisend: [unwrap txs] + [submitAnswer txs]
-- **Events**: `DONE` (tx ready), `NO_TX` (Mech said skip all), `ERROR`
+**Queries** (Omen + Realitio subgraphs):
 
-#### `PostResolutionRound`
-- **Purpose**: Handle post-tx effects (e.g., update shared state tracking)
-- **Logic**: Mark answered/challenged questions in shared state to avoid re-processing
-- **Events**: `DONE`, `ERROR`
+```graphql
+# Omen subgraph: unfinalized markets from watched creators
+fixedProductMarketMakers(
+  where: {
+    creator_in: $watched_addresses
+    openingTimestamp_lt: $now
+    answerFinalizedTimestamp: null
+  }
+) {
+  id, currentAnswer, question { id, currentAnswerBond, timeout }
+  outcomeTokenMarginalPrices
+}
+```
+
+Then for each answered market, fetch latest responder from Realitio subgraph.
+
+**Classification logic:**
+
+```
+for each pending market:
+    if no answer yet:
+        → add to questions_to_answer (standard resolve, needs Mech)
+    elif latest_answerer in whitelist:
+        → skip (trusted)
+    elif question_id in verified_markets AND on_chain_answer == verified_answer:
+        → skip (already verified by Mech in a previous cycle)
+    else:
+        → add to questions_to_evaluate (needs Mech evaluation)
+```
+
+**Whitelist**: `whitelist_addresses: List[str]` — configurable list containing:
+
+- Our own safe address (auto-included)
+- Market creator addresses
+- Other trusted resolver addresses
+
+**Events**: `DONE` (found markets needing Mech), `NONE` (nothing to evaluate)
+
+#### `EvaluateAnswersRound`
+
+**Purpose**: Build Mech requests for markets that need AI evaluation.
+
+**Logic:**
+
+1. Read `questions_to_answer` and `questions_to_evaluate` from SynchronizedData
+2. For new answers: build standard Mech request (question text only)
+3. For challenges: build Mech request with context (current answer, bond, market odds)
+4. Combine into `mech_requests` list
+5. If list is empty (all were filtered by whitelist/verification) → NONE
+
+**Events**: `DONE` (mech requests ready → MechInteract), `NONE` (nothing to evaluate)
+
+#### `BuildChallengesTxRound`
+
+**Purpose**: After MechInteract returns, compare Mech answers with on-chain answers and build challenge txs.
+
+**Logic:**
+
+```
+for each mech_response:
+    if question was unanswered:
+        → build submitAnswer(question_id, mech_answer, 0) with value = initial_bond
+
+    elif mech_answer AGREES with on_chain_answer:
+        → add to verified_markets (local tracking DB)
+        → do NOT challenge
+
+    elif mech_answer DISAGREES with on_chain_answer:
+        → store mech_response in local tracking DB
+        → check economic viability:
+            - required_bond = 2 * current_bond
+            - if required_bond > max_challenge_bond → skip (too expensive)
+            - if safe balance < required_bond → skip (insufficient funds)
+        → build submitAnswer(question_id, mech_answer, current_bond) with value = 2x bond
+```
+
+**Bond amounts**: All `submitAnswer` calls use native xDAI as `msg.value`. If safe holds wxDAI, unwrap first.
+
+**Events**: `DONE` (challenge txs built → TxSettlement), `NONE` (Mech agreed with all answers)
+
+#### `CleanupTrackingRound`
+
+**Purpose**: Purge finalized markets from `verified_markets` local DB.
+
+**Logic:**
+
+1. Query Omen subgraph for markets in `verified_markets` that now have `answerFinalizedTimestamp != null`
+2. Remove those entries from `verified_markets`
+3. This keeps the DB bounded — only tracks active/pending markets
+
+**Events**: `DONE` (always — cleanup is best-effort)
 
 ### Composed app: `market_resolver_abci`
 
@@ -577,10 +688,10 @@ Composition chain:
   AgentRegistrationAbciApp
   -> IdentifyServiceOwnerAbciApp
   -> FundsForwarderAbciApp
-  -> FundRecoveryAbciApp                  # shared skill (same as market creator)
-  -> MarketResolutionManagerAbciApp       # NEW: resolution + challenge
+  -> OmenFundsRecovererAbciApp             # shared skill (same as market creator)
+  -> MarketResolutionManagerAbciApp        # watchdog: scan + evaluate + challenge
   -> TransactionSettlementAbciApp
-  -> MechInteractAbciApp                  # needed for AI evaluation
+  -> MechInteractAbciApp                   # needed for AI evaluation
   -> ResetPauseAbciApp
   + TerminationAbciApp (background)
 
@@ -591,17 +702,17 @@ Transition mapping:
   FinishedFundsForwarderWithTxRound       -> TxSettlement
   FinishedFundsForwarderNoTxRound         -> RemoveLiquidityRound
 
-  # Fund recovery -> single multisend -> TxSettlement -> PostTransaction
+  # Fund recovery
   FinishedWithRecoveryTxRound             -> TxSettlement
   FinishedWithoutRecoveryTxRound          -> ScanMarketsRound
 
-  # Resolution: prepare -> mech -> submit -> settle -> post
+  # Watchdog: scan -> evaluate -> mech -> build challenges -> settle -> cleanup
   FinishedWithMechRequestRound            -> MechVersionDetectionRound
-  FinishedMechResponseRound               -> SubmitResolutionsRound
-  FinishedMechRequestSkipRound            -> ScanMarketsRound
-  FinishedMechResponseTimeoutRound        -> ScanMarketsRound
-  FinishedResolutionWithTxRound           -> TxSettlement
-  FinishedTransactionSubmissionRound      -> PostResolutionRound
+  FinishedMechResponseRound               -> BuildChallengesTxRound
+  FinishedMechRequestSkipRound            -> CleanupTrackingRound
+  FinishedMechResponseTimeoutRound        -> CleanupTrackingRound
+  FinishedWithChallengeTxRound            -> TxSettlement
+  FinishedTransactionSubmissionRound      -> CleanupTrackingRound
 
   # Done
   FinishedResolutionRound                 -> ResetAndPauseRound
@@ -621,7 +732,7 @@ Realitio's `submitAnswer(question_id, answer, max_previous)` is the same call fo
 | **Challenge** | Our different answer | current_bond | >= 2x current_bond |
 | **Re-escalation** | Same answer as before | current_bond | >= 2x current_bond |
 
-The only difference is the Mech prompt context and the bond amount. The FSM doesn't need branching -- ScanMarkets classifies upfront, PrepareResolutions builds appropriate Mech requests, SubmitResolutions builds appropriate txs. All linear.
+The only difference is the Mech prompt context and the bond amount. The FSM doesn't need branching — ScanMarkets classifies upfront, EvaluateAnswers builds appropriate Mech requests, BuildChallengesTx builds the submitAnswer txs. All linear.
 
 ### Fraud detection and challenge strategy
 
@@ -646,9 +757,9 @@ The attack is economically rational because:
 
 This is the primary adversarial scenario the market resolver must defend against.
 
-#### What ScanMarketsRound must detect
+#### What ScanMarketsRound detects
 
-ScanMarketsRound queries the Omen subgraph for markets with existing answers and classifies them. For fraud detection, it needs to identify **suspicious answers** -- answers that contradict market consensus. The key signals:
+ScanMarketsRound queries the Omen subgraph for pending markets from watched creators with existing answers. It classifies them by checking the latest answerer against the whitelist. For non-whitelisted answers, the following signals help prioritize:
 
 **Signal 1: Answer contradicts market odds**
 
@@ -713,7 +824,7 @@ Questions close to finalization with suspicious answers are highest priority. If
 
 #### Classification output
 
-ScanMarketsRound produces a prioritized list in SynchronizedData:
+ScanMarketsRound produces a prioritized list of markets needing evaluation in SynchronizedData:
 
 ```python
 questions_to_resolve: List[Dict] = [
@@ -740,9 +851,9 @@ Priority ordering:
 3. **Normal challenges** -- suspicious answer, time remaining
 4. **New answers** -- unanswered questions
 
-#### Economic decision in PrepareResolutionsRound
+#### Economic decision in BuildChallengesTxRound
 
-Before building a challenge Mech request, PrepareResolutionsRound evaluates whether the challenge is economically justified:
+Before building a challenge tx, BuildChallengesTxRound evaluates whether the challenge is economically justified:
 
 ```
 Challenge cost   = required_bond (risk: lose if we're wrong)
@@ -765,11 +876,24 @@ But if bond has been escalated to 200 xDAI and LP exposure is only 50 xDAI:
 - Ratio: (50 + 200) / 400 = 0.625 -- questionable, depends on confidence
 
 Configuration:
+
 ```yaml
+# Watchdog scope
+watched_addresses: []                 # market creator safe addresses to monitor
+whitelist_addresses: []               # trusted answerers (our safe auto-included)
+
+# Challenge economics
 min_odds_divergence: 0.4              # minimum gap between answer and market odds
 min_challenge_ratio: 1.5              # minimum (protected + profit) / cost
-max_challenge_bond: 100000000000000000000  # 100 xDAI absolute cap
+max_challenge_bond: 100000000000000000000  # 100 xDAI absolute cap (wei)
 escalation_timeout_buffer: 7200       # 2 hours -- must act if less time remaining
+
+# Answering
+realitio_answer_question_bond: 10000000000000000000  # 10 xDAI initial bond (wei)
+mech_tool_resolve_market: "resolve-market-reasoning-gpt-4.1"
+
+# Escalation
+max_escalation_rounds: 5              # max re-escalations per question
 ```
 
 #### Bond escalation war
@@ -792,7 +916,7 @@ total_exposure = initial_challenge * (2^N - 1)
 
 The resolver's strategy for escalation wars:
 
-1. **Re-evaluate each round**: When re-challenged (detected by ScanMarketsRound as `action: "escalate"`), PrepareResolutionsRound re-evaluates via Mech. If new evidence changes the picture, the resolver can ABANDON (accept the bond loss rather than throw good money after bad).
+1. **Re-evaluate each round**: When re-challenged (detected by ScanMarketsRound as non-whitelisted new answer on a previously verified market), EvaluateAnswersRound re-evaluates via Mech. If new evidence changes the picture, the resolver can ABANDON (accept the bond loss rather than throw good money after bad). The `verified_markets` entry is invalidated and re-evaluated fresh.
 
 2. **Bond cap enforcement**: If the next required bond exceeds `max_challenge_bond`, the resolver stops escalating. The attacker "wins" the bond war but has also committed significant capital.
 
@@ -823,7 +947,7 @@ Cycle 1:
                time_remaining = 48h
                --> classified as challenge, urgency=medium
 
-  PrepareResolutions: builds Mech request with context:
+  EvaluateAnswers: builds Mech request with context:
     "Question: Will BTC hit $100k by March?
      Current answer: No (10 xDAI bond)
      Market consensus: 82% Yes
@@ -832,7 +956,7 @@ Cycle 1:
     Economic check: LP exposure 300 xDAI, challenge cost 20 xDAI
     Ratio: (300 + 10) / 20 = 15.5 -- proceed
 
-  SubmitResolutions: submitAnswer("Yes", max_previous=10 xDAI) with value=20 xDAI
+  BuildChallengesTx: submitAnswer("Yes", max_previous=10 xDAI) with value=20 xDAI
 
 Cycle 2:
   FundRecovery: nothing new to recover
@@ -845,12 +969,12 @@ Cycle 3:
                time_remaining = 36h
                --> classified as escalate, urgency=medium
 
-  PrepareResolutions: re-evaluates via Mech
+  EvaluateAnswers: re-evaluates via Mech
     Mech returns: disagree, confidence=0.93, "BTC hit $100.2k yesterday"
     Bond needed: 80 xDAI. Max bond: 100 xDAI. Within limits.
     Economic check: (300 + 50) / 80 = 4.4 -- proceed
 
-  SubmitResolutions: submitAnswer("Yes", max_previous=40 xDAI) with value=80 xDAI
+  BuildChallengesTx: submitAnswer("Yes", max_previous=40 xDAI) with value=80 xDAI
 
 Cycle 4:
   ScanMarkets: no re-challenge. Timeout expires. "Yes" finalizes.
@@ -1047,13 +1171,14 @@ packages/valory/
 1. Create skill scaffold
 2. Port answering logic:
    - ScanMarketsRound (from GetPendingQuestionsBehaviour, expanded)
-   - PrepareResolutionsRound (from GetPendingQuestionsBehaviour mech prep)
-   - SubmitResolutionsRound (from AnswerQuestionsBehaviour)
-   - PostResolutionRound
-3. Add challenge/escalation logic within the same linear rounds:
-   - ScanMarketsRound: add challenge/escalation discovery queries
-   - PrepareResolutionsRound: add challenge-evaluation Mech prompts
-   - SubmitResolutionsRound: add challenge bond calculation
+   - EvaluateAnswersRound (builds Mech requests for non-whitelisted answers)
+   - BuildChallengesTxRound (compares Mech vs on-chain, builds challenge txs)
+   - CleanupTrackingRound (purges finalized markets from local DB)
+3. Implement watchdog logic:
+   - ScanMarketsRound: whitelist filtering, verified_markets lookup
+   - EvaluateAnswersRound: Mech request building with answer context
+   - BuildChallengesTxRound: Mech comparison, economic checks, bond calculation
+   - CleanupTrackingRound: prune finalized entries from verified_markets
 4. Define FSM specification, validate
 5. Write full test suite (100% coverage)
 
