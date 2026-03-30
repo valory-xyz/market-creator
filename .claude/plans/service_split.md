@@ -9,7 +9,7 @@ The goal is to split into **two independent services** that can run on separate 
 1. **Market Creator** -- creates prediction markets, manages LP positions
 2. **Market Resolver** -- answers questions, challenges incorrect answers, manages Realitio bonds
 
-Plus a **shared `fund_recovery_abci` skill** that both services use to recover ALL types of locked funds (LP tokens, conditional tokens, Realitio bonds, xDAI wrapping). Fund recovery runs FIRST in each cycle, so services always operate with maximum available capital.
+Plus a **shared `omen_funds_recoverer_abci` skill** (IMPLEMENTED) that both services use to recover ALL types of locked funds (LP tokens, conditional tokens, Realitio bonds). Fund recovery runs FIRST in each cycle, so services always operate with maximum available capital. Uses a tx accumulation pattern — 3 recovery rounds append tx dicts, then BuildMultisend bundles them into one safe multisend.
 
 ---
 
@@ -43,9 +43,9 @@ PrepareTransaction -> [Tx] -> PostTransaction -> Reset
 
 ### Design principles
 
-1. **Linear FSMs only** -- no conditional branching. Every round either produces a tx (routes through TxSettlement + PostTx, then returns to the next round) or skips (NO_TX -> next round directly).
+1. **Linear FSMs only** -- no conditional branching. Every round either produces a tx (routes through TxSettlement + PostTx, then returns to the next round) or skips (NONE -> next round directly).
 2. **Recovery first, action second** -- each cycle starts by recovering ALL types of locked funds, THEN does the service-specific work (create markets or resolve questions). This ensures maximum capital is available for the action phase.
-3. **One shared skill for ALL fund recovery** -- `fund_recovery_abci` handles LP tokens, conditional tokens, Realitio bonds, and xDAI wrapping. Both services compose it. Rounds that find nothing to do emit NO_TX and the FSM advances to the next round.
+3. **One shared skill for ALL fund recovery** -- `omen_funds_recoverer_abci` handles LP tokens, conditional tokens, and Realitio bonds. Both services compose it. Recovery rounds accumulate tx dicts into `funds_recovery_txs`, then a final `BuildMultisendRound` bundles them into a single safe multisend. **Only one TxSettlement round trip per cycle** (not one per recovery type). DepositDai (xDAI wrapping) is excluded -- it's capital management, not recovery.
 4. **Separate safes** -- each service runs its own Gnosis Safe with its own budget.
 
 ### Full composed FSMs
@@ -62,40 +62,15 @@ IdentifyServiceOwner
 FundsForwarder -(Tx?)-> [TxSettlement]
   |
   v
-========================= fund_recovery_abci =========================
+================= omen_funds_recoverer_abci ====================
   |
-SyncLockedFunds
+RemoveLiquidity -> RedeemPositions -> ClaimBonds -> BuildMultisend
+  (each round accumulates tx dicts into funds_recovery_txs;
+   BuildMultisend bundles them into ONE safe multisend)
   |
-  v
-RemoveLiquidity ----DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-RedeemPositions <---+------------------------------------------'
-  |
-  v
-RedeemPositions ----DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-ClaimBonds <--------+------------------------------------------'
-  |
-  v
-ClaimBonds ---------DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-WithdrawBonds <-----+------------------------------------------'
-  |
-  v
-WithdrawBonds ------DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-DepositDai <--------+------------------------------------------'
-  |
-  v
-DepositDai ---------DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-[FinishedRecovery] <+------------------------------------------'
-  |
+  |-- FinishedWithRecoveryTx --> [TxSettlement] --> PostTransaction
+  |-- FinishedWithoutRecoveryTx -.
+  |                               |
 ===================================================================
   |
   v
@@ -141,40 +116,15 @@ IdentifyServiceOwner
 FundsForwarder -(Tx?)-> [TxSettlement]
   |
   v
-========================= fund_recovery_abci =========================
+================= omen_funds_recoverer_abci ====================
   |
-SyncLockedFunds
+RemoveLiquidity -> RedeemPositions -> ClaimBonds -> BuildMultisend
+  (each round accumulates tx dicts into funds_recovery_txs;
+   BuildMultisend bundles them into ONE safe multisend)
   |
-  v
-RemoveLiquidity ----DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-RedeemPositions <---+------------------------------------------'
-  |
-  v
-RedeemPositions ----DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-ClaimBonds <--------+------------------------------------------'
-  |
-  v
-ClaimBonds ---------DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-WithdrawBonds <-----+------------------------------------------'
-  |
-  v
-WithdrawBonds ------DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-DepositDai <--------+------------------------------------------'
-  |
-  v
-DepositDai ---------DONE----> [TxSettlement] -> PostRecovery -.
-  |--- NO_TX ------.                                          |
-  v                 |                                          |
-[FinishedRecovery] <+------------------------------------------'
-  |
+  |-- FinishedWithRecoveryTx --> [TxSettlement] --> PostTransaction
+  |-- FinishedWithoutRecoveryTx -.
+  |                               |
 ===================================================================
   |
   v
@@ -203,232 +153,137 @@ Background: TerminationAbci
 ```
 
 **Key observations:**
-- Both services have the IDENTICAL `fund_recovery_abci` block. The market creator won't typically have Realitio bonds (it doesn't answer questions), so ClaimBonds and WithdrawBonds emit NO_TX and skip. The resolver won't typically have LP tokens, so RemoveLiquidity and RedeemPositions emit NO_TX and skip. But the rounds are there -- if somehow a service accumulates unexpected fund types, they get recovered.
+- Both services have the IDENTICAL `omen_funds_recoverer_abci` block. The market creator won't typically have Realitio bonds (it doesn't answer questions), so ClaimBonds produces no txs. The resolver won't typically have LP tokens, so RemoveLiquidity produces no txs. Each round's subgraph query returns empty and it appends nothing to `funds_recovery_txs`. If no round finds work, BuildMultisend sees an empty list and emits NONE (no TxSettlement needed).
 - The resolver's `PrepareResolutions -> [MechInteract] -> SubmitResolutions` is a single linear path. ScanMarkets classifies everything (new answers, challenges, escalations) upfront. PrepareResolutions builds Mech requests for all of them. SubmitResolutions builds `submitAnswer` transactions for all -- answering and challenging are the SAME Realitio call, just with different bond amounts.
 
 ---
 
-## 3. Shared Skill: `fund_recovery_abci`
+## 3. Shared Skill: `omen_funds_recoverer_abci` (IMPLEMENTED)
+
+> **Status:** Implemented and tested (170 tests). See `.claude/plans/omen_funds_recoverer.md` for the detailed v3 plan.
 
 ### Purpose
 
 A reusable skill that recovers ALL types of locked funds from an Omen prediction market safe. Runs first in every cycle to maximize available capital for subsequent rounds.
 
-### FSM specification
+### Key design change from original plan
+
+The original plan had each recovery round producing its own tx and going through TxSettlement separately, requiring a PostRecovery router. This was replaced with a **tx accumulation pattern**:
+
+- 3 recovery rounds (RemoveLiquidity, RedeemPositions, ClaimBonds) each query their own subgraph and append tx dicts to `funds_recovery_txs` in SynchronizedData
+- A final `BuildMultisendRound` bundles everything into ONE safe multisend
+- **One TxSettlement round trip per cycle** instead of up to 3
+- **No PostRecovery router** — eliminates the `tx_submitter` string coupling with the parent app
+- **Single initial state, 2 final states** — trivial composition
+- **DepositDai excluded** — capital management, not recovery
+- **No wxDAI unwrap** — recovered funds stay as wxDAI in the safe
+
+### FSM specification (v3 — as implemented)
 
 ```
 Rounds:
-  0. SyncLockedFundsRound
-  1. RemoveLiquidityRound
-  2. RedeemPositionsRound
-  3. ClaimBondsRound
-  4. WithdrawBondsRound
-  5. DepositDaiRound
-  6. PostRecoveryRound
-  7. FinishedRecoveryWithTxRound  (degenerate -> TxSettlement in composition)
-  8. FinishedRecoveryRound        (degenerate -> next skill in composition)
+  0. RemoveLiquidityRound       (accumulates txs)
+  1. RedeemPositionsRound       (accumulates txs)
+  2. ClaimBondsRound            (accumulates txs)
+  3. BuildMultisendRound        (bundles all into one safe multisend)
+  4. FinishedWithRecoveryTxRound   (degenerate -> TxSettlement in composition)
+  5. FinishedWithoutRecoveryTxRound (degenerate -> next skill in composition)
 
-Initial state: SyncLockedFundsRound
-Initial states: {SyncLockedFundsRound, PostRecoveryRound}
+Initial state: RemoveLiquidityRound
+Initial states: {RemoveLiquidityRound}
 
 Transition function:
-  SyncLockedFundsRound:
-    DONE          -> RemoveLiquidityRound
-    ERROR         -> FinishedRecoveryRound       # skip recovery, proceed to action
-    NO_MAJORITY   -> SyncLockedFundsRound
-    ROUND_TIMEOUT -> SyncLockedFundsRound
-
   RemoveLiquidityRound:
-    DONE          -> FinishedRecoveryWithTxRound  # -> TxSettlement -> PostRecovery
-    NO_TX         -> RedeemPositionsRound          # skip, next round
-    ERROR         -> RedeemPositionsRound
+    DONE          -> RedeemPositionsRound
     NO_MAJORITY   -> RedeemPositionsRound
     ROUND_TIMEOUT -> RedeemPositionsRound
 
   RedeemPositionsRound:
-    DONE          -> FinishedRecoveryWithTxRound
-    NO_TX         -> ClaimBondsRound
-    ERROR         -> ClaimBondsRound
+    DONE          -> ClaimBondsRound
     NO_MAJORITY   -> ClaimBondsRound
     ROUND_TIMEOUT -> ClaimBondsRound
 
   ClaimBondsRound:
-    DONE          -> FinishedRecoveryWithTxRound
-    NO_TX         -> WithdrawBondsRound
-    ERROR         -> WithdrawBondsRound
-    NO_MAJORITY   -> WithdrawBondsRound
-    ROUND_TIMEOUT -> WithdrawBondsRound
+    DONE          -> BuildMultisendRound
+    NO_MAJORITY   -> BuildMultisendRound
+    ROUND_TIMEOUT -> BuildMultisendRound
 
-  WithdrawBondsRound:
-    DONE          -> FinishedRecoveryWithTxRound
-    NO_TX         -> DepositDaiRound
-    ERROR         -> DepositDaiRound
-    NO_MAJORITY   -> DepositDaiRound
-    ROUND_TIMEOUT -> DepositDaiRound
-
-  DepositDaiRound:
-    DONE          -> FinishedRecoveryWithTxRound
-    NO_TX         -> FinishedRecoveryRound
-    ERROR         -> FinishedRecoveryRound
-    NO_MAJORITY   -> FinishedRecoveryRound
-    ROUND_TIMEOUT -> FinishedRecoveryRound
-
-  PostRecoveryRound:
-    REMOVE_LIQUIDITY_DONE  -> RedeemPositionsRound
-    REDEEM_POSITIONS_DONE  -> ClaimBondsRound
-    CLAIM_BONDS_DONE       -> WithdrawBondsRound
-    WITHDRAW_BONDS_DONE    -> DepositDaiRound
-    DEPOSIT_DAI_DONE       -> FinishedRecoveryRound
-    ERROR                  -> FinishedRecoveryRound
-    NO_MAJORITY            -> PostRecoveryRound
-    NONE                   -> PostRecoveryRound
+  BuildMultisendRound:
+    DONE          -> FinishedWithRecoveryTxRound
+    NONE          -> FinishedWithoutRecoveryTxRound
+    NO_MAJORITY   -> FinishedWithoutRecoveryTxRound
+    ROUND_TIMEOUT -> FinishedWithoutRecoveryTxRound
 ```
 
-### Linearized flow diagram
+### Flow diagram
 
 ```
-SyncLockedFunds ─────────────────────────────────────────────────────────────────
-       │
-       v
-RemoveLiquidity ──DONE──> [Tx] ─> PostRecovery(REMOVE_DONE) ──┐
-       │                                                        │
-       │──NO_TX──┐                                              │
-       v         │                                              │
-RedeemPositions <┴──────────────────────────────────────────────┘
-       │
-       v
-RedeemPositions ──DONE──> [Tx] ─> PostRecovery(REDEEM_DONE) ──┐
-       │                                                        │
-       │──NO_TX──┐                                              │
-       v         │                                              │
-ClaimBonds <─────┴──────────────────────────────────────────────┘
-       │
-       v
-ClaimBonds ───────DONE──> [Tx] ─> PostRecovery(CLAIM_DONE) ───┐
-       │                                                        │
-       │──NO_TX──┐                                              │
-       v         │                                              │
-WithdrawBonds <──┴──────────────────────────────────────────────┘
-       │
-       v
-WithdrawBonds ────DONE──> [Tx] ─> PostRecovery(WITHDRAW_DONE) ┐
-       │                                                        │
-       │──NO_TX──┐                                              │
-       v         │                                              │
-DepositDai <─────┴──────────────────────────────────────────────┘
-       │
-       v
-DepositDai ───────DONE──> [Tx] ─> PostRecovery(DEPOSIT_DONE) ─┐
-       │                                                        │
-       │──NO_TX──┐                                              │
-       v         │                                              │
-[FinishedRecovery] <────────────────────────────────────────────┘
+RemoveLiquidity ──► RedeemPositions ──► ClaimBonds ──► BuildMultisend
+  (accumulates       (accumulates        (accumulates     (bundles all
+   LP removal txs)    resolve+redeem)     claim+withdraw)  into 1 multisend)
+                                                              │
+                                                    ┌─────────┴──────────┐
+                                                    v                    v
+                                          FinishedWithTx      FinishedWithoutTx
+                                          (→ TxSettlement)    (→ next skill)
 ```
 
-Every round follows the same pattern: check if work exists -> if yes, build tx and route through TxSettlement -> PostRecovery routes to the next round. If no work, skip directly to the next round.
+Each recovery round queries its own subgraph, builds raw tx dicts, and appends them to `funds_recovery_txs`. BuildMultisend reads the accumulated list and bundles into one safe multisend. Only one TxSettlement round trip per cycle.
 
 ### Round details
 
-#### `SyncLockedFundsRound`
-- **Adapted from**: current `SyncMarketsRound` + subgraph queries from other behaviours
-- **Purpose**: Single discovery pass for ALL locked fund types
-- **Queries**:
-  1. **Omen subgraph** -- FPMM pool memberships for the safe (LP shares to remove)
-  2. **ConditionalTokens subgraph** -- user positions with balance > 0 (residual CT to redeem)
-  3. **Omen subgraph** -- finalized markets matching held conditions (CT redemption targets)
-  4. **Realitio subgraph** -- questions answered by the safe, finalized, not yet claimed
-  5. **Realitio contract** -- `balanceOf(safe)` for withdrawable internal balance
-- **Writes to SynchronizedData**:
-  - `markets_to_remove_liquidity: List[Dict]` -- FPMM markets with LP to remove
-  - `positions_to_redeem: List[Dict]` -- CT positions to redeem (resolve + redeem)
-  - `bonds_to_claim: List[Dict]` -- Realitio questions with unclaimed bonds
-  - `realitio_withdrawable: int` -- current Realitio internal balance
-- **Events**: `DONE`, `ERROR`, `NO_MAJORITY`, `ROUND_TIMEOUT`
+> Detailed round specifications are in `.claude/plans/omen_funds_recoverer.md`.
+> Below is a summary of the v3 implementation.
 
 #### `RemoveLiquidityRound`
-- **Adapted from**: current `RemoveFundingRound` + `SyncMarketsRound`
-- **Purpose**: Remove liquidity from expired/resolved FPMM markets
-- **Reads**: `markets_to_remove_liquidity` from SynchronizedData
-- **Logic**: Find first market where `removal_timestamp < now`, build removeFunding + mergePositions + withdraw multisend
-- **Contract calls**: FPMM.removeFunding, CT.mergePositions, wxDAI.withdraw
-- **Events**: `DONE` (tx ready), `NO_TX` (nothing to remove), `ERROR`
+- **Self-contained**: queries Omen subgraph for LP positions, verifies on-chain
+- **Logic**: For markets where `openingTimestamp - liquidity_removal_lead_time < now`, build removeFunding + mergePositions tx dicts
+- **Appends to**: `funds_recovery_txs`
 
 #### `RedeemPositionsRound`
-- **Adapted from**: current `RedeemWinningsRound`
-- **Purpose**: Resolve conditions and redeem conditional token positions
-- **Reads**: `positions_to_redeem` from SynchronizedData
-- **Logic**: For each redeemable market (up to batch_size): check if resolved on-chain, if not prepend resolve tx, build redeemPositions tx
-- **Contract calls**: RealitioProxy.resolve, CT.redeemPositions
-- **Events**: `DONE` (tx ready), `NO_TX` (nothing to redeem), `ERROR`
+- **Self-contained**: queries CT subgraph for held positions + Omen subgraph for finalized markets
+- **Logic**: Cross-reference, for winning positions build resolve (if needed) + redeemPositions tx dicts
+- **Appends to**: `funds_recovery_txs`
 
 #### `ClaimBondsRound`
-- **Adapted from**: planned `ClaimWinningsRound` (see `claim_winnings.md`)
-- **Purpose**: Claim finalized Realitio bonds via `claimWinnings`
-- **Reads**: `bonds_to_claim` from SynchronizedData
-- **Logic**:
-  1. For each unclaimed question (up to `claim_bonds_batch_size`):
-     - Check on-chain `getHistoryHash` -- skip if already claimed (bytes32(0))
-     - If sole answerer: build params from question data directly
-     - If contested: reconstruct history chain from LogNewAnswer events
-  2. Build multisend of claimWinnings calls
-- **Contract calls**: Realitio.claimWinnings
-- **Events**: `DONE` (tx ready), `NO_TX` (nothing to claim), `ERROR`
+- **Self-contained**: queries Realitio subgraph for finalized responses by safe
+- **Logic**: Check getHistoryHash (skip if claimed), build claimWinnings tx dicts + withdraw() if balance > threshold
+- **Appends to**: `funds_recovery_txs`
 
-#### `WithdrawBondsRound`
-- **Adapted from**: current `RedeemBondRound`
-- **Purpose**: Withdraw Realitio internal balance to the safe
-- **Reads**: `realitio_withdrawable` from SynchronizedData (and re-checks on-chain)
-- **Logic**: Check balanceOf, if > min_threshold build withdraw tx
-- **Contract calls**: Realitio.balanceOf, Realitio.withdraw
-- **Events**: `DONE` (tx ready), `NO_TX` (balance too low), `ERROR`
-
-#### `DepositDaiRound`
-- **Adapted from**: current `DepositDaiRound`
-- **Purpose**: Wrap excess xDAI into wxDAI for market operations
-- **Logic**: Check native xDAI balance, if > threshold wrap the excess
-- **Contract calls**: wxDAI.deposit (fallback with ether)
-- **Events**: `DONE` (tx ready), `NO_TX` (balance below threshold), `ERROR`
-
-#### `PostRecoveryRound`
-- **Adapted from**: recovery-specific portion of current `PostTransactionRound`
-- **Purpose**: After TxSettlement, route to the next recovery round
-- **Logic**: Read `tx_submitter` to determine which round produced the tx, emit the corresponding event to advance
-- **Events**: `REMOVE_LIQUIDITY_DONE`, `REDEEM_POSITIONS_DONE`, `CLAIM_BONDS_DONE`, `WITHDRAW_BONDS_DONE`, `DEPOSIT_DAI_DONE`, `ERROR`
+#### `BuildMultisendRound`
+- **Reads**: `funds_recovery_txs` from SynchronizedData
+- **Logic**: If empty → NONE (no tx). If non-empty → bundle into one safe multisend → DONE
 
 ### Final states
 
 | Final State | Routes to (in composition) |
 |---|---|
-| `FinishedRecoveryWithTxRound` | -> TxSettlement (settle the prepared tx) |
-| `FinishedRecoveryRound` | -> next skill in chain (market creation or resolution) |
+| `FinishedWithRecoveryTxRound` | -> TxSettlement (settle the single multisend) |
+| `FinishedWithoutRecoveryTxRound` | -> next skill in chain (market creation or resolution) |
 
 ### Configuration parameters
 
 ```yaml
-# Batch sizes
-claim_bonds_batch_size: 10           # max claimWinnings per cycle
-redeem_positions_batch_size: 5       # max redeemPositions per cycle
-
-# Thresholds
-xdai_threshold: 500000000000000000   # 0.5 xDAI minimum to keep unwrapped
-min_balance_withdraw_realitio: 100000000000000000  # 0.1 xDAI min to withdraw
-
-# Contract addresses (shared with parent skill)
+liquidity_removal_lead_time: 86400          # seconds before market opening to remove LP
+remove_liquidity_batch_size: 1              # LP markets per cycle
+redeem_positions_batch_size: 5              # CT redemptions per cycle
+claim_bonds_batch_size: 10                  # claimWinnings per cycle
+min_balance_withdraw_realitio: 10000000000000000000  # 10 xDAI in wei
+realitio_start_block: 0                     # first block for LogNewAnswer event scan
 realitio_contract: "0x..."
 realitio_oracle_proxy_contract: "0x..."
 conditional_tokens_contract: "0x..."
-collateral_tokens_contract: "0x..."
+collateral_tokens_contract: "0x..."         # wxDAI
 ```
 
 ### Contracts required
 
 | Contract | Methods used |
 |----------|-------------|
-| FPMM | removeFunding, get_balance, get_total_supply |
+| FPMM | removeFunding, get_balance, get_total_supply, get_markets_with_funds |
 | ConditionalTokens | mergePositions, redeemPositions, check_resolved, get_user_holdings |
 | RealitioProxy | resolve |
-| Realitio | claimWinnings, withdraw, balanceOf, getHistoryHash |
-| ERC20/wxDAI | withdraw (unwrap), deposit (wrap), check_balance |
+| Realitio | claimWinnings, withdraw, balanceOf, getHistoryHash, get_claim_params, simulate_claim_winnings |
 | GnosisSafe | get_raw_safe_transaction_hash |
 | MultiSend | get_tx_data |
 
@@ -448,18 +303,18 @@ collateral_tokens_contract: "0x..."
 | `PrepareTransactionRound` | Build market creation multisend |
 | `PostCreationRound` | Handle post-tx: extract FPMM address, update server |
 
-### What is removed (moved to fund_recovery_abci or resolver)
+### What is removed (moved to omen_funds_recoverer_abci or resolver)
 
 | Round | Destination |
 |-------|------------|
-| `SyncMarketsRound` | fund_recovery_abci -> SyncLockedFundsRound |
-| `RemoveFundingRound` | fund_recovery_abci -> RemoveLiquidityRound |
-| `RedeemWinningsRound` | fund_recovery_abci -> RedeemPositionsRound |
-| `DepositDaiRound` | fund_recovery_abci -> DepositDaiRound |
+| `SyncMarketsRound` | omen_funds_recoverer_abci -> RemoveLiquidityRound (self-contained query) |
+| `RemoveFundingRound` | omen_funds_recoverer_abci -> RemoveLiquidityRound |
+| `RedeemWinningsRound` | omen_funds_recoverer_abci -> RedeemPositionsRound |
+| `DepositDaiRound` | Removed (capital management, not recovery) |
 | `GetPendingQuestionsRound` | market_resolution_manager_abci -> ScanMarketsRound |
 | `AnswerQuestionsRound` | market_resolution_manager_abci -> SubmitResolutionsRound |
-| `RedeemBondRound` | fund_recovery_abci -> WithdrawBondsRound |
-| `PostTransactionRound` | Split: recovery routing -> fund_recovery_abci PostRecoveryRound, creation routing -> PostCreationRound |
+| `RedeemBondRound` | omen_funds_recoverer_abci -> ClaimBondsRound (includes withdraw) |
+| `PostTransactionRound` | Recovery routing eliminated (tx accumulation pattern). Creation routing stays as PostCreationRound |
 
 ### FSM specification
 
@@ -553,14 +408,13 @@ Composition chain:
 Transition mapping:
   FinishedRegistrationRound           -> IdentifyServiceOwnerRound
   FinishedIdentifyServiceOwnerRound   -> FundsForwarderRound
-  FinishedIdentifyServiceOwnerError   -> SyncLockedFundsRound
+  FinishedIdentifyServiceOwnerError   -> RemoveLiquidityRound
   FinishedFundsForwarderWithTxRound   -> TxSettlement
-  FinishedFundsForwarderNoTxRound     -> SyncLockedFundsRound
+  FinishedFundsForwarderNoTxRound     -> RemoveLiquidityRound
 
-  # Fund recovery -> TxSettlement -> PostRecovery -> next recovery round
-  FinishedRecoveryWithTxRound         -> TxSettlement
-  FinishedTransactionSubmissionRound  -> PostRecoveryRound (or PostCreationRound)
-  FinishedRecoveryRound               -> CollectRandomnessRound
+  # Fund recovery -> single multisend -> TxSettlement -> PostTransaction
+  FinishedWithRecoveryTxRound         -> TxSettlement
+  FinishedWithoutRecoveryTxRound      -> CollectRandomnessRound
 
   # Market creation -> TxSettlement -> PostCreation -> reset
   FinishedMarketCreationRound         -> TxSettlement
@@ -585,7 +439,7 @@ Transition mapping:
 - ConditionalTokens (prepareCondition for market creation)
 - ERC20/wxDAI (collateral for market creation)
 - Market Approval Server (market proposals)
-- All fund_recovery_abci contract dependencies (via composed skill)
+- All omen_funds_recoverer_abci contract dependencies (via composed skill)
 
 ---
 
@@ -733,13 +587,13 @@ Composition chain:
 Transition mapping:
   FinishedRegistrationRound               -> IdentifyServiceOwnerRound
   FinishedIdentifyServiceOwnerRound       -> FundsForwarderRound
-  FinishedIdentifyServiceOwnerError       -> SyncLockedFundsRound
+  FinishedIdentifyServiceOwnerError       -> RemoveLiquidityRound
   FinishedFundsForwarderWithTxRound       -> TxSettlement
-  FinishedFundsForwarderNoTxRound         -> SyncLockedFundsRound
+  FinishedFundsForwarderNoTxRound         -> RemoveLiquidityRound
 
-  # Fund recovery loop
-  FinishedRecoveryWithTxRound             -> TxSettlement
-  FinishedRecoveryRound                   -> ScanMarketsRound
+  # Fund recovery -> single multisend -> TxSettlement -> PostTransaction
+  FinishedWithRecoveryTxRound             -> TxSettlement
+  FinishedWithoutRecoveryTxRound          -> ScanMarketsRound
 
   # Resolution: prepare -> mech -> submit -> settle -> post
   FinishedWithMechRequestRound            -> MechVersionDetectionRound
@@ -747,7 +601,7 @@ Transition mapping:
   FinishedMechRequestSkipRound            -> ScanMarketsRound
   FinishedMechResponseTimeoutRound        -> ScanMarketsRound
   FinishedResolutionWithTxRound           -> TxSettlement
-  FinishedTransactionSubmissionRound      -> PostResolutionRound (or PostRecoveryRound)
+  FinishedTransactionSubmissionRound      -> PostResolutionRound
 
   # Done
   FinishedResolutionRound                 -> ResetAndPauseRound
@@ -952,7 +806,7 @@ If the resolver's answer is correct and finalizes:
 - **All accumulated bonds** from the entire answer chain are credited via `claimWinnings`
 - This includes the attacker's bonds from every escalation round
 - The LP's residual tokens retain their value (market resolves correctly)
-- `fund_recovery_abci` handles the `claimWinnings` + `withdraw` in the next cycle
+- `omen_funds_recoverer_abci` handles the `claimWinnings` + `withdraw` in the next cycle
 
 If the resolver is wrong:
 - The resolver loses all bonds it posted
@@ -1006,7 +860,7 @@ Cycle 5 (fund_recovery):
               Resolver gets back: 80 (own bond) + 40 (attacker round 3) + 10 (attacker round 1) = 130 xDAI
               Net profit: 130 - 80 - 20 = 30 xDAI from bonds alone
               Plus: LP tokens protected (300 xDAI in creator's safe retains value)
-  WithdrawBonds: withdraw 130 xDAI from Realitio to safe
+  ClaimBonds: claimWinnings + withdraw 130 xDAI from Realitio to safe
 ```
 
 ### Configuration parameters
@@ -1061,7 +915,7 @@ Return: {agree|disagree|insufficient_evidence}, confidence (0-1), reasoning
 ```
 packages/valory/
 |-- skills/
-|   |-- fund_recovery_abci/              # NEW: shared fund recovery
+|   |-- omen_funds_recoverer_abci/              # IMPLEMENTED: shared fund recovery
 |   |   |-- __init__.py
 |   |   |-- skill.yaml
 |   |   |-- fsm_specification.yaml
@@ -1073,19 +927,13 @@ packages/valory/
 |   |   |-- behaviours/
 |   |   |   |-- __init__.py
 |   |   |   |-- base.py
-|   |   |   |-- sync_locked_funds.py
 |   |   |   |-- remove_liquidity.py
 |   |   |   |-- redeem_positions.py
 |   |   |   |-- claim_bonds.py
-|   |   |   |-- withdraw_bonds.py
-|   |   |   |-- deposit_dai.py
-|   |   |   `-- post_recovery.py
-|   |   |-- states/
-|   |   |   |-- __init__.py
-|   |   |   |-- base.py
-|   |   |   `-- ... (one per round)
+|   |   |   |-- build_multisend.py
+|   |   |   `-- round_behaviour.py
 |   |   `-- tests/
-|   |       `-- ... (100% coverage)
+|   |       `-- ... (170 tests)
 |   |
 |   |-- market_resolution_manager_abci/  # NEW: resolver core skill
 |   |   |-- __init__.py
@@ -1122,7 +970,7 @@ packages/valory/
 |   |   `-- tests/
 |   |
 |   |-- market_creation_manager_abci/    # MODIFIED: slimmed (no recovery, no answering)
-|   `-- market_maker_abci/               # MODIFIED: composes with fund_recovery_abci
+|   `-- market_maker_abci/               # MODIFIED: composes with omen_funds_recoverer_abci
 |
 |-- agents/
 |   |-- market_maker/                    # MODIFIED
@@ -1140,7 +988,7 @@ packages/valory/
   "dev": {
     "contract/valory/fpmm_deterministic_factory/0.1.0": "...",
     "contract/valory/fpmm/0.1.0": "...",
-    "skill/valory/fund_recovery_abci/0.1.0": "...",
+    "skill/valory/omen_funds_recoverer_abci/0.1.0": "...",
     "skill/valory/market_creation_manager_abci/0.1.0": "...",
     "skill/valory/market_maker_abci/0.1.0": "...",
     "skill/valory/market_resolution_manager_abci/0.1.0": "...",
@@ -1157,55 +1005,40 @@ packages/valory/
 
 ## 7. Phased Implementation Plan
 
-### Phase 0: Foundation (ClaimWinnings + lifecycle reorder)
-**Goal**: Implement the missing ClaimWinningsRound and reorder the current FSM to lifecycle order. This establishes a clean baseline before splitting.
+### Phase 0+1: `omen_funds_recoverer_abci` (DONE)
+**Goal**: Create a standalone reusable skill that recovers all locked funds from Omen markets.
 
-**Steps**:
-1. Implement `ClaimWinningsRound` + `ClaimWinningsBehaviour` (per `claim_winnings.md`)
-2. Reorder FSM to lifecycle order (per `fsm_lifecycle_restructure.md`)
-3. Full test suite at 100% coverage
-4. Full lint pipeline
+**What was done** (differs from original plan):
+- Skipped the monolithic ClaimWinnings + lifecycle reorder — went straight to standalone skill
+- Built `omen_funds_recoverer_abci` with tx accumulation pattern (not per-round TxSettlement)
+- 3 self-contained recovery rounds + BuildMultisend, no SyncLockedFunds or PostRecovery
+- Validated with Tenderly simulations (`simulate_redemption.py`, `simulate_redeem_no_merge.py`)
+- 170 tests passing, formatted with isort + black
 
-**Deliverable**: Monolithic market creator with lifecycle-ordered FSM including ClaimWinnings
-
-### Phase 1: Extract `fund_recovery_abci`
-**Goal**: Extract all fund-recovery rounds into a standalone reusable skill.
-
-**Steps**:
-1. Create skill scaffold (skill.yaml, handlers, dialogues, models, payloads)
-2. Move/adapt rounds:
-   - SyncMarketsRound -> SyncLockedFundsRound (expanded queries)
-   - RemoveFundingRound -> RemoveLiquidityRound
-   - RedeemWinningsRound -> RedeemPositionsRound
-   - ClaimWinningsRound -> ClaimBondsRound
-   - RedeemBondRound -> WithdrawBondsRound
-   - DepositDaiRound -> DepositDaiRound
-3. Move corresponding behaviours with subgraph queries
-4. Create PostRecoveryRound for post-tx routing
-5. Define FSM specification, validate with `autonomy analyse fsm-specs`
-6. Write full test suite (100% coverage)
-7. Lint pipeline
-
-**Deliverable**: Standalone `fund_recovery_abci` skill
+**Deliverable**: Standalone `omen_funds_recoverer_abci` skill at `packages/valory/skills/omen_funds_recoverer_abci/`
+**Detailed plan**: `.claude/plans/omen_funds_recoverer.md`
 
 ### Phase 2: Slim down Market Creator
-**Goal**: Remove recovery and answering rounds, compose with `fund_recovery_abci`.
+**Goal**: Remove recovery and answering rounds, compose with `omen_funds_recoverer_abci`.
 
 **Steps**:
-1. Remove rounds: SyncMarkets, RemoveFunding, RedeemWinnings, DepositDai, GetPendingQuestions, AnswerQuestions, RedeemBond, ClaimWinnings
+
+1. Remove rounds: SyncMarkets, RemoveFunding, RedeemWinnings, DepositDai, GetPendingQuestions, AnswerQuestions, RedeemBond
 2. Remove corresponding behaviours, payloads, states
 3. Remove unused Event enum members
 4. Simplify PostTransactionRound -> PostCreationRound
 5. Update FSM transitions and specification
 6. Update `market_maker_abci/composition.py`:
-   - Add fund_recovery_abci to chain
-   - Remove MechInteract from chain
-   - Update transition mapping
+   - Add `omen_funds_recoverer_abci` to chain
+   - Map `FinishedWithRecoveryTxRound` -> TxSettlement
+   - Map `FinishedWithoutRecoveryTxRound` -> MarketCreationManager initial round
+   - Add one `tx_submitter` string check in PostTransaction for recovery tx routing
+   - Remove MechInteract from chain (moves to resolver)
 7. Update skill.yaml, agent, service YAML files
 8. Update/remove tests
 9. Full lint pipeline
 
-**Deliverable**: Slimmed Market Creator composing with fund_recovery_abci
+**Deliverable**: Slimmed Market Creator composing with `omen_funds_recoverer_abci`
 
 ### Phase 3: Create Market Resolver skill
 **Goal**: Build `market_resolution_manager_abci` with answering + challenge logic.
@@ -1263,14 +1096,14 @@ packages/valory/
 |------|--------|------------|
 | **Bond management bugs** | Challenging with incorrect logic could lose significant funds | Strict confidence threshold, max_challenge_bond cap, conservative defaults. Extensive testing. |
 | **Shared state conflicts** | Both services operating on same markets could interfere | Resolver checks `currentAnswerBond` to avoid re-answering. Each service tracks its own questions. Realitio's 2x bond requirement naturally prevents accidental double-answering. |
-| **PostRecovery/PostResolution routing** | TxSettlement returns to the SAME PostRound entry point regardless of which skill's tx was settled. The composition must correctly route `FinishedTransactionSubmissionRound` to the right PostRound. | Use `tx_submitter` field to determine origin. Pattern already proven in current PostTransactionRound. |
+| **TxSettlement routing** | TxSettlement returns to a single PostTx entry point. The composition must route correctly. | Recovery skill uses tx accumulation (one multisend), so only one `tx_submitter` string to check. Proven simpler than per-round TxSettlement routing. |
 
 ### Medium risk
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | **Test coverage regression** | Extracting code requires rewriting ~5000 lines of tests | Budget significant time. Each phase includes full test suite. |
-| **SyncLockedFundsRound complexity** | Consolidating 5 different subgraph queries into one round | Keep round focused: just query and store. Processing stays in individual rounds. |
+| **Subgraph query reliability** | Each recovery round depends on its subgraph being available | Rounds that fail to query produce no txs (safe degradation). BuildMultisend bundles whatever was found. |
 | **Mech tool for challenges** | New `evaluate_answer` tool needs to work reliably | Start as wrapper around existing `resolve_market` with added context. |
 
 ### Low risk
@@ -1304,12 +1137,6 @@ packages/valory/
 2. **Should the resolver request arbitration when bond escalation exceeds the max?**
    - Defer to future phase -- adds complexity for edge case
 
-3. **Should SyncLockedFundsRound do ALL queries or delegate discovery to each round?**
-   - Current plan: centralized discovery in SyncLockedFunds, individual rounds just read and act
-   - Alternative: each round does its own discovery (simpler SyncLockedFunds, but more subgraph calls per cycle)
-   - Recommendation: centralized discovery -- fewer network calls, cleaner data flow
+3. ~~**Should SyncLockedFundsRound do ALL queries or delegate discovery to each round?**~~ **RESOLVED**: Each round does its own discovery (self-contained subgraph queries). Subgraph queries are fast (<1s) for safe-filtered results, so the overhead is negligible.
 
-4. **How to handle TxSettlement routing when both fund_recovery and the action skill produce txs?**
-   - `tx_submitter` field already identifies which round originated the tx
-   - PostRecoveryRound and PostCreationRound/PostResolutionRound check this field to determine routing
-   - The composition's `FinishedTransactionSubmissionRound` can map to a shared PostTxRouter that dispatches based on tx_submitter
+4. ~~**How to handle TxSettlement routing when both fund_recovery and the action skill produce txs?**~~ **RESOLVED**: The tx accumulation pattern eliminates this problem. Recovery produces ONE multisend, so the parent's PostTransaction only needs one `tx_submitter` string check. No PostRecoveryRound or shared router needed.
