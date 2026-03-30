@@ -1,7 +1,7 @@
 alphabet_in:
 - DONE
-- NO_MAJORITY
 - NONE
+- NO_MAJORITY
 - ROUND_TIMEOUT
 default_start_state: RemoveLiquidityRound
 final_states:
@@ -18,16 +18,19 @@ states:
 - RedeemPositionsRound
 - RemoveLiquidityRound
 transition_func:
-  (BuildMultisendRound, DONE): FinishedWithRecoveryTxRound
-  (BuildMultisendRound, NO_MAJORITY): FinishedWithoutRecoveryTxRound
-  (BuildMultisendRound, NONE): FinishedWithoutRecoveryTxRound
-  (BuildMultisendRound, ROUND_TIMEOUT): FinishedWithoutRecoveryTxRound
-  (ClaimBondsRound, DONE): BuildMultisendRound
-  (ClaimBondsRound, NO_MAJORITY): BuildMultisendRound
-  (ClaimBondsRound, ROUND_TIMEOUT): BuildMultisendRound
-  (RedeemPositionsRound, DONE): ClaimBondsRound
-  (RedeemPositionsRound, NO_MAJORITY): ClaimBondsRound
-  (RedeemPositionsRound, ROUND_TIMEOUT): ClaimBondsRound
-  (RemoveLiquidityRound, DONE): RedeemPositionsRound
-  (RemoveLiquidityRound, NO_MAJORITY): RedeemPositionsRound
-  (RemoveLiquidityRound, ROUND_TIMEOUT): RedeemPositionsRound
+    (BuildMultisendRound, DONE): FinishedWithRecoveryTxRound
+    (BuildMultisendRound, NONE): FinishedWithoutRecoveryTxRound
+    (BuildMultisendRound, NO_MAJORITY): FinishedWithoutRecoveryTxRound
+    (BuildMultisendRound, ROUND_TIMEOUT): FinishedWithoutRecoveryTxRound
+    (ClaimBondsRound, DONE): BuildMultisendRound
+    (ClaimBondsRound, NONE): BuildMultisendRound
+    (ClaimBondsRound, NO_MAJORITY): BuildMultisendRound
+    (ClaimBondsRound, ROUND_TIMEOUT): BuildMultisendRound
+    (RedeemPositionsRound, DONE): ClaimBondsRound
+    (RedeemPositionsRound, NONE): ClaimBondsRound
+    (RedeemPositionsRound, NO_MAJORITY): ClaimBondsRound
+    (RedeemPositionsRound, ROUND_TIMEOUT): ClaimBondsRound
+    (RemoveLiquidityRound, DONE): RedeemPositionsRound
+    (RemoveLiquidityRound, NONE): RedeemPositionsRound
+    (RemoveLiquidityRound, NO_MAJORITY): RedeemPositionsRound
+    (RemoveLiquidityRound, ROUND_TIMEOUT): RedeemPositionsRound

@@ -4,7 +4,7 @@
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihkb6e2dc3j4pr54x5faswa4dnzksufx2azlsejqofii3x3x6dgmm",
         "skill/valory/market_maker_abci/0.1.0": "bafybeigwhgumdlsp5jtjrgtnl7ovibw2k5pu47vexmd4gbxqvuszgk5nvy",
-        "skill/valory/omen_funds_recoverer_abci/0.1.0": "bafybeibtmmstwlrbqcgbd3krfntjpcopao64xqlmxscyv4ktcvamvm324y",
+        "skill/valory/omen_funds_recoverer_abci/0.1.0": "bafybeidwczkvunpd5hpptvgw4t25mwfuulbonxjpj64phqbtlaimtmqodq",
         "agent/valory/market_maker/0.1.0": "bafybeibr5z6cmtfqmskofrecue4oxxnjte46dttcud3tfnjtmdl6wmyswm",
         "service/valory/market_maker/0.1.0": "bafybeia5wo64wfq5m6nzee2wqsjtfx43idbun5dwhn62zshuelv5odp6fq"
     },

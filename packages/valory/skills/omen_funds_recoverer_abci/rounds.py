@@ -164,14 +164,17 @@ class OmenFundsRecovererAbciApp(AbciApp[Event]):
     Transition states:
         0. RemoveLiquidityRound
             - done: 1.
+            - none: 1.
             - no majority: 1.
             - round timeout: 1.
         1. RedeemPositionsRound
             - done: 2.
+            - none: 2.
             - no majority: 2.
             - round timeout: 2.
         2. ClaimBondsRound
             - done: 3.
+            - none: 3.
             - no majority: 3.
             - round timeout: 3.
         3. BuildMultisendRound
@@ -193,16 +196,19 @@ class OmenFundsRecovererAbciApp(AbciApp[Event]):
     transition_function: AbciAppTransitionFunction = {
         RemoveLiquidityRound: {
             Event.DONE: RedeemPositionsRound,
+            Event.NONE: RedeemPositionsRound,
             Event.NO_MAJORITY: RedeemPositionsRound,
             Event.ROUND_TIMEOUT: RedeemPositionsRound,
         },
         RedeemPositionsRound: {
             Event.DONE: ClaimBondsRound,
+            Event.NONE: ClaimBondsRound,
             Event.NO_MAJORITY: ClaimBondsRound,
             Event.ROUND_TIMEOUT: ClaimBondsRound,
         },
         ClaimBondsRound: {
             Event.DONE: BuildMultisendRound,
+            Event.NONE: BuildMultisendRound,
             Event.NO_MAJORITY: BuildMultisendRound,
             Event.ROUND_TIMEOUT: BuildMultisendRound,
         },
