@@ -23,10 +23,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from packages.valory.skills.abstract_round_abci.models import (
-    ApiSpecs,
-    BaseParams,
-)
+from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
 )
@@ -231,5 +228,5 @@ class TestOmenFundsRecovererParams:
             "conditional_tokens_contract": "0x0000000000000000000000000000000000000000",
             "collateral_tokens_contract": "0x0000000000000000000000000000000000000000",
         }
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             OmenFundsRecovererParams(**kwargs)

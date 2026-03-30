@@ -19,9 +19,7 @@
 
 """This module contains the round behaviour for the omen_funds_recoverer_abci skill."""
 
-from packages.valory.skills.abstract_round_abci.behaviours import (
-    AbstractRoundBehaviour,
-)
+from packages.valory.skills.abstract_round_abci.behaviours import AbstractRoundBehaviour
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.build_multisend import (
     BuildMultisendBehaviour,
 )

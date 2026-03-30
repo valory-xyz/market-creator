@@ -27,9 +27,7 @@ from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
 from packages.valory.skills.omen_funds_recoverer_abci.payloads import (
     BuildMultisendPayload,
 )
-from packages.valory.skills.omen_funds_recoverer_abci.rounds import (
-    BuildMultisendRound,
-)
+from packages.valory.skills.omen_funds_recoverer_abci.rounds import BuildMultisendRound
 
 
 class BuildMultisendBehaviour(OmenFundsRecovererBaseBehaviour):

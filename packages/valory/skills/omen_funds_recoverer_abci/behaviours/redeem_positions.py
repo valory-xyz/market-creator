@@ -34,12 +34,8 @@ from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
     ZERO_HASH,
     get_callable_name,
 )
-from packages.valory.skills.omen_funds_recoverer_abci.payloads import (
-    RecoveryTxsPayload,
-)
-from packages.valory.skills.omen_funds_recoverer_abci.rounds import (
-    RedeemPositionsRound,
-)
+from packages.valory.skills.omen_funds_recoverer_abci.payloads import RecoveryTxsPayload
+from packages.valory.skills.omen_funds_recoverer_abci.rounds import RedeemPositionsRound
 
 # Subgraph max per page.
 SUBGRAPH_PAGE_SIZE = 1000
@@ -126,9 +122,7 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
             new_txs = yield from self._get_recovery_txs()
             existing = self.synchronized_data.funds_recovery_txs
             combined = existing + new_txs
-            payload = RecoveryTxsPayload(
-                sender=sender, content=json.dumps(combined)
-            )
+            payload = RecoveryTxsPayload(sender=sender, content=json.dumps(combined))
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()
@@ -163,7 +157,7 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
         redeemable = []
         for market in positions_to_redeem:
             condition_id = market.get("condition_id", "").lower()
-            held_index_sets_raw = held_positions.get(condition_id, [])
+            held_index_sets_raw = list(held_positions.get(condition_id, []))
             held_index_sets = set(held_index_sets_raw)
             payouts = market.get("payouts", [])
             if payouts and self._has_winning_position(payouts, held_index_sets):

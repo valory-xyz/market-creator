@@ -22,9 +22,7 @@
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
-    ETHER_VALUE,
-)
+from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import ETHER_VALUE
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.redeem_positions import (
     RedeemPositionsBehaviour,
 )
@@ -232,7 +230,7 @@ class TestRedeemPositionsBehaviour:
         with patch.object(self.behaviour, "_get_held_positions", new=make_gen({})):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_no_finalized_markets(self) -> None:
         """Test _get_recovery_txs when no finalized markets match conditions."""
@@ -244,7 +242,7 @@ class TestRedeemPositionsBehaviour:
         ):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_no_winning_positions(self) -> None:
         """Test _get_recovery_txs when cross-reference yields no winners."""
@@ -264,7 +262,7 @@ class TestRedeemPositionsBehaviour:
         ):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_success_resolved(self) -> None:
         """Test _get_recovery_txs happy path with already-resolved condition."""
@@ -348,4 +346,4 @@ class TestRedeemPositionsBehaviour:
         ):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result

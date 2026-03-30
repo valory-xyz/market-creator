@@ -21,7 +21,7 @@
 
 import json
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Set, Tuple, cast
 
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,
@@ -104,9 +104,7 @@ class RecoveryTxsRound(CollectSameUntilThresholdRound):
     done_event = Event.DONE
     none_event = Event.NONE
     no_majority_event = Event.NO_MAJORITY
-    selection_key: Tuple[str, ...] = (
-        get_name(SynchronizedData.funds_recovery_txs),
-    )
+    selection_key: Tuple[str, ...] = (get_name(SynchronizedData.funds_recovery_txs),)
     collection_key = get_name(SynchronizedData.participant_to_funds_recovery_txs)
 
 
@@ -165,24 +163,24 @@ class OmenFundsRecovererAbciApp(AbciApp[Event]):
 
     Transition states:
         0. RemoveLiquidityRound
-            - done: RedeemPositionsRound
-            - no majority: RedeemPositionsRound
-            - round timeout: RedeemPositionsRound
+            - done: 1.
+            - no majority: 1.
+            - round timeout: 1.
         1. RedeemPositionsRound
-            - done: ClaimBondsRound
-            - no majority: ClaimBondsRound
-            - round timeout: ClaimBondsRound
+            - done: 2.
+            - no majority: 2.
+            - round timeout: 2.
         2. ClaimBondsRound
-            - done: BuildMultisendRound
-            - no majority: BuildMultisendRound
-            - round timeout: BuildMultisendRound
+            - done: 3.
+            - no majority: 3.
+            - round timeout: 3.
         3. BuildMultisendRound
-            - done: FinishedWithRecoveryTxRound
-            - none: FinishedWithoutRecoveryTxRound
-            - no majority: FinishedWithoutRecoveryTxRound
-            - round timeout: FinishedWithoutRecoveryTxRound
-        4. FinishedWithRecoveryTxRound - Loss
-        5. FinishedWithoutRecoveryTxRound - Loss
+            - done: 4.
+            - none: 5.
+            - no majority: 5.
+            - round timeout: 5.
+        4. FinishedWithRecoveryTxRound
+        5. FinishedWithoutRecoveryTxRound
 
     Final states: {FinishedWithRecoveryTxRound, FinishedWithoutRecoveryTxRound}
 
@@ -224,7 +222,7 @@ class OmenFundsRecovererAbciApp(AbciApp[Event]):
     event_to_timeout: Dict[Event, float] = {
         Event.ROUND_TIMEOUT: 30.0,
     }
-    cross_period_persisted_keys: Set[str] = set()
+    cross_period_persisted_keys: frozenset[str] = frozenset()
     db_pre_conditions: Dict[AppState, Set[str]] = {
         RemoveLiquidityRound: set(),
     }

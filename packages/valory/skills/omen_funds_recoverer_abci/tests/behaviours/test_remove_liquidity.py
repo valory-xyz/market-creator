@@ -22,9 +22,7 @@
 from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
-from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
-    ETHER_VALUE,
-)
+from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import ETHER_VALUE
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.remove_liquidity import (
     RemoveLiquidityBehaviour,
 )
@@ -333,6 +331,36 @@ class TestRemoveLiquidityBehaviour:
 
         assert result is None
 
+
+class TestRemoveLiquidityBehaviourFlow:
+    """Tests for RemoveLiquidityBehaviour flow and integration."""
+
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
+        context_mock = MagicMock()
+        context_mock.logger = MagicMock()
+        context_mock.params = MagicMock()
+        context_mock.params.conditional_tokens_contract = "0xConditionalTokens"
+        context_mock.params.collateral_tokens_contract = "0xCollateral"
+        context_mock.params.liquidity_removal_lead_time = 86400
+        context_mock.params.remove_liquidity_batch_size = 3
+        context_mock.state.round_sequence = MagicMock()
+        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
+            1700100000
+        )
+        context_mock.state.synchronized_data = MagicMock()
+        context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
+        context_mock.benchmark_tool = MagicMock()
+        context_mock.agent_address = "0x1234567890123456789012345678901234567890"
+        context_mock.omen_subgraph = MagicMock()
+        context_mock.omen_subgraph.get_spec.return_value = {
+            "method": "POST",
+            "url": "https://omen.example.com",
+        }
+        self.behaviour: Any = RemoveLiquidityBehaviour(
+            name="test", skill_context=context_mock
+        )
+
     def test_async_act(self) -> None:
         """Test async_act wraps _get_recovery_txs correctly."""
         self.behaviour.synchronized_data.funds_recovery_txs = []
@@ -357,7 +385,7 @@ class TestRemoveLiquidityBehaviour:
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
 
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_no_eligible(self) -> None:
         """Test _get_recovery_txs when no market is eligible (future timestamp)."""
@@ -380,7 +408,7 @@ class TestRemoveLiquidityBehaviour:
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
 
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_amounts_none(self) -> None:
         """Test _get_recovery_txs when _calculate_amounts returns None."""
@@ -405,7 +433,7 @@ class TestRemoveLiquidityBehaviour:
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
 
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_remove_funding_none(self) -> None:
         """Test _get_recovery_txs when _get_remove_funding_tx returns None."""
@@ -432,7 +460,7 @@ class TestRemoveLiquidityBehaviour:
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
 
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_merge_positions_none(self) -> None:
         """Test _get_recovery_txs when _get_merge_positions_tx returns None."""
@@ -463,7 +491,7 @@ class TestRemoveLiquidityBehaviour:
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
 
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_success(self) -> None:
         """Test _get_recovery_txs happy path with one eligible market."""
@@ -507,7 +535,7 @@ class TestRemoveLiquidityBehaviour:
         """Test _get_markets_with_funds with no addresses."""
         gen = self.behaviour._get_markets_with_funds([], "0xSafe")
         result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_markets_with_funds_error(self) -> None:
         """Test _get_markets_with_funds with contract error."""
@@ -518,7 +546,7 @@ class TestRemoveLiquidityBehaviour:
         ):
             gen = self.behaviour._get_markets_with_funds(["0xM1"], "0xSafe")
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_markets_with_funds_success(self) -> None:
         """Test _get_markets_with_funds with successful response."""

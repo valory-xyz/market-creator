@@ -36,12 +36,8 @@ from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
     ZERO_HASH,
     get_callable_name,
 )
-from packages.valory.skills.omen_funds_recoverer_abci.payloads import (
-    RecoveryTxsPayload,
-)
-from packages.valory.skills.omen_funds_recoverer_abci.rounds import (
-    RemoveLiquidityRound,
-)
+from packages.valory.skills.omen_funds_recoverer_abci.payloads import RecoveryTxsPayload
+from packages.valory.skills.omen_funds_recoverer_abci.rounds import RemoveLiquidityRound
 
 # Subgraph max per page.
 SUBGRAPH_PAGE_SIZE = 1000
@@ -88,9 +84,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
             new_txs = yield from self._get_recovery_txs()
             existing = self.synchronized_data.funds_recovery_txs
             combined = existing + new_txs
-            payload = RecoveryTxsPayload(
-                sender=sender, content=json.dumps(combined)
-            )
+            payload = RecoveryTxsPayload(sender=sender, content=json.dumps(combined))
         with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
             yield from self.send_a2a_transaction(payload)
             yield from self.wait_until_round_end()

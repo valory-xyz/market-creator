@@ -331,7 +331,7 @@ class TestBuildMultisendRound:
             SynchronizedData.participant_to_tx_prep
         )
 
-    def test_none_event(self) -> None:
+    def test_none_event_routes_to_finished_without(self) -> None:
         """Test none event routes to FinishedWithoutRecoveryTxRound."""
         assert BuildMultisendRound.none_event == Event.NONE
 

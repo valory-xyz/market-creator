@@ -22,9 +22,7 @@
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
-    ETHER_VALUE,
-)
+from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import ETHER_VALUE
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.claim_bonds import (
     ClaimBondsBehaviour,
     ZERO_BYTES32,
@@ -278,7 +276,7 @@ class TestClaimBondsBehaviour:
 
     def test_maybe_build_withdraw_tx_below_threshold(self) -> None:
         """Test _maybe_build_withdraw_tx returns None when balance below threshold."""
-        # Balance (100) < threshold (10 * 10^18)
+        # balance of 100 wei is below min_balance_withdraw_realitio threshold
         resp = make_contract_state_response({"data": 100})
         with patch.object(
             self.behaviour,
@@ -377,7 +375,7 @@ class TestClaimBondsBehaviour:
         ), patch.object(self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_no_responses_with_withdraw(self) -> None:
         """Test _get_recovery_txs with no claims but a withdraw tx."""
@@ -430,7 +428,7 @@ class TestClaimBondsBehaviour:
         ):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_claim_params_fail(self) -> None:
         """Test _get_recovery_txs skips when claim params fail."""
@@ -447,7 +445,7 @@ class TestClaimBondsBehaviour:
         ):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_simulation_fail(self) -> None:
         """Test _get_recovery_txs skips when simulation fails."""
@@ -466,7 +464,7 @@ class TestClaimBondsBehaviour:
         ):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
 
     def test_get_recovery_txs_build_claim_tx_fail(self) -> None:
         """Test _get_recovery_txs skips when build claim tx fails."""
@@ -487,4 +485,4 @@ class TestClaimBondsBehaviour:
         ):
             gen = self.behaviour._get_recovery_txs()
             result = exhaust_gen(gen)
-        assert result == []
+        assert not result
