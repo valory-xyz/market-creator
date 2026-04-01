@@ -146,15 +146,17 @@ class TestRetrieveApprovedMarketBehaviour:
 
     def test_not_sender_act(self) -> None:
         """Test _not_sender_act waits for round end."""
-        with patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(self.behaviour, "set_done") as mock_set_done, patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(
-                    most_voted_keeper_address="0x9999999999999999999999999999999999999999"
-                )
+        with (
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(
+                        most_voted_keeper_address="0x9999999999999999999999999999999999999999"
+                    )
+                ),
             ),
         ):
             gen = self.behaviour._not_sender_act()
@@ -166,31 +168,32 @@ class TestRetrieveApprovedMarketBehaviour:
         mock_response = MagicMock()
         mock_response.status_code = 204
 
-        with patch.object(
-            self.behaviour, "get_http_response", new=_make_gen(mock_response)
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour, "get_http_response", new=_make_gen(mock_response)
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour._sender_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
     def test_async_act_not_sender(self) -> None:
         """Test async_act when not sender."""
-        with patch.object(
-            self.behaviour, "_i_am_not_sending", return_value=True
-        ), patch.object(self.behaviour, "_not_sender_act", new=_make_gen(None)):
+        with (
+            patch.object(self.behaviour, "_i_am_not_sending", return_value=True),
+            patch.object(self.behaviour, "_not_sender_act", new=_make_gen(None)),
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
     def test_async_act_sender(self) -> None:
         """Test async_act when sender."""
-        with patch.object(
-            self.behaviour, "_i_am_not_sending", return_value=False
-        ), patch.object(self.behaviour, "_sender_act", new=_make_gen(None)):
+        with (
+            patch.object(self.behaviour, "_i_am_not_sending", return_value=False),
+            patch.object(self.behaviour, "_sender_act", new=_make_gen(None)),
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
