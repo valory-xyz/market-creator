@@ -323,14 +323,17 @@ class TestPostTransactionBehaviour:
 
     def test_handle_market_creation_mark_done_error(self) -> None:
         """Test _handle_market_creation when _mark_market_as_done returns error."""
-        with patch.object(
-            self.behaviour,
-            "_get_fpmm_id",
-            new=_make_gen("0xFPMM123"),
-        ), patch.object(
-            self.behaviour,
-            "_mark_market_as_done",
-            new=_make_gen("some error"),
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_fpmm_id",
+                new=_make_gen("0xFPMM123"),
+            ),
+            patch.object(
+                self.behaviour,
+                "_mark_market_as_done",
+                new=_make_gen("some error"),
+            ),
         ):
             gen = self.behaviour._handle_market_creation("market_1", "0xTx")
             result = _exhaust_gen(gen)
@@ -339,14 +342,17 @@ class TestPostTransactionBehaviour:
 
     def test_handle_market_creation_success(self) -> None:
         """Test _handle_market_creation happy path."""
-        with patch.object(
-            self.behaviour,
-            "_get_fpmm_id",
-            new=_make_gen("0xFPMM123"),
-        ), patch.object(
-            self.behaviour,
-            "_mark_market_as_done",
-            new=_make_gen(None),
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_fpmm_id",
+                new=_make_gen("0xFPMM123"),
+            ),
+            patch.object(
+                self.behaviour,
+                "_mark_market_as_done",
+                new=_make_gen(None),
+            ),
         ):
             gen = self.behaviour._handle_market_creation("market_1", "0xTx")
             result = _exhaust_gen(gen)
@@ -355,17 +361,16 @@ class TestPostTransactionBehaviour:
 
     def test_async_act(self) -> None:
         """Test async_act wraps get_payload correctly."""
-        with patch.object(
-            self.behaviour,
-            "get_payload",
-            new=_make_gen(PostTransactionRound.DONE_PAYLOAD),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour,
+                "get_payload",
+                new=_make_gen(PostTransactionRound.DONE_PAYLOAD),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()

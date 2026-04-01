@@ -304,14 +304,17 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         mock_raw_resp.performative = ContractApiMessage.Performative.RAW_TRANSACTION
         mock_raw_resp.raw_transaction.body = {"data": "0xaabbccdd"}
 
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(mock_raw_resp),
-        ), patch.object(
-            self.behaviour,
-            "_get_safe_tx_hash",
-            new=_make_gen("a" * 64),
+        with (
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(mock_raw_resp),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_safe_tx_hash",
+                new=_make_gen("a" * 64),
+            ),
         ):
             gen = self.behaviour._to_multisend(
                 transactions=[
@@ -351,14 +354,17 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         mock_raw_resp.performative = ContractApiMessage.Performative.RAW_TRANSACTION
         mock_raw_resp.raw_transaction.body = {"data": "0xaabbccdd"}
 
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(mock_raw_resp),
-        ), patch.object(
-            self.behaviour,
-            "_get_safe_tx_hash",
-            new=_make_gen(None),
+        with (
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(mock_raw_resp),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_safe_tx_hash",
+                new=_make_gen(None),
+            ),
         ):
             gen = self.behaviour._to_multisend(
                 transactions=[
@@ -533,18 +539,22 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         mock_llm_dialogue = MagicMock()
         mock_response = MagicMock()
 
-        with patch.object(
-            self.behaviour,
-            "_get_request_nonce_from_dialogue",
-            return_value="nonce123",
-        ), patch.object(
-            self.behaviour,
-            "get_callback_request",
-            return_value=MagicMock(),
-        ), patch.object(
-            self.behaviour,
-            "wait_for_message",
-            new=_make_gen(mock_response),
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_request_nonce_from_dialogue",
+                return_value="nonce123",
+            ),
+            patch.object(
+                self.behaviour,
+                "get_callback_request",
+                return_value=MagicMock(),
+            ),
+            patch.object(
+                self.behaviour,
+                "wait_for_message",
+                new=_make_gen(mock_response),
+            ),
         ):
             gen = self.behaviour.do_llm_request(mock_llm_message, mock_llm_dialogue)
             result = _exhaust_gen(gen)

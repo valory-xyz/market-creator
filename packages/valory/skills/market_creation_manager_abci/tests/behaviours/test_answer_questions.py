@@ -251,14 +251,17 @@ class TestAnswerQuestionsBehaviourGenerators:
         mock_shared_state.questions_responded = {"0xquestion1"}
         mock_shared_state.questions_requested_mech = {}
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced_data),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=lambda: property(lambda self: mock_shared_state),
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced_data),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=lambda: property(lambda self: mock_shared_state),
+            ),
         ):
             gen = self.behaviour._get_payload()
             result = _exhaust_gen(gen)
@@ -280,14 +283,17 @@ class TestAnswerQuestionsBehaviourGenerators:
         mock_shared_state.questions_responded = set()
         mock_shared_state.questions_requested_mech = {}
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced_data),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=lambda: property(lambda self: mock_shared_state),
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced_data),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=lambda: property(lambda self: mock_shared_state),
+            ),
         ):
             gen = self.behaviour._get_payload()
             result = _exhaust_gen(gen)
@@ -312,26 +318,32 @@ class TestAnswerQuestionsBehaviourGenerators:
             }
         }
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced_data),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=lambda: property(lambda self: mock_shared_state),
-        ), patch.object(
-            self.behaviour,
-            "_get_answer_tx",
-            new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
-        ), patch.object(
-            self.behaviour,
-            "_prepend_wxdai_unwrap",
-            new=_passthrough_gen,
-        ), patch.object(
-            self.behaviour,
-            "_to_multisend",
-            new=_make_gen("0xmultisend_hash"),
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced_data),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=lambda: property(lambda self: mock_shared_state),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_answer_tx",
+                new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepend_wxdai_unwrap",
+                new=_passthrough_gen,
+            ),
+            patch.object(
+                self.behaviour,
+                "_to_multisend",
+                new=_make_gen("0xmultisend_hash"),
+            ),
         ):
             gen = self.behaviour._get_payload()
             result = _exhaust_gen(gen)
@@ -357,14 +369,17 @@ class TestAnswerQuestionsBehaviourGenerators:
             }
         }
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced_data),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=lambda: property(lambda self: mock_shared_state),
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced_data),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=lambda: property(lambda self: mock_shared_state),
+            ),
         ):
             gen = self.behaviour._get_payload()
             result = _exhaust_gen(gen)
@@ -391,26 +406,32 @@ class TestAnswerQuestionsBehaviourGenerators:
             }
         }
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced_data),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=lambda: property(lambda self: mock_shared_state),
-        ), patch.object(
-            self.behaviour,
-            "_get_answer_tx",
-            new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
-        ), patch.object(
-            self.behaviour,
-            "_prepend_wxdai_unwrap",
-            new=_passthrough_gen,
-        ), patch.object(
-            self.behaviour,
-            "_to_multisend",
-            new=_make_gen("0xmultisend_hash"),
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced_data),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=lambda: property(lambda self: mock_shared_state),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_answer_tx",
+                new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepend_wxdai_unwrap",
+                new=_passthrough_gen,
+            ),
+            patch.object(
+                self.behaviour,
+                "_to_multisend",
+                new=_make_gen("0xmultisend_hash"),
+            ),
         ):
             gen = self.behaviour._get_payload()
             result = _exhaust_gen(gen)
@@ -437,18 +458,22 @@ class TestAnswerQuestionsBehaviourGenerators:
             }
         }
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced_data),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=lambda: property(lambda self: mock_shared_state),
-        ), patch.object(
-            self.behaviour,
-            "_get_answer_tx",
-            new=_make_gen(None),
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced_data),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=lambda: property(lambda self: mock_shared_state),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_answer_tx",
+                new=_make_gen(None),
+            ),
         ):
             gen = self.behaviour._get_payload()
             result = _exhaust_gen(gen)
@@ -475,26 +500,32 @@ class TestAnswerQuestionsBehaviourGenerators:
             }
         }
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced_data),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=lambda: property(lambda self: mock_shared_state),
-        ), patch.object(
-            self.behaviour,
-            "_get_answer_tx",
-            new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
-        ), patch.object(
-            self.behaviour,
-            "_prepend_wxdai_unwrap",
-            new=_passthrough_gen,
-        ), patch.object(
-            self.behaviour,
-            "_to_multisend",
-            new=_make_gen(None),
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced_data),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=lambda: property(lambda self: mock_shared_state),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_answer_tx",
+                new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepend_wxdai_unwrap",
+                new=_passthrough_gen,
+            ),
+            patch.object(
+                self.behaviour,
+                "_to_multisend",
+                new=_make_gen(None),
+            ),
         ):
             gen = self.behaviour._get_payload()
             result = _exhaust_gen(gen)
@@ -503,43 +534,53 @@ class TestAnswerQuestionsBehaviourGenerators:
 
     def test_async_act_with_tx_hash(self) -> None:
         """Test async_act when get_payload returns a hash."""
-        with patch.object(
-            self.behaviour,
-            "_get_payload",
-            new=_make_gen("0xhash"),
-        ), patch.object(
-            self.behaviour,
-            "send_a2a_transaction",
-            new=_make_gen(None),
-        ), patch.object(
-            self.behaviour,
-            "wait_until_round_end",
-            new=_make_gen(None),
-        ), patch.object(
-            self.behaviour,
-            "set_done",
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_payload",
+                new=_make_gen("0xhash"),
+            ),
+            patch.object(
+                self.behaviour,
+                "send_a2a_transaction",
+                new=_make_gen(None),
+            ),
+            patch.object(
+                self.behaviour,
+                "wait_until_round_end",
+                new=_make_gen(None),
+            ),
+            patch.object(
+                self.behaviour,
+                "set_done",
+            ) as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
     def test_async_act_without_tx_hash(self) -> None:
         """Test async_act when get_payload returns None."""
-        with patch.object(
-            self.behaviour,
-            "_get_payload",
-            new=_make_gen(None),
-        ), patch.object(
-            self.behaviour,
-            "send_a2a_transaction",
-            new=_make_gen(None),
-        ), patch.object(
-            self.behaviour,
-            "wait_until_round_end",
-            new=_make_gen(None),
-        ), patch.object(
-            self.behaviour,
-            "set_done",
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_payload",
+                new=_make_gen(None),
+            ),
+            patch.object(
+                self.behaviour,
+                "send_a2a_transaction",
+                new=_make_gen(None),
+            ),
+            patch.object(
+                self.behaviour,
+                "wait_until_round_end",
+                new=_make_gen(None),
+            ),
+            patch.object(
+                self.behaviour,
+                "set_done",
+            ),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -578,26 +619,32 @@ class TestAnswerQuestionsBehaviourGenerators:
             },
         }
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced_data),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=lambda: property(lambda self: mock_shared_state),
-        ), patch.object(
-            self.behaviour,
-            "_get_answer_tx",
-            new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
-        ), patch.object(
-            self.behaviour,
-            "_prepend_wxdai_unwrap",
-            new=_passthrough_gen,
-        ), patch.object(
-            self.behaviour,
-            "_to_multisend",
-            new=_make_gen("0xmultisend_hash"),
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced_data),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=lambda: property(lambda self: mock_shared_state),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_answer_tx",
+                new=_make_gen({"to": "0xrealitio", "value": 10**17, "data": b"\x00"}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepend_wxdai_unwrap",
+                new=_passthrough_gen,
+            ),
+            patch.object(
+                self.behaviour,
+                "_to_multisend",
+                new=_make_gen("0xmultisend_hash"),
+            ),
         ):
             gen = self.behaviour._get_payload()
             result = _exhaust_gen(gen)
@@ -649,9 +696,10 @@ class TestPrependWxdaiUnwrap:
     def test_withdraw_tx_fails(self) -> None:
         """Test that failed withdraw tx build returns txs unchanged."""
         txs = [{"to": "0x1", "value": 100, "data": b"\x00"}]
-        with patch.object(
-            self.behaviour, "get_wxdai_balance", new=_make_gen(200)
-        ), patch.object(self.behaviour, "_get_wxdai_withdraw_tx", new=_make_gen(None)):
+        with (
+            patch.object(self.behaviour, "get_wxdai_balance", new=_make_gen(200)),
+            patch.object(self.behaviour, "_get_wxdai_withdraw_tx", new=_make_gen(None)),
+        ):
             gen = self.behaviour._prepend_wxdai_unwrap(txs)
             result = _exhaust_gen(gen)
         assert result == txs
@@ -660,10 +708,11 @@ class TestPrependWxdaiUnwrap:
         """Test successful unwrap prepends withdraw tx."""
         txs = [{"to": "0x1", "value": 100, "data": b"\x00"}]
         withdraw_tx = {"to": "0xwxdai", "value": 0, "data": b"\x01"}
-        with patch.object(
-            self.behaviour, "get_wxdai_balance", new=_make_gen(200)
-        ), patch.object(
-            self.behaviour, "_get_wxdai_withdraw_tx", new=_make_gen(withdraw_tx)
+        with (
+            patch.object(self.behaviour, "get_wxdai_balance", new=_make_gen(200)),
+            patch.object(
+                self.behaviour, "_get_wxdai_withdraw_tx", new=_make_gen(withdraw_tx)
+            ),
         ):
             gen = self.behaviour._prepend_wxdai_unwrap(txs)
             result = _exhaust_gen(gen)

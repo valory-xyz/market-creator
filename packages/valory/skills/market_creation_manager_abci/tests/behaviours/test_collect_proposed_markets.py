@@ -228,29 +228,31 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
         mock_synced.approved_markets_timestamp = 0
         mock_synced.safe_contract_address = "0xsafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1700000000),
-        ), patch.object(
-            self.behaviour,
-            "_collect_latest_open_markets",
-            new=_make_gen({"fixedProductMarketMakers": []}),
-        ), patch.object(
-            self.behaviour,
-            "_collect_approved_markets",
-            new=_make_gen({"approved_markets": []}),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1700000000),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_latest_open_markets",
+                new=_make_gen({"fixedProductMarketMakers": []}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_approved_markets",
+                new=_make_gen({"approved_markets": []}),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
@@ -262,28 +264,30 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
         mock_synced.approved_markets_timestamp = 1700000000 - 100  # very recent
         mock_synced.safe_contract_address = "0xsafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1700000000),
-        ), patch.object(
-            self.behaviour,
-            "_collect_latest_open_markets",
-            new=_make_gen({"fixedProductMarketMakers": []}),
-        ), patch.object(
-            self.behaviour,
-            "_collect_approved_markets",
-            new=_make_gen({"approved_markets": []}),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1700000000),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_latest_open_markets",
+                new=_make_gen({"fixedProductMarketMakers": []}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_approved_markets",
+                new=_make_gen({"approved_markets": []}),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done"),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -300,28 +304,30 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             "creationTimestamp": str(1700000000 - 100),  # very recent creation
         }
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1700000000),
-        ), patch.object(
-            self.behaviour,
-            "_collect_latest_open_markets",
-            new=_make_gen({"fixedProductMarketMakers": [market]}),
-        ), patch.object(
-            self.behaviour,
-            "_collect_approved_markets",
-            new=_make_gen({"approved_markets": []}),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1700000000),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_latest_open_markets",
+                new=_make_gen({"fixedProductMarketMakers": [market]}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_approved_markets",
+                new=_make_gen({"approved_markets": []}),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done"),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -347,28 +353,30 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             {"openingTimestamp": str(ts2), "creationTimestamp": "0"},
         ]
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1700000000),
-        ), patch.object(
-            self.behaviour,
-            "_collect_latest_open_markets",
-            new=_make_gen({"fixedProductMarketMakers": markets}),
-        ), patch.object(
-            self.behaviour,
-            "_collect_approved_markets",
-            new=_make_gen({"approved_markets": []}),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1700000000),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_latest_open_markets",
+                new=_make_gen({"fixedProductMarketMakers": markets}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_approved_markets",
+                new=_make_gen({"approved_markets": []}),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done"),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -385,28 +393,30 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
         mock_synced.approved_markets_timestamp = 0
         mock_synced.safe_contract_address = "0xsafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1700000000),
-        ), patch.object(
-            self.behaviour,
-            "_collect_latest_open_markets",
-            new=_make_gen({"fixedProductMarketMakers": []}),
-        ), patch.object(
-            self.behaviour,
-            "_collect_approved_markets",
-            new=_make_gen({"approved_markets": [{"id": "m1"}]}),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1700000000),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_latest_open_markets",
+                new=_make_gen({"fixedProductMarketMakers": []}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_approved_markets",
+                new=_make_gen({"approved_markets": [{"id": "m1"}]}),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done"),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -421,29 +431,31 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
         # max_approved_markets = -1 means no limit
         self.behaviour.params.max_approved_markets = -1
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1700000000),
-        ), patch.object(
-            self.behaviour,
-            "_collect_latest_open_markets",
-            new=_make_gen({"fixedProductMarketMakers": []}),
-        ), patch.object(
-            self.behaviour,
-            "_collect_approved_markets",
-            new=_make_gen({"approved_markets": []}),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1700000000),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_latest_open_markets",
+                new=_make_gen({"fixedProductMarketMakers": []}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_approved_markets",
+                new=_make_gen({"approved_markets": []}),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()

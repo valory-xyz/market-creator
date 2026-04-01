@@ -103,16 +103,19 @@ class TestRedeemWinningsBehaviour:
     def test_get_held_positions_empty(self) -> None:
         """Test _get_held_positions when CT subgraph returns no positions."""
         ct_response: Any = {"data": {"user": {"userPositions": []}}}
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xSafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xSafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_conditional_tokens_subgraph_result",
-            new=_make_gen(ct_response),
+            patch.object(
+                self.behaviour,
+                "get_conditional_tokens_subgraph_result",
+                new=_make_gen(ct_response),
+            ),
         ):
             gen = self.behaviour._get_held_positions()
             result = _exhaust_gen(gen)
@@ -120,16 +123,19 @@ class TestRedeemWinningsBehaviour:
 
     def test_get_held_positions_subgraph_error(self) -> None:
         """Test _get_held_positions when CT subgraph returns None."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xSafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xSafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_conditional_tokens_subgraph_result",
-            new=_make_gen(None),
+            patch.object(
+                self.behaviour,
+                "get_conditional_tokens_subgraph_result",
+                new=_make_gen(None),
+            ),
         ):
             gen = self.behaviour._get_held_positions()
             result = _exhaust_gen(gen)
@@ -176,16 +182,19 @@ class TestRedeemWinningsBehaviour:
             return page1 if call_count == 1 else page2
             yield  # noqa: unreachable
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xSafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xSafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_conditional_tokens_subgraph_result",
-            new=_mock_ct_subgraph,
+            patch.object(
+                self.behaviour,
+                "get_conditional_tokens_subgraph_result",
+                new=_mock_ct_subgraph,
+            ),
         ):
             gen = self.behaviour._get_held_positions()
             result = _exhaust_gen(gen)
@@ -226,16 +235,19 @@ class TestRedeemWinningsBehaviour:
                 }
             }
         }
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xSafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xSafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_conditional_tokens_subgraph_result",
-            new=_make_gen(ct_response),
+            patch.object(
+                self.behaviour,
+                "get_conditional_tokens_subgraph_result",
+                new=_make_gen(ct_response),
+            ),
         ):
             gen = self.behaviour._get_held_positions()
             result = _exhaust_gen(gen)
@@ -258,11 +270,14 @@ class TestRedeemWinningsBehaviour:
 
     def test_get_markets_for_conditions_subgraph_error(self) -> None:
         """Test _get_markets_for_conditions when subgraph returns None."""
-        with patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1000000),
-        ), patch.object(self.behaviour, "get_subgraph_result", new=_make_gen(None)):
+        with (
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1000000),
+            ),
+            patch.object(self.behaviour, "get_subgraph_result", new=_make_gen(None)),
+        ):
             gen = self.behaviour._get_markets_for_conditions(["0xcond1"])
             result = _exhaust_gen(gen)
         assert result == []
@@ -300,12 +315,15 @@ class TestRedeemWinningsBehaviour:
                 ]
             }
         }
-        with patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 3000000),
-        ), patch.object(
-            self.behaviour, "get_subgraph_result", new=_make_gen(omen_response)
+        with (
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 3000000),
+            ),
+            patch.object(
+                self.behaviour, "get_subgraph_result", new=_make_gen(omen_response)
+            ),
         ):
             gen = self.behaviour._get_markets_for_conditions(["0xcond1", "0xcond2"])
             result = _exhaust_gen(gen)
@@ -451,10 +469,11 @@ class TestRedeemWinningsBehaviour:
     def test_get_payload_no_finalized_markets(self) -> None:
         """Test get_payload when Omen subgraph returns no markets for held conditions."""
         held = {"0xcond1": {1}}
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=_make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=_make_gen([])
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=_make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=_make_gen([])
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -471,10 +490,11 @@ class TestRedeemWinningsBehaviour:
                 "payouts": ["1", "0"],  # outcome 0 won → losing
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=_make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=_make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -491,14 +511,15 @@ class TestRedeemWinningsBehaviour:
                 "payouts": ["1", "0"],  # outcome 0 won → winning
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=_make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_check_resolved", new=_make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_redeem_positions_tx", new=_make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=_make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=_make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_redeem_positions_tx", new=_make_gen(None)
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -518,14 +539,13 @@ class TestRedeemWinningsBehaviour:
                 "template_id": 2,
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=_make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_check_resolved", new=_make_gen(False)
-        ), patch.object(
-            self.behaviour, "_get_resolve_tx", new=_make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=_make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=_make_gen(False)),
+            patch.object(self.behaviour, "_get_resolve_tx", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -547,18 +567,19 @@ class TestRedeemWinningsBehaviour:
         ]
         resolve_tx = {"to": "0xproxy", "data": "0xresolve", "value": 0}
         redeem_tx = {"to": "0xcondtokens", "data": "0xredeem", "value": 0}
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=_make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_check_resolved", new=_make_gen(False)
-        ), patch.object(
-            self.behaviour, "_get_resolve_tx", new=_make_gen(resolve_tx)
-        ), patch.object(
-            self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=_make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=_make_gen(False)),
+            patch.object(self.behaviour, "_get_resolve_tx", new=_make_gen(resolve_tx)),
+            patch.object(
+                self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
+            ),
+            patch.object(
+                self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -576,16 +597,16 @@ class TestRedeemWinningsBehaviour:
             }
         ]
         redeem_tx = {"to": "0xcondtokens", "data": "0xdata", "value": 0}
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=_make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_check_resolved", new=_make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=_make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=_make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
+            ),
+            patch.object(self.behaviour, "_to_multisend", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -603,16 +624,18 @@ class TestRedeemWinningsBehaviour:
             }
         ]
         redeem_tx = {"to": "0xcondtokens", "data": "0xdata", "value": 0}
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=_make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_check_resolved", new=_make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=_make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=_make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=_make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_redeem_positions_tx", new=_make_gen(redeem_tx)
+            ),
+            patch.object(
+                self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -622,30 +645,24 @@ class TestRedeemWinningsBehaviour:
 
     def test_async_act_with_tx_hash(self) -> None:
         """Test async_act when get_payload returns a tx hash."""
-        with patch.object(
-            self.behaviour, "get_payload", new=_make_gen("0xtxhash")
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(self.behaviour, "get_payload", new=_make_gen("0xtxhash")),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
     def test_async_act_without_tx_hash(self) -> None:
         """Test async_act when get_payload returns None."""
-        with patch.object(
-            self.behaviour, "get_payload", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(self.behaviour, "get_payload", new=_make_gen(None)),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()

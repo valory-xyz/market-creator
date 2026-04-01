@@ -83,14 +83,19 @@ class TestRedeemBondBehaviour:
         mock_response.performative = ContractApiMessage.Performative.STATE
         mock_response.state.body = {"data": 5 * 10**18}
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(mock_response),
+            ),
         ):
             gen = self.behaviour.get_balance("0xaddr")
             result = _exhaust_gen(gen)
@@ -102,14 +107,19 @@ class TestRedeemBondBehaviour:
         mock_response = MagicMock()
         mock_response.performative = ContractApiMessage.Performative.ERROR
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour, "get_contract_api_response", new=_make_gen(mock_response)
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(mock_response),
+            ),
         ):
             gen = self.behaviour.get_balance("0xaddr")
             result = _exhaust_gen(gen)
@@ -148,13 +158,16 @@ class TestRedeemBondBehaviour:
 
     def test_get_payload_balance_none(self) -> None:
         """Test get_payload when balance is None."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(self.behaviour, "get_balance", new=_make_gen(None)):
+            patch.object(self.behaviour, "get_balance", new=_make_gen(None)),
+        ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
 
@@ -162,16 +175,19 @@ class TestRedeemBondBehaviour:
 
     def test_get_payload_balance_below_threshold(self) -> None:
         """Test get_payload when balance is below MIN_BALANCE_WITHDRAW_REALITIO."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_balance",
-            new=_make_gen(MIN_BALANCE_WITHDRAW_REALITIO - 1),
+            patch.object(
+                self.behaviour,
+                "get_balance",
+                new=_make_gen(MIN_BALANCE_WITHDRAW_REALITIO - 1),
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -180,18 +196,20 @@ class TestRedeemBondBehaviour:
 
     def test_get_payload_withdraw_tx_none(self) -> None:
         """Test get_payload when _get_withdraw_tx returns None."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_balance",
-            new=_make_gen(MIN_BALANCE_WITHDRAW_REALITIO + 10**18),
-        ), patch.object(
-            self.behaviour, "_get_withdraw_tx", new=_make_gen(None)
+            patch.object(
+                self.behaviour,
+                "get_balance",
+                new=_make_gen(MIN_BALANCE_WITHDRAW_REALITIO + 10**18),
+            ),
+            patch.object(self.behaviour, "_get_withdraw_tx", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -205,20 +223,23 @@ class TestRedeemBondBehaviour:
             "data": "0xdata",
             "value": 0,
         }
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_balance",
-            new=_make_gen(MIN_BALANCE_WITHDRAW_REALITIO + 10**18),
-        ), patch.object(
-            self.behaviour, "_get_withdraw_tx", new=_make_gen(withdraw_tx)
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen(None)
+            patch.object(
+                self.behaviour,
+                "get_balance",
+                new=_make_gen(MIN_BALANCE_WITHDRAW_REALITIO + 10**18),
+            ),
+            patch.object(
+                self.behaviour, "_get_withdraw_tx", new=_make_gen(withdraw_tx)
+            ),
+            patch.object(self.behaviour, "_to_multisend", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -232,20 +253,25 @@ class TestRedeemBondBehaviour:
             "data": "0xdata",
             "value": 0,
         }
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_balance",
-            new=_make_gen(MIN_BALANCE_WITHDRAW_REALITIO + 10**18),
-        ), patch.object(
-            self.behaviour, "_get_withdraw_tx", new=_make_gen(withdraw_tx)
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
+            patch.object(
+                self.behaviour,
+                "get_balance",
+                new=_make_gen(MIN_BALANCE_WITHDRAW_REALITIO + 10**18),
+            ),
+            patch.object(
+                self.behaviour, "_get_withdraw_tx", new=_make_gen(withdraw_tx)
+            ),
+            patch.object(
+                self.behaviour, "_to_multisend", new=_make_gen("0xmultisend_hash")
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -254,30 +280,24 @@ class TestRedeemBondBehaviour:
 
     def test_async_act_with_tx_hash(self) -> None:
         """Test async_act when get_payload returns a tx hash."""
-        with patch.object(
-            self.behaviour, "get_payload", new=_make_gen("0xtxhash")
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(self.behaviour, "get_payload", new=_make_gen("0xtxhash")),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
     def test_async_act_without_tx_hash(self) -> None:
         """Test async_act when get_payload returns None."""
-        with patch.object(
-            self.behaviour, "get_payload", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(self.behaviour, "get_payload", new=_make_gen(None)),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()

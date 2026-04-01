@@ -234,13 +234,15 @@ class TestApproveMarketsBehaviourGenerators:
 
     def test_not_sender_act(self) -> None:
         """Test _not_sender_act waits and sets done."""
-        with patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(self.behaviour, "set_done") as mock_set_done, patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(most_voted_keeper_address="0x9999")
+        with (
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(most_voted_keeper_address="0x9999")
+                ),
             ),
         ):
             gen = self.behaviour._not_sender_act()
@@ -256,21 +258,21 @@ class TestApproveMarketsBehaviourGenerators:
         )
         mock_synced.approved_markets_count = 0
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1000),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1000),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour._sender_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
@@ -288,27 +290,33 @@ class TestApproveMarketsBehaviourGenerators:
             {"reasoning": "test", "questions": {"error": "Some error"}}
         )
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1000),
-        ), patch(
-            "packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets.mech_tool_propose_questions"
-        ) as mock_mech:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1000),
+            ),
+            patch(
+                "packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets.mech_tool_propose_questions"
+            ) as mock_mech,
+        ):
             mock_mech.KeyChain = MagicMock()
             mock_mech.run.return_value = [mech_output]
 
-            with patch.object(
-                self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-            ), patch.object(
-                self.behaviour, "wait_until_round_end", new=_make_gen(None)
-            ), patch.object(
-                self.behaviour, "set_done"
-            ) as mock_set_done:
+            with (
+                patch.object(
+                    self.behaviour, "send_a2a_transaction", new=_make_gen(None)
+                ),
+                patch.object(
+                    self.behaviour, "wait_until_round_end", new=_make_gen(None)
+                ),
+                patch.object(self.behaviour, "set_done") as mock_set_done,
+            ):
                 gen = self.behaviour._sender_act()
                 _exhaust_gen(gen)
                 mock_set_done.assert_called_once()
@@ -319,9 +327,10 @@ class TestApproveMarketsBehaviourGenerators:
         mock_resp.status_code = 200
         mock_resp.body = json.dumps({"status": "ok"}).encode()
 
-        with patch.object(
-            self.behaviour, "get_http_response", new=_make_gen(mock_resp)
-        ), patch("time.sleep"):
+        with (
+            patch.object(self.behaviour, "get_http_response", new=_make_gen(mock_resp)),
+            patch("time.sleep"),
+        ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
             )
@@ -372,8 +381,9 @@ class TestApproveMarketsBehaviourGenerators:
             return mock_resp_fail
             yield  # noqa
 
-        with patch.object(self.behaviour, "get_http_response", new=multi_gen), patch(
-            "time.sleep"
+        with (
+            patch.object(self.behaviour, "get_http_response", new=multi_gen),
+            patch("time.sleep"),
         ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
@@ -405,8 +415,9 @@ class TestApproveMarketsBehaviourGenerators:
             return mock_resp_fail
             yield  # noqa
 
-        with patch.object(self.behaviour, "get_http_response", new=multi_gen), patch(
-            "time.sleep"
+        with (
+            patch.object(self.behaviour, "get_http_response", new=multi_gen),
+            patch("time.sleep"),
         ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
@@ -417,17 +428,19 @@ class TestApproveMarketsBehaviourGenerators:
 
     def test_async_act_not_sender(self) -> None:
         """Test async_act when _i_am_not_sending returns True."""
-        with patch.object(
-            self.behaviour, "_i_am_not_sending", return_value=True
-        ), patch.object(self.behaviour, "_not_sender_act", new=_make_gen(None)):
+        with (
+            patch.object(self.behaviour, "_i_am_not_sending", return_value=True),
+            patch.object(self.behaviour, "_not_sender_act", new=_make_gen(None)),
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
     def test_async_act_sender(self) -> None:
         """Test async_act when _i_am_not_sending returns False."""
-        with patch.object(
-            self.behaviour, "_i_am_not_sending", return_value=False
-        ), patch.object(self.behaviour, "_sender_act", new=_make_gen(None)):
+        with (
+            patch.object(self.behaviour, "_i_am_not_sending", return_value=False),
+            patch.object(self.behaviour, "_sender_act", new=_make_gen(None)),
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
 
@@ -463,27 +476,29 @@ class TestApproveMarketsBehaviourGenerators:
             }
         )
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1000),
-        ), patch(
-            "packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets.mech_tool_propose_questions"
-        ) as mock_mech, patch.object(
-            self.behaviour,
-            "_propose_and_approve_market",
-            new=_make_gen("ok"),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1000),
+            ),
+            patch(
+                "packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets.mech_tool_propose_questions"
+            ) as mock_mech,
+            patch.object(
+                self.behaviour,
+                "_propose_and_approve_market",
+                new=_make_gen("ok"),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             mock_mech.KeyChain = MagicMock()
             mock_mech.run.return_value = [mech_output]
 
@@ -518,23 +533,24 @@ class TestApproveMarketsBehaviourGenerators:
             }
         )
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=lambda: property(lambda self: 1000),
-        ), patch(
-            "packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets.mech_tool_propose_questions"
-        ) as mock_mech, patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1000),
+            ),
+            patch(
+                "packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets.mech_tool_propose_questions"
+            ) as mock_mech,
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             mock_mech.KeyChain = MagicMock()
             mock_mech.run.return_value = [mech_output]
 

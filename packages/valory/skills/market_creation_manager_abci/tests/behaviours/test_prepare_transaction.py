@@ -351,33 +351,35 @@ class TestPrepareTransactionBehaviourGenerators:
             return {"to": "0xC", "data": b"\x04", "value": 0}
             yield  # noqa
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            self.behaviour, "_calculate_question_id", new=multi_calc_question_id
-        ), patch.object(
-            self.behaviour, "_prepare_ask_question_mstx", new=multi_ask_question
-        ), patch.object(
-            self.behaviour,
-            "_prepare_prepare_condition_mstx",
-            new=multi_prepare_condition,
-        ), patch.object(
-            self.behaviour, "_calculate_condition_id", new=multi_calc_condition
-        ), patch.object(
-            self.behaviour, "_prepare_create_fpmm_mstx", new=multi_create_fpmm
-        ), patch.object(
-            self.behaviour, "_get_approve_tx", new=multi_approve
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen("0xTxHash")
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_question_id", new=multi_calc_question_id
+            ),
+            patch.object(
+                self.behaviour, "_prepare_ask_question_mstx", new=multi_ask_question
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_prepare_condition_mstx",
+                new=multi_prepare_condition,
+            ),
+            patch.object(
+                self.behaviour, "_calculate_condition_id", new=multi_calc_condition
+            ),
+            patch.object(
+                self.behaviour, "_prepare_create_fpmm_mstx", new=multi_create_fpmm
+            ),
+            patch.object(self.behaviour, "_get_approve_tx", new=multi_approve),
+            patch.object(self.behaviour, "_to_multisend", new=_make_gen("0xTxHash")),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
@@ -394,14 +396,18 @@ class TestPrepareTransactionBehaviourGenerators:
         }
         mock_synced.safe_contract_address = "0xSafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
-        ), patch.object(
-            self.behaviour, "_prepare_ask_question_mstx", new=_make_gen(None)
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
+            ),
+            patch.object(
+                self.behaviour, "_prepare_ask_question_mstx", new=_make_gen(None)
+            ),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -418,18 +424,23 @@ class TestPrepareTransactionBehaviourGenerators:
         }
         mock_synced.safe_contract_address = "0xSafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
-        ), patch.object(
-            self.behaviour,
-            "_prepare_ask_question_mstx",
-            new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
-        ), patch.object(
-            self.behaviour, "_prepare_prepare_condition_mstx", new=_make_gen(None)
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_ask_question_mstx",
+                new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
+            ),
+            patch.object(
+                self.behaviour, "_prepare_prepare_condition_mstx", new=_make_gen(None)
+            ),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -446,22 +457,28 @@ class TestPrepareTransactionBehaviourGenerators:
         }
         mock_synced.safe_contract_address = "0xSafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
-        ), patch.object(
-            self.behaviour,
-            "_prepare_ask_question_mstx",
-            new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
-        ), patch.object(
-            self.behaviour,
-            "_prepare_prepare_condition_mstx",
-            new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_calculate_condition_id", new=_make_gen(None)
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_ask_question_mstx",
+                new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_prepare_condition_mstx",
+                new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_condition_id", new=_make_gen(None)
+            ),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -478,24 +495,31 @@ class TestPrepareTransactionBehaviourGenerators:
         }
         mock_synced.safe_contract_address = "0xSafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
-        ), patch.object(
-            self.behaviour,
-            "_prepare_ask_question_mstx",
-            new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
-        ), patch.object(
-            self.behaviour,
-            "_prepare_prepare_condition_mstx",
-            new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
-        ), patch.object(
-            self.behaviour, "_prepare_create_fpmm_mstx", new=_make_gen(None)
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_ask_question_mstx",
+                new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_prepare_condition_mstx",
+                new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
+            ),
+            patch.object(
+                self.behaviour, "_prepare_create_fpmm_mstx", new=_make_gen(None)
+            ),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -512,30 +536,36 @@ class TestPrepareTransactionBehaviourGenerators:
         }
         mock_synced.safe_contract_address = "0xSafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
-        ), patch.object(
-            self.behaviour,
-            "_prepare_ask_question_mstx",
-            new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
-        ), patch.object(
-            self.behaviour,
-            "_prepare_prepare_condition_mstx",
-            new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
-        ), patch.object(
-            self.behaviour,
-            "_prepare_create_fpmm_mstx",
-            new=_make_gen(
-                {"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
             ),
-        ), patch.object(
-            self.behaviour, "_get_approve_tx", new=_make_gen(None)
+            patch.object(
+                self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_ask_question_mstx",
+                new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_prepare_condition_mstx",
+                new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_create_fpmm_mstx",
+                new=_make_gen(
+                    {"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}
+                ),
+            ),
+            patch.object(self.behaviour, "_get_approve_tx", new=_make_gen(None)),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
@@ -552,34 +582,41 @@ class TestPrepareTransactionBehaviourGenerators:
         }
         mock_synced.safe_contract_address = "0xSafe"
 
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(lambda self: mock_synced),
-        ), patch.object(
-            self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
-        ), patch.object(
-            self.behaviour,
-            "_prepare_ask_question_mstx",
-            new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
-        ), patch.object(
-            self.behaviour,
-            "_prepare_prepare_condition_mstx",
-            new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
-        ), patch.object(
-            self.behaviour,
-            "_prepare_create_fpmm_mstx",
-            new=_make_gen(
-                {"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
             ),
-        ), patch.object(
-            self.behaviour,
-            "_get_approve_tx",
-            new=_make_gen({"to": "0xC", "data": b"\x04", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen(None)
+            patch.object(
+                self.behaviour, "_calculate_question_id", new=_make_gen("0xQid")
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_ask_question_mstx",
+                new=_make_gen({"to": "0xR", "data": b"\x01", "value": 100}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_prepare_condition_mstx",
+                new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour, "_calculate_condition_id", new=_make_gen("0xCondId")
+            ),
+            patch.object(
+                self.behaviour,
+                "_prepare_create_fpmm_mstx",
+                new=_make_gen(
+                    {"to": "0xF", "data": b"\x03", "value": 0, "approval_amount": 5000}
+                ),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_approve_tx",
+                new=_make_gen({"to": "0xC", "data": b"\x04", "value": 0}),
+            ),
+            patch.object(self.behaviour, "_to_multisend", new=_make_gen(None)),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)

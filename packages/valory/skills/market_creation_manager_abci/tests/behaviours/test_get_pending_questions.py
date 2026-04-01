@@ -166,16 +166,19 @@ class TestGetPendingQuestionsBehaviour:
         """Test _eligible_questions_to_answer with a new, unseen question."""
         questions = [_make_question("q1")]
 
-        with patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700000100,
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=PropertyMock,
-        ) as mock_shared:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700000100,
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=PropertyMock,
+            ) as mock_shared,
+        ):
             state = MagicMock()
             state.questions_responded = {}
             state.questions_requested_mech = {}
@@ -189,16 +192,19 @@ class TestGetPendingQuestionsBehaviour:
         """Test _eligible_questions_to_answer when question already responded."""
         questions = [_make_question("q1")]
 
-        with patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700000100,
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=PropertyMock,
-        ) as mock_shared:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700000100,
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=PropertyMock,
+            ) as mock_shared,
+        ):
             state = MagicMock()
             state.questions_responded = {"q1": True}
             state.questions_requested_mech = {}
@@ -212,16 +218,19 @@ class TestGetPendingQuestionsBehaviour:
         """Test _eligible_questions_to_answer when retry interval not elapsed."""
         questions = [_make_question("q1")]
 
-        with patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700000100,
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=PropertyMock,
-        ) as mock_shared:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700000100,
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=PropertyMock,
+            ) as mock_shared,
+        ):
             state = MagicMock()
             state.questions_responded = {}
             # Last retry was very recent (1 second ago)
@@ -241,16 +250,19 @@ class TestGetPendingQuestionsBehaviour:
         """Test _eligible_questions_to_answer when retry interval has elapsed."""
         questions = [_make_question("q1")]
 
-        with patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700001000,
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=PropertyMock,
-        ) as mock_shared:
+        with (
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700001000,
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=PropertyMock,
+            ) as mock_shared,
+        ):
             state = MagicMock()
             state.questions_responded = {}
             # Last retry was long ago (900+ seconds ago, interval[1]=300)
@@ -282,14 +294,17 @@ class TestGetPendingQuestionsBehaviour:
         """Test get_payload when all questions are already responded."""
         questions = [_make_question("q1")]
 
-        with patch.object(
-            self.behaviour,
-            "_get_unanswered_questions",
-            new=_make_gen(questions),
-        ), patch.object(
-            self.behaviour,
-            "_eligible_questions_to_answer",
-            return_value=[],
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_unanswered_questions",
+                new=_make_gen(questions),
+            ),
+            patch.object(
+                self.behaviour,
+                "_eligible_questions_to_answer",
+                return_value=[],
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -300,18 +315,22 @@ class TestGetPendingQuestionsBehaviour:
         """Test get_payload when balance is less than bond_required."""
         questions = [_make_question("q1")]
 
-        with patch.object(
-            self.behaviour,
-            "_get_unanswered_questions",
-            new=_make_gen(questions),
-        ), patch.object(
-            self.behaviour,
-            "_eligible_questions_to_answer",
-            return_value=["q1"],
-        ), patch.object(
-            self.behaviour,
-            "get_wxdai_balance",
-            new=_make_gen(10),
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_unanswered_questions",
+                new=_make_gen(questions),
+            ),
+            patch.object(
+                self.behaviour,
+                "_eligible_questions_to_answer",
+                return_value=["q1"],
+            ),
+            patch.object(
+                self.behaviour,
+                "get_wxdai_balance",
+                new=_make_gen(10),
+            ),
         ):
             # bond_required = 100 * 1 = 100, balance = 10
             self.behaviour.params.realitio_answer_question_bond = 100
@@ -335,18 +354,22 @@ class TestGetPendingQuestionsBehaviour:
         """Test get_payload when _get_balance returns None."""
         questions = [_make_question("q1")]
 
-        with patch.object(
-            self.behaviour,
-            "_get_unanswered_questions",
-            new=_make_gen(questions),
-        ), patch.object(
-            self.behaviour,
-            "_eligible_questions_to_answer",
-            return_value=["q1"],
-        ), patch.object(
-            self.behaviour,
-            "get_wxdai_balance",
-            new=_make_gen(None),
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_unanswered_questions",
+                new=_make_gen(questions),
+            ),
+            patch.object(
+                self.behaviour,
+                "_eligible_questions_to_answer",
+                return_value=["q1"],
+            ),
+            patch.object(
+                self.behaviour,
+                "get_wxdai_balance",
+                new=_make_gen(None),
+            ),
         ):
             self.behaviour.params.questions_to_close_batch_size = 5
             gen = self.behaviour.get_payload()
@@ -360,27 +383,33 @@ class TestGetPendingQuestionsBehaviour:
 
         questions = [_make_question("q1")]
 
-        with patch.object(
-            self.behaviour,
-            "_get_unanswered_questions",
-            new=_make_gen(questions),
-        ), patch.object(
-            self.behaviour,
-            "_eligible_questions_to_answer",
-            return_value=["q1"],
-        ), patch.object(
-            self.behaviour,
-            "get_wxdai_balance",
-            new=_make_gen(10000),
-        ), patch.object(
-            type(self.behaviour),
-            "shared_state",
-            new_callable=PropertyMock,
-        ) as mock_shared, patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700000100,
+        with (
+            patch.object(
+                self.behaviour,
+                "_get_unanswered_questions",
+                new=_make_gen(questions),
+            ),
+            patch.object(
+                self.behaviour,
+                "_eligible_questions_to_answer",
+                return_value=["q1"],
+            ),
+            patch.object(
+                self.behaviour,
+                "get_wxdai_balance",
+                new=_make_gen(10000),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "shared_state",
+                new_callable=PropertyMock,
+            ) as mock_shared,
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700000100,
+            ),
         ):
             state = MagicMock()
             state.questions_requested_mech = {
@@ -405,17 +434,16 @@ class TestGetPendingQuestionsBehaviour:
 
     def test_async_act(self) -> None:
         """Test async_act wraps get_payload correctly."""
-        with patch.object(
-            self.behaviour,
-            "get_payload",
-            new=_make_gen(GetPendingQuestionsRound.NO_TX_PAYLOAD),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour,
+                "get_payload",
+                new=_make_gen(GetPendingQuestionsRound.NO_TX_PAYLOAD),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
