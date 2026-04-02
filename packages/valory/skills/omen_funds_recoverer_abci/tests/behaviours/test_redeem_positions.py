@@ -416,7 +416,7 @@ class TestGetHeldPositions:
 
     def test_get_held_positions_empty(self) -> None:
         """Test _get_held_positions when CT subgraph returns no user positions."""
-        response = {"data": {"user": {"userPositions": []}}}
+        response: dict = {"data": {"user": {"userPositions": []}}}
         with patch.object(
             self.behaviour,
             "get_conditional_tokens_subgraph_result",

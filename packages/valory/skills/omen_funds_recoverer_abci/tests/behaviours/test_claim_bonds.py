@@ -483,7 +483,7 @@ class TestClaimBondsBehaviour:
 
     def test_get_claimable_responses_empty(self) -> None:
         """Test _get_claimable_responses returns empty list when subgraph returns no data."""
-        subgraph_response = {"data": {"responses": []}}
+        subgraph_response: dict = {"data": {"responses": []}}
         with patch.object(
             self.behaviour,
             "get_realitio_subgraph_result",

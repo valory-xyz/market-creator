@@ -609,7 +609,7 @@ class TestGetMarkets:
 
     def test_get_markets_no_memberships(self) -> None:
         """Test _get_markets returns empty when no pool memberships found."""
-        response = {"data": {"fpmmPoolMemberships": []}}
+        response: dict = {"data": {"fpmmPoolMemberships": []}}
         with patch.object(
             self.behaviour,
             "get_subgraph_result",
