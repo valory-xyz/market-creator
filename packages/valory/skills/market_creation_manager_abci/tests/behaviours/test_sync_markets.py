@@ -120,14 +120,17 @@ class TestSyncMarketsBehaviour:
         contract_resp.performative = ContractApiMessage.Performative.STATE
         contract_resp.state.body = {"data": []}
 
-        with patch.object(
-            self.behaviour,
-            "get_subgraph_result",
-            new=_make_gen(subgraph_response),
-        ), patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(contract_resp),
+        with (
+            patch.object(
+                self.behaviour,
+                "get_subgraph_result",
+                new=_make_gen(subgraph_response),
+            ),
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(contract_resp),
+            ),
         ):
             gen = self.behaviour.get_markets()
             result = _exhaust_gen(gen)
@@ -145,14 +148,17 @@ class TestSyncMarketsBehaviour:
         contract_resp.performative = ContractApiMessage.Performative.STATE
         contract_resp.state.body = {"data": []}
 
-        with patch.object(
-            self.behaviour,
-            "get_subgraph_result",
-            new=_make_gen(subgraph_response),
-        ), patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(contract_resp),
+        with (
+            patch.object(
+                self.behaviour,
+                "get_subgraph_result",
+                new=_make_gen(subgraph_response),
+            ),
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(contract_resp),
+            ),
         ):
             gen = self.behaviour.get_markets()
             result = _exhaust_gen(gen)
@@ -171,14 +177,17 @@ class TestSyncMarketsBehaviour:
         contract_resp.performative = ContractApiMessage.Performative.STATE
         contract_resp.state.body = {"data": []}
 
-        with patch.object(
-            self.behaviour,
-            "get_subgraph_result",
-            new=_make_gen(subgraph_response),
-        ), patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(contract_resp),
+        with (
+            patch.object(
+                self.behaviour,
+                "get_subgraph_result",
+                new=_make_gen(subgraph_response),
+            ),
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(contract_resp),
+            ),
         ):
             gen = self.behaviour.get_markets()
             result = _exhaust_gen(gen)
@@ -196,14 +205,17 @@ class TestSyncMarketsBehaviour:
         contract_resp.performative = ContractApiMessage.Performative.STATE
         contract_resp.state.body = {"data": []}
 
-        with patch.object(
-            self.behaviour,
-            "get_subgraph_result",
-            new=_make_gen(subgraph_response),
-        ), patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(contract_resp),
+        with (
+            patch.object(
+                self.behaviour,
+                "get_subgraph_result",
+                new=_make_gen(subgraph_response),
+            ),
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(contract_resp),
+            ),
         ):
             gen = self.behaviour.get_markets()
             result = _exhaust_gen(gen)
@@ -221,14 +233,17 @@ class TestSyncMarketsBehaviour:
         contract_resp.performative = ContractApiMessage.Performative.STATE
         contract_resp.state.body = {"data": ["0xMarket1"]}
 
-        with patch.object(
-            self.behaviour,
-            "get_subgraph_result",
-            new=_make_gen(subgraph_response),
-        ), patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(contract_resp),
+        with (
+            patch.object(
+                self.behaviour,
+                "get_subgraph_result",
+                new=_make_gen(subgraph_response),
+            ),
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(contract_resp),
+            ),
         ):
             gen = self.behaviour.get_markets()
             result = _exhaust_gen(gen)
@@ -334,17 +349,16 @@ class TestSyncMarketsBehaviour:
 
     def test_async_act(self) -> None:
         """Test async_act wraps get_payload correctly."""
-        with patch.object(
-            self.behaviour,
-            "get_payload",
-            new=_make_gen(SyncMarketsRound.NO_UPDATE_PAYLOAD),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour,
+                "get_payload",
+                new=_make_gen(SyncMarketsRound.NO_UPDATE_PAYLOAD),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
@@ -359,14 +373,17 @@ class TestSyncMarketsBehaviour:
         contract_resp.performative = ContractApiMessage.Performative.STATE
         contract_resp.state.body = {"data": ["0xOtherMarket"]}
 
-        with patch.object(
-            self.behaviour,
-            "get_subgraph_result",
-            new=_make_gen(subgraph_response),
-        ), patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(contract_resp),
+        with (
+            patch.object(
+                self.behaviour,
+                "get_subgraph_result",
+                new=_make_gen(subgraph_response),
+            ),
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=_make_gen(contract_resp),
+            ),
         ):
             gen = self.behaviour.get_markets()
             result = _exhaust_gen(gen)

@@ -420,17 +420,16 @@ class TestRemoveFundingBehaviour:
             RemoveFundingRound,
         )
 
-        with patch.object(
-            self.behaviour,
-            "get_payload",
-            new=_make_gen(RemoveFundingRound.NO_UPDATE_PAYLOAD),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour,
+                "get_payload",
+                new=_make_gen(RemoveFundingRound.NO_UPDATE_PAYLOAD),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
@@ -458,9 +457,10 @@ class TestRemoveFundingBehaviour:
             "condition_id": "0xCond",
             "outcome_slot_count": 2,
         }
-        with patch.object(
-            self.behaviour, "_get_market_to_close", return_value=market
-        ), patch.object(self.behaviour, "_calculate_amounts", new=_make_gen(None)):
+        with (
+            patch.object(self.behaviour, "_get_market_to_close", return_value=market),
+            patch.object(self.behaviour, "_calculate_amounts", new=_make_gen(None)),
+        ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
 
@@ -477,12 +477,12 @@ class TestRemoveFundingBehaviour:
             "condition_id": "0xCond",
             "outcome_slot_count": 2,
         }
-        with patch.object(
-            self.behaviour, "_get_market_to_close", return_value=market
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
-        ), patch.object(
-            self.behaviour, "_get_remove_funding_tx", new=_make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_market_to_close", return_value=market),
+            patch.object(
+                self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
+            ),
+            patch.object(self.behaviour, "_get_remove_funding_tx", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -500,16 +500,19 @@ class TestRemoveFundingBehaviour:
             "condition_id": "0xCond",
             "outcome_slot_count": 2,
         }
-        with patch.object(
-            self.behaviour, "_get_market_to_close", return_value=market
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
-        ), patch.object(
-            self.behaviour,
-            "_get_remove_funding_tx",
-            new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_get_merge_positions_tx", new=_make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_market_to_close", return_value=market),
+            patch.object(
+                self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_remove_funding_tx",
+                new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour, "_get_merge_positions_tx", new=_make_gen(None)
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -527,20 +530,22 @@ class TestRemoveFundingBehaviour:
             "condition_id": "0xCond",
             "outcome_slot_count": 2,
         }
-        with patch.object(
-            self.behaviour, "_get_market_to_close", return_value=market
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
-        ), patch.object(
-            self.behaviour,
-            "_get_remove_funding_tx",
-            new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
-        ), patch.object(
-            self.behaviour,
-            "_get_merge_positions_tx",
-            new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_get_withdraw_tx", new=_make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_market_to_close", return_value=market),
+            patch.object(
+                self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_remove_funding_tx",
+                new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_merge_positions_tx",
+                new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
+            ),
+            patch.object(self.behaviour, "_get_withdraw_tx", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -558,24 +563,27 @@ class TestRemoveFundingBehaviour:
             "condition_id": "0xCond",
             "outcome_slot_count": 2,
         }
-        with patch.object(
-            self.behaviour, "_get_market_to_close", return_value=market
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
-        ), patch.object(
-            self.behaviour,
-            "_get_remove_funding_tx",
-            new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
-        ), patch.object(
-            self.behaviour,
-            "_get_merge_positions_tx",
-            new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
-        ), patch.object(
-            self.behaviour,
-            "_get_withdraw_tx",
-            new=_make_gen({"to": "0xC", "data": b"\x03", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_market_to_close", return_value=market),
+            patch.object(
+                self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_remove_funding_tx",
+                new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_merge_positions_tx",
+                new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_withdraw_tx",
+                new=_make_gen({"to": "0xC", "data": b"\x03", "value": 0}),
+            ),
+            patch.object(self.behaviour, "_to_multisend", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)
@@ -591,24 +599,29 @@ class TestRemoveFundingBehaviour:
             "condition_id": "0xCond",
             "outcome_slot_count": 2,
         }
-        with patch.object(
-            self.behaviour, "_get_market_to_close", return_value=market
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
-        ), patch.object(
-            self.behaviour,
-            "_get_remove_funding_tx",
-            new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
-        ), patch.object(
-            self.behaviour,
-            "_get_merge_positions_tx",
-            new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
-        ), patch.object(
-            self.behaviour,
-            "_get_withdraw_tx",
-            new=_make_gen({"to": "0xC", "data": b"\x03", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_to_multisend", new=_make_gen("0xMultisendHash")
+        with (
+            patch.object(self.behaviour, "_get_market_to_close", return_value=market),
+            patch.object(
+                self.behaviour, "_calculate_amounts", new=_make_gen((500, 160))
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_remove_funding_tx",
+                new=_make_gen({"to": "0xM", "data": b"\x01", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_merge_positions_tx",
+                new=_make_gen({"to": "0xCT", "data": b"\x02", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_withdraw_tx",
+                new=_make_gen({"to": "0xC", "data": b"\x03", "value": 0}),
+            ),
+            patch.object(
+                self.behaviour, "_to_multisend", new=_make_gen("0xMultisendHash")
+            ),
         ):
             gen = self.behaviour.get_payload()
             result = _exhaust_gen(gen)

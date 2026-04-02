@@ -130,13 +130,16 @@ class TestDepositDaiBehaviour:
 
     def test_get_tx_hash_balance_none(self) -> None:
         """Test get_tx_hash when balance is None."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(self.behaviour, "get_balance", new=_make_gen(None)):
+            patch.object(self.behaviour, "get_balance", new=_make_gen(None)),
+        ):
             gen = self.behaviour.get_tx_hash()
             result = _exhaust_gen(gen)
 
@@ -144,16 +147,19 @@ class TestDepositDaiBehaviour:
 
     def test_get_tx_hash_balance_below_threshold(self) -> None:
         """Test get_tx_hash when balance is below threshold."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour,
-            "get_balance",
-            new=_make_gen(10**17),  # 0.1 xDAI < 1 xDAI threshold
+            patch.object(
+                self.behaviour,
+                "get_balance",
+                new=_make_gen(10**17),  # 0.1 xDAI < 1 xDAI threshold
+            ),
         ):
             gen = self.behaviour.get_tx_hash()
             result = _exhaust_gen(gen)
@@ -162,16 +168,16 @@ class TestDepositDaiBehaviour:
 
     def test_get_tx_hash_deposit_tx_none(self) -> None:
         """Test get_tx_hash when _get_deposit_tx returns None."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour, "get_balance", new=_make_gen(5 * 10**18)
-        ), patch.object(
-            self.behaviour, "_get_deposit_tx", new=_make_gen(None)
+            patch.object(self.behaviour, "get_balance", new=_make_gen(5 * 10**18)),
+            patch.object(self.behaviour, "_get_deposit_tx", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_tx_hash()
             result = _exhaust_gen(gen)
@@ -180,18 +186,17 @@ class TestDepositDaiBehaviour:
 
     def test_get_tx_hash_safe_tx_hash_none(self) -> None:
         """Test get_tx_hash when _get_safe_tx_hash returns None."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour, "get_balance", new=_make_gen(5 * 10**18)
-        ), patch.object(
-            self.behaviour, "_get_deposit_tx", new=_make_gen(b"\x01\x02")
-        ), patch.object(
-            self.behaviour, "_get_safe_tx_hash", new=_make_gen(None)
+            patch.object(self.behaviour, "get_balance", new=_make_gen(5 * 10**18)),
+            patch.object(self.behaviour, "_get_deposit_tx", new=_make_gen(b"\x01\x02")),
+            patch.object(self.behaviour, "_get_safe_tx_hash", new=_make_gen(None)),
         ):
             gen = self.behaviour.get_tx_hash()
             result = _exhaust_gen(gen)
@@ -200,21 +205,23 @@ class TestDepositDaiBehaviour:
 
     def test_get_tx_hash_success(self) -> None:
         """Test get_tx_hash happy path."""
-        with patch.object(
-            type(self.behaviour),
-            "synchronized_data",
-            new_callable=lambda: property(
-                lambda self: MagicMock(safe_contract_address="0xsafe")
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(
+                    lambda self: MagicMock(safe_contract_address="0xsafe")
+                ),
             ),
-        ), patch.object(
-            self.behaviour, "get_balance", new=_make_gen(5 * 10**18)
-        ), patch.object(
-            self.behaviour, "_get_deposit_tx", new=_make_gen(b"\x01\x02")
-        ), patch.object(
-            self.behaviour, "_get_safe_tx_hash", new=_make_gen("abcdef1234567890")
-        ), patch(
-            "packages.valory.skills.market_creation_manager_abci.behaviours.deposit_dai.hash_payload_to_hex",
-            return_value="0xpayloadhex",
+            patch.object(self.behaviour, "get_balance", new=_make_gen(5 * 10**18)),
+            patch.object(self.behaviour, "_get_deposit_tx", new=_make_gen(b"\x01\x02")),
+            patch.object(
+                self.behaviour, "_get_safe_tx_hash", new=_make_gen("abcdef1234567890")
+            ),
+            patch(
+                "packages.valory.skills.market_creation_manager_abci.behaviours.deposit_dai.hash_payload_to_hex",
+                return_value="0xpayloadhex",
+            ),
         ):
             gen = self.behaviour.get_tx_hash()
             result = _exhaust_gen(gen)
@@ -223,30 +230,24 @@ class TestDepositDaiBehaviour:
 
     def test_async_act_with_tx_hash(self) -> None:
         """Test async_act when tx_hash is not None."""
-        with patch.object(
-            self.behaviour, "get_tx_hash", new=_make_gen("0xtxhash")
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(self.behaviour, "get_tx_hash", new=_make_gen("0xtxhash")),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
     def test_async_act_without_tx_hash(self) -> None:
         """Test async_act when tx_hash is None."""
-        with patch.object(
-            self.behaviour, "get_tx_hash", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=_make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(self.behaviour, "get_tx_hash", new=_make_gen(None)),
+            patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
             mock_set_done.assert_called_once()
