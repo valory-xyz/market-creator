@@ -362,33 +362,32 @@ class TestRemoveLiquidityBehaviourFlow:
         )
 
     def test_async_act(self) -> None:
-        """Test async_act wraps _get_recovery_txs correctly."""
+        """Test async_act wraps _build_remove_liquidity_txs correctly."""
         self.behaviour.synchronized_data.funds_recovery_txs = []
-        with patch.object(
-            self.behaviour,
-            "_get_recovery_txs",
-            new=make_gen([]),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour,
+                "_build_remove_liquidity_txs",
+                new=make_gen([]),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
-    def test_get_recovery_txs_no_markets(self) -> None:
-        """Test _get_recovery_txs when _get_markets returns empty list."""
+    def test_build_remove_liquidity_txs_no_markets(self) -> None:
+        """Test _build_remove_liquidity_txs when _get_markets returns empty list."""
         with patch.object(self.behaviour, "_get_markets", new=make_gen([])):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_remove_liquidity_txs()
             result = exhaust_gen(gen)
 
         assert not result
 
-    def test_get_recovery_txs_no_eligible(self) -> None:
-        """Test _get_recovery_txs when no market is eligible (future timestamp)."""
+    def test_build_remove_liquidity_txs_no_eligible(self) -> None:
+        """Test _build_remove_liquidity_txs when no market is eligible (future timestamp)."""
         markets = [
             {
                 "address": "0xMarket1",
@@ -397,21 +396,22 @@ class TestRemoveLiquidityBehaviourFlow:
                 "outcome_slot_count": 2,
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_markets", new=make_gen(markets)
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700100000,
+        with (
+            patch.object(self.behaviour, "_get_markets", new=make_gen(markets)),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700100000,
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_remove_liquidity_txs()
             result = exhaust_gen(gen)
 
         assert not result
 
-    def test_get_recovery_txs_amounts_none(self) -> None:
-        """Test _get_recovery_txs when _calculate_amounts returns None."""
+    def test_build_remove_liquidity_txs_amounts_none(self) -> None:
+        """Test _build_remove_liquidity_txs when _calculate_amounts returns None."""
         markets = [
             {
                 "address": "0xMarket1",
@@ -420,23 +420,23 @@ class TestRemoveLiquidityBehaviourFlow:
                 "outcome_slot_count": 2,
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_markets", new=make_gen(markets)
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700100000,
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_markets", new=make_gen(markets)),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700100000,
+            ),
+            patch.object(self.behaviour, "_calculate_amounts", new=make_gen(None)),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_remove_liquidity_txs()
             result = exhaust_gen(gen)
 
         assert not result
 
-    def test_get_recovery_txs_remove_funding_none(self) -> None:
-        """Test _get_recovery_txs when _get_remove_funding_tx returns None."""
+    def test_build_remove_liquidity_txs_remove_funding_none(self) -> None:
+        """Test _build_remove_liquidity_txs when _get_remove_funding_tx returns None."""
         markets = [
             {
                 "address": "0xMarket1",
@@ -445,25 +445,26 @@ class TestRemoveLiquidityBehaviourFlow:
                 "outcome_slot_count": 2,
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_markets", new=make_gen(markets)
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700100000,
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=make_gen((500, 160))
-        ), patch.object(
-            self.behaviour, "_get_remove_funding_tx", new=make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_markets", new=make_gen(markets)),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700100000,
+            ),
+            patch.object(
+                self.behaviour, "_calculate_amounts", new=make_gen((500, 160))
+            ),
+            patch.object(self.behaviour, "_get_remove_funding_tx", new=make_gen(None)),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_remove_liquidity_txs()
             result = exhaust_gen(gen)
 
         assert not result
 
-    def test_get_recovery_txs_merge_positions_none(self) -> None:
-        """Test _get_recovery_txs when _get_merge_positions_tx returns None."""
+    def test_build_remove_liquidity_txs_merge_positions_none(self) -> None:
+        """Test _build_remove_liquidity_txs when _get_merge_positions_tx returns None."""
         markets = [
             {
                 "address": "0xMarket1",
@@ -472,29 +473,31 @@ class TestRemoveLiquidityBehaviourFlow:
                 "outcome_slot_count": 2,
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_markets", new=make_gen(markets)
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700100000,
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=make_gen((500, 160))
-        ), patch.object(
-            self.behaviour,
-            "_get_remove_funding_tx",
-            new=make_gen({"to": "0xM", "data": "0x01", "value": 0}),
-        ), patch.object(
-            self.behaviour, "_get_merge_positions_tx", new=make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_markets", new=make_gen(markets)),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700100000,
+            ),
+            patch.object(
+                self.behaviour, "_calculate_amounts", new=make_gen((500, 160))
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_remove_funding_tx",
+                new=make_gen({"to": "0xM", "data": "0x01", "value": 0}),
+            ),
+            patch.object(self.behaviour, "_get_merge_positions_tx", new=make_gen(None)),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_remove_liquidity_txs()
             result = exhaust_gen(gen)
 
         assert not result
 
-    def test_get_recovery_txs_success(self) -> None:
-        """Test _get_recovery_txs happy path with one eligible market."""
+    def test_build_remove_liquidity_txs_success(self) -> None:
+        """Test _build_remove_liquidity_txs happy path with one eligible market."""
         markets = [
             {
                 "address": "0xMarket1",
@@ -506,25 +509,29 @@ class TestRemoveLiquidityBehaviourFlow:
         remove_tx = {"to": "0xM", "data": "0x01", "value": 0}
         merge_tx = {"to": "0xCT", "data": "0x02", "value": 0}
 
-        with patch.object(
-            self.behaviour, "_get_markets", new=make_gen(markets)
-        ), patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700100000,
-        ), patch.object(
-            self.behaviour, "_calculate_amounts", new=make_gen((500, 160))
-        ), patch.object(
-            self.behaviour,
-            "_get_remove_funding_tx",
-            new=make_gen(remove_tx),
-        ), patch.object(
-            self.behaviour,
-            "_get_merge_positions_tx",
-            new=make_gen(merge_tx),
+        with (
+            patch.object(self.behaviour, "_get_markets", new=make_gen(markets)),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700100000,
+            ),
+            patch.object(
+                self.behaviour, "_calculate_amounts", new=make_gen((500, 160))
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_remove_funding_tx",
+                new=make_gen(remove_tx),
+            ),
+            patch.object(
+                self.behaviour,
+                "_get_merge_positions_tx",
+                new=make_gen(merge_tx),
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_remove_liquidity_txs()
             result = exhaust_gen(gen)
 
         assert len(result) == 2

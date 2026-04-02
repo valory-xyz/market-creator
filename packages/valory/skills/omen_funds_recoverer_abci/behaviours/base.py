@@ -49,6 +49,13 @@ ETHER_VALUE = 0
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
+SKILL_LOG_PREFIX = "[OmenFundsRecoverer]"
+
+
+def wei_to_str(wei: int, unit: str = "xDAI") -> str:
+    """Format a wei amount with human-readable equivalent."""
+    return f"{wei / 10**18:.4f} {unit}"
+
 
 def to_content(query: str) -> bytes:
     """Convert the given query string to payload content."""
@@ -77,12 +84,7 @@ class OmenFundsRecovererBaseBehaviour(BaseBehaviour, ABC):
 
     @property
     def last_synced_timestamp(self) -> int:
-        """Get last synced timestamp.
-
-        This is the last timestamp guaranteed to be the same by 2/3 of the agents.
-
-        :returns: the last synced timestamp.
-        """
+        """Get last synced timestamp, guaranteed consistent across 2/3 of agents."""
         state = cast(SharedState, self.context.state)
         last_timestamp = (
             state.round_sequence.last_round_transition_timestamp.timestamp()
@@ -102,16 +104,7 @@ class OmenFundsRecovererBaseBehaviour(BaseBehaviour, ABC):
         safe_tx_gas: int = SAFE_TX_GAS,
         operation: int = SafeOperation.CALL.value,
     ) -> Generator[None, None, Optional[str]]:
-        """Prepares and returns the safe tx hash.
-
-        :param to_address: the contract address the safe will call.
-        :param data: the encoded transaction data.
-        :param value: the ether value to send with the tx.
-        :param safe_tx_gas: the safe tx gas.
-        :param operation: the safe operation type.
-        :yield: None
-        :return: the tx hash, or None on error.
-        """
+        """Prepare and return the safe tx hash."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.synchronized_data.safe_contract_address,
@@ -137,12 +130,7 @@ class OmenFundsRecovererBaseBehaviour(BaseBehaviour, ABC):
     def _to_multisend(
         self, transactions: List[Dict]
     ) -> Generator[None, None, Optional[str]]:
-        """Transform payload to MultiSend.
-
-        :param transactions: the list of transactions to bundle.
-        :yield: None
-        :return: the multisend payload data, or None on error.
-        """
+        """Bundle transactions into a MultiSend and return the safe payload hash."""
         multi_send_txs = []
         for transaction in transactions:
             transaction = {
@@ -192,12 +180,7 @@ class OmenFundsRecovererBaseBehaviour(BaseBehaviour, ABC):
         self,
         query: str,
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Query the Omen subgraph.
-
-        :param query: the GraphQL query string.
-        :yield: None
-        :return: the parsed JSON response, or None on error.
-        """
+        """Query the Omen subgraph."""
         response = yield from self.get_http_response(
             content=to_content(query),
             **self.context.omen_subgraph.get_spec(),
@@ -221,12 +204,7 @@ class OmenFundsRecovererBaseBehaviour(BaseBehaviour, ABC):
         self,
         query: str,
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Query the ConditionalTokens subgraph.
-
-        :param query: the GraphQL query string.
-        :yield: None
-        :return: the parsed JSON response, or None on error.
-        """
+        """Query the ConditionalTokens subgraph."""
         response = yield from self.get_http_response(
             content=to_content(query),
             **self.context.conditional_tokens_subgraph.get_spec(),
@@ -251,12 +229,7 @@ class OmenFundsRecovererBaseBehaviour(BaseBehaviour, ABC):
         self,
         query: str,
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Query the Realitio subgraph.
-
-        :param query: the GraphQL query string.
-        :yield: None
-        :return: the parsed JSON response, or None on error.
-        """
+        """Query the Realitio subgraph."""
         response = yield from self.get_http_response(
             content=to_content(query),
             **self.context.realitio_subgraph.get_spec(),

@@ -27,10 +27,7 @@ from packages.valory.skills.abstract_round_abci.base import BaseTxPayload
 
 @dataclass(frozen=True)
 class RecoveryTxsPayload(BaseTxPayload):
-    """Payload for recovery rounds that accumulate tx dicts.
-
-    content is a JSON-serialized list of tx dicts (may be empty "[]").
-    """
+    """Payload for recovery rounds carrying a JSON-serialized list of tx dicts."""
 
     content: str
 

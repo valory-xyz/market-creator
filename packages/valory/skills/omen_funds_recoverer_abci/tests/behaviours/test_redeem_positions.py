@@ -208,44 +208,44 @@ class TestRedeemPositionsBehaviour:
         assert result is None
 
     def test_async_act(self) -> None:
-        """Test async_act wraps _get_recovery_txs correctly."""
+        """Test async_act wraps _build_redeem_positions_txs correctly."""
         self.behaviour.synchronized_data.funds_recovery_txs = []
-        with patch.object(
-            self.behaviour,
-            "_get_recovery_txs",
-            new=make_gen([]),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour,
+                "_build_redeem_positions_txs",
+                new=make_gen([]),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
-    def test_get_recovery_txs_no_held_positions(self) -> None:
-        """Test _get_recovery_txs when no held positions found."""
+    def test_build_redeem_positions_txs_no_held_positions(self) -> None:
+        """Test _build_redeem_positions_txs when no held positions found."""
         with patch.object(self.behaviour, "_get_held_positions", new=make_gen({})):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_redeem_positions_txs()
             result = exhaust_gen(gen)
         assert not result
 
-    def test_get_recovery_txs_no_finalized_markets(self) -> None:
-        """Test _get_recovery_txs when no finalized markets match conditions."""
+    def test_build_redeem_positions_txs_no_finalized_markets(self) -> None:
+        """Test _build_redeem_positions_txs when no finalized markets match conditions."""
         held = {"0xcond1": {1, 2}}
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=make_gen([])
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=make_gen([])
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_redeem_positions_txs()
             result = exhaust_gen(gen)
         assert not result
 
-    def test_get_recovery_txs_no_winning_positions(self) -> None:
-        """Test _get_recovery_txs when cross-reference yields no winners."""
+    def test_build_redeem_positions_txs_no_winning_positions(self) -> None:
+        """Test _build_redeem_positions_txs when cross-reference yields no winners."""
         held = {"0xcond1": {1}}
         markets = [
             {
@@ -255,17 +255,18 @@ class TestRedeemPositionsBehaviour:
                 "payouts": ["0", "1"],  # index_set=1 -> payout[0]=0 -> no win
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_redeem_positions_txs()
             result = exhaust_gen(gen)
         assert not result
 
-    def test_get_recovery_txs_success_resolved(self) -> None:
-        """Test _get_recovery_txs happy path with already-resolved condition."""
+    def test_build_redeem_positions_txs_success_resolved(self) -> None:
+        """Test _build_redeem_positions_txs happy path with already-resolved condition."""
         held = {"0xcond1": {1}}
         markets = [
             {
@@ -276,22 +277,23 @@ class TestRedeemPositionsBehaviour:
             }
         ]
         redeem_tx = {"to": "0xCT", "data": "0xredeem", "value": 0}
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_check_resolved", new=make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_redeem_positions_tx", new=make_gen(redeem_tx)
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_redeem_positions_tx", new=make_gen(redeem_tx)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_redeem_positions_txs()
             result = exhaust_gen(gen)
         assert len(result) == 1
         assert result[0] == redeem_tx
 
-    def test_get_recovery_txs_success_not_resolved(self) -> None:
-        """Test _get_recovery_txs when condition needs resolve first."""
+    def test_build_redeem_positions_txs_success_not_resolved(self) -> None:
+        """Test _build_redeem_positions_txs when condition needs resolve first."""
         held = {"0xcond1": {1}}
         markets = [
             {
@@ -306,25 +308,25 @@ class TestRedeemPositionsBehaviour:
         ]
         resolve_tx = {"to": "0xProxy", "data": "0xresolve", "value": 0}
         redeem_tx = {"to": "0xCT", "data": "0xredeem", "value": 0}
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_check_resolved", new=make_gen(False)
-        ), patch.object(
-            self.behaviour, "_get_resolve_tx", new=make_gen(resolve_tx)
-        ), patch.object(
-            self.behaviour, "_get_redeem_positions_tx", new=make_gen(redeem_tx)
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=make_gen(False)),
+            patch.object(self.behaviour, "_get_resolve_tx", new=make_gen(resolve_tx)),
+            patch.object(
+                self.behaviour, "_get_redeem_positions_tx", new=make_gen(redeem_tx)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_redeem_positions_txs()
             result = exhaust_gen(gen)
         assert len(result) == 2
         assert result[0] == resolve_tx
         assert result[1] == redeem_tx
 
-    def test_get_recovery_txs_resolve_tx_fails_skips(self) -> None:
-        """Test _get_recovery_txs skips market when resolve tx fails."""
+    def test_build_redeem_positions_txs_resolve_tx_fails_skips(self) -> None:
+        """Test _build_redeem_positions_txs skips market when resolve tx fails."""
         held = {"0xcond1": {1}}
         markets = [
             {
@@ -335,15 +337,14 @@ class TestRedeemPositionsBehaviour:
                 "question_id": "0xqid",
             }
         ]
-        with patch.object(
-            self.behaviour, "_get_held_positions", new=make_gen(held)
-        ), patch.object(
-            self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
-        ), patch.object(
-            self.behaviour, "_check_resolved", new=make_gen(False)
-        ), patch.object(
-            self.behaviour, "_get_resolve_tx", new=make_gen(None)
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=make_gen(False)),
+            patch.object(self.behaviour, "_get_resolve_tx", new=make_gen(None)),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_redeem_positions_txs()
             result = exhaust_gen(gen)
         assert not result

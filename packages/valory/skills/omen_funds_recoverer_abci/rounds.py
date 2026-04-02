@@ -52,10 +52,7 @@ class Event(Enum):
 
 
 class SynchronizedData(TxSynchronizedData):
-    """Class to represent the synchronized data.
-
-    This data is replicated by the tendermint application.
-    """
+    """Synchronized data replicated by the tendermint application."""
 
     def _get_deserialized(self, key: str) -> DeserializedCollection:
         """Strictly get a collection and return it deserialized."""
@@ -92,12 +89,7 @@ class SynchronizedData(TxSynchronizedData):
 
 
 class RecoveryTxsRound(CollectSameUntilThresholdRound):
-    """Base round for recovery stages that accumulate txs.
-
-    Each behaviour reads existing funds_recovery_txs, appends its new txs,
-    and sends the full combined list as the payload. The round simply stores
-    whatever the agents agree on — no custom end_block needed.
-    """
+    """Base round for recovery stages that accumulate tx dicts."""
 
     payload_class = RecoveryTxsPayload
     synchronized_data_class = SynchronizedData
@@ -124,12 +116,7 @@ class ClaimBondsRound(RecoveryTxsRound):
 
 
 class BuildMultisendRound(CollectSameUntilThresholdRound):
-    """A round that bundles all accumulated funds_recovery_txs into a single multisend.
-
-    If funds_recovery_txs is empty, the behaviour sends tx_submitter=None and
-    tx_hash=None, which triggers none_event (NONE). Otherwise the behaviour
-    builds the safe multisend tx hash and sends it, triggering done_event (DONE).
-    """
+    """Bundle accumulated recovery txs into a single multisend safe transaction."""
 
     payload_class = BuildMultisendPayload
     synchronized_data_class = SynchronizedData

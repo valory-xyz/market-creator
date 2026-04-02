@@ -20,7 +20,6 @@
 """This module contains the RemoveLiquidityBehaviour of the 'omen_funds_recoverer_abci' skill."""
 
 import json
-from datetime import datetime
 from string import Template
 from typing import Any, Dict, Generator, List, Optional, Tuple, cast
 
@@ -32,6 +31,7 @@ from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
     ETHER_VALUE,
     OmenFundsRecovererBaseBehaviour,
+    SKILL_LOG_PREFIX,
     ZERO_ADDRESS,
     ZERO_HASH,
     get_callable_name,
@@ -68,12 +68,7 @@ FPMM_POOL_MEMBERSHIPS_QUERY = Template("""  {
 
 
 class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
-    """RemoveLiquidityBehaviour
-
-    Removes liquidity from FPMM markets whose opening time is approaching,
-    then merges the resulting conditional token positions back into collateral.
-    Returns raw tx dicts via RecoveryTxsPayload for later bundling.
-    """
+    """Remove liquidity from approaching markets and merge positions into collateral."""
 
     matching_round = RemoveLiquidityRound
 
@@ -81,7 +76,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            new_txs = yield from self._get_recovery_txs()
+            new_txs = yield from self._build_remove_liquidity_txs()
             existing = self.synchronized_data.funds_recovery_txs
             combined = existing + new_txs
             payload = RecoveryTxsPayload(sender=sender, content=json.dumps(combined))
@@ -90,35 +85,29 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
             yield from self.wait_until_round_end()
         self.set_done()
 
-    def _get_recovery_txs(self) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Get recovery transactions for liquidity removal.
-
-        1. Query Omen subgraph for LP positions
-        2. Verify on-chain with FPMM.get_markets_with_funds
-        3. Filter by opening_timestamp - liquidity_removal_lead_time < now
-        4. For each eligible market: build removeFunding + mergePositions tx dicts
-
-        :yield: None
-        :return: list of tx dicts (may be empty).
-        """
+    def _build_remove_liquidity_txs(
+        self,
+    ) -> Generator[None, None, List[Dict[str, Any]]]:
+        """Build removeFunding + mergePositions txs for eligible markets."""
         markets = yield from self._get_markets()
         if not markets:
-            self.context.logger.info("No markets with LP positions found.")
             return []
 
         # Filter eligible markets
         eligible = [
             m for m in markets if m["removal_timestamp"] < self.last_synced_timestamp
         ]
+        self.context.logger.info(
+            f"{SKILL_LOG_PREFIX} RemoveLiquidity: found {len(markets)} LP markets, "
+            f"{len(eligible)} eligible for removal"
+        )
         if not eligible:
-            self.context.logger.info("No markets eligible for liquidity removal yet.")
             return []
 
         batch_size = self.params.remove_liquidity_batch_size
         txs: List[Dict[str, Any]] = []
         for market in eligible[:batch_size]:
             address = market["address"]
-            self.context.logger.info(f"Closing market: {address}")
 
             amounts = yield from self._calculate_amounts(
                 market=address,
@@ -129,8 +118,10 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
                 continue
 
             amount_to_remove, amount_to_merge = amounts
-            self.context.logger.info(f"Amount to remove: {amount_to_remove}")
-            self.context.logger.info(f"Amount to merge: {amount_to_merge}")
+            self.context.logger.info(
+                f"{SKILL_LOG_PREFIX} RemoveLiquidity: removing LP from {address} "
+                f"(shares: {amount_to_remove}, merge: {amount_to_merge})"
+            )
 
             remove_funding_tx = yield from self._get_remove_funding_tx(
                 address=address, amount_to_remove=amount_to_remove
@@ -152,26 +143,21 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
             txs.append(merge_positions_tx)
 
         self.context.logger.info(
-            f"Built {len(txs)} remove-liquidity tx(es) "
-            f"for {min(len(eligible), batch_size)} market(s)."
+            f"{SKILL_LOG_PREFIX} RemoveLiquidity: built {len(txs)} txs"
         )
         return txs
 
     def _get_markets(
         self,
     ) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Collect FPMM LP positions from the Omen subgraph, verified on-chain.
-
-        :yield: None
-        :return: list of market dicts.
-        """
+        """Collect FPMM LP positions from the Omen subgraph, verified on-chain."""
         creator = self.synchronized_data.safe_contract_address.lower()
         response = yield from self.get_subgraph_result(
             query=FPMM_POOL_MEMBERSHIPS_QUERY.substitute(creator=creator)
         )
         if response is None:
             self.context.logger.warning(
-                "Failed to query Omen subgraph for LP positions."
+                f"{SKILL_LOG_PREFIX} RemoveLiquidity: Omen subgraph query for LP positions failed"
             )
             return []
 
@@ -217,18 +203,6 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
             if str(market["address"]).lower() not in market_addresses_with_funds_str:
                 continue
             markets_with_funds.append(market)
-            log_msg = "\n\t".join(
-                [
-                    "Adding market with",
-                    "Address: " + market["address"],
-                    "Liquidity: " + str(market["amount"]),
-                    "Opening time: "
-                    + str(datetime.fromtimestamp(market["opening_timestamp"])),
-                    "Liquidity removal time: "
-                    + str(datetime.fromtimestamp(market["removal_timestamp"])),
-                ]
-            )
-            self.context.logger.info(log_msg)
 
         return markets_with_funds
 
@@ -237,13 +211,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         market_addresses: List[str],
         safe_address: str,
     ) -> Generator[None, None, List[str]]:
-        """Verify which markets have LP funds on-chain.
-
-        :param market_addresses: list of market contract addresses.
-        :param safe_address: the safe contract address.
-        :yield: None
-        :return: list of market addresses that have funds.
-        """
+        """Verify which markets have LP funds on-chain."""
         if len(market_addresses) == 0:
             return []
 
@@ -256,10 +224,8 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
             safe_address=safe_address,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Couldn't get tx data for FPMMContract.get_markets_with_funds. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
-                f"received {response.performative.value}."
+            self.context.logger.warning(
+                f"{SKILL_LOG_PREFIX} RemoveLiquidity: FPMMContract.get_markets_with_funds failed"
             )
             return []
         return cast(List[str], response.state.body["data"])
@@ -270,14 +236,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         condition_id: str,
         outcome_slot_count: int,
     ) -> Generator[None, None, Optional[Tuple[int, int]]]:
-        """Calculate amount to burn.
-
-        :param market: the market address.
-        :param condition_id: the condition ID.
-        :param outcome_slot_count: the number of outcome slots.
-        :yield: None
-        :return: tuple of (amount_to_remove, amount_to_merge), or None on error.
-        """
+        """Calculate LP shares to burn and positions to merge."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
@@ -294,8 +253,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"ConditionalTokensContract.get_user_holdings unsuccessful! : "
-                f"{response}"
+                f"{SKILL_LOG_PREFIX} RemoveLiquidity: ConditionalTokensContract.get_user_holdings failed"
             )
             return None
 
@@ -311,7 +269,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"FPMMContract.get_balance unsuccessful! : {response}"
+                f"{SKILL_LOG_PREFIX} RemoveLiquidity: FPMMContract.get_balance failed"
             )
             return None
         amount_to_remove = cast(int, response.state.body["balance"])
@@ -324,7 +282,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"FPMMContract.get_total_supply unsuccessful! : {response}"
+                f"{SKILL_LOG_PREFIX} RemoveLiquidity: FPMMContract.get_total_supply failed"
             )
             return None
         total_pool_shares = cast(int, response.state.body["supply"])
@@ -352,13 +310,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         address: str,
         amount_to_remove: int,
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Build the encoded FPMMContract.removeFunds() call.
-
-        :param address: the market address.
-        :param amount_to_remove: the LP shares to burn.
-        :yield: None
-        :return: transaction dict or None on error.
-        """
+        """Build the encoded FPMMContract.removeFunds() call."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_id=str(FPMMContract.contract_id),
@@ -367,10 +319,8 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
             amount_to_remove=amount_to_remove,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Couldn't get tx data for FPMMContract.build_remove_funding_tx. "
-                f"Expected response performative {ContractApiMessage.Performative.STATE.value}, "  # type: ignore
-                f"received {response.performative.value}."
+            self.context.logger.warning(
+                f"{SKILL_LOG_PREFIX} RemoveLiquidity: FPMMContract.build_remove_funding_tx failed"
             )
             return None
 
@@ -390,16 +340,7 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         outcome_slot_count: int,
         amount: int,
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Build a mergePositions transaction.
-
-        :param collateral_token: the collateral token address.
-        :param parent_collection_id: the parent collection ID.
-        :param condition_id: the condition ID.
-        :param outcome_slot_count: the number of outcome slots.
-        :param amount: the amount to merge.
-        :yield: None
-        :return: transaction dict or None on error.
-        """
+        """Build the encoded ConditionalTokens.mergePositions() call."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
@@ -415,8 +356,8 @@ class RemoveLiquidityBehaviour(OmenFundsRecovererBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"ConditionalTokensContract.build_merge_positions_tx "
-                f"unsuccessful! : {response}"
+                f"{SKILL_LOG_PREFIX} RemoveLiquidity: "
+                f"ConditionalTokensContract.build_merge_positions_tx failed"
             )
             return None
 

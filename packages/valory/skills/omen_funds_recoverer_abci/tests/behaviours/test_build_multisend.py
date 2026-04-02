@@ -112,30 +112,24 @@ class TestBuildMultisendBehaviour:
 
     def test_async_act_with_tx(self) -> None:
         """Test async_act when there is a multisend hash."""
-        with patch.object(
-            self.behaviour, "_build_multisend", new=make_gen("0xHash")
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(self.behaviour, "_build_multisend", new=make_gen("0xHash")),
+            patch.object(self.behaviour, "send_a2a_transaction", new=make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
     def test_async_act_without_tx(self) -> None:
         """Test async_act when there is no multisend hash (no txs)."""
-        with patch.object(
-            self.behaviour, "_build_multisend", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(self.behaviour, "_build_multisend", new=make_gen(None)),
+            patch.object(self.behaviour, "send_a2a_transaction", new=make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             exhaust_gen(gen)
             mock_set_done.assert_called_once()

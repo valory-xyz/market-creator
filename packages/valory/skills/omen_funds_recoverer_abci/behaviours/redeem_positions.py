@@ -31,6 +31,7 @@ from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
     ETHER_VALUE,
     OmenFundsRecovererBaseBehaviour,
+    SKILL_LOG_PREFIX,
     ZERO_HASH,
     get_callable_name,
 )
@@ -92,23 +93,13 @@ MARKETS_BY_CONDITIONS_QUERY = Template("""{
 
 
 class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
-    """RedeemPositionsBehaviour
-
-    Redeems conditional token positions from resolved markets.
-    Queries the ConditionalTokens and Omen subgraphs, cross-references
-    to find winning positions, and builds raw tx dicts for later bundling.
-    """
+    """Redeem conditional token positions from resolved markets."""
 
     matching_round = RedeemPositionsRound
 
     @staticmethod
     def _has_winning_position(payouts: List[str], held_index_sets: Set[int]) -> bool:
-        """Check if any held index set corresponds to a winning payout.
-
-        :param payouts: list of payout strings from the market.
-        :param held_index_sets: set of index sets the safe holds.
-        :return: True if a winning position exists.
-        """
+        """Check if any held index set corresponds to a winning payout."""
         for idx_set in held_index_sets:
             for i, payout in enumerate(payouts):
                 if idx_set == (1 << i) and float(payout) > 0:
@@ -119,7 +110,7 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
         """Do the act, supporting asynchronous execution."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
-            new_txs = yield from self._get_recovery_txs()
+            new_txs = yield from self._build_redeem_positions_txs()
             existing = self.synchronized_data.funds_recovery_txs
             combined = existing + new_txs
             payload = RecoveryTxsPayload(sender=sender, content=json.dumps(combined))
@@ -128,30 +119,19 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
             yield from self.wait_until_round_end()
         self.set_done()
 
-    def _get_recovery_txs(self) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Get recovery transactions for position redemption.
-
-        1. Query CT subgraph for positions with balance > 0
-        2. Query Omen subgraph for finalized markets matching held conditions
-        3. Cross-reference to find winning positions
-        4. For each redeemable market: optionally build resolve tx + build redeem tx
-
-        :yield: None
-        :return: list of tx dicts (may be empty).
-        """
+    def _build_redeem_positions_txs(
+        self,
+    ) -> Generator[None, None, List[Dict[str, Any]]]:
+        """Build resolve + redeemPositions txs for winning positions in finalized markets."""
         # Step 1: Get held positions from CT subgraph
         held_positions = yield from self._get_held_positions()
         if not held_positions:
-            self.context.logger.info("No held positions found in CT subgraph.")
             return []
 
         # Step 2: Get finalized markets for held conditions
         positions_to_redeem = yield from self._get_markets_for_conditions(
             list(held_positions.keys())
         )
-        if not positions_to_redeem:
-            self.context.logger.info("No finalized markets found for held conditions.")
-            return []
 
         # Step 3: Cross-reference for winning positions
         redeemable = []
@@ -164,12 +144,11 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
                 redeemable.append(market)
 
         self.context.logger.info(
-            f"Cross-reference: {len(redeemable)} redeemable market(s) "
-            f"out of {len(positions_to_redeem)} with held positions."
+            f"{SKILL_LOG_PREFIX} RedeemPositions: found {len(held_positions)} held conditions, "
+            f"{len(positions_to_redeem)} finalized, {len(redeemable)} redeemable"
         )
 
         if not redeemable:
-            self.context.logger.info("No redeemable positions found.")
             return []
 
         # Step 4: Build txs
@@ -185,20 +164,21 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
                 resolve_tx = yield from self._get_resolve_tx(market)
                 if resolve_tx is not None:
                     self.context.logger.info(
-                        f"Prepending resolve tx for market "
-                        f"{market['address']} (not yet resolved on-chain)"
+                        f"{SKILL_LOG_PREFIX} RedeemPositions: resolving condition "
+                        f"{condition_id} on market {market['address']}"
                     )
                     txs.append(resolve_tx)
                 else:
                     self.context.logger.warning(
-                        f"Failed to build resolve tx for market "
-                        f"{market['address']} — skipping"
+                        f"{SKILL_LOG_PREFIX} RedeemPositions: "
+                        f"RealitioProxyContract.build_resolve_tx failed "
+                        f"for market {market['address']}"
                     )
                     continue
 
             self.context.logger.info(
-                f"Building redeemPositions tx for market {market['address']} "
-                f"with condition {condition_id}"
+                f"{SKILL_LOG_PREFIX} RedeemPositions: redeeming condition "
+                f"{condition_id} on market {market['address']}"
             )
             index_sets = ConditionalTokensContract.get_partitions(
                 market["outcome_slot_count"]
@@ -210,17 +190,15 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
             if redeem_tx is not None:
                 txs.append(redeem_tx)
 
-        self.context.logger.info(f"Built {len(txs)} redeem-positions tx(es).")
+        self.context.logger.info(
+            f"{SKILL_LOG_PREFIX} RedeemPositions: built {len(txs)} txs"
+        )
         return txs
 
     def _get_held_positions(
         self,
     ) -> Generator[None, None, Dict[str, Set[int]]]:
-        """Query the ConditionalTokens subgraph for positions the safe holds.
-
-        :yield: None
-        :return: mapping from condition_id to set of held index_sets.
-        """
+        """Query the ConditionalTokens subgraph for positions the safe holds."""
         safe = self.synchronized_data.safe_contract_address.lower()
         held: Dict[str, Set[int]] = {}
         cursor = ""
@@ -233,7 +211,7 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
             )
             if response is None:
                 self.context.logger.warning(
-                    "Failed to query ConditionalTokens subgraph."
+                    f"{SKILL_LOG_PREFIX} RedeemPositions: ConditionalTokens subgraph query failed"
                 )
                 break
 
@@ -263,12 +241,7 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
     def _get_markets_for_conditions(
         self, condition_ids: List[str]
     ) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Query the Omen subgraph for finalized markets matching given conditions.
-
-        :param condition_ids: list of condition IDs to query for.
-        :yield: None
-        :return: list of market dicts.
-        """
+        """Query the Omen subgraph for finalized markets matching given conditions."""
         now = str(self.last_synced_timestamp)
         all_markets: List[Dict[str, Any]] = []
         seen: set = set()
@@ -313,19 +286,11 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
                         }
                     )
 
-        self.context.logger.info(
-            f"Queried Omen subgraph for {len(condition_ids)} conditions: "
-            f"{len(all_markets)} finalized market(s) with payouts."
-        )
+        # Logging is done in the caller after cross-referencing
         return all_markets
 
     def _check_resolved(self, condition_id: str) -> Generator[None, None, bool]:
-        """Check if a condition is resolved on ConditionalTokens.
-
-        :param condition_id: the condition ID to check.
-        :yield: None
-        :return: True if resolved, False otherwise.
-        """
+        """Check if a condition is resolved on ConditionalTokens."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
@@ -337,7 +302,9 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"check_resolved unsuccessful for {condition_id}: {response}"
+                f"{SKILL_LOG_PREFIX} RedeemPositions: "
+                f"ConditionalTokensContract.check_resolved failed "
+                f"for {condition_id}"
             )
             return False
         return bool(response.state.body.get("resolved", False))
@@ -345,12 +312,7 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
     def _get_resolve_tx(
         self, market: Dict[str, Any]
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Build a resolve transaction via RealitioProxy.
-
-        :param market: market dict with question_id, template_id, etc.
-        :yield: None
-        :return: transaction dict or None on failure.
-        """
+        """Build the encoded RealitioProxy.resolve() call."""
         question_id = market.get("question_id", "")
         question_data = market.get("question_data", "")
         template_id = market.get("template_id", 0)
@@ -358,8 +320,8 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
 
         if not question_id:
             self.context.logger.warning(
-                f"No question_id for market {market['address']} — "
-                f"cannot build resolve tx"
+                f"{SKILL_LOG_PREFIX} RedeemPositions: no question_id for market "
+                f"{market['address']}"
             )
             return None
 
@@ -375,7 +337,8 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"RealitioProxyContract.build_resolve_tx " f"unsuccessful! : {response}"
+                f"{SKILL_LOG_PREFIX} RedeemPositions: "
+                f"RealitioProxyContract.build_resolve_tx failed"
             )
             return None
 
@@ -392,13 +355,7 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
         condition_id: str,
         index_sets: List[int],
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Build a redeemPositions transaction.
-
-        :param condition_id: the condition ID to redeem.
-        :param index_sets: the index sets (partitions) to redeem.
-        :yield: None
-        :return: transaction dict or None on failure.
-        """
+        """Build the encoded ConditionalTokens.redeemPositions() call."""
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.conditional_tokens_contract,
@@ -413,8 +370,8 @@ class RedeemPositionsBehaviour(OmenFundsRecovererBaseBehaviour):
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
-                f"ConditionalTokensContract.build_redeem_positions_tx "
-                f"unsuccessful! : {response}"
+                f"{SKILL_LOG_PREFIX} RedeemPositions: "
+                f"ConditionalTokensContract.build_redeem_positions_tx failed"
             )
             return None
 

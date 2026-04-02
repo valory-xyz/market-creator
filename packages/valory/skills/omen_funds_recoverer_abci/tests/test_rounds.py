@@ -213,15 +213,18 @@ class TestRecoveryTxsRoundEndBlock:
 
     def test_no_threshold_no_majority(self, setup_round: RemoveLiquidityRound) -> None:
         """Test no threshold and no majority possible."""
-        with patch.object(
-            type(setup_round),
-            "threshold_reached",
-            new_callable=PropertyMock,
-            return_value=False,
-        ), patch.object(
-            RemoveLiquidityRound,
-            "is_majority_possible",
-            return_value=False,
+        with (
+            patch.object(
+                type(setup_round),
+                "threshold_reached",
+                new_callable=PropertyMock,
+                return_value=False,
+            ),
+            patch.object(
+                RemoveLiquidityRound,
+                "is_majority_possible",
+                return_value=False,
+            ),
         ):
             result = setup_round.end_block()
             assert result is not None
@@ -232,15 +235,18 @@ class TestRecoveryTxsRoundEndBlock:
         self, setup_round: RemoveLiquidityRound
     ) -> None:
         """Test returns None when majority is still possible."""
-        with patch.object(
-            type(setup_round),
-            "threshold_reached",
-            new_callable=PropertyMock,
-            return_value=False,
-        ), patch.object(
-            RemoveLiquidityRound,
-            "is_majority_possible",
-            return_value=True,
+        with (
+            patch.object(
+                type(setup_round),
+                "threshold_reached",
+                new_callable=PropertyMock,
+                return_value=False,
+            ),
+            patch.object(
+                RemoveLiquidityRound,
+                "is_majority_possible",
+                return_value=True,
+            ),
         ):
             assert setup_round.end_block() is None
 

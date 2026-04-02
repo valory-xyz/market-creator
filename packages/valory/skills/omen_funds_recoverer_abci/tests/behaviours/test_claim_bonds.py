@@ -351,138 +351,148 @@ class TestClaimBondsBehaviour:
         assert result is None
 
     def test_async_act(self) -> None:
-        """Test async_act wraps _get_recovery_txs correctly."""
+        """Test async_act wraps _build_claim_bonds_txs correctly."""
         self.behaviour.synchronized_data.funds_recovery_txs = []
-        with patch.object(
-            self.behaviour,
-            "_get_recovery_txs",
-            new=make_gen([]),
-        ), patch.object(
-            self.behaviour, "send_a2a_transaction", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "wait_until_round_end", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "set_done"
-        ) as mock_set_done:
+        with (
+            patch.object(
+                self.behaviour,
+                "_build_claim_bonds_txs",
+                new=make_gen([]),
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=make_gen(None)),
+            patch.object(self.behaviour, "wait_until_round_end", new=make_gen(None)),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
             gen = self.behaviour.async_act()
             exhaust_gen(gen)
             mock_set_done.assert_called_once()
 
-    def test_get_recovery_txs_no_responses_no_withdraw(self) -> None:
-        """Test _get_recovery_txs with no claimable responses and no withdraw."""
-        with patch.object(
-            self.behaviour, "_get_claimable_responses", new=make_gen([])
-        ), patch.object(self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)):
-            gen = self.behaviour._get_recovery_txs()
+    def test_build_claim_bonds_txs_no_responses_no_withdraw(self) -> None:
+        """Test _build_claim_bonds_txs with no claimable responses and no withdraw."""
+        with (
+            patch.object(self.behaviour, "_get_claimable_responses", new=make_gen([])),
+            patch.object(
+                self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+            ),
+        ):
+            gen = self.behaviour._build_claim_bonds_txs()
             result = exhaust_gen(gen)
         assert not result
 
-    def test_get_recovery_txs_no_responses_with_withdraw(self) -> None:
-        """Test _get_recovery_txs with no claims but a withdraw tx."""
+    def test_build_claim_bonds_txs_no_responses_with_withdraw(self) -> None:
+        """Test _build_claim_bonds_txs with no claims but a withdraw tx."""
         withdraw_tx = {"to": "0xR", "data": "0xw", "value": 0}
-        with patch.object(
-            self.behaviour, "_get_claimable_responses", new=make_gen([])
-        ), patch.object(
-            self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(withdraw_tx)
+        with (
+            patch.object(self.behaviour, "_get_claimable_responses", new=make_gen([])),
+            patch.object(
+                self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(withdraw_tx)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_claim_bonds_txs()
             result = exhaust_gen(gen)
         assert len(result) == 1
         assert result[0] == withdraw_tx
 
-    def test_get_recovery_txs_claim_and_withdraw(self) -> None:
-        """Test _get_recovery_txs with one claim and a withdraw tx."""
+    def test_build_claim_bonds_txs_claim_and_withdraw(self) -> None:
+        """Test _build_claim_bonds_txs with one claim and a withdraw tx."""
         responses = [{"question": {"id": "0xabcd"}, "bond": "100"}]
         claim_tx = {"to": "0xR", "data": "0xclaim", "value": 0}
         withdraw_tx = {"to": "0xR", "data": "0xw", "value": 0}
 
-        with patch.object(
-            self.behaviour, "_get_claimable_responses", new=make_gen(responses)
-        ), patch.object(
-            self.behaviour, "_is_unclaimed", new=make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_claim_params", new=make_gen([{"p": "v"}])
-        ), patch.object(
-            self.behaviour, "_simulate_claim", new=make_gen(True)
-        ), patch.object(
-            self.behaviour, "_build_claim_tx", new=make_gen(claim_tx)
-        ), patch.object(
-            self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(withdraw_tx)
+        with (
+            patch.object(
+                self.behaviour, "_get_claimable_responses", new=make_gen(responses)
+            ),
+            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_claim_params", new=make_gen([{"p": "v"}])
+            ),
+            patch.object(self.behaviour, "_simulate_claim", new=make_gen(True)),
+            patch.object(self.behaviour, "_build_claim_tx", new=make_gen(claim_tx)),
+            patch.object(
+                self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(withdraw_tx)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_claim_bonds_txs()
             result = exhaust_gen(gen)
         assert len(result) == 2
         assert result[0] == claim_tx
         assert result[1] == withdraw_tx
 
-    def test_get_recovery_txs_already_claimed(self) -> None:
-        """Test _get_recovery_txs skips already-claimed questions."""
+    def test_build_claim_bonds_txs_already_claimed(self) -> None:
+        """Test _build_claim_bonds_txs skips already-claimed questions."""
         responses = [{"question": {"id": "0xabcd"}, "bond": "100"}]
 
-        with patch.object(
-            self.behaviour, "_get_claimable_responses", new=make_gen(responses)
-        ), patch.object(
-            self.behaviour, "_is_unclaimed", new=make_gen(False)
-        ), patch.object(
-            self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+        with (
+            patch.object(
+                self.behaviour, "_get_claimable_responses", new=make_gen(responses)
+            ),
+            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(False)),
+            patch.object(
+                self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_claim_bonds_txs()
             result = exhaust_gen(gen)
         assert not result
 
-    def test_get_recovery_txs_claim_params_fail(self) -> None:
-        """Test _get_recovery_txs skips when claim params fail."""
+    def test_build_claim_bonds_txs_claim_params_fail(self) -> None:
+        """Test _build_claim_bonds_txs skips when claim params fail."""
         responses = [{"question": {"id": "0xabcd"}, "bond": "100"}]
 
-        with patch.object(
-            self.behaviour, "_get_claimable_responses", new=make_gen(responses)
-        ), patch.object(
-            self.behaviour, "_is_unclaimed", new=make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_claim_params", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+        with (
+            patch.object(
+                self.behaviour, "_get_claimable_responses", new=make_gen(responses)
+            ),
+            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
+            patch.object(self.behaviour, "_get_claim_params", new=make_gen(None)),
+            patch.object(
+                self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_claim_bonds_txs()
             result = exhaust_gen(gen)
         assert not result
 
-    def test_get_recovery_txs_simulation_fail(self) -> None:
-        """Test _get_recovery_txs skips when simulation fails."""
+    def test_build_claim_bonds_txs_simulation_fail(self) -> None:
+        """Test _build_claim_bonds_txs skips when simulation fails."""
         responses = [{"question": {"id": "0xabcd"}, "bond": "100"}]
 
-        with patch.object(
-            self.behaviour, "_get_claimable_responses", new=make_gen(responses)
-        ), patch.object(
-            self.behaviour, "_is_unclaimed", new=make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_claim_params", new=make_gen([{"p": "v"}])
-        ), patch.object(
-            self.behaviour, "_simulate_claim", new=make_gen(False)
-        ), patch.object(
-            self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+        with (
+            patch.object(
+                self.behaviour, "_get_claimable_responses", new=make_gen(responses)
+            ),
+            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_claim_params", new=make_gen([{"p": "v"}])
+            ),
+            patch.object(self.behaviour, "_simulate_claim", new=make_gen(False)),
+            patch.object(
+                self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_claim_bonds_txs()
             result = exhaust_gen(gen)
         assert not result
 
-    def test_get_recovery_txs_build_claim_tx_fail(self) -> None:
-        """Test _get_recovery_txs skips when build claim tx fails."""
+    def test_build_claim_bonds_txs_build_claim_tx_fail(self) -> None:
+        """Test _build_claim_bonds_txs skips when build claim tx fails."""
         responses = [{"question": {"id": "0xabcd"}, "bond": "100"}]
 
-        with patch.object(
-            self.behaviour, "_get_claimable_responses", new=make_gen(responses)
-        ), patch.object(
-            self.behaviour, "_is_unclaimed", new=make_gen(True)
-        ), patch.object(
-            self.behaviour, "_get_claim_params", new=make_gen([{"p": "v"}])
-        ), patch.object(
-            self.behaviour, "_simulate_claim", new=make_gen(True)
-        ), patch.object(
-            self.behaviour, "_build_claim_tx", new=make_gen(None)
-        ), patch.object(
-            self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+        with (
+            patch.object(
+                self.behaviour, "_get_claimable_responses", new=make_gen(responses)
+            ),
+            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_claim_params", new=make_gen([{"p": "v"}])
+            ),
+            patch.object(self.behaviour, "_simulate_claim", new=make_gen(True)),
+            patch.object(self.behaviour, "_build_claim_tx", new=make_gen(None)),
+            patch.object(
+                self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
+            ),
         ):
-            gen = self.behaviour._get_recovery_txs()
+            gen = self.behaviour._build_claim_bonds_txs()
             result = exhaust_gen(gen)
         assert not result

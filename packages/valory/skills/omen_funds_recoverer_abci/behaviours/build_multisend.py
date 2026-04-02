@@ -23,6 +23,7 @@ from typing import Generator, Optional
 
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
     OmenFundsRecovererBaseBehaviour,
+    SKILL_LOG_PREFIX,
 )
 from packages.valory.skills.omen_funds_recoverer_abci.payloads import (
     BuildMultisendPayload,
@@ -31,11 +32,7 @@ from packages.valory.skills.omen_funds_recoverer_abci.rounds import BuildMultise
 
 
 class BuildMultisendBehaviour(OmenFundsRecovererBaseBehaviour):
-    """BuildMultisendBehaviour
-
-    Reads funds_recovery_txs from SynchronizedData and bundles all accumulated
-    raw tx dicts into a single multisend safe transaction.
-    """
+    """Bundle accumulated recovery txs into a single multisend safe transaction."""
 
     matching_round = BuildMultisendRound
 
@@ -57,16 +54,16 @@ class BuildMultisendBehaviour(OmenFundsRecovererBaseBehaviour):
         self.set_done()
 
     def _build_multisend(self) -> Generator[None, None, Optional[str]]:
-        """Bundle all accumulated funds_recovery_txs into a single multisend.
-
-        :yield: None
-        :return: the multisend payload hash, or None if no txs to bundle.
-        """
+        """Bundle all accumulated funds_recovery_txs into a single multisend."""
         txs = self.synchronized_data.funds_recovery_txs
         if not txs:
-            self.context.logger.info("No recovery transactions to submit.")
+            self.context.logger.info(
+                f"{SKILL_LOG_PREFIX} BuildMultisend: no recovery txs to submit"
+            )
             return None
-        self.context.logger.info(f"Building multisend with {len(txs)} recovery tx(s).")
+        self.context.logger.info(
+            f"{SKILL_LOG_PREFIX} BuildMultisend: bundling {len(txs)} recovery txs into multisend"
+        )
         # Convert data fields from hex strings back to bytes if needed
         for tx in txs:
             if isinstance(tx.get("data"), str):
