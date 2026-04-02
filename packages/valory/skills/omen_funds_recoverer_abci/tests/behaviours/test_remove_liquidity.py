@@ -22,6 +22,8 @@
 from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
+import pytest
+
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import ETHER_VALUE
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.remove_liquidity import (
     RemoveLiquidityBehaviour,
@@ -95,65 +97,38 @@ class TestRemoveLiquidityBehaviour:
         amount_to_remove, amount_to_merge = result
         assert amount_to_remove == 500
 
-    def test_calculate_amounts_holdings_fail(self) -> None:
-        """Test _calculate_amounts when first contract call (holdings) fails."""
-        resp_error = make_contract_error_response()
-
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=make_gen(resp_error),
-        ):
-            gen = self.behaviour._calculate_amounts("0xMarket", "0xCond", 2)
-            result = exhaust_gen(gen)
-
-        assert result is None
-
-    def test_calculate_amounts_balance_fail(self) -> None:
-        """Test _calculate_amounts when second contract call (balance) fails."""
-        resp_holdings = make_contract_state_response(
-            {"shares": [100, 200], "holdings": [300, 400]}
-        )
-        resp_error = make_contract_error_response()
-
-        call_count = 0
-
-        def mock_contract_gen(*args: Any, **kwargs: Any) -> Any:
-            nonlocal call_count
-            call_count += 1
-            if call_count == 1:
-                return resp_holdings
-            return resp_error
-            yield  # noqa
-
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=mock_contract_gen,
-        ):
-            gen = self.behaviour._calculate_amounts("0xMarket", "0xCond", 2)
-            result = exhaust_gen(gen)
-
-        assert result is None
-
-    def test_calculate_amounts_supply_fail(self) -> None:
-        """Test _calculate_amounts when third contract call (supply) fails."""
+    @pytest.mark.parametrize(
+        "description,fail_at_call",
+        [
+            ("holdings fail", 1),
+            ("balance fail", 2),
+            ("supply fail", 3),
+        ],
+    )
+    def test_calculate_amounts_contract_call_fail(
+        self, description: str, fail_at_call: int
+    ) -> None:
+        """Test _calculate_amounts returns None when a contract call fails."""
         resp_holdings = make_contract_state_response(
             {"shares": [100, 200], "holdings": [300, 400]}
         )
         resp_balance = make_contract_state_response({"balance": 500})
         resp_error = make_contract_error_response()
 
+        responses = {
+            1: resp_holdings,
+            2: resp_balance,
+            3: make_contract_state_response({"supply": 1000}),
+        }
+        # Replace the failing call with an error
+        responses[fail_at_call] = resp_error
+
         call_count = 0
 
         def mock_contract_gen(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
-            if call_count == 1:
-                return resp_holdings
-            elif call_count == 2:
-                return resp_balance
-            return resp_error
+            return responses[call_count]
             yield  # noqa
 
         with patch.object(
@@ -566,3 +541,206 @@ class TestRemoveLiquidityBehaviourFlow:
             gen = self.behaviour._get_markets_with_funds(["0xM1", "0xM2"], "0xSafe")
             result = exhaust_gen(gen)
         assert result == ["0xM1"]
+
+
+def _make_pool_membership(overrides: dict) -> dict:
+    """Build a valid pool membership dict, then apply overrides to the pool."""
+    pool = {
+        "id": "0xMarket1",
+        "openingTimestamp": "1700200000",
+        "creator": "0xSafe",
+        "liquidityMeasure": "5000",
+        "outcomeTokenAmounts": ["2000", "3000"],
+        "conditions": [
+            {
+                "id": "0xC1",
+                "outcomeSlotCount": 2,
+                "question": {"id": "0xQ1"},
+            }
+        ],
+    }
+    pool.update(overrides)
+    return {
+        "amount": "1000",
+        "id": "m1",
+        "pool": pool,
+    }
+
+
+class TestGetMarkets:
+    """Tests for _get_markets subgraph query and on-chain verification."""
+
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
+        context_mock = MagicMock()
+        context_mock.logger = MagicMock()
+        context_mock.params = MagicMock()
+        context_mock.params.conditional_tokens_contract = "0xConditionalTokens"
+        context_mock.params.collateral_tokens_contract = "0xCollateral"
+        context_mock.params.liquidity_removal_lead_time = 86400
+        context_mock.params.remove_liquidity_batch_size = 3
+        context_mock.state.round_sequence = MagicMock()
+        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
+            1700100000
+        )
+        context_mock.state.synchronized_data = MagicMock()
+        context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
+        context_mock.benchmark_tool = MagicMock()
+        context_mock.agent_address = "0xAgent"
+        context_mock.omen_subgraph = MagicMock()
+        context_mock.omen_subgraph.get_spec.return_value = {
+            "method": "POST",
+            "url": "https://omen.example.com",
+        }
+        self.behaviour: Any = RemoveLiquidityBehaviour(
+            name="test", skill_context=context_mock
+        )
+
+    def test_get_markets_subgraph_failure(self) -> None:
+        """Test _get_markets returns empty on subgraph failure."""
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=make_gen(None),
+        ):
+            gen = self.behaviour._get_markets()
+            result = exhaust_gen(gen)
+        assert result == []
+
+    def test_get_markets_no_memberships(self) -> None:
+        """Test _get_markets returns empty when no pool memberships found."""
+        response = {"data": {"fpmmPoolMemberships": []}}
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_markets()
+            result = exhaust_gen(gen)
+        assert result == []
+
+    def test_get_markets_success(self) -> None:
+        """Test _get_markets returns markets with valid data and on-chain funds."""
+        response = {
+            "data": {
+                "fpmmPoolMemberships": [
+                    {
+                        "amount": "1000",
+                        "id": "membership1",
+                        "pool": {
+                            "id": "0xMarket1",
+                            "openingTimestamp": "1700200000",
+                            "creator": "0xSafe",
+                            "liquidityMeasure": "5000",
+                            "outcomeTokenAmounts": ["2000", "3000"],
+                            "conditions": [
+                                {
+                                    "id": "0xCond1",
+                                    "outcomeSlotCount": 2,
+                                    "question": {"id": "0xQ1"},
+                                }
+                            ],
+                        },
+                    }
+                ]
+            }
+        }
+        funds_resp = make_contract_state_response({"data": ["0xMarket1"]})
+
+        with (
+            patch.object(
+                self.behaviour,
+                "get_subgraph_result",
+                new=make_gen(response),
+            ),
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=make_gen(funds_resp),
+            ),
+        ):
+            gen = self.behaviour._get_markets()
+            result = exhaust_gen(gen)
+        assert len(result) == 1
+        assert result[0]["address"] == "0xMarket1"
+        assert result[0]["condition_id"] == "0xCond1"
+
+    @pytest.mark.parametrize(
+        "description,pool_overrides",
+        [
+            ("zero liquidity", {"liquidityMeasure": "0"}),
+            ("None liquidity", {"liquidityMeasure": None}),
+            ("None openingTimestamp", {"openingTimestamp": None}),
+            (
+                "None question",
+                {
+                    "conditions": [
+                        {
+                            "id": "0xC1",
+                            "outcomeSlotCount": 2,
+                            "question": None,
+                        }
+                    ]
+                },
+            ),
+        ],
+    )
+    def test_get_markets_filtered(
+        self, description: str, pool_overrides: dict
+    ) -> None:
+        """Test _get_markets filters out markets with invalid pool data."""
+        membership = _make_pool_membership(pool_overrides)
+        response = {"data": {"fpmmPoolMemberships": [membership]}}
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_markets()
+            result = exhaust_gen(gen)
+        assert result == []
+
+    def test_get_markets_no_on_chain_funds(self) -> None:
+        """Test _get_markets filters markets that have no on-chain funds."""
+        response = {
+            "data": {
+                "fpmmPoolMemberships": [
+                    {
+                        "amount": "1000",
+                        "id": "m1",
+                        "pool": {
+                            "id": "0xMarket1",
+                            "openingTimestamp": "1700200000",
+                            "creator": "0xSafe",
+                            "liquidityMeasure": "5000",
+                            "outcomeTokenAmounts": ["2000", "3000"],
+                            "conditions": [
+                                {
+                                    "id": "0xC1",
+                                    "outcomeSlotCount": 2,
+                                    "question": {"id": "0xQ1"},
+                                }
+                            ],
+                        },
+                    }
+                ]
+            }
+        }
+        # On-chain verification returns empty list -- market has no funds
+        funds_resp = make_contract_state_response({"data": []})
+
+        with (
+            patch.object(
+                self.behaviour,
+                "get_subgraph_result",
+                new=make_gen(response),
+            ),
+            patch.object(
+                self.behaviour,
+                "get_contract_api_response",
+                new=make_gen(funds_resp),
+            ),
+        ):
+            gen = self.behaviour._get_markets()
+            result = exhaust_gen(gen)
+        assert result == []

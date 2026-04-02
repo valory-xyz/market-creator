@@ -22,9 +22,13 @@
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import ETHER_VALUE
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.redeem_positions import (
+    CONDITION_ID_BATCH_SIZE,
     RedeemPositionsBehaviour,
+    SUBGRAPH_PAGE_SIZE,
 )
 from packages.valory.skills.omen_funds_recoverer_abci.tests.behaviours.conftest import (
     exhaust_gen,
@@ -348,3 +352,367 @@ class TestRedeemPositionsBehaviour:
             gen = self.behaviour._build_redeem_positions_txs()
             result = exhaust_gen(gen)
         assert not result
+
+    def test_build_redeem_positions_txs_redeem_tx_fails(self) -> None:
+        """Test _build_redeem_positions_txs when redeem tx fails (already resolved)."""
+        held = {"0xcond1": {1}}
+        markets = [
+            {
+                "address": "0xM1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["1", "0"],
+            }
+        ]
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_check_resolved", new=make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_redeem_positions_tx", new=make_gen(None)
+            ),
+        ):
+            gen = self.behaviour._build_redeem_positions_txs()
+            result = exhaust_gen(gen)
+        # No txs appended since redeem returned None
+        assert not result
+
+
+class TestGetHeldPositions:
+    """Tests for _get_held_positions subgraph pagination."""
+
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
+        context_mock = MagicMock()
+        context_mock.logger = MagicMock()
+        context_mock.params = MagicMock()
+        context_mock.params.conditional_tokens_contract = "0xConditionalTokens"
+        context_mock.params.collateral_tokens_contract = "0xCollateral"
+        context_mock.params.realitio_oracle_proxy_contract = "0xRealitioProxy"
+        context_mock.params.redeem_positions_batch_size = 5
+        context_mock.state.round_sequence = MagicMock()
+        context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
+            1700100000
+        )
+        context_mock.state.synchronized_data = MagicMock()
+        context_mock.state.synchronized_data.safe_contract_address = "0xSafe"
+        context_mock.benchmark_tool = MagicMock()
+        context_mock.agent_address = "0xAgent"
+        context_mock.conditional_tokens_subgraph = MagicMock()
+        context_mock.conditional_tokens_subgraph.get_spec.return_value = {
+            "method": "POST",
+            "url": "https://ct.example.com",
+        }
+        context_mock.omen_subgraph = MagicMock()
+        context_mock.omen_subgraph.get_spec.return_value = {
+            "method": "POST",
+            "url": "https://omen.example.com",
+        }
+        self.behaviour: Any = RedeemPositionsBehaviour(
+            name="test", skill_context=context_mock
+        )
+
+    def test_get_held_positions_empty(self) -> None:
+        """Test _get_held_positions when CT subgraph returns no user positions."""
+        response = {"data": {"user": {"userPositions": []}}}
+        with patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = exhaust_gen(gen)
+        assert result == {}
+
+    def test_get_held_positions_user_none(self) -> None:
+        """Test _get_held_positions when user is None (no user found)."""
+        response = {"data": {"user": None}}
+        with patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = exhaust_gen(gen)
+        assert result == {}
+
+    def test_get_held_positions_single_page(self) -> None:
+        """Test _get_held_positions with a single page of results."""
+        response = {
+            "data": {
+                "user": {
+                    "userPositions": [
+                        {
+                            "id": "pos1",
+                            "balance": "100",
+                            "position": {
+                                "conditionIds": ["0xCond1"],
+                                "indexSets": ["1", "2"],
+                            },
+                        }
+                    ]
+                }
+            }
+        }
+        with patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = exhaust_gen(gen)
+        assert "0xcond1" in result
+        assert result["0xcond1"] == {1, 2}
+
+    def test_get_held_positions_pagination(self) -> None:
+        """Test _get_held_positions paginates through multiple pages."""
+        page1 = [
+            {
+                "id": f"pos{i}",
+                "balance": "100",
+                "position": {
+                    "conditionIds": [f"0xCond{i}"],
+                    "indexSets": ["1"],
+                },
+            }
+            for i in range(SUBGRAPH_PAGE_SIZE)
+        ]
+        page2 = [
+            {
+                "id": "posFinal",
+                "balance": "50",
+                "position": {
+                    "conditionIds": ["0xCondFinal"],
+                    "indexSets": ["2"],
+                },
+            }
+        ]
+
+        call_count = 0
+
+        def mock_subgraph(*args: Any, **kwargs: Any) -> Any:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return {"data": {"user": {"userPositions": page1}}}
+            return {"data": {"user": {"userPositions": page2}}}
+            yield  # noqa
+
+        with patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=mock_subgraph,
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = exhaust_gen(gen)
+        assert "0xcondfinal" in result
+        assert len(result) == SUBGRAPH_PAGE_SIZE + 1
+
+    def test_get_held_positions_duplicate_condition_id(self) -> None:
+        """Test _get_held_positions merges index sets for duplicate condition IDs."""
+        response = {
+            "data": {
+                "user": {
+                    "userPositions": [
+                        {
+                            "id": "pos1",
+                            "balance": "100",
+                            "position": {
+                                "conditionIds": ["0xCond1"],
+                                "indexSets": ["1"],
+                            },
+                        },
+                        {
+                            "id": "pos2",
+                            "balance": "200",
+                            "position": {
+                                "conditionIds": ["0xCond1"],
+                                "indexSets": ["2"],
+                            },
+                        },
+                    ]
+                }
+            }
+        }
+        with patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = exhaust_gen(gen)
+        assert "0xcond1" in result
+        assert result["0xcond1"] == {1, 2}
+
+    def test_get_held_positions_subgraph_failure(self) -> None:
+        """Test _get_held_positions returns empty on subgraph failure."""
+        with patch.object(
+            self.behaviour,
+            "get_conditional_tokens_subgraph_result",
+            new=make_gen(None),
+        ):
+            gen = self.behaviour._get_held_positions()
+            result = exhaust_gen(gen)
+        assert result == {}
+
+    def test_get_markets_for_conditions_empty(self) -> None:
+        """Test _get_markets_for_conditions with no condition_ids."""
+        gen = self.behaviour._get_markets_for_conditions([])
+        result = exhaust_gen(gen)
+        assert result == []
+
+    def test_get_markets_for_conditions_success(self) -> None:
+        """Test _get_markets_for_conditions returns markets for valid conditions."""
+        response = {
+            "data": {
+                "fixedProductMarketMakers": [
+                    {
+                        "id": "0xMarket1",
+                        "payouts": ["1", "0"],
+                        "templateId": "2",
+                        "question": {"id": "0xq1", "data": "question?"},
+                        "conditions": [{"id": "0xCond1", "outcomeSlotCount": 2}],
+                    }
+                ]
+            }
+        }
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_markets_for_conditions(["0xCond1"])
+            result = exhaust_gen(gen)
+        assert len(result) == 1
+        assert result[0]["address"] == "0xMarket1"
+        assert result[0]["condition_id"] == "0xCond1"
+
+    def test_get_markets_for_conditions_dedup(self) -> None:
+        """Test _get_markets_for_conditions deduplicates market addresses."""
+        entry = {
+            "id": "0xMarket1",
+            "payouts": ["1", "0"],
+            "templateId": "2",
+            "question": {"id": "0xq1", "data": "q"},
+            "conditions": [{"id": "0xCond1", "outcomeSlotCount": 2}],
+        }
+        response = {"data": {"fixedProductMarketMakers": [entry, entry]}}
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_markets_for_conditions(["0xCond1"])
+            result = exhaust_gen(gen)
+        assert len(result) == 1
+
+    @pytest.mark.parametrize(
+        "description,market_entry",
+        [
+            (
+                "no positive payouts",
+                {
+                    "id": "0xM1",
+                    "payouts": ["0", "0"],
+                    "templateId": None,
+                    "question": {"id": "0xq1", "data": "q"},
+                    "conditions": [{"id": "0xC1", "outcomeSlotCount": 2}],
+                },
+            ),
+            (
+                "null payouts",
+                {
+                    "id": "0xM1",
+                    "payouts": None,
+                    "templateId": "0",
+                    "question": None,
+                    "conditions": [{"id": "0xC1", "outcomeSlotCount": 2}],
+                },
+            ),
+            (
+                "empty conditions",
+                {
+                    "id": "0xM1",
+                    "payouts": ["1", "0"],
+                    "templateId": "2",
+                    "question": {"id": "0xq1", "data": "q"},
+                    "conditions": [],
+                },
+            ),
+            (
+                "null outcomeSlotCount",
+                {
+                    "id": "0xM1",
+                    "payouts": ["1", "0"],
+                    "templateId": "2",
+                    "question": {"id": "0xq1", "data": "q"},
+                    "conditions": [{"id": "0xC1", "outcomeSlotCount": None}],
+                },
+            ),
+        ],
+    )
+    def test_get_markets_for_conditions_filtered(
+        self, description: str, market_entry: dict
+    ) -> None:
+        """Test _get_markets_for_conditions filters out invalid entries."""
+        response = {"data": {"fixedProductMarketMakers": [market_entry]}}
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=make_gen(response),
+        ):
+            gen = self.behaviour._get_markets_for_conditions(["0xC1"])
+            result = exhaust_gen(gen)
+        assert result == []
+
+    def test_get_markets_for_conditions_subgraph_failure(self) -> None:
+        """Test _get_markets_for_conditions continues on subgraph failure."""
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=make_gen(None),
+        ):
+            gen = self.behaviour._get_markets_for_conditions(["0xC1"])
+            result = exhaust_gen(gen)
+        assert result == []
+
+    def test_get_markets_for_conditions_batching(self) -> None:
+        """Test _get_markets_for_conditions batches condition IDs."""
+        # Create more than CONDITION_ID_BATCH_SIZE condition IDs to trigger batching
+        condition_ids = [f"0xCond{i}" for i in range(CONDITION_ID_BATCH_SIZE + 1)]
+
+        call_count = 0
+
+        def mock_subgraph(*args: Any, **kwargs: Any) -> Any:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return {
+                    "data": {
+                        "fixedProductMarketMakers": [
+                            {
+                                "id": "0xM1",
+                                "payouts": ["1", "0"],
+                                "templateId": "2",
+                                "question": {"id": "0xq1", "data": "q"},
+                                "conditions": [
+                                    {"id": "0xCond0", "outcomeSlotCount": 2}
+                                ],
+                            }
+                        ]
+                    }
+                }
+            return {"data": {"fixedProductMarketMakers": []}}
+            yield  # noqa
+
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=mock_subgraph,
+        ):
+            gen = self.behaviour._get_markets_for_conditions(condition_ids)
+            result = exhaust_gen(gen)
+        assert call_count == 2  # Two batches
+        assert len(result) == 1
