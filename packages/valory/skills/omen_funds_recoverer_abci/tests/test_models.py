@@ -89,10 +89,6 @@ class TestOmenFundsRecovererParams:
             "claim_bonds_batch_size": 10,
             "min_balance_withdraw_realitio": 10**19,
             "realitio_start_block": 0,
-            "realitio_contract": "0xRealitio",
-            "realitio_oracle_proxy_contract": "0xRealitioProxy",
-            "conditional_tokens_contract": "0xCT",
-            "collateral_tokens_contract": "0xCollateral",
         }
         with patch.object(BaseParams, "__init__", return_value=None):
             OmenFundsRecovererParams.__init__(mock_self, **kwargs)
@@ -102,7 +98,3 @@ class TestOmenFundsRecovererParams:
         assert mock_self.claim_bonds_batch_size == 10
         assert mock_self.min_balance_withdraw_realitio == 10**19
         assert mock_self.realitio_start_block == 0
-        assert mock_self.realitio_contract == "0xRealitio"
-        assert mock_self.realitio_oracle_proxy_contract == "0xRealitioProxy"
-        assert mock_self.conditional_tokens_contract == "0xCT"
-        assert mock_self.collateral_tokens_contract == "0xCollateral"
