@@ -164,29 +164,56 @@ Transition function:
 
 ## Phased Implementation Plan
 
-### Phase 0+1: `omen_funds_recoverer_abci` — DONE
+### Phase 1: `omen_funds_recoverer_abci` — DONE
 
 Standalone skill implemented with tx accumulation pattern. See [omen_funds_recoverer.md](omen_funds_recoverer.md).
 
-### Phase 2: Slim down Market Creator
+### Phase 2: Integrate `omen_funds_recoverer_abci` into Market Creator — DONE
 
-1. Remove recovery + answering rounds from `market_creation_manager_abci`
-2. Compose with `omen_funds_recoverer_abci`
-3. Update PostTransaction → PostCreation routing
-4. Remove MechInteract from composition
-5. Full test + lint pipeline
+Removed recovery rounds from `market_creation_manager_abci`, composed with `omen_funds_recoverer_abci`. Agent tested on Tenderly — full cycle works correctly.
 
-### Phase 3: Create Market Resolver skill
+**What was done:**
 
-In the [market-resolver repo](https://github.com/valory-xyz/market-resolver). See [market_resolver.md](https://github.com/valory-xyz/market-resolver/blob/main/.claude/plans/market_resolver.md).
+- Removed 5 recovery rounds: SyncMarkets, RemoveFunding, RedeemWinnings, RedeemBond (+ their behaviours, states, tests)
+- Kept DepositDai (wraps xDAI→wxDAI for market creation collateral)
+- Kept answering logic (GetPendingQuestions, AnswerQuestions, MechInteract)
+- Added `OmenFundsRecovererAbciApp` to composition chain
+- Added `OmenFundsRecovererRoundBehaviour` to composed behaviours
+- Added `OmenFundsRecovererParams` to composed Params MRO
+- Added `RealitioSubgraph` model to composed skill
+- Added `RECOVERY_DONE` event for PostTransaction routing
+- Shared contract address params (`realitio_contract`, etc.) declared as class attributes in `OmenFundsRecovererParams` to avoid MRO double-consumption
+- Fixed Realitio subgraph composite question ID format (`{contract}-{question_id}`)
+- Updated all configs (skill.yaml, agent aea-config.yaml, service.yaml)
+- All linters pass (pylint 10.00, mypy 0 issues, flake8 OK, darglint OK)
+- All structural checks pass (check-abciapp-specs, check-handlers, check-packages, analyse-service)
+- 569 tests pass
 
-### Phase 4: Compose Market Resolver service
+**New composed FSM flow:**
 
-Wire `market_resolution_manager_abci` into a deployable service in the resolver repo.
+```
+Registration → IdentifyOwner → FundsForwarder
+  → RemoveLiquidity → RedeemPositions → ClaimBonds → BuildMultisend (omen_funds_recoverer)
+  → [TxSettlement if recovery tx]
+  → DepositDai → GetPendingQuestions → [MechInteract] → AnswerQuestions
+  → CollectRandomness → SelectKeeper → CollectProposed → Approve → Retrieve → Prepare
+  → [TxSettlement] → PostTransaction → ResetPause → (loop)
+```
 
-### Phase 5: Integration testing
+### Phase 3 (future): Remove answering logic + MechInteract
 
-Deploy both on testnet, verify independence, validate fund recovery works for both.
+Done when the market-resolver service is ready:
+- Remove `GetPendingQuestionsRound`, `AnswerQuestionsRound`
+- Remove MechInteract from composition
+- Remove mech-related params and events
+
+### Phase 4: Deployment
+
+1. Deploy Market Creator (v2) to production
+2. Verify fund recovery + market creation work correctly
+3. When market-resolver is ready, deploy both simultaneously
+
+> **Note:** Market Resolver is developed in the [market-resolver repo](https://github.com/valory-xyz/market-resolver). See [market_resolver.md](https://github.com/valory-xyz/market-resolver/blob/main/.claude/plans/market_resolver.md).
 
 ---
 

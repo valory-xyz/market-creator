@@ -62,6 +62,12 @@ from packages.valory.skills.mech_interact_abci.models import (
     Params as MechInteractAbciParams,
 )
 from packages.valory.skills.mech_interact_abci.rounds import Event as MechInteractEvent
+from packages.valory.skills.omen_funds_recoverer_abci.models import (
+    OmenFundsRecovererParams,
+)
+from packages.valory.skills.omen_funds_recoverer_abci.models import (
+    RealitioSubgraph as BaseRealitioSubgraph,
+)
 from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEvent
 from packages.valory.skills.termination_abci.models import TerminationParams
 from packages.valory.skills.transaction_settlement_abci.rounds import Event as TSEvent
@@ -76,6 +82,7 @@ BenchmarkTool = BaseBenchmarkTool
 RandomnessApi = MarketCreationManagerRandomnessApi
 ConditionalTokensSubgraph = BaseConditionalTokensSubgraph
 OmenSubgraph = BaseOmenSubgraph
+RealitioSubgraph = BaseRealitioSubgraph
 MechInteractParams = MechInteractAbciParams
 MechToolsSpecs = BaseMechToolsSpecs
 MechsSubgraph = BaseMechsSubgraph
@@ -127,6 +134,7 @@ class SharedState(BaseSharedState):
 
 class Params(
     MarketCreationManagerParams,
+    OmenFundsRecovererParams,
     FundsForwarderParams,
     MechInteractParams,
     TerminationParams,

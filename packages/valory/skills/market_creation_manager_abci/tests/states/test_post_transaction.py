@@ -83,24 +83,14 @@ class TestPostTransactionRound:
             == "MECH_REQUEST_DONE_PAYLOAD"
         )
         assert (
-            PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD == "REDEEM_BOND_DONE_PAYLOAD"
-        )
-        assert (
             PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD == "DEPOSIT_DAI_DONE_PAYLOAD"
         )
         assert (
             PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
             == "ANSWER_QUESTION_DONE_PAYLOAD"
         )
-        assert (
-            PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
-            == "REMOVE_FUNDING_DONE_PAYLOAD"
-        )
-        assert (
-            PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
-            == "REDEEM_WINNINGS_DONE_PAYLOAD"
-        )
         assert PostTransactionRound.FUND_SWEEP_DONE_PAYLOAD == "FUND_SWEEP_DONE_PAYLOAD"
+        assert PostTransactionRound.RECOVERY_DONE_PAYLOAD == "RECOVERY_DONE_PAYLOAD"
 
 
 class TestPostTransactionRoundEndBlock:
@@ -119,12 +109,10 @@ class TestPostTransactionRoundEndBlock:
         [
             ("ERROR_PAYLOAD", Event.ERROR),
             ("MECH_REQUEST_DONE_PAYLOAD", Event.MECH_REQUEST_DONE),
-            ("REDEEM_BOND_DONE_PAYLOAD", Event.REDEEM_BOND_DONE),
             ("DEPOSIT_DAI_DONE_PAYLOAD", Event.DEPOSIT_DAI_DONE),
             ("ANSWER_QUESTION_DONE_PAYLOAD", Event.ANSWER_QUESTION_DONE),
-            ("REMOVE_FUNDING_DONE_PAYLOAD", Event.REMOVE_FUNDING_DONE),
-            ("REDEEM_WINNINGS_DONE_PAYLOAD", Event.REDEEM_WINNINGS_DONE),
             ("FUND_SWEEP_DONE_PAYLOAD", Event.FUND_SWEEP_DONE),
+            ("RECOVERY_DONE_PAYLOAD", Event.RECOVERY_DONE),
             ("some_other_payload", Event.DONE),
         ],
     )

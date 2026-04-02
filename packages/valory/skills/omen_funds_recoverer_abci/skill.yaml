@@ -11,14 +11,14 @@ fingerprint:
   behaviours/__init__.py: bafybeicqhvq2rz2r22bhd3roxtl3kekrycnvskbzvhenxlrdduvnmgxuoe
   behaviours/base.py: bafybeie567pn7z5uzm6lasdrddcajad3ervn4o4ezduykl5zn5ydxpryh4
   behaviours/build_multisend.py: bafybeicmzef4b2cws3z4pc6x2ydd2nylbjmm27ed3dzhjneh63jpzzopfy
-  behaviours/claim_bonds.py: bafybeidpxgwaybvm73hntwslg55fiqzuwucv2xfqpnjjjrb3eelov4e4qm
+  behaviours/claim_bonds.py: bafybeihq2typ4ywr5zdx3ctemor63jkpuhsdzjwdtfzmmwd3kt4becoobi
   behaviours/redeem_positions.py: bafybeicekpns5ua6sl7ky3jlunkxczbm3f6phgngjbb3hnsto3fvnnsmz4
   behaviours/remove_liquidity.py: bafybeibzqy5gnhxscskblmcasfsj6dyxo77qb6flmus7wpgzm4lbkfyl3u
   behaviours/round_behaviour.py: bafybeievk4sflkc72cjfxxxaro4ymjwgrwewjxlq3nn7b5xg47kuqewkbq
   dialogues.py: bafybeihiugqv2lcpdob4dybncetyqll2hpn3syrrjj3aur5rqnvot5s5ka
   fsm_specification.yaml: bafybeie76hhct2ur6rh7scoqt7yw2hhshih5ltj5z5awl6nim35nfjafcq
   handlers.py: bafybeib7veis4r7ymg6awzg2izlsbq4needaqlo55gebpbziq45s64crjy
-  models.py: bafybeihr6hqc6hxaitf7nhn3yucatfieuo5kd6puaqtjojoojwhptoe3yu
+  models.py: bafybeiahmxl5n3kazmsgevkuu5wsbhntrihqs6tkttivfvm7ypaoies3sy
   payloads.py: bafybeibbcayhvyxm6vbuigbsejdxexsodgtpvjloqfnkftrcf6fahqbdjm
   rounds.py: bafybeihk7x3dfz76fwqvccr47pejifagysnbclaum2asvds2xorifyfq6e
   tests/__init__.py: bafybeia3ktrwkudv5xnsy3gtc24nwtezhhk3pphjcygyvadibk36yz75qe
@@ -33,7 +33,7 @@ fingerprint:
   tests/conftest.py: bafybeidqcv2jyx64csuyqm5hs2l7nshct2lt5iv7ezb63zvedxxchiby2e
   tests/test_dialogues.py: bafybeifdyv2ipdzfr4ywhoq5ewzfjfih7w4llb4lsvoitrbecz7obgxgxi
   tests/test_handlers.py: bafybeifd2zwao77y6d7pudekwu5u2xd36tlpilcs3v3tq7z5tguken6caq
-  tests/test_models.py: bafybeiclcvlipnwlmqtzgq2o7emtxvv5yklnptrnfo2l72gme6u6g4afem
+  tests/test_models.py: bafybeiebp72bw4lnipz7j3bhhegi2t2mhbmy7gnbmf6l4755mp5s6t65eu
   tests/test_payloads.py: bafybeibm7dmckzkx4pdll25avhgqxaet7hyrtcyxlnmwljv6umxqg3rbsm
   tests/test_rounds.py: bafybeictc2pow7mi3wugtpb32x6fouh7k7up7ypvlpkbfvuzjpmcn5uvbi
 fingerprint_ignore_patterns: []

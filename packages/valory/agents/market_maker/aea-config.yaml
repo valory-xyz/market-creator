@@ -56,15 +56,16 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeict6h3wfmddpvam5gmmanqzuokup6ppoev3t4j5uyl7xxahjaols4
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
-- valory/market_maker_abci:0.1.0:bafybeihmaxfrye4aggfdg4sgaevt343i6k2h477fcckecyazhu7uprdv2u
+- valory/market_maker_abci:0.1.0:bafybeia3bv6lw5zdsi57adplep7wjjpvqz3yddhfxmm52uqajz2bsbge2e
 - valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
-- valory/market_creation_manager_abci:0.1.0:bafybeicu3e7rkb7o33hazjgyhkf4cijgcwdgbhsi3clqwqlxbufuwdviwy
+- valory/market_creation_manager_abci:0.1.0:bafybeifbsfiu5kdvvgfqvmhmopkwcrpeke7tatsd4hjqkk4dtn7nhtfyou
 - valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
 - valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
 - valory/mech_interact_abci:0.1.0:bafybeibrmrdpys5xfivpmlyerbwlu2am2rmqb75bwub3cvcrvfwdbqxv54
 - valory/identify_service_owner_abci:0.1.0:bafybeid3uz3zy2feigoyw47jknqg3m5nwettuazprefzmz57jgktdsumne
 - valory/funds_forwarder_abci:0.1.0:bafybeig4kflknvmbpbsaeeim4kurgpjvpduu36xfcjm3ehrjhxamt6byaa
+- valory/omen_funds_recoverer_abci:0.1.0:bafybeidxyvxrd6ahdfdq4h53k4krqhkg5e3u5ylppavydsnjohiismtmj4
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -256,6 +257,12 @@ models:
       answer_retry_intervals: ${list:[0, 86400, 259200, 604800, 1209600]}
       service_endpoint_base: ${str:https://dummy_service.autonolas.tech/}
       redeem_winnings_batch_size: ${int:5}
+      liquidity_removal_lead_time: ${int:86400}
+      remove_liquidity_batch_size: ${int:1}
+      redeem_positions_batch_size: ${int:5}
+      claim_bonds_batch_size: ${int:10}
+      min_balance_withdraw_realitio: ${int:10000000000000000000}
+      realitio_start_block: ${int:0}
       expected_service_owner_address: ${str:0x0000000000000000000000000000000000000000}
       funds_forwarder_token_config: ${dict:{}}
       irrelevant_tools:
@@ -326,6 +333,15 @@ models:
       response_type: ${str:list}
       retries: ${int:5}
       url: ${str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz}
+  realitio_subgraph:
+    args:
+      headers:
+        Content-Type: ${str:application/json}
+      method: ${str:POST}
+      response_key: ${str:data}
+      response_type: ${str:list}
+      retries: ${int:5}
+      url: ${str:https://realitio.subgraph.autonolas.tech}
 is_abstract: false
 ---
 public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfeztlgrlcoxhr7kf6nbq
