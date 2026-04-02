@@ -28,10 +28,8 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     GetPendingQuestionsPayload,
     MultisigTxPayload,
     PostTxPayload,
-    RemoveFundingPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
-    SyncMarketsPayload,
 )
 
 SENDER = "sender_address"
@@ -51,14 +49,6 @@ SENDER = "sender_address"
         (
             RetrieveApprovedMarketPayload,
             {"content": '{"market": "test_market"}'},
-        ),
-        (
-            SyncMarketsPayload,
-            {"content": '{"markets": [], "from_block": 100}'},
-        ),
-        (
-            RemoveFundingPayload,
-            {"content": '{"tx": "0xtxdata", "market": "0xmarket"}'},
         ),
         (
             PostTxPayload,

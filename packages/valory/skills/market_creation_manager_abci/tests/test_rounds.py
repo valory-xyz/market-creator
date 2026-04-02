@@ -52,9 +52,6 @@ from packages.valory.skills.market_creation_manager_abci.states.final_states imp
     FinishedWithDepositDaiRound,
     FinishedWithGetPendingQuestionsRound,
     FinishedWithMechRequestRound,
-    FinishedWithRedeemBondRound,
-    FinishedWithRedeemWinningsRound,
-    FinishedWithRemoveFundingRound,
     FinishedWithoutTxRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.get_pending_questions import (
@@ -66,23 +63,11 @@ from packages.valory.skills.market_creation_manager_abci.states.post_transaction
 from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction import (
     PrepareTransactionRound,
 )
-from packages.valory.skills.market_creation_manager_abci.states.redeem_bond import (
-    RedeemBondRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.redeem_winnings import (
-    RedeemWinningsRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
-    RemoveFundingRound,
-)
 from packages.valory.skills.market_creation_manager_abci.states.retrieve_approved_market import (
     RetrieveApprovedMarketRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.select_keeper import (
     SelectKeeperRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.sync_markets import (
-    SyncMarketsRound,
 )
 
 
@@ -100,18 +85,14 @@ class TestAbciAppInitialization:
 
     def test_initial_round_cls(self, abci_app: MarketCreationManagerAbciApp) -> None:
         """Test initial round class."""
-        assert abci_app.initial_round_cls is CollectRandomnessRound
+        assert abci_app.initial_round_cls is DepositDaiRound
 
     def test_initial_states(self, abci_app: MarketCreationManagerAbciApp) -> None:
         """Test initial states set."""
         expected = {
             AnswerQuestionsRound,
-            CollectRandomnessRound,
             DepositDaiRound,
             PostTransactionRound,
-            RedeemWinningsRound,
-            SyncMarketsRound,
-            GetPendingQuestionsRound,
         }
         assert abci_app.initial_states == expected
 
@@ -120,12 +101,9 @@ class TestAbciAppInitialization:
         expected = {
             FinishedMarketCreationManagerRound,
             FinishedWithAnswerQuestionsRound,
-            FinishedWithMechRequestRound,
-            FinishedWithRemoveFundingRound,
-            FinishedWithRedeemWinningsRound,
             FinishedWithDepositDaiRound,
             FinishedWithGetPendingQuestionsRound,
-            FinishedWithRedeemBondRound,
+            FinishedWithMechRequestRound,
             FinishedWithoutTxRound,
         }
         assert abci_app.final_states == expected
@@ -167,10 +145,8 @@ class TestPostTransactionTransitions:
             (Event.DEPOSIT_DAI_DONE, GetPendingQuestionsRound),
             (Event.MECH_REQUEST_DONE, FinishedWithMechRequestRound),
             (Event.ANSWER_QUESTION_DONE, CollectRandomnessRound),
-            (Event.REDEEM_BOND_DONE, CollectProposedMarketsRound),
-            (Event.REMOVE_FUNDING_DONE, RedeemWinningsRound),
-            (Event.REDEEM_WINNINGS_DONE, DepositDaiRound),
-            (Event.FUND_SWEEP_DONE, SyncMarketsRound),
+            (Event.FUND_SWEEP_DONE, DepositDaiRound),
+            (Event.RECOVERY_DONE, DepositDaiRound),
         ],
     )
     def test_transitions(
@@ -260,7 +236,7 @@ class TestSelectKeeperTransitions:
     @pytest.mark.parametrize(
         "event,expected_next",
         [
-            (Event.DONE, RedeemBondRound),
+            (Event.DONE, CollectProposedMarketsRound),
             (Event.NO_MAJORITY, CollectRandomnessRound),
             (Event.NONE, CollectRandomnessRound),
             (Event.ROUND_TIMEOUT, CollectRandomnessRound),
@@ -274,29 +250,6 @@ class TestSelectKeeperTransitions:
     ) -> None:
         """Test all SelectKeeperRound transitions."""
         tf = abci_app.transition_function[SelectKeeperRound]
-        assert tf[event] == expected_next
-
-
-class TestRedeemBondTransitions:
-    """Test RedeemBondRound transitions."""
-
-    @pytest.mark.parametrize(
-        "event,expected_next",
-        [
-            (Event.DONE, FinishedWithRedeemBondRound),
-            (Event.NO_MAJORITY, CollectProposedMarketsRound),
-            (Event.NONE, CollectProposedMarketsRound),
-            (Event.ROUND_TIMEOUT, CollectProposedMarketsRound),
-        ],
-    )
-    def test_transitions(
-        self,
-        abci_app: MarketCreationManagerAbciApp,
-        event: Event,
-        expected_next: type,
-    ) -> None:
-        """Test all RedeemBondRound transitions."""
-        tf = abci_app.transition_function[RedeemBondRound]
         assert tf[event] == expected_next
 
 
@@ -395,77 +348,6 @@ class TestPrepareTransactionTransitions:
         assert tf[event] == expected_next
 
 
-class TestSyncMarketsTransitions:
-    """Test SyncMarketsRound transitions."""
-
-    @pytest.mark.parametrize(
-        "event,expected_next",
-        [
-            (Event.DONE, RemoveFundingRound),
-            (Event.NO_MAJORITY, DepositDaiRound),
-            (Event.ERROR, DepositDaiRound),
-            (Event.ROUND_TIMEOUT, DepositDaiRound),
-        ],
-    )
-    def test_transitions(
-        self,
-        abci_app: MarketCreationManagerAbciApp,
-        event: Event,
-        expected_next: type,
-    ) -> None:
-        """Test all SyncMarketsRound transitions."""
-        tf = abci_app.transition_function[SyncMarketsRound]
-        assert tf[event] == expected_next
-
-
-class TestRemoveFundingTransitions:
-    """Test RemoveFundingRound transitions."""
-
-    @pytest.mark.parametrize(
-        "event,expected_next",
-        [
-            (Event.DONE, FinishedWithRemoveFundingRound),
-            (Event.NONE, RedeemWinningsRound),
-            (Event.NO_MAJORITY, RedeemWinningsRound),
-            (Event.ROUND_TIMEOUT, RedeemWinningsRound),
-            (Event.NO_TX, RedeemWinningsRound),
-            (Event.ERROR, RedeemWinningsRound),
-        ],
-    )
-    def test_transitions(
-        self,
-        abci_app: MarketCreationManagerAbciApp,
-        event: Event,
-        expected_next: type,
-    ) -> None:
-        """Test all RemoveFundingRound transitions."""
-        tf = abci_app.transition_function[RemoveFundingRound]
-        assert tf[event] == expected_next
-
-
-class TestRedeemWinningsTransitions:
-    """Test RedeemWinningsRound transitions."""
-
-    @pytest.mark.parametrize(
-        "event,expected_next",
-        [
-            (Event.DONE, FinishedWithRedeemWinningsRound),
-            (Event.NO_MAJORITY, DepositDaiRound),
-            (Event.NONE, DepositDaiRound),
-            (Event.ROUND_TIMEOUT, DepositDaiRound),
-        ],
-    )
-    def test_transitions(
-        self,
-        abci_app: MarketCreationManagerAbciApp,
-        event: Event,
-        expected_next: type,
-    ) -> None:
-        """Test all RedeemWinningsRound transitions."""
-        tf = abci_app.transition_function[RedeemWinningsRound]
-        assert tf[event] == expected_next
-
-
 class TestFinalStateTransitions:
     """Test final state rounds have empty transition functions."""
 
@@ -475,11 +357,8 @@ class TestFinalStateTransitions:
             FinishedMarketCreationManagerRound,
             FinishedWithAnswerQuestionsRound,
             FinishedWithMechRequestRound,
-            FinishedWithRemoveFundingRound,
-            FinishedWithRedeemWinningsRound,
             FinishedWithDepositDaiRound,
             FinishedWithGetPendingQuestionsRound,
-            FinishedWithRedeemBondRound,
             FinishedWithoutTxRound,
         ],
     )
@@ -514,11 +393,7 @@ class TestDbPreConditions:
         [
             AnswerQuestionsRound,
             DepositDaiRound,
-            GetPendingQuestionsRound,
-            CollectRandomnessRound,
             PostTransactionRound,
-            RedeemWinningsRound,
-            SyncMarketsRound,
         ],
     )
     def test_pre_conditions_empty(
@@ -538,10 +413,7 @@ class TestDbPostConditions:
         [
             FinishedWithAnswerQuestionsRound,
             FinishedWithDepositDaiRound,
-            FinishedWithRedeemBondRound,
-            FinishedWithRedeemWinningsRound,
             FinishedMarketCreationManagerRound,
-            FinishedWithRemoveFundingRound,
         ],
     )
     def test_post_conditions_with_tx_hash(

@@ -51,9 +51,14 @@ class OmenFundsRecovererParams(BaseParams):
     """Parameters for the omen_funds_recoverer_abci skill."""
 
     # These parameters are from other ABCI skills, and are added
-    # here to avoid subclassing and avoid MyPy linter issues.
+    # here as class attributes to avoid subclassing issues in MRO.
+    # They get set by whichever parent class calls _ensure first.
     multisend_address: str
     multisend_batch_size: int
+    realitio_contract: str
+    realitio_oracle_proxy_contract: str
+    conditional_tokens_contract: str
+    collateral_tokens_contract: str
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the parameters object."""
@@ -74,18 +79,6 @@ class OmenFundsRecovererParams(BaseParams):
         )
         self.realitio_start_block = self._ensure(
             "realitio_start_block", kwargs, type_=int
-        )
-        self.realitio_contract = self._ensure(
-            key="realitio_contract", kwargs=kwargs, type_=str
-        )
-        self.realitio_oracle_proxy_contract = self._ensure(
-            key="realitio_oracle_proxy_contract", kwargs=kwargs, type_=str
-        )
-        self.conditional_tokens_contract = self._ensure(
-            key="conditional_tokens_contract", kwargs=kwargs, type_=str
-        )
-        self.collateral_tokens_contract = self._ensure(
-            key="collateral_tokens_contract", kwargs=kwargs, type_=str
         )
         super().__init__(*args, **kwargs)
 

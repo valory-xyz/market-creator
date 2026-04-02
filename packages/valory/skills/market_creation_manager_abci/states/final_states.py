@@ -26,20 +26,8 @@ class FinishedMarketCreationManagerRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
 
-class FinishedWithRemoveFundingRound(DegenerateRound):
-    """FinishedWithRemoveFundingRound"""
-
-
 class FinishedWithDepositDaiRound(DegenerateRound):
     """FinishedWithDepositDaiRound"""
-
-
-class FinishedWithRedeemBondRound(DegenerateRound):
-    """FinishedWithRedeemBondRound"""
-
-
-class FinishedWithRedeemWinningsRound(DegenerateRound):
-    """FinishedWithRedeemWinningsRound"""
 
 
 class FinishedWithoutTxRound(DegenerateRound):

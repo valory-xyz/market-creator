@@ -28,6 +28,7 @@ import packages.valory.skills.mech_interact_abci.states.final_states as MechFina
 import packages.valory.skills.mech_interact_abci.states.mech_version as MechVersionStates
 import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 import packages.valory.skills.mech_interact_abci.states.response as MechResponseStates
+import packages.valory.skills.omen_funds_recoverer_abci.rounds as OmenFundsRecovererAbci
 import packages.valory.skills.transaction_settlement_abci.rounds as TransactionSettlementAbci
 from packages.valory.skills.market_maker_abci.composition import (
     MarketCreatorAbciApp,
@@ -47,14 +48,39 @@ from packages.valory.skills.termination_abci.rounds import BackgroundRound, Even
 
 # All expected (source_round, target_round) pairs in the transition mapping.
 EXPECTED_TRANSITIONS = [
+    # Registration → IdentifyServiceOwner
     (FinishedRegistrationRound, IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound),
-    (MarketCreationManagerAbci.FinishedWithoutTxRound, ResetAndPauseRound),
+    # IdentifyServiceOwner → FundsForwarder / OmenFundsRecoverer
     (
-        MarketCreationManagerAbci.FinishedWithDepositDaiRound,
+        IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound,
+        FundsForwarderAbci.FundsForwarderRound,
+    ),
+    (
+        IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound,
+        OmenFundsRecovererAbci.RemoveLiquidityRound,
+    ),
+    # FundsForwarder → OmenFundsRecoverer / TxSettlement
+    (
+        FundsForwarderAbci.FinishedFundsForwarderNoTxRound,
+        OmenFundsRecovererAbci.RemoveLiquidityRound,
+    ),
+    (
+        FundsForwarderAbci.FinishedFundsForwarderWithTxRound,
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    ),
+    # OmenFundsRecoverer → TxSettlement / MarketCreation
+    (
+        OmenFundsRecovererAbci.FinishedWithRecoveryTxRound,
         TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     ),
     (
-        MarketCreationManagerAbci.FinishedWithRedeemBondRound,
+        OmenFundsRecovererAbci.FinishedWithoutRecoveryTxRound,
+        MarketCreationManagerAbci.DepositDaiRound,
+    ),
+    # MarketCreation final states
+    (MarketCreationManagerAbci.FinishedWithoutTxRound, ResetAndPauseRound),
+    (
+        MarketCreationManagerAbci.FinishedWithDepositDaiRound,
         TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     ),
     (
@@ -62,9 +88,10 @@ EXPECTED_TRANSITIONS = [
         TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     ),
     (
-        MarketCreationManagerAbci.FinishedWithRemoveFundingRound,
+        MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound,
         TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     ),
+    # MechInteract flow
     (
         MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound,
         MechVersionStates.MechVersionDetectionRound,
@@ -96,47 +123,25 @@ EXPECTED_TRANSITIONS = [
     ),
     (
         MechFinalStates.FinishedMechRequestSkipRound,
-        MarketCreationManagerAbci.CollectRandomnessRound,
+        MarketCreationManagerAbci.DepositDaiRound,
     ),
     (
         MechFinalStates.FinishedMechResponseTimeoutRound,
-        MarketCreationManagerAbci.CollectRandomnessRound,
+        MarketCreationManagerAbci.DepositDaiRound,
     ),
     (
         MarketCreationManagerAbci.FinishedWithMechRequestRound,
         MechResponseStates.MechResponseRound,
     ),
-    (
-        MarketCreationManagerAbci.FinishedWithRedeemWinningsRound,
-        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    ),
-    (
-        MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound,
-        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    ),
+    # TxSettlement → PostTransaction
     (
         TransactionSettlementAbci.FinishedTransactionSubmissionRound,
         MarketCreationManagerAbci.PostTransactionRound,
     ),
     (TransactionSettlementAbci.FailedRound, ResetAndPauseRound),
+    # ResetPause
     (FinishedResetAndPauseRound, IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound),
     (FinishedResetAndPauseErrorRound, RegistrationRound),
-    (
-        IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound,
-        FundsForwarderAbci.FundsForwarderRound,
-    ),
-    (
-        IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound,
-        MarketCreationManagerAbci.SyncMarketsRound,
-    ),
-    (
-        FundsForwarderAbci.FinishedFundsForwarderNoTxRound,
-        MarketCreationManagerAbci.SyncMarketsRound,
-    ),
-    (
-        FundsForwarderAbci.FinishedFundsForwarderWithTxRound,
-        TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    ),
 ]
 
 

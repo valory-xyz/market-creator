@@ -39,10 +39,10 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     DepositDaiRound,
     PostTransactionRound,
     PrepareTransactionRound,
-    RedeemBondRound,
-    RedeemWinningsRound,
-    RemoveFundingRound,
 )
+
+# tx_submitter string for omen_funds_recoverer_abci (string to avoid cross-skill import)
+RECOVERY_TX_SUBMITTER = "build_multisend_round"
 
 
 class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
@@ -68,30 +68,24 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No settled tx hash.")
             return PostTransactionRound.DONE_PAYLOAD
 
-        if (
-            self.synchronized_data.tx_submitter
-            == MechRequestStates.MechRequestRound.auto_round_id()
-        ):
+        tx_submitter = self.synchronized_data.tx_submitter
+
+        if tx_submitter == MechRequestStates.MechRequestRound.auto_round_id():
             return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_submitter == RedeemBondRound.auto_round_id():
-            return PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
-
-        if self.synchronized_data.tx_submitter == DepositDaiRound.auto_round_id():
-            return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
-
-        if self.synchronized_data.tx_submitter == AnswerQuestionsRound.auto_round_id():
+        if tx_submitter == AnswerQuestionsRound.auto_round_id():
             return PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_submitter == RemoveFundingRound.auto_round_id():
-            return PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
+        if tx_submitter == DepositDaiRound.auto_round_id():
+            return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_submitter == RedeemWinningsRound.auto_round_id():
-            return PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
-
-        # Funds forwarder round from funds_forwarder_abci skill (string to avoid cross-skill import)
-        if self.synchronized_data.tx_submitter == "funds_forwarder_round":
+        # Funds forwarder round from funds_forwarder_abci skill
+        if tx_submitter == "funds_forwarder_round":
             return PostTransactionRound.FUND_SWEEP_DONE_PAYLOAD
+
+        # Omen funds recoverer round from omen_funds_recoverer_abci skill
+        if tx_submitter == RECOVERY_TX_SUBMITTER:
+            return PostTransactionRound.RECOVERY_DONE_PAYLOAD
 
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set
@@ -111,13 +105,9 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             f"For market with id {market_id}. "
         )
 
-        if (
-            self.synchronized_data.tx_submitter
-            != PrepareTransactionRound.auto_round_id()
-        ):
-            # we only handle market creation txs atm, any other tx, we don't need to take action
+        if tx_submitter != PrepareTransactionRound.auto_round_id():
             self.context.logger.info(
-                f"No handling required for tx sender with round id {self.synchronized_data.tx_submitter}. "
+                f"No handling required for tx sender with round id {tx_submitter}. "
                 f"Handling only required for {PrepareTransactionRound.auto_round_id()}."
             )
             return PostTransactionRound.DONE_PAYLOAD

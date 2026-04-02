@@ -21,7 +21,7 @@
 
 import json
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, cast
 
 from packages.valory.skills.abstract_round_abci.base import (
     CollectSameUntilThresholdRound,
@@ -54,13 +54,11 @@ class Event(Enum):
     MAX_RETRIES_REACHED = "max_retries_reached"
     MECH_REQUEST_DONE = "mech_request_done"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
-    REDEEM_BOND_DONE = "redeem_bond_done"
-    DEPOSIT_DAI_DONE = "deposit_dai_done"
     ANSWER_QUESTION_DONE = "answer_question_done"
-    REMOVE_FUNDING_DONE = "remove_funding_done"
-    REDEEM_WINNINGS_DONE = "redeem_winnings_done"
+    DEPOSIT_DAI_DONE = "deposit_dai_done"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
     FUND_SWEEP_DONE = "fund_sweep_done"
+    RECOVERY_DONE = "recovery_done"
 
 
 DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
@@ -167,18 +165,6 @@ class SynchronizedData(TxSynchronizedData):
     def most_voted_keeper_address(self) -> str:
         """Get the most_voted_keeper_address."""
         return cast(str, self.db.get_strict("most_voted_keeper_address"))
-
-    @property
-    def markets_to_remove_liquidity(self) -> List[Dict[str, Any]]:
-        """Get the markets_to_remove_liquidity."""
-        return cast(
-            List[Dict[str, Any]], self.db.get("markets_to_remove_liquidity", [])
-        )
-
-    @property
-    def market_from_block(self) -> int:
-        """Get the market_from_block."""
-        return cast(int, self.db.get("market_from_block", 0))
 
     @property
     def settled_tx_hash(self) -> Optional[str]:

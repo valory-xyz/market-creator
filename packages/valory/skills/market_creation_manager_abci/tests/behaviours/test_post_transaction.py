@@ -27,13 +27,11 @@ import packages.valory.skills.mech_interact_abci.states.request as MechRequestSt
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.post_transaction import (
     PostTransactionBehaviour,
+    RECOVERY_TX_SUBMITTER,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     AnswerQuestionsRound,
     DepositDaiRound,
-    RedeemBondRound,
-    RedeemWinningsRound,
-    RemoveFundingRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.post_transaction import (
     PostTransactionRound,
@@ -99,16 +97,6 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
 
-    def test_get_payload_redeem_bond_submitter(self) -> None:
-        """Test get_payload when tx_submitter is RedeemBondRound."""
-        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
-        self.behaviour.synchronized_data.tx_submitter = RedeemBondRound.auto_round_id()
-
-        gen = self.behaviour.get_payload()
-        result = _exhaust_gen(gen)
-
-        assert result == PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
-
     def test_get_payload_deposit_dai_submitter(self) -> None:
         """Test get_payload when tx_submitter is DepositDaiRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
@@ -131,30 +119,6 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
 
-    def test_get_payload_remove_funding_submitter(self) -> None:
-        """Test get_payload when tx_submitter is RemoveFundingRound."""
-        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
-        self.behaviour.synchronized_data.tx_submitter = (
-            RemoveFundingRound.auto_round_id()
-        )
-
-        gen = self.behaviour.get_payload()
-        result = _exhaust_gen(gen)
-
-        assert result == PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
-
-    def test_get_payload_redeem_winnings_submitter(self) -> None:
-        """Test get_payload when tx_submitter is RedeemWinningsRound."""
-        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
-        self.behaviour.synchronized_data.tx_submitter = (
-            RedeemWinningsRound.auto_round_id()
-        )
-
-        gen = self.behaviour.get_payload()
-        result = _exhaust_gen(gen)
-
-        assert result == PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
-
     def test_get_payload_funds_forwarder_submitter(self) -> None:
         """Test get_payload when tx_submitter is funds_forwarder_round."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
@@ -164,6 +128,16 @@ class TestPostTransactionBehaviour:
         result = _exhaust_gen(gen)
 
         assert result == PostTransactionRound.FUND_SWEEP_DONE_PAYLOAD
+
+    def test_get_payload_recovery_done(self) -> None:
+        """Test get_payload when tx_submitter is the recovery tx submitter."""
+        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
+        self.behaviour.synchronized_data.tx_submitter = RECOVERY_TX_SUBMITTER
+
+        gen = self.behaviour.get_payload()
+        result = _exhaust_gen(gen)
+
+        assert result == PostTransactionRound.RECOVERY_DONE_PAYLOAD
 
     def test_get_payload_no_approved_question_data(self) -> None:
         """Test get_payload when is_approved_question_data_set is False."""

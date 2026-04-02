@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeifvfh7javgfcsigroufg5rhingpdapuvgqhw46x6acf6btyvxiy3a
+agent: valory/market_maker:0.1.0:bafybeic55f3ovedwagve53p5i2f6jsjl2xvmwfgy4c5zcl4i2fbap2fbcm
 number_of_agents: 1
 deployment:
   agent:
@@ -116,6 +116,12 @@ models:
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
       service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
       redeem_winnings_batch_size: ${REDEEM_WINNINGS_BATCH_SIZE:int:5}
+      liquidity_removal_lead_time: ${LIQUIDITY_REMOVAL_LEAD_TIME:int:86400}
+      remove_liquidity_batch_size: ${REMOVE_LIQUIDITY_BATCH_SIZE:int:1}
+      redeem_positions_batch_size: ${REDEEM_POSITIONS_BATCH_SIZE:int:5}
+      claim_bonds_batch_size: ${CLAIM_BONDS_BATCH_SIZE:int:10}
+      min_balance_withdraw_realitio: ${MIN_BALANCE_WITHDRAW_REALITIO:int:10000000000000000000}
+      realitio_start_block: ${REALITIO_START_BLOCK:int:0}
       expected_service_owner_address: ${EXPECTED_SERVICE_OWNER_ADDRESS:str:0x0000000000000000000000000000000000000000}
       funds_forwarder_token_config: ${FUNDS_FORWARDER_TOKEN_CONFIG:dict:{"0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d":{"retain_balance":300000000000000000000,"max_transfer":1000000000000000000000,
         "min_transfer":100000000000000000000}}}
