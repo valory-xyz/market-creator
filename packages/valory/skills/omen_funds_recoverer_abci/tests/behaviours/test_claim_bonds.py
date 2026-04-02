@@ -425,9 +425,7 @@ class TestClaimBondsBehaviour:
             patch.object(
                 self.behaviour, "_get_claimable_responses", new=make_gen(responses)
             ),
-            patch.object(
-                self.behaviour, "_is_unclaimed", new=make_gen(is_unclaimed)
-            ),
+            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(is_unclaimed)),
             patch.object(
                 self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
             ),
@@ -447,9 +445,7 @@ class TestClaimBondsBehaviour:
             )
         if simulate_ok:
             patches.append(
-                patch.object(
-                    self.behaviour, "_build_claim_tx", new=make_gen(build_tx)
-                )
+                patch.object(self.behaviour, "_build_claim_tx", new=make_gen(build_tx))
             )
 
         with patches[0]:

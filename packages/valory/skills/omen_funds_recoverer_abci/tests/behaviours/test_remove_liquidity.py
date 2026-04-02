@@ -685,9 +685,7 @@ class TestGetMarkets:
             ),
         ],
     )
-    def test_get_markets_filtered(
-        self, description: str, pool_overrides: dict
-    ) -> None:
+    def test_get_markets_filtered(self, description: str, pool_overrides: dict) -> None:
         """Test _get_markets filters out markets with invalid pool data."""
         membership = _make_pool_membership(pool_overrides)
         response = {"data": {"fpmmPoolMemberships": [membership]}}
