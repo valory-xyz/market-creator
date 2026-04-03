@@ -11,7 +11,7 @@ fingerprint:
   behaviours/__init__.py: bafybeicqhvq2rz2r22bhd3roxtl3kekrycnvskbzvhenxlrdduvnmgxuoe
   behaviours/base.py: bafybeie567pn7z5uzm6lasdrddcajad3ervn4o4ezduykl5zn5ydxpryh4
   behaviours/build_multisend.py: bafybeicmzef4b2cws3z4pc6x2ydd2nylbjmm27ed3dzhjneh63jpzzopfy
-  behaviours/claim_bonds.py: bafybeidpxgwaybvm73hntwslg55fiqzuwucv2xfqpnjjjrb3eelov4e4qm
+  behaviours/claim_bonds.py: bafybeihq2typ4ywr5zdx3ctemor63jkpuhsdzjwdtfzmmwd3kt4becoobi
   behaviours/redeem_positions.py: bafybeicekpns5ua6sl7ky3jlunkxczbm3f6phgngjbb3hnsto3fvnnsmz4
   behaviours/remove_liquidity.py: bafybeibzqy5gnhxscskblmcasfsj6dyxo77qb6flmus7wpgzm4lbkfyl3u
   behaviours/round_behaviour.py: bafybeievk4sflkc72cjfxxxaro4ymjwgrwewjxlq3nn7b5xg47kuqewkbq

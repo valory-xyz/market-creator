@@ -114,8 +114,15 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
         self, resp: Dict[str, Any]
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Build a claimWinnings tx for a single response, or None if it should be skipped."""
-        question_id_hex = resp["question"]["id"]
-        question_id_bytes = bytes.fromhex(question_id_hex[2:])
+        raw_question_id = resp["question"]["id"]
+        # Realitio subgraph uses composite IDs: "{contract_address}-{question_id}"
+        # Extract the actual question_id (after the dash)
+        question_id_hex = (
+            raw_question_id.split("-")[-1]
+            if "-" in raw_question_id
+            else raw_question_id
+        )
+        question_id_bytes = bytes.fromhex(question_id_hex.replace("0x", ""))
 
         is_unclaimed = yield from self._is_unclaimed(question_id_bytes)
         if not is_unclaimed:
