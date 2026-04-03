@@ -32,7 +32,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
 - valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
 - valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
-- valory/market_creation_manager_abci:0.1.0:bafybeictdt56ehrqizt25zmvhuhv5s4vs32zhp7ecmzzyn4yxkt3xk3gba
+- valory/market_creation_manager_abci:0.1.0:bafybeicu3e7rkb7o33hazjgyhkf4cijgcwdgbhsi3clqwqlxbufuwdviwy
 - valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
 - valory/mech_interact_abci:0.1.0:bafybeibrmrdpys5xfivpmlyerbwlu2am2rmqb75bwub3cvcrvfwdbqxv54
@@ -177,7 +177,7 @@ models:
       reset_pause_duration: 1800
       mech_interact_round_timeout_seconds: 1200
       mech_interaction_sleep_time: 10
-      use_mech_marketplace: false
+      use_mech_marketplace: true
       mech_marketplace_config:
         mech_marketplace_address: '0x0000000000000000000000000000000000000000'
         priority_mech_address: '0x0000000000000000000000000000000000000000'
@@ -225,7 +225,7 @@ models:
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
-      mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
+      mech_contract_address: '0x0000000000000000000000000000000000000000'
       mech_tool_resolve_market: resolve-market-reasoning-gpt-4.1
       answer_retry_intervals:
       - 0

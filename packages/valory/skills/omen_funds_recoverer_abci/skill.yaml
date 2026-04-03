@@ -1,0 +1,221 @@
+name: omen_funds_recoverer_abci
+author: valory
+version: 0.1.0
+type: skill
+description: A reusable ABCI skill that recovers all types of locked funds from Omen
+  prediction markets (LP shares, conditional tokens, Realitio bonds, internal balances).
+license: Apache-2.0
+aea_version: '>=2.0.0, <3.0.0'
+fingerprint:
+  __init__.py: bafybeidm34esyjpfz32yvivqqsblkxnvcrm4sr4wlj42ka3ljqa3fowcde
+  behaviours/__init__.py: bafybeicqhvq2rz2r22bhd3roxtl3kekrycnvskbzvhenxlrdduvnmgxuoe
+  behaviours/base.py: bafybeie567pn7z5uzm6lasdrddcajad3ervn4o4ezduykl5zn5ydxpryh4
+  behaviours/build_multisend.py: bafybeicmzef4b2cws3z4pc6x2ydd2nylbjmm27ed3dzhjneh63jpzzopfy
+  behaviours/claim_bonds.py: bafybeihq2typ4ywr5zdx3ctemor63jkpuhsdzjwdtfzmmwd3kt4becoobi
+  behaviours/redeem_positions.py: bafybeicekpns5ua6sl7ky3jlunkxczbm3f6phgngjbb3hnsto3fvnnsmz4
+  behaviours/remove_liquidity.py: bafybeibzqy5gnhxscskblmcasfsj6dyxo77qb6flmus7wpgzm4lbkfyl3u
+  behaviours/round_behaviour.py: bafybeievk4sflkc72cjfxxxaro4ymjwgrwewjxlq3nn7b5xg47kuqewkbq
+  dialogues.py: bafybeihiugqv2lcpdob4dybncetyqll2hpn3syrrjj3aur5rqnvot5s5ka
+  fsm_specification.yaml: bafybeie76hhct2ur6rh7scoqt7yw2hhshih5ltj5z5awl6nim35nfjafcq
+  handlers.py: bafybeib7veis4r7ymg6awzg2izlsbq4needaqlo55gebpbziq45s64crjy
+  models.py: bafybeihr6hqc6hxaitf7nhn3yucatfieuo5kd6puaqtjojoojwhptoe3yu
+  payloads.py: bafybeibbcayhvyxm6vbuigbsejdxexsodgtpvjloqfnkftrcf6fahqbdjm
+  rounds.py: bafybeihk7x3dfz76fwqvccr47pejifagysnbclaum2asvds2xorifyfq6e
+  tests/__init__.py: bafybeia3ktrwkudv5xnsy3gtc24nwtezhhk3pphjcygyvadibk36yz75qe
+  tests/behaviours/__init__.py: bafybeiahzv7e6zh53dm66yz5nzfdtdllyy6s34beqcldjxngxct33lznf4
+  tests/behaviours/conftest.py: bafybeicebe6snq6a6t34phbpyefcul5r54ycxiv4aqvbme6p4orvn5ktiu
+  tests/behaviours/test_base.py: bafybeibxez2eqih3gy3ats236pxmftcadbivqkagonvwacphk7ig3m5fju
+  tests/behaviours/test_build_multisend.py: bafybeic3s4uzk4ftyhrod2rehntzlo2l5526cyy2w6jhm6fnqanwgdie6m
+  tests/behaviours/test_claim_bonds.py: bafybeiaybrnslel5ubazv6o57d3capurrjmfqa5s3zr4qphpuwsgwh2p2i
+  tests/behaviours/test_redeem_positions.py: bafybeiggqbajg6uhklkrxer6ovrqivmuwsp4sceoyvj7bubrzfghump2hi
+  tests/behaviours/test_remove_liquidity.py: bafybeigs4h76rsnk27qbz4rn2oh6bwearc4nuquackiv3ef3v5hqxn4ff4
+  tests/behaviours/test_round_behaviour.py: bafybeibndp4ouudfjnbuamm2nhz4ozyxrqbedjh3vmhd5a6j43qqwzjumm
+  tests/conftest.py: bafybeidqcv2jyx64csuyqm5hs2l7nshct2lt5iv7ezb63zvedxxchiby2e
+  tests/test_dialogues.py: bafybeifdyv2ipdzfr4ywhoq5ewzfjfih7w4llb4lsvoitrbecz7obgxgxi
+  tests/test_handlers.py: bafybeifd2zwao77y6d7pudekwu5u2xd36tlpilcs3v3tq7z5tguken6caq
+  tests/test_models.py: bafybeiclcvlipnwlmqtzgq2o7emtxvv5yklnptrnfo2l72gme6u6g4afem
+  tests/test_payloads.py: bafybeibm7dmckzkx4pdll25avhgqxaet7hyrtcyxlnmwljv6umxqg3rbsm
+  tests/test_rounds.py: bafybeictc2pow7mi3wugtpb32x6fouh7k7up7ypvlpkbfvuzjpmcn5uvbi
+fingerprint_ignore_patterns: []
+connections: []
+contracts:
+- valory/gnosis_safe:0.1.0:bafybeice337zvg3ol4cwpw2iikxcukmthwmw32ytwtdnkcju222qfc323y
+- valory/multisend:0.1.0:bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq
+- valory/realitio:0.1.0:bafybeibj7wequqhgxcke2bwsq5onp6amk35vdhzf5zcczhytiohz2tfqua
+- valory/conditional_tokens:0.1.0:bafybeieumljzqj6dw3aifiza4msx6m4etyqhsthvcgw3s26kn73oktxdk4
+- valory/realitio_proxy:0.1.0:bafybeiehe26tllwbni57zomdyxtwipmdvmrirgc54fp5gwtg324lbfl7im
+- valory/fpmm:0.1.0:bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e
+protocols:
+- valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
+skills:
+- valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
+- valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
+behaviours:
+  main:
+    args: {}
+    class_name: OmenFundsRecovererRoundBehaviour
+handlers:
+  abci:
+    args: {}
+    class_name: ABCIHandler
+  http:
+    args: {}
+    class_name: HttpHandler
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  ipfs:
+    args: {}
+    class_name: IpfsHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+  tendermint:
+    args: {}
+    class_name: TendermintHandler
+models:
+  abci_dialogues:
+    args: {}
+    class_name: AbciDialogues
+  benchmark_tool:
+    args:
+      log_dir: /logs
+    class_name: BenchmarkTool
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+  ipfs_dialogues:
+    args: {}
+    class_name: IpfsDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  params:
+    args:
+      liquidity_removal_lead_time: 86400
+      remove_liquidity_batch_size: 1
+      redeem_positions_batch_size: 5
+      claim_bonds_batch_size: 10
+      min_balance_withdraw_realitio: 10000000000000000000
+      realitio_start_block: 0
+      realitio_contract: '0x0000000000000000000000000000000000000000'
+      realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
+      conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
+      collateral_tokens_contract: '0x0000000000000000000000000000000000000000'
+      cleanup_history_depth: 1
+      cleanup_history_depth_current: null
+      drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
+      finalize_timeout: 60.0
+      genesis_config:
+        chain_id: chain-c4daS1
+        consensus_params:
+          block:
+            max_bytes: '22020096'
+            max_gas: '-1'
+            time_iota_ms: '1000'
+          evidence:
+            max_age_duration: '172800000000000'
+            max_age_num_blocks: '100000'
+            max_bytes: '1048576'
+          validator:
+            pub_key_types:
+            - ed25519
+          version: {}
+        genesis_time: '2022-05-20T16:00:21.735122717Z'
+        voting_power: '10'
+      history_check_timeout: 1205
+      ipfs_domain_name: null
+      keeper_allowed_retries: 3
+      keeper_timeout: 30.0
+      max_attempts: 10
+      max_healthcheck: 120
+      multisend_address: '0x0000000000000000000000000000000000000000'
+      multisend_batch_size: 5
+      ipfs_address: https://gateway.autonolas.tech/ipfs/
+      on_chain_service_id: null
+      request_retry_delay: 1.0
+      request_timeout: 10.0
+      reset_pause_duration: 1800
+      reset_tendermint_after: 1
+      retry_attempts: 400
+      retry_timeout: 3
+      round_timeout_seconds: 60.0
+      service_id: omen_funds_recoverer
+      service_registry_address: null
+      setup:
+        all_participants:
+        - '0x0000000000000000000000000000000000000000'
+        consensus_threshold: null
+        safe_contract_address: '0x0000000000000000000000000000000000000000'
+      share_tm_config_on_startup: false
+      sleep_time: 1
+      tendermint_check_sleep_delay: 3
+      tendermint_com_url: http://localhost:8080
+      tendermint_max_retries: 5
+      tendermint_p2p_url: localhost:26656
+      tendermint_url: http://localhost:26657
+      tx_timeout: 10.0
+      validate_timeout: 1205
+      use_termination: false
+      use_slashing: false
+      slash_cooldown_hours: 3
+      slash_threshold_amount: 10000000000000000
+      light_slash_unit_amount: 5000000000000000
+      serious_slash_unit_amount: 8000000000000000
+    class_name: OmenFundsRecovererParams
+  conditional_tokens_subgraph:
+    args:
+      api_id: conditional_tokens
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://conditional-tokens.subgraph.autonolas.tech
+    class_name: ConditionalTokensSubgraph
+  omen_subgraph:
+    args:
+      api_id: omen
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz
+    class_name: OmenSubgraph
+  realitio_subgraph:
+    args:
+      api_id: realitio
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://realitio.subgraph.autonolas.tech
+    class_name: RealitioSubgraph
+  requests:
+    args: {}
+    class_name: Requests
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  state:
+    args: {}
+    class_name: SharedState
+  tendermint_dialogues:
+    args: {}
+    class_name: TendermintDialogues
+dependencies: {}
+is_abstract: true

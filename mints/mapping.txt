@@ -6,6 +6,7 @@ token_id-"component_id"
 104-"contract/valory/fpmm/0.1.0"
 105-"skill/valory/market_creation_manager_abci/0.1.0"
 106-"skill/valory/market_maker_abci/0.1.0"
+320-"skill/valory/omen_funds_recoverer_abci/0.1.0"
 ---
 token_id-"agent_id"
 13-"agent/valory/market_maker/0.1.0"
