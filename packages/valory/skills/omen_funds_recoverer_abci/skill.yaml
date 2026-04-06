@@ -145,7 +145,7 @@ models:
       reset_tendermint_after: 1
       retry_attempts: 400
       retry_timeout: 3
-      round_timeout_seconds: 60.0
+      round_timeout_seconds: 120.0
       service_id: omen_funds_recoverer
       service_registry_address: null
       setup:

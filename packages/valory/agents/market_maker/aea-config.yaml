@@ -56,9 +56,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeict6h3wfmddpvam5gmmanqzuokup6ppoev3t4j5uyl7xxahjaols4
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
-- valory/market_maker_abci:0.1.0:bafybeihmaxfrye4aggfdg4sgaevt343i6k2h477fcckecyazhu7uprdv2u
+- valory/market_maker_abci:0.1.0:bafybeifwxff6xfvvvmlavu2cup4ine6riuut2bf2ausc7vyffrwr2qybcq
 - valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
-- valory/market_creation_manager_abci:0.1.0:bafybeicu3e7rkb7o33hazjgyhkf4cijgcwdgbhsi3clqwqlxbufuwdviwy
+- valory/market_creation_manager_abci:0.1.0:bafybeiae4on4updywbbdtenqnk6fanjgzxracaqfnkgvaxft3kd6k632x4
 - valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
 - valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
@@ -235,7 +235,7 @@ models:
       termination_sleep: ${int:900}
       termination_from_block: ${int:0}
       tx_timeout: ${float:10.0}
-      round_timeout_seconds: ${float:60}
+      round_timeout_seconds: ${float:120}
       use_termination: ${bool:false}
       use_slashing: ${bool:false}
       slash_cooldown_hours: ${int:3}
