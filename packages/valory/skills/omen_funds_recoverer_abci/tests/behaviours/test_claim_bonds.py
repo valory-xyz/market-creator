@@ -20,7 +20,7 @@
 """Tests for ClaimBondsBehaviour."""
 
 import contextlib
-from typing import Any
+from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -28,7 +28,6 @@ import pytest
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import ETHER_VALUE
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.claim_bonds import (
     ClaimBondsBehaviour,
-    SUBGRAPH_PAGE_SIZE,
     ZERO_BYTES32,
 )
 from packages.valory.skills.omen_funds_recoverer_abci.tests.behaviours.conftest import (
@@ -48,7 +47,6 @@ class TestClaimBondsBehaviour:
         context_mock.logger = MagicMock()
         context_mock.params = MagicMock()
         context_mock.params.realitio_contract = "0xRealitio"
-        context_mock.params.realitio_start_block = 0
         context_mock.params.claim_bonds_batch_size = 10
         context_mock.params.min_balance_withdraw_realitio = 10000000000000000000
         context_mock.state.round_sequence = MagicMock()
@@ -150,7 +148,7 @@ class TestClaimBondsBehaviour:
             "get_contract_api_response",
             new=make_gen(resp),
         ):
-            gen = self.behaviour._get_claim_params(b"\x01" * 32)
+            gen = self.behaviour._get_claim_params(b"\x01" * 32, from_block=12345)
             result = exhaust_gen(gen)
         assert result == answered
 
@@ -176,7 +174,7 @@ class TestClaimBondsBehaviour:
             "get_contract_api_response",
             new=make_gen(resp),
         ):
-            gen = self.behaviour._get_claim_params(b"\x01" * 32)
+            gen = self.behaviour._get_claim_params(b"\x01" * 32, from_block=12345)
             result = exhaust_gen(gen)
         assert result is None
 
@@ -377,7 +375,9 @@ class TestClaimBondsBehaviour:
 
     def test_build_claim_bonds_txs_claim_and_withdraw(self) -> None:
         """Test _build_claim_bonds_txs with one claim and a withdraw tx."""
-        responses = [{"question": {"id": "0xabcd"}, "bond": "100"}]
+        responses = [
+            {"question": {"id": "0xabcd", "createdBlock": "12345"}, "bond": "100"}
+        ]
         claim_tx = {"to": "0xR", "data": "0xclaim", "value": 0}
         withdraw_tx = {"to": "0xR", "data": "0xw", "value": 0}
 
@@ -398,8 +398,10 @@ class TestClaimBondsBehaviour:
             gen = self.behaviour._build_claim_bonds_txs()
             result = exhaust_gen(gen)
         assert len(result) == 2
-        assert result[0] == claim_tx
-        assert result[1] == withdraw_tx
+        # Withdraw is built first so it gets queued even if the claim loop
+        # is slow or partially fails.
+        assert result[0] == withdraw_tx
+        assert result[1] == claim_tx
 
     @pytest.mark.parametrize(
         "description,is_unclaimed,claim_params,simulate_ok,build_tx",
@@ -419,7 +421,9 @@ class TestClaimBondsBehaviour:
         build_tx: Any,
     ) -> None:
         """Test _build_claim_bonds_txs skips when a step in the claim chain fails."""
-        responses = [{"question": {"id": "0xabcd"}, "bond": "100"}]
+        responses = [
+            {"question": {"id": "0xabcd", "createdBlock": "12345"}, "bond": "100"}
+        ]
 
         patches = [
             patch.object(
@@ -460,8 +464,8 @@ class TestClaimBondsBehaviour:
         """Test _build_claim_txs stops after reaching batch_size."""
         self.behaviour.context.params.claim_bonds_batch_size = 1
         responses = [
-            {"question": {"id": "0xaaaa"}, "bond": "100"},
-            {"question": {"id": "0xbbbb"}, "bond": "200"},
+            {"question": {"id": "0xaaaa", "createdBlock": "111"}, "bond": "100"},
+            {"question": {"id": "0xbbbb", "createdBlock": "222"}, "bond": "200"},
         ]
         claim_tx = {"to": "0xR", "data": "0xclaim", "value": 0}
 
@@ -481,6 +485,67 @@ class TestClaimBondsBehaviour:
         # Only 1 tx even though there are 2 responses
         assert len(result) == 1
 
+    def test_try_build_single_claim_missing_created_block(self) -> None:
+        """A response without createdBlock is skipped without any contract calls."""
+        resp = {"question": {"id": "0xabcd"}, "bond": "100"}
+        # Patch _is_unclaimed to fail loudly if it gets called.
+        with patch.object(self.behaviour, "_is_unclaimed", side_effect=AssertionError):
+            gen = self.behaviour._try_build_single_claim(resp)
+            result = exhaust_gen(gen)
+        assert result is None
+
+    def test_try_build_single_claim_passes_per_question_from_block(self) -> None:
+        """from_block is derived as max(0, createdBlock - 1) and forwarded to _get_claim_params."""
+        resp = {
+            "question": {"id": "0xabcd", "createdBlock": "12345"},
+            "bond": "100",
+        }
+        captured: Dict[str, int] = {}
+
+        def fake_get_claim_params(question_id: bytes, from_block: int) -> Any:
+            captured["from_block"] = from_block
+            return [{"p": "v"}]
+            yield  # noqa
+
+        with (
+            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_claim_params", new=fake_get_claim_params
+            ),
+            patch.object(self.behaviour, "_simulate_claim", new=make_gen(True)),
+            patch.object(
+                self.behaviour,
+                "_build_claim_tx",
+                new=make_gen({"to": "0xR", "data": "0x", "value": 0}),
+            ),
+        ):
+            gen = self.behaviour._try_build_single_claim(resp)
+            exhaust_gen(gen)
+        assert captured["from_block"] == 12344  # 12345 - 1
+
+    def test_try_build_single_claim_from_block_clamped_at_zero(self) -> None:
+        """createdBlock=0 (edge case) clamps to from_block=0, never negative."""
+        resp = {
+            "question": {"id": "0xabcd", "createdBlock": "0"},
+            "bond": "100",
+        }
+        captured: Dict[str, int] = {}
+
+        def fake_get_claim_params(question_id: bytes, from_block: int) -> Any:
+            captured["from_block"] = from_block
+            return None
+            yield  # noqa
+
+        with (
+            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
+            patch.object(
+                self.behaviour, "_get_claim_params", new=fake_get_claim_params
+            ),
+        ):
+            gen = self.behaviour._try_build_single_claim(resp)
+            exhaust_gen(gen)
+        assert captured["from_block"] == 0
+
     def test_get_claimable_responses_empty(self) -> None:
         """Test _get_claimable_responses returns empty list when subgraph returns no data."""
         subgraph_response: dict = {"data": {"responses": []}}
@@ -493,8 +558,8 @@ class TestClaimBondsBehaviour:
             result = exhaust_gen(gen)
         assert result == []
 
-    def test_get_claimable_responses_single_page(self) -> None:
-        """Test _get_claimable_responses returns results from a single page."""
+    def test_get_claimable_responses_returns_batch(self) -> None:
+        """Test _get_claimable_responses returns the items from a single subgraph call."""
         responses_data = [
             {
                 "id": "resp1",
@@ -502,35 +567,20 @@ class TestClaimBondsBehaviour:
                 "bond": "100",
                 "answer": "0x01",
             },
+            {
+                "id": "resp2",
+                "question": {"id": "0xq2"},
+                "bond": "200",
+                "answer": "0x00",
+            },
         ]
         subgraph_response = {"data": {"responses": responses_data}}
-        with patch.object(
-            self.behaviour,
-            "get_realitio_subgraph_result",
-            new=make_gen(subgraph_response),
-        ):
-            gen = self.behaviour._get_claimable_responses()
-            result = exhaust_gen(gen)
-        assert len(result) == 1
-        assert result[0]["id"] == "resp1"
-
-    def test_get_claimable_responses_pagination(self) -> None:
-        """Test _get_claimable_responses paginates through multiple pages."""
-        # First page: exactly SUBGRAPH_PAGE_SIZE items to trigger pagination
-        page1 = [
-            {"id": f"r{i}", "question": {"id": f"0xq{i}"}}
-            for i in range(SUBGRAPH_PAGE_SIZE)
-        ]
-        page2 = [{"id": "final", "question": {"id": "0xfinal"}}]
-
         call_count = 0
 
         def mock_subgraph(*args: Any, **kwargs: Any) -> Any:
             nonlocal call_count
             call_count += 1
-            if call_count == 1:
-                return {"data": {"responses": page1}}
-            return {"data": {"responses": page2}}
+            return subgraph_response
             yield  # noqa
 
         with patch.object(
@@ -540,8 +590,31 @@ class TestClaimBondsBehaviour:
         ):
             gen = self.behaviour._get_claimable_responses()
             result = exhaust_gen(gen)
-        assert len(result) == SUBGRAPH_PAGE_SIZE + 1
-        assert result[-1]["id"] == "final"
+        # Single call only — no pagination loop.
+        assert call_count == 1
+        assert len(result) == 2
+        assert result[0]["id"] == "resp1"
+        assert result[1]["id"] == "resp2"
+
+    def test_get_claimable_responses_query_uses_batch_size(self) -> None:
+        """Test the rendered query interpolates claim_bonds_batch_size as `first:`."""
+        self.behaviour.context.params.claim_bonds_batch_size = 7
+        captured_query: Dict[str, str] = {}
+
+        def mock_subgraph(*args: Any, **kwargs: Any) -> Any:
+            captured_query["q"] = kwargs.get("query", "")
+            return {"data": {"responses": []}}
+            yield  # noqa
+
+        with patch.object(
+            self.behaviour,
+            "get_realitio_subgraph_result",
+            new=mock_subgraph,
+        ):
+            gen = self.behaviour._get_claimable_responses()
+            exhaust_gen(gen)
+        assert "first: 7" in captured_query["q"]
+        assert "orderDirection: desc" in captured_query["q"]
 
     def test_get_claimable_responses_subgraph_failure(self) -> None:
         """Test _get_claimable_responses returns empty on subgraph failure."""

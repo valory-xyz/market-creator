@@ -82,7 +82,6 @@ class TestOmenFundsRecovererBaseBehaviour:
         context_mock.params = MagicMock()
         context_mock.params.multisend_address = "0x" + "A0" * 20
         context_mock.params.realitio_contract = "0xRealitio"
-        context_mock.params.realitio_start_block = 0
         context_mock.params.claim_bonds_batch_size = 10
         context_mock.params.min_balance_withdraw_realitio = 10**19
         context_mock.state.round_sequence = MagicMock()

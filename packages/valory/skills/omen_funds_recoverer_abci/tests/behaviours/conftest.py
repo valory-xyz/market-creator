@@ -96,7 +96,6 @@ def mock_context() -> MagicMock:
     context.params.collateral_tokens_contract = "0xCollateral"
     context.params.realitio_contract = "0xRealitio"
     context.params.realitio_oracle_proxy_contract = "0xRealitioProxy"
-    context.params.realitio_start_block = 0
     context.params.liquidity_removal_lead_time = 86400
     context.params.remove_liquidity_batch_size = 3
     context.params.redeem_positions_batch_size = 5

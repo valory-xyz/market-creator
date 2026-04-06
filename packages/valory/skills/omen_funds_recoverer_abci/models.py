@@ -72,9 +72,6 @@ class OmenFundsRecovererParams(BaseParams):
         self.min_balance_withdraw_realitio = self._ensure(
             "min_balance_withdraw_realitio", kwargs, type_=int
         )
-        self.realitio_start_block = self._ensure(
-            "realitio_start_block", kwargs, type_=int
-        )
         self.realitio_contract = self._ensure(
             key="realitio_contract", kwargs=kwargs, type_=str
         )

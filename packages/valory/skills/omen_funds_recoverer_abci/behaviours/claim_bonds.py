@@ -35,22 +35,28 @@ from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
 from packages.valory.skills.omen_funds_recoverer_abci.payloads import RecoveryTxsPayload
 from packages.valory.skills.omen_funds_recoverer_abci.rounds import ClaimBondsRound
 
-# Subgraph max per page.
-SUBGRAPH_PAGE_SIZE = 1000
-
 # Zero bytes32 -- indicates an already-claimed question.
 ZERO_BYTES32 = b"\x00" * 32
 
-# Realitio subgraph: finalized questions answered by the safe.
+# Realitio subgraph: most recent finalized responses by the safe.
+#
+# We deliberately do NOT paginate. The query returns at most
+# `claim_bonds_batch_size` items ordered by id DESCENDING — i.e. the most
+# recently submitted responses first. This bounds per-round work to a
+# constant `O(batch_size)` regardless of how many bonds the safe has ever
+# posted, and naturally side-steps any persistently-broken items at the
+# head of the id space (the failing ids observed in production —
+# 0x1a2d…, 0x1af5…, 0x1baf… — all sit at the lowest ids and would otherwise
+# starve the round budget on every period).
 CLAIMABLE_RESPONSES_QUERY = Template("""{
     responses(
-      where: {user: "$safe", question_: {answerFinalizedTimestamp_lt: "$now", answerFinalizedTimestamp_not: null}}
-      first: $page_size
+      where: {user: "$safe", question_: {answerFinalizedTimestamp_gt: 0}}
+      first: $batch_size
       orderBy: id
-      id_gt: "$cursor"
+      orderDirection: desc
     ) {
       id
-      question { id }
+      question { id createdBlock }
       bond
       answer
     }
@@ -76,14 +82,18 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
         self.set_done()
 
     def _build_claim_bonds_txs(self) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Build claimWinnings txs and an optional withdraw tx."""
-        claim_txs = yield from self._build_claim_txs()
-        withdraw_tx = yield from self._maybe_build_withdraw_tx()
+        """Build an optional withdraw tx then claimWinnings txs.
 
-        txs = claim_txs
+        Withdraw is built FIRST so that even if the claim loop is slow or
+        partially fails, the (fast, O(1)) withdraw tx is still queued in
+        this round's payload via the funds_recovery_txs accumulator.
+        """
+        txs: List[Dict[str, Any]] = []
+        withdraw_tx = yield from self._maybe_build_withdraw_tx()
         if withdraw_tx is not None:
             txs.append(withdraw_tx)
-
+        claim_txs = yield from self._build_claim_txs()
+        txs.extend(claim_txs)
         self.context.logger.info(f"{SKILL_LOG_PREFIX} ClaimBonds: built {len(txs)} txs")
         return txs
 
@@ -124,11 +134,25 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
         )
         question_id_bytes = bytes.fromhex(question_id_hex.replace("0x", ""))
 
+        # Per-question lower bound for the eth_getLogs window: the block in
+        # which the Realitio question was created. Subtract 1 as a defensive
+        # margin against subgraph indexing skew. This collapses the
+        # eth_getLogs range from the chain history (~38M blocks on Gnosis) to
+        # only the question's lifetime (typically a few thousand blocks).
+        created_block_raw = resp["question"].get("createdBlock")
+        if created_block_raw is None:
+            self.context.logger.warning(
+                f"{SKILL_LOG_PREFIX} ClaimBonds: missing createdBlock for "
+                f"question {question_id_hex}, skipping"
+            )
+            return None
+        from_block = max(0, int(created_block_raw) - 1)
+
         is_unclaimed = yield from self._is_unclaimed(question_id_bytes)
         if not is_unclaimed:
             return None
 
-        claim_params = yield from self._get_claim_params(question_id_bytes)
+        claim_params = yield from self._get_claim_params(question_id_bytes, from_block)
         if claim_params is None:
             self.context.logger.warning(
                 f"{SKILL_LOG_PREFIX} ClaimBonds: RealitioContract.get_claim_params failed "
@@ -162,37 +186,25 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
     def _get_claimable_responses(
         self,
     ) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Query the Realitio subgraph for finalized questions answered by the safe."""
+        """Query the Realitio subgraph for the next batch of finalized responses.
+
+        Returns at most `claim_bonds_batch_size` items, ordered by id desc
+        (newest first). No pagination — the per-round work is bounded by
+        configuration, not by history size.
+        """
         safe = self.synchronized_data.safe_contract_address.lower()
-        now = str(self.last_synced_timestamp)
-        all_responses: List[Dict[str, Any]] = []
-        cursor = ""
-
-        while True:
-            response = yield from self.get_realitio_subgraph_result(
-                query=CLAIMABLE_RESPONSES_QUERY.substitute(
-                    safe=safe,
-                    now=now,
-                    page_size=SUBGRAPH_PAGE_SIZE,
-                    cursor=cursor,
-                )
+        response = yield from self.get_realitio_subgraph_result(
+            query=CLAIMABLE_RESPONSES_QUERY.substitute(
+                safe=safe,
+                batch_size=self.params.claim_bonds_batch_size,
             )
-            if response is None:
-                self.context.logger.warning(
-                    f"{SKILL_LOG_PREFIX} ClaimBonds: Realitio subgraph query failed"
-                )
-                break
-
-            responses = response.get("data", {}).get("responses", [])
-            if not responses:
-                break
-
-            all_responses.extend(responses)
-            cursor = responses[-1]["id"]
-            if len(responses) < SUBGRAPH_PAGE_SIZE:
-                break
-
-        return all_responses
+        )
+        if response is None:
+            self.context.logger.warning(
+                f"{SKILL_LOG_PREFIX} ClaimBonds: Realitio subgraph query failed"
+            )
+            return []
+        return cast(List[Dict[str, Any]], response.get("data", {}).get("responses", []))
 
     def _is_unclaimed(self, question_id: bytes) -> Generator[None, None, bool]:
         """Check if a question is unclaimed. A history hash of all zeros means already claimed."""
@@ -219,10 +231,9 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
         return False
 
     def _get_claim_params(
-        self, question_id: bytes
+        self, question_id: bytes, from_block: int
     ) -> Generator[None, None, Optional[Any]]:
         """Get claim parameters for a question from on-chain event logs."""
-        from_block = self.params.realitio_start_block
         response = yield from self.get_contract_api_response(
             performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
             contract_address=self.params.realitio_contract,

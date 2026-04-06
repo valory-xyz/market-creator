@@ -88,7 +88,6 @@ class TestOmenFundsRecovererParams:
             "redeem_positions_batch_size": 5,
             "claim_bonds_batch_size": 10,
             "min_balance_withdraw_realitio": 10**19,
-            "realitio_start_block": 0,
             "realitio_contract": "0xRealitio",
             "realitio_oracle_proxy_contract": "0xRealitioProxy",
             "conditional_tokens_contract": "0xCT",
@@ -101,7 +100,6 @@ class TestOmenFundsRecovererParams:
         assert mock_self.redeem_positions_batch_size == 5
         assert mock_self.claim_bonds_batch_size == 10
         assert mock_self.min_balance_withdraw_realitio == 10**19
-        assert mock_self.realitio_start_block == 0
         assert mock_self.realitio_contract == "0xRealitio"
         assert mock_self.realitio_oracle_proxy_contract == "0xRealitioProxy"
         assert mock_self.conditional_tokens_contract == "0xCT"
