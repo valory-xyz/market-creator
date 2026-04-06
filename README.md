@@ -186,8 +186,6 @@ pip install aea-helpers
 ```bash
 aea-helpers run-agent \
   --name valory/market_maker \
-  --config-replace \
-  --config-mapping config-mapping.json \
   --connection-key
 ```
 

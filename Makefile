@@ -87,4 +87,4 @@ run-agent:
 	LOG_FILE="./logs/agent_log_$$TIMESTAMP.log"; \
 	LATEST_LOG_FILE="./logs/agent_log_latest.log"; \
 	echo "Running agent and logging to $$LOG_FILE"; \
-	aea-helpers run-agent --name valory/market_maker --config-replace --config-mapping config-mapping.json --connection-key 2>&1 | tee $$LOG_FILE $$LATEST_LOG_FILE'
+	aea-helpers run-agent --name valory/market_maker --connection-key 2>&1 | tee $$LOG_FILE $$LATEST_LOG_FILE'
