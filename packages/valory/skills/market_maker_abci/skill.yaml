@@ -115,7 +115,6 @@ models:
       - science
       - sustainability
       - technology
-      - travel
       - weather
       market_fee: 2.0
       initial_funds: 1.0
