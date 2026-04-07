@@ -32,7 +32,7 @@ fingerprint:
   handlers.py: bafybeifjipvibmq77gavlncqrbbmlfokp7axk3sjemouxaewgolp3nfbey
   models.py: bafybeigxycewlxlwo7cmthgemqd2s2vzrpxgbi6sy343vcleqrpw7snbxu
   payloads.py: bafybeibbvv2rpzrs77vl45eac7bjownr3abrms3pg7orqpqzob2pglwqhm
-  propose_questions.py: bafybeifl3az6sfloymavhklb26l7owj4e3qdyvxupzjtzvmkza57266zna
+  propose_questions.py: bafybeift5o4chfdnb76jpktc2yyycn6zuknyq6fzy6de2oanntfatfj2ee
   rounds.py: bafybeigyidv5rutq72wllqtfrhpq42fbi55wp4ofxoyfu4c5b7drcdstem
   states/__init__.py: bafybeibogw3ljdly5zf2zesfdltrxc4ncw67imtys6srp7w5by2u5ajhhu
   states/answer_questions.py: bafybeiecaz7ft745bluxy2x3obaw3elpguplsedp3j4hsbh7yahovi3xrm
@@ -185,7 +185,6 @@ models:
       - science
       - sustainability
       - technology
-      - travel
       - weather
       market_fee: 2.0
       initial_funds: 1.0
