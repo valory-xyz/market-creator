@@ -21,7 +21,7 @@
 
 import json
 from string import Template
-from typing import Any, Dict, Generator, List, Optional, cast
+from typing import Any, Dict, Generator, List, Optional, Tuple, cast
 
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
@@ -35,22 +35,83 @@ from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import (
 from packages.valory.skills.omen_funds_recoverer_abci.payloads import RecoveryTxsPayload
 from packages.valory.skills.omen_funds_recoverer_abci.rounds import ClaimBondsRound
 
-# Zero bytes32 -- indicates an already-claimed question.
+# Zero bytes32 -- indicates an already-claimed question, and is the
+# `last_history_hash` value `claimWinnings` walks back to after the
+# very first (oldest) entry in the response history.
 ZERO_BYTES32 = b"\x00" * 32
 
-# Realitio subgraph: most recent finalized responses by the safe.
+# Type alias for the 4-tuple expected by Realitio.claimWinnings:
+#   (history_hashes, addresses, bonds, answers), all in reverse-
+#   chronological order (newest first), all the same length.
+ClaimParamsType = Tuple[List[Any], List[str], List[int], List[Any]]
+
+
+def _assemble_claim_params(answered: List[Dict[str, Any]]) -> ClaimParamsType:
+    """Convert a chronological event list into the claimWinnings 4-tuple.
+
+    The Realitio v2.1 contract walks the four supplied arrays in
+    **reverse-chronological** order (newest entry at index 0, oldest at
+    index N-1) and at each step verifies that the running
+    ``last_history_hash`` matches ``keccak256(history_hashes[i] || answer
+    || bond || addr || is_commitment)``. Critically, ``history_hashes[i]``
+    is the hash that existed *before* the i-th entry was posted —
+    equivalently, the stored ``history_hash`` of the previous (older)
+    chronological entry, or ``0x00…00`` if the i-th entry is the very
+    first one.
+
+    Source of the algorithm: ``Realitio.sol::claimWinnings`` +
+    ``_verifyHistoryInputOrRevert`` in
+    https://github.com/realitio/realitio-contracts.
+
+    :param answered: list of decoded ``LogNewAnswer`` events in
+        **chronological** order (oldest first), as returned by
+        ``RealitioContract.get_claim_params``.
+    :return: tuple ``(history_hashes, addresses, bonds, answers)`` in
+        reverse-chronological order, ready to pass to
+        ``claimWinnings``.
+    """
+    history_hashes: List[Any] = []
+    addresses: List[str] = []
+    bonds: List[int] = []
+    answers: List[Any] = []
+    for chrono_idx in range(len(answered) - 1, -1, -1):
+        args = answered[chrono_idx]["args"]
+        if chrono_idx == 0:
+            prior_hash: Any = ZERO_BYTES32
+        else:
+            prior_hash = answered[chrono_idx - 1]["args"]["history_hash"]
+        history_hashes.append(prior_hash)
+        addresses.append(args["user"])
+        bonds.append(int(args["bond"]))
+        answers.append(args["answer"])
+    return history_hashes, addresses, bonds, answers
+
+
+# Realitio subgraph: most recent finalized, still-unclaimed responses
+# by the safe.
 #
 # We deliberately do NOT paginate. The query returns at most
 # `claim_bonds_batch_size` items ordered by id DESCENDING — i.e. the most
 # recently submitted responses first. This bounds per-round work to a
 # constant `O(batch_size)` regardless of how many bonds the safe has ever
-# posted, and naturally side-steps any persistently-broken items at the
-# head of the id space (the failing ids observed in production —
-# 0x1a2d…, 0x1af5…, 0x1baf… — all sit at the lowest ids and would otherwise
-# starve the round budget on every period).
+# posted.
+#
+# Critically, the `historyHash_not` filter excludes questions whose
+# on-chain history hash has already been cleared to zero — i.e. questions
+# that have already been successfully claimed. Without this filter, once
+# the skill claims a batch of questions the NEXT period's query would
+# return the same 10 (now-claimed) questions forever, because the
+# id-based ordering doesn't change when the on-chain state changes. That
+# would deadlock the backlog drain after exactly one successful batch.
 CLAIMABLE_RESPONSES_QUERY = Template("""{
     responses(
-      where: {user: "$safe", question_: {answerFinalizedTimestamp_gt: 0}}
+      where: {
+        user: "$safe",
+        question_: {
+          answerFinalizedTimestamp_gt: 0,
+          historyHash_not: "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
       first: $batch_size
       orderBy: id
       orderDirection: desc
@@ -103,20 +164,36 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
         if not responses:
             return []
 
+        # The safe may have posted multiple responses on the same
+        # question (e.g. defending its answer through several rounds
+        # of bond escalation). Each distinct response is a separate
+        # subgraph entry but they all share the same question_id, and
+        # a single successful claimWinnings call claims ALL of them at
+        # once. Deduplicate by question id so we don't build multiple
+        # claim txs for the same question — the second one would
+        # revert on-chain because the first one clears the history
+        # hash.
+        seen_question_ids: set = set()
+        unique_responses: List[Dict[str, Any]] = []
+        for resp in responses:
+            qid = resp.get("question", {}).get("id")
+            if qid is None or qid in seen_question_ids:
+                continue
+            seen_question_ids.add(qid)
+            unique_responses.append(resp)
+
         batch_size = self.params.claim_bonds_batch_size
         txs: List[Dict[str, Any]] = []
-        unclaimed_count = 0
-        for resp in responses:
+        for resp in unique_responses:
             if len(txs) >= batch_size:
                 break
             claim_tx = yield from self._try_build_single_claim(resp)
             if claim_tx is not None:
                 txs.append(claim_tx)
-                unclaimed_count += 1
 
         self.context.logger.info(
-            f"{SKILL_LOG_PREFIX} ClaimBonds: found {len(responses)} finalized responses, "
-            f"{unclaimed_count} unclaimed"
+            f"{SKILL_LOG_PREFIX} ClaimBonds: fetched {len(responses)} responses "
+            f"({len(unique_responses)} unique questions), built {len(txs)} claim txs"
         )
         return txs
 
@@ -124,21 +201,15 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
         self, resp: Dict[str, Any]
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Build a claimWinnings tx for a single response, or None if it should be skipped."""
-        raw_question_id = resp["question"]["id"]
-        # Realitio subgraph uses composite IDs: "{contract_address}-{question_id}"
-        # Extract the actual question_id (after the dash)
-        question_id_hex = (
-            raw_question_id.split("-")[-1]
-            if "-" in raw_question_id
-            else raw_question_id
-        )
+        # Realitio subgraph always uses composite ids of the form
+        # "{contract_address}-{question_id}".
+        question_id_hex = resp["question"]["id"].split("-")[-1]
         question_id_bytes = bytes.fromhex(question_id_hex.replace("0x", ""))
 
-        # Per-question lower bound for the eth_getLogs window: the block in
-        # which the Realitio question was created. Subtract 1 as a defensive
-        # margin against subgraph indexing skew. This collapses the
-        # eth_getLogs range from the chain history (~38M blocks on Gnosis) to
-        # only the question's lifetime (typically a few thousand blocks).
+        # Per-question lower bound for the eth_getLogs window. Subtract
+        # 1 as a defensive margin against subgraph indexing skew.
+        # Missing createdBlock means the subgraph row is malformed;
+        # skip it rather than fall back to scanning from 0.
         created_block_raw = resp["question"].get("createdBlock")
         if created_block_raw is None:
             self.context.logger.warning(
@@ -148,32 +219,19 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
             return None
         from_block = max(0, int(created_block_raw) - 1)
 
-        is_unclaimed = yield from self._is_unclaimed(question_id_bytes)
-        if not is_unclaimed:
-            return None
-
+        # Linear bail-out chain: each helper logs its own failure, so
+        # we just return None on the first step that doesn't produce a
+        # value. The subgraph filter already excludes already-claimed
+        # questions, so we skip the on-chain getHistoryHash check —
+        # any stale-index edge case is caught naturally by simulation.
         claim_params = yield from self._get_claim_params(question_id_bytes, from_block)
         if claim_params is None:
-            self.context.logger.warning(
-                f"{SKILL_LOG_PREFIX} ClaimBonds: RealitioContract.get_claim_params failed "
-                f"for {question_id_hex}"
-            )
             return None
-
         simulation_ok = yield from self._simulate_claim(question_id_bytes, claim_params)
         if not simulation_ok:
-            self.context.logger.warning(
-                f"{SKILL_LOG_PREFIX} ClaimBonds: RealitioContract.simulate_claim_winnings failed "
-                f"for {question_id_hex}"
-            )
             return None
-
         claim_tx = yield from self._build_claim_tx(question_id_bytes, claim_params)
         if claim_tx is None:
-            self.context.logger.warning(
-                f"{SKILL_LOG_PREFIX} ClaimBonds: RealitioContract.build_claim_winnings failed "
-                f"for {question_id_hex}"
-            )
             return None
 
         bond = int(resp.get("bond", 0))
@@ -205,30 +263,6 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
             )
             return []
         return cast(List[Dict[str, Any]], response.get("data", {}).get("responses", []))
-
-    def _is_unclaimed(self, question_id: bytes) -> Generator[None, None, bool]:
-        """Check if a question is unclaimed. A history hash of all zeros means already claimed."""
-        response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            contract_address=self.params.realitio_contract,
-            contract_id=str(RealitioContract.contract_id),
-            contract_callable=get_callable_name(RealitioContract.get_history_hash),
-            question_id=question_id,
-        )
-        if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.warning(
-                f"{SKILL_LOG_PREFIX} ClaimBonds: RealitioContract.get_history_hash failed "
-                f"for 0x{question_id.hex()}"
-            )
-            return False
-
-        history_hash = response.state.body["data"]
-        if isinstance(history_hash, bytes):
-            return history_hash != ZERO_BYTES32
-        # If returned as hex string
-        if isinstance(history_hash, str):
-            return history_hash.replace("0x", "") != "0" * 64
-        return False
 
     def _get_claim_params(
         self, question_id: bytes, from_block: int
@@ -266,7 +300,12 @@ class ClaimBondsBehaviour(OmenFundsRecovererBaseBehaviour):
             )
             return None
 
-        return answered
+        # The contract wrapper returns the raw chronological list of
+        # LogNewAnswer events. claimWinnings expects a 4-tuple of
+        # parallel arrays in reverse-chronological order. Without this
+        # transform the calldata is malformed and the simulation
+        # always reverts.
+        return _assemble_claim_params(cast(List[Dict[str, Any]], answered))
 
     def _simulate_claim(
         self,

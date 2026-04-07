@@ -29,6 +29,7 @@ from packages.valory.skills.omen_funds_recoverer_abci.behaviours.base import ETH
 from packages.valory.skills.omen_funds_recoverer_abci.behaviours.claim_bonds import (
     ClaimBondsBehaviour,
     ZERO_BYTES32,
+    _assemble_claim_params,
 )
 from packages.valory.skills.omen_funds_recoverer_abci.tests.behaviours.conftest import (
     exhaust_gen,
@@ -66,82 +67,27 @@ class TestClaimBondsBehaviour:
             name="test", skill_context=context_mock
         )
 
-    def test_is_unclaimed_true_bytes(self) -> None:
-        """Test _is_unclaimed returns True for non-zero bytes hash."""
-        non_zero_hash = b"\x01" + b"\x00" * 31
-        resp = make_contract_state_response({"data": non_zero_hash})
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=make_gen(resp),
-        ):
-            gen = self.behaviour._is_unclaimed(b"\x00" * 32)
-            result = exhaust_gen(gen)
-        assert result is True
-
-    def test_is_unclaimed_false_bytes(self) -> None:
-        """Test _is_unclaimed returns False for zero bytes hash."""
-        resp = make_contract_state_response({"data": ZERO_BYTES32})
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=make_gen(resp),
-        ):
-            gen = self.behaviour._is_unclaimed(b"\x00" * 32)
-            result = exhaust_gen(gen)
-        assert result is False
-
-    def test_is_unclaimed_true_hex_string(self) -> None:
-        """Test _is_unclaimed returns True for non-zero hex string hash."""
-        resp = make_contract_state_response({"data": "0x" + "ab" * 32})
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=make_gen(resp),
-        ):
-            gen = self.behaviour._is_unclaimed(b"\x00" * 32)
-            result = exhaust_gen(gen)
-        assert result is True
-
-    def test_is_unclaimed_false_hex_string(self) -> None:
-        """Test _is_unclaimed returns False for zero hex string hash."""
-        resp = make_contract_state_response({"data": "0x" + "0" * 64})
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=make_gen(resp),
-        ):
-            gen = self.behaviour._is_unclaimed(b"\x00" * 32)
-            result = exhaust_gen(gen)
-        assert result is False
-
-    def test_is_unclaimed_error(self) -> None:
-        """Test _is_unclaimed returns False on contract error."""
-        resp = make_contract_error_response()
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=make_gen(resp),
-        ):
-            gen = self.behaviour._is_unclaimed(b"\x00" * 32)
-            result = exhaust_gen(gen)
-        assert result is False
-
-    def test_is_unclaimed_unexpected_type(self) -> None:
-        """Test _is_unclaimed returns False for unexpected data type."""
-        resp = make_contract_state_response({"data": 12345})
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=make_gen(resp),
-        ):
-            gen = self.behaviour._is_unclaimed(b"\x00" * 32)
-            result = exhaust_gen(gen)
-        assert result is False
-
     def test_get_claim_params_success(self) -> None:
-        """Test _get_claim_params returns answered data on success."""
-        answered = [{"some": "params"}]
+        """Test _get_claim_params transforms raw events into the claimWinnings 4-tuple."""
+        # Two chronological entries: oldest first.
+        answered = [
+            {
+                "args": {
+                    "user": "0xUserOld",
+                    "bond": 100,
+                    "answer": b"\x00" * 32,
+                    "history_hash": b"\xaa" * 32,
+                }
+            },
+            {
+                "args": {
+                    "user": "0xUserNew",
+                    "bond": 200,
+                    "answer": b"\x01" + b"\x00" * 31,
+                    "history_hash": b"\xbb" * 32,
+                }
+            },
+        ]
         resp = make_contract_state_response({"answered": answered})
         with patch.object(
             self.behaviour,
@@ -150,7 +96,15 @@ class TestClaimBondsBehaviour:
         ):
             gen = self.behaviour._get_claim_params(b"\x01" * 32, from_block=12345)
             result = exhaust_gen(gen)
-        assert result == answered
+        # Result is the (history_hashes, addrs, bonds, answers) 4-tuple
+        # in REVERSE chronological order (newest at index 0).
+        history_hashes, addrs, bonds, answers = result
+        assert addrs == ["0xUserNew", "0xUserOld"]
+        assert bonds == [200, 100]
+        assert answers == [b"\x01" + b"\x00" * 31, b"\x00" * 32]
+        # For the newest entry, history_hashes[0] is the older entry's
+        # stored hash. For the oldest entry, it's ZERO_BYTES32.
+        assert history_hashes == [b"\xaa" * 32, ZERO_BYTES32]
 
     @pytest.mark.parametrize(
         "description,response_body",
@@ -385,7 +339,6 @@ class TestClaimBondsBehaviour:
             patch.object(
                 self.behaviour, "_get_claimable_responses", new=make_gen(responses)
             ),
-            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
             patch.object(
                 self.behaviour, "_get_claim_params", new=make_gen([{"p": "v"}])
             ),
@@ -404,18 +357,16 @@ class TestClaimBondsBehaviour:
         assert result[1] == claim_tx
 
     @pytest.mark.parametrize(
-        "description,is_unclaimed,claim_params,simulate_ok,build_tx",
+        "description,claim_params,simulate_ok,build_tx",
         [
-            ("already claimed", False, None, None, None),
-            ("claim params fail", True, None, None, None),
-            ("simulation fail", True, [{"p": "v"}], False, None),
-            ("build claim tx fail", True, [{"p": "v"}], True, None),
+            ("claim params fail", None, None, None),
+            ("simulation fail", [{"p": "v"}], False, None),
+            ("build claim tx fail", [{"p": "v"}], True, None),
         ],
     )
     def test_build_claim_bonds_txs_single_claim_failure(
         self,
         description: str,
-        is_unclaimed: bool,
         claim_params: Any,
         simulate_ok: Any,
         build_tx: Any,
@@ -429,18 +380,14 @@ class TestClaimBondsBehaviour:
             patch.object(
                 self.behaviour, "_get_claimable_responses", new=make_gen(responses)
             ),
-            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(is_unclaimed)),
             patch.object(
                 self.behaviour, "_maybe_build_withdraw_tx", new=make_gen(None)
             ),
+            patch.object(
+                self.behaviour, "_get_claim_params", new=make_gen(claim_params)
+            ),
         ]
-        # Only add patches for steps that are reached
-        if is_unclaimed:
-            patches.append(
-                patch.object(
-                    self.behaviour, "_get_claim_params", new=make_gen(claim_params)
-                )
-            )
+        # Only add patches for steps that are actually reached.
         if claim_params is not None:
             patches.append(
                 patch.object(
@@ -473,7 +420,6 @@ class TestClaimBondsBehaviour:
             patch.object(
                 self.behaviour, "_get_claimable_responses", new=make_gen(responses)
             ),
-            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
             patch.object(
                 self.behaviour, "_get_claim_params", new=make_gen([{"p": "v"}])
             ),
@@ -485,11 +431,99 @@ class TestClaimBondsBehaviour:
         # Only 1 tx even though there are 2 responses
         assert len(result) == 1
 
+    def test_build_claim_txs_deduplicates_by_question_id(self) -> None:
+        """Multiple responses on the same question produce at most one claim tx."""
+        # Three responses, two of them on the same question
+        # (0xaaaa). After dedup the skill should only build claim txs
+        # for two unique questions.
+        responses = [
+            {"question": {"id": "0xaaaa", "createdBlock": "111"}, "bond": "100"},
+            {"question": {"id": "0xaaaa", "createdBlock": "111"}, "bond": "200"},
+            {"question": {"id": "0xbbbb", "createdBlock": "222"}, "bond": "300"},
+        ]
+        claim_tx = {"to": "0xR", "data": "0xclaim", "value": 0}
+        call_count = 0
+
+        def counting_try_build(_: Any) -> Any:
+            nonlocal call_count
+            call_count += 1
+            return claim_tx
+            yield  # noqa
+
+        with (
+            patch.object(
+                self.behaviour, "_get_claimable_responses", new=make_gen(responses)
+            ),
+            patch.object(
+                self.behaviour, "_try_build_single_claim", new=counting_try_build
+            ),
+        ):
+            gen = self.behaviour._build_claim_txs()
+            result = exhaust_gen(gen)
+        assert len(result) == 2
+        # _try_build_single_claim was only called once per UNIQUE question,
+        # not three times.
+        assert call_count == 2
+
+    def test_build_claim_txs_skips_responses_without_question_id(self) -> None:
+        """Malformed subgraph responses missing question.id are skipped."""
+        responses = [
+            {"question": {}, "bond": "100"},  # missing id
+            {"question": {"id": "0xbbbb", "createdBlock": "222"}, "bond": "200"},
+        ]
+        claim_tx = {"to": "0xR", "data": "0xclaim", "value": 0}
+        seen_qids: list = []
+
+        def record_try_build(resp: Any) -> Any:
+            seen_qids.append(resp["question"].get("id"))
+            return claim_tx
+            yield  # noqa
+
+        with (
+            patch.object(
+                self.behaviour, "_get_claimable_responses", new=make_gen(responses)
+            ),
+            patch.object(
+                self.behaviour, "_try_build_single_claim", new=record_try_build
+            ),
+        ):
+            gen = self.behaviour._build_claim_txs()
+            result = exhaust_gen(gen)
+        assert len(result) == 1
+        assert seen_qids == ["0xbbbb"]
+
+    def test_get_claimable_responses_query_excludes_already_claimed(self) -> None:
+        """The rendered query excludes questions whose historyHash is zero."""
+        captured_query: Dict[str, str] = {}
+
+        def mock_subgraph(*args: Any, **kwargs: Any) -> Any:
+            captured_query["q"] = kwargs.get("query", "")
+            return {"data": {"responses": []}}
+            yield  # noqa
+
+        with patch.object(
+            self.behaviour,
+            "get_realitio_subgraph_result",
+            new=mock_subgraph,
+        ):
+            gen = self.behaviour._get_claimable_responses()
+            exhaust_gen(gen)
+        # The filter must be present so already-claimed questions drop
+        # out of the result set — without it the skill would deadlock
+        # after the first successful batch.
+        assert "historyHash_not" in captured_query["q"]
+        assert (
+            "0x0000000000000000000000000000000000000000000000000000000000000000"
+            in captured_query["q"]
+        )
+
     def test_try_build_single_claim_missing_created_block(self) -> None:
         """A response without createdBlock is skipped without any contract calls."""
         resp = {"question": {"id": "0xabcd"}, "bond": "100"}
-        # Patch _is_unclaimed to fail loudly if it gets called.
-        with patch.object(self.behaviour, "_is_unclaimed", side_effect=AssertionError):
+        # Patch _get_claim_params to fail loudly if it gets called.
+        with patch.object(
+            self.behaviour, "_get_claim_params", side_effect=AssertionError
+        ):
             gen = self.behaviour._try_build_single_claim(resp)
             result = exhaust_gen(gen)
         assert result is None
@@ -508,7 +542,6 @@ class TestClaimBondsBehaviour:
             yield  # noqa
 
         with (
-            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
             patch.object(
                 self.behaviour, "_get_claim_params", new=fake_get_claim_params
             ),
@@ -536,11 +569,8 @@ class TestClaimBondsBehaviour:
             return None
             yield  # noqa
 
-        with (
-            patch.object(self.behaviour, "_is_unclaimed", new=make_gen(True)),
-            patch.object(
-                self.behaviour, "_get_claim_params", new=fake_get_claim_params
-            ),
+        with patch.object(
+            self.behaviour, "_get_claim_params", new=fake_get_claim_params
         ):
             gen = self.behaviour._try_build_single_claim(resp)
             exhaust_gen(gen)
@@ -626,3 +656,70 @@ class TestClaimBondsBehaviour:
             gen = self.behaviour._get_claimable_responses()
             result = exhaust_gen(gen)
         assert result == []
+
+
+class TestAssembleClaimParams:
+    """Tests for the _assemble_claim_params helper.
+
+    These exercise the calldata-shape requirement of
+    Realitio.claimWinnings: arrays must be in REVERSE chronological
+    order (newest first), parallel and equal length, with
+    history_hashes[i] holding the stored hash of the previous (older)
+    chronological entry, or ZERO_BYTES32 for the very first entry.
+    """
+
+    @staticmethod
+    def _entry(
+        user: str, bond: int, answer: bytes, history_hash: bytes
+    ) -> Dict[str, Any]:
+        return {
+            "args": {
+                "user": user,
+                "bond": bond,
+                "answer": answer,
+                "history_hash": history_hash,
+            }
+        }
+
+    def test_single_entry(self) -> None:
+        """A 1-entry history yields a 1-element 4-tuple with ZERO_BYTES32."""
+        ans = b"\x01" + b"\x00" * 31
+        hh = b"\xaa" * 32
+        result = _assemble_claim_params([self._entry("0xUserA", 100, ans, hh)])
+        history_hashes, addrs, bonds, answers = result
+        assert addrs == ["0xUserA"]
+        assert bonds == [100]
+        assert answers == [ans]
+        # Only one entry → its prior hash is the zero-bytes32 sentinel.
+        assert history_hashes == [ZERO_BYTES32]
+
+    def test_three_entries_reverse_order_and_hash_chain(self) -> None:
+        """Three chronological entries → reversed arrays + correct hash chain."""
+        e1 = self._entry("0xUser1", 100, b"\x00" * 32, b"\x11" * 32)
+        e2 = self._entry("0xUser2", 200, b"\x01" + b"\x00" * 31, b"\x22" * 32)
+        e3 = self._entry("0xUser3", 400, b"\x00" * 32, b"\x33" * 32)
+        history_hashes, addrs, bonds, answers = _assemble_claim_params([e1, e2, e3])
+        # Reverse-chronological: newest (e3) at index 0, oldest (e1) at index 2.
+        assert addrs == ["0xUser3", "0xUser2", "0xUser1"]
+        assert bonds == [400, 200, 100]
+        assert answers == [
+            b"\x00" * 32,
+            b"\x01" + b"\x00" * 31,
+            b"\x00" * 32,
+        ]
+        # history_hashes[i] is the stored hash of the entry one older
+        # than entry i (in reverse order), or ZERO_BYTES32 for the
+        # oldest entry.
+        assert history_hashes == [
+            b"\x22" * 32,  # before e3 was posted, the chain ended at e2.history_hash
+            b"\x11" * 32,  # before e2 was posted, the chain ended at e1.history_hash
+            ZERO_BYTES32,  # before e1 was posted, the chain was empty
+        ]
+
+    def test_bond_coerced_to_int(self) -> None:
+        """A string bond from JSON deserialization is coerced to int."""
+        e = self._entry("0xUser", 0, b"\x00" * 32, b"\x11" * 32)
+        e["args"]["bond"] = "1234567890"  # subgraph/JSON path returns strings
+        _, _, bonds, _ = _assemble_claim_params([e])
+        assert bonds == [1234567890]
+        assert isinstance(bonds[0], int)
