@@ -11,7 +11,7 @@ fingerprint:
   behaviours/__init__.py: bafybeicqhvq2rz2r22bhd3roxtl3kekrycnvskbzvhenxlrdduvnmgxuoe
   behaviours/base.py: bafybeie567pn7z5uzm6lasdrddcajad3ervn4o4ezduykl5zn5ydxpryh4
   behaviours/build_multisend.py: bafybeicmzef4b2cws3z4pc6x2ydd2nylbjmm27ed3dzhjneh63jpzzopfy
-  behaviours/claim_bonds.py: bafybeiah6btz4zec3jwck33qsfpgmuzey4uo3gwdcuoqwv2um5ysoon7ui
+  behaviours/claim_bonds.py: bafybeiczwdozj7mzsvx6q4uyf3wxomvvxnlthnfz3bmfs6ve66vunk6tfu
   behaviours/redeem_positions.py: bafybeicekpns5ua6sl7ky3jlunkxczbm3f6phgngjbb3hnsto3fvnnsmz4
   behaviours/remove_liquidity.py: bafybeibzqy5gnhxscskblmcasfsj6dyxo77qb6flmus7wpgzm4lbkfyl3u
   behaviours/round_behaviour.py: bafybeievk4sflkc72cjfxxxaro4ymjwgrwewjxlq3nn7b5xg47kuqewkbq
@@ -26,7 +26,7 @@ fingerprint:
   tests/behaviours/conftest.py: bafybeifwe23malpxul4hjhdlpvl6vaw2ecpfix5vc2xsvhuchv3v22dl7q
   tests/behaviours/test_base.py: bafybeiarl26ygp36jt4r3jetudrgk63bltvzpne4chiubstnfusymkw2fy
   tests/behaviours/test_build_multisend.py: bafybeic3s4uzk4ftyhrod2rehntzlo2l5526cyy2w6jhm6fnqanwgdie6m
-  tests/behaviours/test_claim_bonds.py: bafybeif6wzkr5r3v5wccoalpbsk4eoklb4p5ptncqesgumczsjclkvrbbq
+  tests/behaviours/test_claim_bonds.py: bafybeifihetfeyoyn5zcnyjfludife5rxcz4ggzigajxza5hfo2bwx4l5q
   tests/behaviours/test_redeem_positions.py: bafybeiggqbajg6uhklkrxer6ovrqivmuwsp4sceoyvj7bubrzfghump2hi
   tests/behaviours/test_remove_liquidity.py: bafybeigs4h76rsnk27qbz4rn2oh6bwearc4nuquackiv3ef3v5hqxn4ff4
   tests/behaviours/test_round_behaviour.py: bafybeibndp4ouudfjnbuamm2nhz4ozyxrqbedjh3vmhd5a6j43qqwzjumm
