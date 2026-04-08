@@ -19,6 +19,10 @@
 
 """Tests for CtRedeemBaseBehaviour and base helpers."""
 
+# pylint: disable=protected-access,attribute-defined-outside-init
+# pylint: disable=unused-argument,import-outside-toplevel
+# pylint: disable=too-many-public-methods,too-many-lines
+
 import json
 from typing import Any
 from unittest.mock import MagicMock, patch

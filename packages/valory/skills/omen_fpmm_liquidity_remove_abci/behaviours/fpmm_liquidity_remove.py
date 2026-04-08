@@ -19,6 +19,9 @@
 
 """This module contains FpmmLiquidityRemoveBehaviour for the omen_fpmm_liquidity_remove_abci skill."""
 
+# pylint: disable=too-many-ancestors,too-many-locals,too-many-arguments
+# pylint: disable=too-many-positional-arguments
+
 from string import Template
 from typing import Any, Dict, Generator, List, Optional, Tuple, cast
 
@@ -131,6 +134,7 @@ class FpmmLiquidityRemoveBehaviour(FpmmLiquidityRemoveBaseBehaviour):
 
         :param market: market dict with opening_timestamp and condition_id keys
         :param now: the last synced timestamp (seconds)
+        :yield: contract-api requests during the on-chain resolve check.
         :return: action string
         """
         opening_ts = market["opening_timestamp"]
@@ -157,6 +161,7 @@ class FpmmLiquidityRemoveBehaviour(FpmmLiquidityRemoveBaseBehaviour):
 
         :param market: market dict
         :param action: one of remove_only or remove_and_merge
+        :yield: contract-api requests while building the txs.
         :return: list of encoded transaction dicts
         """
         address = market["address"]

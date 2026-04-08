@@ -19,6 +19,9 @@
 
 """Tests for the OmenCtRedeemAbciApp FSM rounds."""
 
+# pylint: disable=redefined-outer-name,too-few-public-methods,unused-argument
+# pylint: disable=import-outside-toplevel
+
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest

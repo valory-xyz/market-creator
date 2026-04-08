@@ -19,6 +19,8 @@
 
 """This module contains the CtRedeemBehaviour of the 'omen_ct_redeem_abci' skill."""
 
+# pylint: disable=too-many-ancestors,too-many-locals
+
 from string import Template
 from typing import Any, Dict, Generator, List, Optional, Set
 

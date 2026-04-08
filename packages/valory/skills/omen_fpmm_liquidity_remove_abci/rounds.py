@@ -40,7 +40,7 @@ Timeouts:
 """
 
 from enum import Enum
-from typing import Dict, Optional, Set, Tuple, Type, cast
+from typing import Dict, Set, Tuple, cast
 
 from packages.valory.skills.abstract_round_abci.base import (
     AbciApp,

@@ -35,7 +35,7 @@ class TestOmenFpmmLiquidityRemoveRoundBehaviour:
     """Tests for OmenFpmmLiquidityRemoveRoundBehaviour class attributes."""
 
     def test_is_abstract_round_behaviour(self) -> None:
-        """OmenFpmmLiquidityRemoveRoundBehaviour subclasses AbstractRoundBehaviour."""
+        """Test that OmenFpmmLiquidityRemoveRoundBehaviour subclasses AbstractRoundBehaviour."""
         assert issubclass(OmenFpmmLiquidityRemoveRoundBehaviour, AbstractRoundBehaviour)
 
     def test_initial_behaviour_cls(self) -> None:
@@ -53,12 +53,12 @@ class TestOmenFpmmLiquidityRemoveRoundBehaviour:
         )
 
     def test_behaviours_contains_fpmm_behaviour(self) -> None:
-        """behaviours set contains FpmmLiquidityRemoveBehaviour."""
+        """Test that behaviours set contains FpmmLiquidityRemoveBehaviour."""
         assert (
             FpmmLiquidityRemoveBehaviour
             in OmenFpmmLiquidityRemoveRoundBehaviour.behaviours
         )
 
     def test_behaviours_count(self) -> None:
-        """behaviours set contains exactly one behaviour."""
+        """Test that behaviours set contains exactly one behaviour."""
         assert len(OmenFpmmLiquidityRemoveRoundBehaviour.behaviours) == 1

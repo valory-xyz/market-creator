@@ -40,7 +40,9 @@ class SharedState(BaseSharedState):
 
     abci_app_cls: Type[AbciApp] = OmenCtRedeemAbciApp
 
-    def __init__(self, *args: Any, skill_context: SkillContext, **kwargs: Any) -> None:
+    def __init__(  # pylint: disable=useless-parent-delegation
+        self, *args: Any, skill_context: SkillContext, **kwargs: Any
+    ) -> None:
         """Initialize the shared state object."""
         super().__init__(*args, skill_context=skill_context, **kwargs)
 

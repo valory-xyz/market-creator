@@ -19,6 +19,8 @@
 
 """Tests for payloads in the omen_fpmm_liquidity_remove_abci skill."""
 
+# pylint: disable=import-outside-toplevel
+
 from packages.valory.skills.omen_fpmm_liquidity_remove_abci.payloads import (
     FpmmLiquidityRemovePayload,
 )
@@ -45,9 +47,11 @@ class TestFpmmLiquidityRemovePayload:
 
     def test_payload_is_frozen(self) -> None:
         """Test that payload is immutable (frozen dataclass)."""
+        from dataclasses import FrozenInstanceError
+
         payload = FpmmLiquidityRemovePayload(sender="0xsender", tx_hash="0xhash")
         try:
             payload.tx_hash = "other"  # type: ignore[misc]
-            assert False, "Expected FrozenInstanceError"
-        except Exception:  # noqa: BLE001
+            raise AssertionError("Expected FrozenInstanceError")
+        except FrozenInstanceError:
             pass

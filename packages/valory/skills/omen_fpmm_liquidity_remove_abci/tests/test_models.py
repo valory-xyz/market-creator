@@ -19,6 +19,8 @@
 
 """Tests for models in the omen_fpmm_liquidity_remove_abci skill."""
 
+# pylint: disable=protected-access,import-outside-toplevel
+
 from unittest.mock import MagicMock
 
 from packages.valory.skills.omen_fpmm_liquidity_remove_abci.models import (
@@ -60,7 +62,7 @@ class TestFpmmLiquidityRemoveParams:
     """Tests for FpmmLiquidityRemoveParams."""
 
     def test_is_subclass_of_base_params(self) -> None:
-        """FpmmLiquidityRemoveParams is a subclass of BaseParams."""
+        """Test that FpmmLiquidityRemoveParams is a subclass of BaseParams."""
         from packages.valory.skills.abstract_round_abci.models import BaseParams
 
         assert issubclass(FpmmLiquidityRemoveParams, BaseParams)
@@ -94,7 +96,7 @@ class TestModelAliases:
     """Tests that Requests and BenchmarkTool are properly aliased."""
 
     def test_requests_alias(self) -> None:
-        """Requests is the base Requests class."""
+        """Test that Requests is the base Requests class."""
         from packages.valory.skills.abstract_round_abci.models import (
             Requests as BaseRequests,
         )
@@ -102,7 +104,7 @@ class TestModelAliases:
         assert Requests is BaseRequests
 
     def test_benchmark_tool_alias(self) -> None:
-        """BenchmarkTool is the base BenchmarkTool class."""
+        """Test that BenchmarkTool is the base BenchmarkTool class."""
         from packages.valory.skills.abstract_round_abci.models import (
             BenchmarkTool as BaseBenchmarkTool,
         )
@@ -110,7 +112,7 @@ class TestModelAliases:
         assert BenchmarkTool is BaseBenchmarkTool
 
     def test_omen_subgraph_is_api_specs(self) -> None:
-        """OmenSubgraph inherits from ApiSpecs."""
+        """Test that OmenSubgraph inherits from ApiSpecs."""
         from packages.valory.skills.abstract_round_abci.models import ApiSpecs
 
         assert issubclass(OmenSubgraph, ApiSpecs)

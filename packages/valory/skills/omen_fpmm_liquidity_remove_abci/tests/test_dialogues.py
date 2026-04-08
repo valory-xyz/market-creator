@@ -68,57 +68,57 @@ class TestDialogues:
     """Tests that all dialogue aliases are correctly exported."""
 
     def test_abci_dialogue(self) -> None:
-        """AbciDialogue is correctly re-exported."""
+        """Test that AbciDialogue is correctly re-exported."""
         assert dialogues_module.AbciDialogue is BaseAbciDialogue
 
     def test_abci_dialogues(self) -> None:
-        """AbciDialogues is correctly re-exported."""
+        """Test that AbciDialogues is correctly re-exported."""
         assert dialogues_module.AbciDialogues is BaseAbciDialogues
 
     def test_http_dialogue(self) -> None:
-        """HttpDialogue is correctly re-exported."""
+        """Test that HttpDialogue is correctly re-exported."""
         assert dialogues_module.HttpDialogue is BaseHttpDialogue
 
     def test_http_dialogues(self) -> None:
-        """HttpDialogues is correctly re-exported."""
+        """Test that HttpDialogues is correctly re-exported."""
         assert dialogues_module.HttpDialogues is BaseHttpDialogues
 
     def test_signing_dialogue(self) -> None:
-        """SigningDialogue is correctly re-exported."""
+        """Test that SigningDialogue is correctly re-exported."""
         assert dialogues_module.SigningDialogue is BaseSigningDialogue
 
     def test_signing_dialogues(self) -> None:
-        """SigningDialogues is correctly re-exported."""
+        """Test that SigningDialogues is correctly re-exported."""
         assert dialogues_module.SigningDialogues is BaseSigningDialogues
 
     def test_ledger_api_dialogue(self) -> None:
-        """LedgerApiDialogue is correctly re-exported."""
+        """Test that ledgerApiDialogue is correctly re-exported."""
         assert dialogues_module.LedgerApiDialogue is BaseLedgerApiDialogue
 
     def test_ledger_api_dialogues(self) -> None:
-        """LedgerApiDialogues is correctly re-exported."""
+        """Test that ledgerApiDialogues is correctly re-exported."""
         assert dialogues_module.LedgerApiDialogues is BaseLedgerApiDialogues
 
     def test_contract_api_dialogue(self) -> None:
-        """ContractApiDialogue is correctly re-exported."""
+        """Test that contractApiDialogue is correctly re-exported."""
         assert dialogues_module.ContractApiDialogue is BaseContractApiDialogue
 
     def test_contract_api_dialogues(self) -> None:
-        """ContractApiDialogues is correctly re-exported."""
+        """Test that contractApiDialogues is correctly re-exported."""
         assert dialogues_module.ContractApiDialogues is BaseContractApiDialogues
 
     def test_tendermint_dialogue(self) -> None:
-        """TendermintDialogue is correctly re-exported."""
+        """Test that TendermintDialogue is correctly re-exported."""
         assert dialogues_module.TendermintDialogue is BaseTendermintDialogue
 
     def test_tendermint_dialogues(self) -> None:
-        """TendermintDialogues is correctly re-exported."""
+        """Test that TendermintDialogues is correctly re-exported."""
         assert dialogues_module.TendermintDialogues is BaseTendermintDialogues
 
     def test_ipfs_dialogue(self) -> None:
-        """IpfsDialogue is correctly re-exported."""
+        """Test that IpfsDialogue is correctly re-exported."""
         assert dialogues_module.IpfsDialogue is BaseIpfsDialogue
 
     def test_ipfs_dialogues(self) -> None:
-        """IpfsDialogues is correctly re-exported."""
+        """Test that IpfsDialogues is correctly re-exported."""
         assert dialogues_module.IpfsDialogues is BaseIpfsDialogues

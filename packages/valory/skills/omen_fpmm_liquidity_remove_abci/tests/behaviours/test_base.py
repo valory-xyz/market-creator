@@ -19,12 +19,14 @@
 
 """Tests for FpmmLiquidityRemoveBaseBehaviour utility methods."""
 
+# pylint: disable=protected-access,attribute-defined-outside-init
+# pylint: disable=unused-argument,import-outside-toplevel
+
 import json
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 from packages.valory.skills.omen_fpmm_liquidity_remove_abci.behaviours.base import (
-    FpmmLiquidityRemoveBaseBehaviour,
     HTTP_OK,
     get_callable_name,
     to_content,
@@ -98,7 +100,7 @@ class TestFpmmLiquidityRemoveBaseBehaviourProperties:
         assert self.behaviour.last_synced_timestamp == 1700100000
 
     def test_params_property(self) -> None:
-        """params returns ctx.params."""
+        """Test that params returns ctx.params."""
         assert self.behaviour.params is self.ctx.params
 
     def test_shared_state_property(self) -> None:
@@ -261,7 +263,7 @@ class TestToMultisend:
                 self.behaviour, "get_contract_api_response", make_gen(raw_resp)
             ),
             patch.object(
-                self.behaviour, "_get_safe_tx_hash", lambda *a, **k: (x for x in [None])
+                self.behaviour, "_get_safe_tx_hash", make_gen(None)
             ),
         ):
             txs = [{"to": "0xA", "value": 0, "data": b""}]

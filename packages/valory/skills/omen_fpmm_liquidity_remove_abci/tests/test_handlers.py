@@ -47,29 +47,29 @@ class TestHandlers:
     """Tests that all handler aliases are correctly exported."""
 
     def test_abci_handler_alias(self) -> None:
-        """ABCIHandler in skill is the base ABCIRoundHandler."""
+        """Test that ABCIHandler in skill is the base ABCIRoundHandler."""
         assert handlers_module.ABCIHandler is BaseABCIRoundHandler
 
     def test_http_handler_alias(self) -> None:
-        """HttpHandler is correctly re-exported."""
+        """Test that HttpHandler is correctly re-exported."""
         assert handlers_module.HttpHandler is BaseHttpHandler
 
     def test_signing_handler_alias(self) -> None:
-        """SigningHandler is correctly re-exported."""
+        """Test that SigningHandler is correctly re-exported."""
         assert handlers_module.SigningHandler is BaseSigningHandler
 
     def test_ledger_api_handler_alias(self) -> None:
-        """LedgerApiHandler is correctly re-exported."""
+        """Test that ledgerApiHandler is correctly re-exported."""
         assert handlers_module.LedgerApiHandler is BaseLedgerApiHandler
 
     def test_contract_api_handler_alias(self) -> None:
-        """ContractApiHandler is correctly re-exported."""
+        """Test that contractApiHandler is correctly re-exported."""
         assert handlers_module.ContractApiHandler is BaseContractApiHandler
 
     def test_tendermint_handler_alias(self) -> None:
-        """TendermintHandler is correctly re-exported."""
+        """Test that TendermintHandler is correctly re-exported."""
         assert handlers_module.TendermintHandler is BaseTendermintHandler
 
     def test_ipfs_handler_alias(self) -> None:
-        """IpfsHandler is correctly re-exported."""
+        """Test that IpfsHandler is correctly re-exported."""
         assert handlers_module.IpfsHandler is BaseIpfsHandler

@@ -19,6 +19,8 @@
 
 """This module contains the CtRedeemBaseBehaviour for the omen_ct_redeem_abci skill."""
 
+# pylint: disable=too-many-ancestors,too-many-arguments,too-many-positional-arguments
+
 import json
 from abc import ABC
 from typing import Any, Callable, Dict, Generator, List, Optional, cast

@@ -24,7 +24,7 @@ fingerprint:
   tests/behaviours/__init__.py: bafybeia3r5tj4ries5ap2yjw56m2ixcwt5uqizijipes4wx4goglptaxzm
   tests/behaviours/conftest.py: bafybeiaw6tws36xu4c7mle7wz3k33i5d7hplgzxormt3sj6cpvfgp2aula
   tests/behaviours/test_base.py: bafybeicnekraglgzdmch4kipzslxuck5p74fig7hyj4frcasqdvhqyj75e
-  tests/behaviours/test_realitio_bond_withdraw.py: bafybeifr3fxzrhrbmgzeoechxwliush3ryhcwlflbk72w7n4pnbywdxzya
+  tests/behaviours/test_realitio_bond_withdraw.py: bafybeigpxogjub2w7ltg7rmvjscttzr7qyjtvtyfewkqhhpo2nnbmp6xu4
   tests/behaviours/test_round_behaviour.py: bafybeig2pthrsndzyz7oz7avrjbywj2cznm3qebjx7kvcybhluqbbyhfei
   tests/conftest.py: bafybeidjyzvxpphlgjz733b63576kh5rscfinfxzsv6j6yropnxvbqdosq
   tests/test_dialogues.py: bafybeig75ywsx37a7sibmdnklbx35n74qjdf7pbd4eyuy43pgx7oghhy4a

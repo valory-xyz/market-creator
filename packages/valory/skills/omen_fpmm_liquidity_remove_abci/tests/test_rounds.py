@@ -19,6 +19,8 @@
 
 """Tests for rounds in the omen_fpmm_liquidity_remove_abci skill."""
 
+# pylint: disable=import-outside-toplevel
+
 import pytest
 
 from packages.valory.skills.abstract_round_abci.base import (
@@ -89,11 +91,11 @@ class TestFinishedRounds:
     """Tests for degenerate final rounds."""
 
     def test_finished_with_tx_is_degenerate(self) -> None:
-        """FinishedWithFpmmLiquidityRemoveTxRound is a DegenerateRound."""
+        """Test that FinishedWithFpmmLiquidityRemoveTxRound is a DegenerateRound."""
         assert issubclass(FinishedWithFpmmLiquidityRemoveTxRound, DegenerateRound)
 
     def test_finished_without_tx_is_degenerate(self) -> None:
-        """FinishedWithoutFpmmLiquidityRemoveTxRound is a DegenerateRound."""
+        """Test that FinishedWithoutFpmmLiquidityRemoveTxRound is a DegenerateRound."""
         assert issubclass(FinishedWithoutFpmmLiquidityRemoveTxRound, DegenerateRound)
 
 
