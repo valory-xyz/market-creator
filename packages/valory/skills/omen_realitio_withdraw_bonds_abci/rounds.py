@@ -111,7 +111,7 @@ class FinishedWithoutRealitioWithdrawBondsTxRound(DegenerateRound):
 
 
 class OmenRealitioWithdrawBondsAbciApp(AbciApp[Event]):
-    """OmenRealitioWithdrawBondsAbciApp.
+    """OmenRealitioWithdrawBondsAbciApp
 
     Initial round: RealitioWithdrawBondsRound
 
