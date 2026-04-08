@@ -73,7 +73,9 @@ def test_abci_app_final_states() -> None:
 
 def test_abci_app_initial_state() -> None:
     """The only initial state is RealitioWithdrawBondsRound."""
-    assert OmenRealitioWithdrawBondsAbciApp.initial_states == {RealitioWithdrawBondsRound}
+    assert OmenRealitioWithdrawBondsAbciApp.initial_states == {
+        RealitioWithdrawBondsRound
+    }
     assert (
         OmenRealitioWithdrawBondsAbciApp.initial_round_cls is RealitioWithdrawBondsRound
     )

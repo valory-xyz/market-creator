@@ -97,7 +97,9 @@ class RealitioWithdrawBondsRound(CollectSameUntilThresholdRound):
         get_name(SynchronizedData.tx_submitter),
         get_name(SynchronizedData.most_voted_tx_hash),
     )
-    collection_key = get_name(SynchronizedData.participant_to_realitio_withdraw_bonds_tx)
+    collection_key = get_name(
+        SynchronizedData.participant_to_realitio_withdraw_bonds_tx
+    )
 
 
 class FinishedWithRealitioWithdrawBondsTxRound(DegenerateRound):
