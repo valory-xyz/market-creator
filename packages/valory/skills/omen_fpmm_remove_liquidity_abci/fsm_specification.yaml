@@ -1,0 +1,21 @@
+alphabet_in:
+- DONE
+- NO_MAJORITY
+- NONE
+- ROUND_TIMEOUT
+default_start_state: FpmmRemoveLiquidityRound
+final_states:
+- FinishedWithFpmmRemoveLiquidityTxRound
+- FinishedWithoutFpmmRemoveLiquidityTxRound
+label: OmenFpmmRemoveLiquidityAbciApp
+start_states:
+- FpmmRemoveLiquidityRound
+states:
+- FinishedWithFpmmRemoveLiquidityTxRound
+- FinishedWithoutFpmmRemoveLiquidityTxRound
+- FpmmRemoveLiquidityRound
+transition_func:
+    (FpmmRemoveLiquidityRound, DONE): FinishedWithFpmmRemoveLiquidityTxRound
+    (FpmmRemoveLiquidityRound, NO_MAJORITY): FinishedWithoutFpmmRemoveLiquidityTxRound
+    (FpmmRemoveLiquidityRound, NONE): FinishedWithoutFpmmRemoveLiquidityTxRound
+    (FpmmRemoveLiquidityRound, ROUND_TIMEOUT): FinishedWithoutFpmmRemoveLiquidityTxRound

@@ -1,0 +1,183 @@
+name: omen_realitio_withdraw_bond_abci
+author: valory
+version: 0.1.0
+type: skill
+description: A single-purpose ABCI skill that recovers Realitio bonds for an answerer
+  safe via Realitio.claimWinnings + Realitio.withdraw, bundled into one multisend
+  per period. Independent of the trader (CT redemption) and LP (FPMM removeFunding)
+  recovery flows.
+license: Apache-2.0
+aea_version: '>=2.0.0, <3.0.0'
+fingerprint:
+  __init__.py: bafybeibltmez4rcc3exbrrpbzoyudztw4gyq323p72z3j6fch7ww6yihv4
+  behaviours/__init__.py: bafybeib2e4hl4letl5ofwjsodsgu2a6dotanmtf6pz374osbbs3qx7y3si
+  behaviours/base.py: bafybeihmcs72hxzkdbthgsypezzyz6ln3bglyf52cwrs5alxjxgkuincn4
+  behaviours/round_behaviour.py: bafybeic2dkmeybzowlyfjik6rgvppn2ocjezyhgia4f32ycdfrmljhawmq
+  behaviours/withdraw_bond.py: bafybeid2zhevzlnupa4bmpuhuz4jifu2akomn622ltnns4ldxohddwufua
+  dialogues.py: bafybeieiajznryfgqnbwfa2cru24ccnu2vxtzaz6jepbcyhcrp6hbqlgr4
+  fsm_specification.yaml: bafybeiae26ghaodg3eb3k7xfpeig56phabgtpnhdd6f75nkt5kictq4gre
+  handlers.py: bafybeiej3mu7undxhpbtt3opqtvnkxtt2taol6og2gbm4jg3d7qwsblu6m
+  models.py: bafybeiaunko2pkzihtuvxrxivwgxmecgdly3rkip6ezyz72zrtj5qa4ace
+  payloads.py: bafybeihf6afurxfuns6u27lyvo3odfzay3rcgfvmrtfys6l35d5drgx5xa
+  rounds.py: bafybeig6sreh7pa2id7hlpe473vgxvydh5vkwy3a62sdcjrfsuufg23rri
+  tests/__init__.py: bafybeifkzpfunpdnj7kqg6z5yyabaa2uqnh3awdk56ymye6svjxwqf6tgi
+  tests/behaviours/__init__.py: bafybeieiwbwuxygq4hq76ycyhtkjsh26onb7ljdvqiqyv3bedugdwibcfu
+  tests/behaviours/conftest.py: bafybeidxh2i4s4vaz3bxxzpt64m75zgdp526g6cuvwxrqqzvu5aivkfmlq
+  tests/behaviours/test_base.py: bafybeifdqtnnt6he272bxp5vjsw53iqgjdnpocsoeqthcefjsg3xaphjaa
+  tests/behaviours/test_round_behaviour.py: bafybeigtv23bziimduk2dpgzh2gqrrgz7fxmzrkqynzg5c2xsusaflcacq
+  tests/behaviours/test_withdraw_bond.py: bafybeieov6l7dzsrzmqx6d6ewfrhtlf4oadyd7beupz6xiwn32ea5l2vga
+  tests/conftest.py: bafybeictc4pq6ioomlripuilhojqm6ljpxlvbln3ttk6gy53xixlgd5dfm
+  tests/test_dialogues.py: bafybeibnv6wzscmjkkvr7jcq7jrupmbkclk2xx55u7uu7ye7i3t73uww7i
+  tests/test_handlers.py: bafybeib5wn4ztcethw2lnrfh4lxwavxhrjmaelx57hotqoxnqsvzupois4
+  tests/test_models.py: bafybeiaahhholdtthvijj54qeocrg5naziifv2rsqb25i3onvbxe6qtqia
+  tests/test_payloads.py: bafybeiazvm7vsjwk6axpjynkjoxite4lb3aquzk6wy744gkmglykteaeje
+  tests/test_rounds.py: bafybeihmpentzt472ii74unnvre43pu6hqzspwsqgrxi37nosycaoqjapm
+fingerprint_ignore_patterns: []
+connections: []
+contracts:
+- valory/gnosis_safe:0.1.0:bafybeice337zvg3ol4cwpw2iikxcukmthwmw32ytwtdnkcju222qfc323y
+- valory/multisend:0.1.0:bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq
+- valory/realitio:0.1.0:bafybeibj7wequqhgxcke2bwsq5onp6amk35vdhzf5zcczhytiohz2tfqua
+protocols:
+- valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
+skills:
+- valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
+- valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
+behaviours:
+  main:
+    args: {}
+    class_name: OmenRealitioWithdrawBondRoundBehaviour
+handlers:
+  abci:
+    args: {}
+    class_name: ABCIHandler
+  http:
+    args: {}
+    class_name: HttpHandler
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  ipfs:
+    args: {}
+    class_name: IpfsHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+  tendermint:
+    args: {}
+    class_name: TendermintHandler
+models:
+  abci_dialogues:
+    args: {}
+    class_name: AbciDialogues
+  benchmark_tool:
+    args:
+      log_dir: /logs
+    class_name: BenchmarkTool
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+  ipfs_dialogues:
+    args: {}
+    class_name: IpfsDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  params:
+    args:
+      realitio_withdraw_bond_batch_size: 10
+      min_realitio_withdraw_balance: 10000000000000000000
+      realitio_contract: '0x0000000000000000000000000000000000000000'
+      cleanup_history_depth: 1
+      cleanup_history_depth_current: null
+      drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
+      finalize_timeout: 60.0
+      genesis_config:
+        chain_id: chain-c4daS1
+        consensus_params:
+          block:
+            max_bytes: '22020096'
+            max_gas: '-1'
+            time_iota_ms: '1000'
+          evidence:
+            max_age_duration: '172800000000000'
+            max_age_num_blocks: '100000'
+            max_bytes: '1048576'
+          validator:
+            pub_key_types:
+            - ed25519
+          version: {}
+        genesis_time: '2022-05-20T16:00:21.735122717Z'
+        voting_power: '10'
+      history_check_timeout: 1205
+      ipfs_domain_name: null
+      keeper_allowed_retries: 3
+      keeper_timeout: 30.0
+      max_attempts: 10
+      max_healthcheck: 120
+      multisend_address: '0x0000000000000000000000000000000000000000'
+      multisend_batch_size: 5
+      ipfs_address: https://gateway.autonolas.tech/ipfs/
+      on_chain_service_id: null
+      request_retry_delay: 1.0
+      request_timeout: 10.0
+      reset_pause_duration: 1800
+      reset_tendermint_after: 1
+      retry_attempts: 400
+      retry_timeout: 3
+      round_timeout_seconds: 120.0
+      service_id: omen_realitio_withdraw_bond
+      service_registry_address: null
+      setup:
+        all_participants:
+        - '0x0000000000000000000000000000000000000000'
+        consensus_threshold: null
+        safe_contract_address: '0x0000000000000000000000000000000000000000'
+      share_tm_config_on_startup: false
+      sleep_time: 1
+      tendermint_check_sleep_delay: 3
+      tendermint_com_url: http://localhost:8080
+      tendermint_max_retries: 5
+      tendermint_p2p_url: localhost:26656
+      tendermint_url: http://localhost:26657
+      tx_timeout: 10.0
+      validate_timeout: 1205
+      use_termination: false
+      use_slashing: false
+      slash_cooldown_hours: 3
+      slash_threshold_amount: 10000000000000000
+      light_slash_unit_amount: 5000000000000000
+      serious_slash_unit_amount: 8000000000000000
+    class_name: RealitioWithdrawBondParams
+  realitio_subgraph:
+    args:
+      api_id: realitio
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://realitio.subgraph.autonolas.tech
+    class_name: RealitioSubgraph
+  requests:
+    args: {}
+    class_name: Requests
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  state:
+    args: {}
+    class_name: SharedState
+  tendermint_dialogues:
+    args: {}
+    class_name: TendermintDialogues
+dependencies: {}
+is_abstract: true
