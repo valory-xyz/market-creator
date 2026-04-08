@@ -17,9 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the CtRedeemTokensBaseBehaviour for the omen_ct_redeem_tokens_abci skill."""
-
-# pylint: disable=too-many-ancestors,too-many-arguments,too-many-positional-arguments
+"""Base behaviour for the omen_ct_redeem_tokens_abci skill."""
 
 import json
 from abc import ABC

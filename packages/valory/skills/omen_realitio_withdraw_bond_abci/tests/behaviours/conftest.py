@@ -19,8 +19,6 @@
 
 """Shared fixtures and helpers for omen_realitio_withdraw_bond_abci behaviour tests."""
 
-# pylint: disable=unused-argument
-
 from typing import Any
 from unittest.mock import MagicMock
 

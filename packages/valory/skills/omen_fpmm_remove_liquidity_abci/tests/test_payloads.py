@@ -19,8 +19,6 @@
 
 """Tests for payloads in the omen_fpmm_remove_liquidity_abci skill."""
 
-# pylint: disable=import-outside-toplevel
-
 from packages.valory.skills.omen_fpmm_remove_liquidity_abci.payloads import (
     FpmmRemoveLiquidityPayload,
 )

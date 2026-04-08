@@ -17,9 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the CtRedeemTokensBehaviour of the 'omen_ct_redeem_tokens_abci' skill."""
-
-# pylint: disable=too-many-ancestors,too-many-locals
+"""CtRedeemTokensBehaviour for the omen_ct_redeem_tokens_abci skill."""
 
 from string import Template
 from typing import Any, Dict, Generator, List, Optional, Set
@@ -41,16 +39,10 @@ from packages.valory.skills.omen_ct_redeem_tokens_abci.payloads import (
 )
 from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import CtRedeemTokensRound
 
-# Subgraph max per page.
 SUBGRAPH_PAGE_SIZE = 1000
-
-# Max condition IDs per Omen subgraph id_in query to avoid query size limits.
 CONDITION_ID_BATCH_SIZE = 100
-
-# tx_submitter tag for the parent composition's PostTransactionRound router.
 CT_REDEEM_TX_SUBMITTER = "omen_ct_redeem_tokens"
 
-# ConditionalTokens subgraph: user positions with non-zero balance.
 USER_POSITIONS_QUERY = Template("""{
     user(id: "$safe") {
       userPositions(
@@ -71,7 +63,6 @@ USER_POSITIONS_QUERY = Template("""{
     }
   }""")
 
-# Omen subgraph: finalized markets filtered by specific condition IDs.
 MARKETS_BY_CONDITIONS_QUERY = Template("""{
     fixedProductMarketMakers(
       where: {
@@ -192,10 +183,8 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
         for market in redeemable[:batch_size]:
             condition_id = market["condition_id"]
 
-            # Check if condition is resolved on ConditionalTokens
             is_resolved = yield from self._check_resolved(condition_id)
             if not is_resolved:
-                # Build resolve tx to prepend before redeem
                 resolve_tx = yield from self._get_resolve_tx(market)
                 if resolve_tx is not None:
                     self.context.logger.info(

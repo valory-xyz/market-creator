@@ -10,30 +10,30 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   __init__.py: bafybeicagt3c65byayg2uujdy4c33jrcjhudk6a3oifo7yh2lqkewf2qru
   behaviours/__init__.py: bafybeiafknyckew2sq4ren7oxkrc5ue44pawfp5k55zzwdeuqxb6ssysuq
-  behaviours/base.py: bafybeidj45qxof5sbow6ibejin3xpwlzluukhpic5e66eubybsyju7tige
-  behaviours/remove_liquidity.py: bafybeidqd5b2ij36l775vycosxpbsuiamz6zawtom3z6kojmcwuio2vs64
+  behaviours/base.py: bafybeien4ixejxvacq5ke2yukncmnqhybssp5zkw2pj5klvy4psrigxqjq
+  behaviours/remove_liquidity.py: bafybeihswdkwedlz3jqwh3pvaafrxs56ys5srvr7evjamqlnki2m75l3gy
   behaviours/round_behaviour.py: bafybeidsp47omyxst7dmlltfzqj7r7asldv7tsysej67w2xlrgoit5ugmu
   dialogues.py: bafybeigknfckhgdzg6pxb5fj67274n7iahytivecg33v7le2pe2qa3u63q
   fsm_specification.yaml: bafybeib552xusfbnqaytgxcyuvty4jsdabzgofjj74t7sgok6y5qcaqdva
   handlers.py: bafybeicbwd5fjeszpuf3qtepovchj4ue6btzbholz2x7bn5dqwcihqlwc4
-  models.py: bafybeiaibuz4zejnrmpfxgyaojwahm6nb4ypaqk45e6wacaprxvk6h4ro4
+  models.py: bafybeiclpy2txps2ssv26vzll46pruemekrzawjrzbh6idonylyajv6mxy
   payloads.py: bafybeih7f6g4as7nfgbqztmnv336ogf7uq4fdefxn6ls3rpzlfobsd7cp4
   rounds.py: bafybeihadjyfsazfbwmzkvdg3rkurnoyfcfz75l2mv762lctzt7rzm5bsy
   tests/__init__.py: bafybeic6c4nszwxmswhzhbgotxzj23iguozil42lscw2hifyy6ink75qzi
   tests/behaviours/__init__.py: bafybeiff5ylxqu4yjdnbvdlfxm55qho6bhljc3bxjos3u7wrn4qptxbzia
-  tests/behaviours/conftest.py: bafybeif63rkzxlctzix7dqqzi57oufr7xtd6lubfcbc4ob3qoqlp2yetxy
-  tests/behaviours/test_base.py: bafybeidubfexw3ghiyiwrirgt2k6jiru6w42ba4grejzbwaibspodequ7a
-  tests/behaviours/test_remove_liquidity.py: bafybeiewcobrsdjcz4cv26i6cq6a5htawo27mesvfboepoqde77gj5zxyy
+  tests/behaviours/conftest.py: bafybeiexauytp73lwapqiofncxm6pr2cu5iqbxc2djd3uibhbbtsgloceu
+  tests/behaviours/test_base.py: bafybeiekltkwudznlv6ejbbj5t44smdze4lmy7gjsxotgxr6sxlbicjwou
+  tests/behaviours/test_remove_liquidity.py: bafybeie4ir75hyt5jnvsivwwfp2gequhv4mc7ehwa6fmblghe7hisuwstq
   tests/behaviours/test_round_behaviour.py: bafybeieo2mq7ylafnkktdro4q3rnrcem25evfnf57xnvfl76cotjlkxyw4
   tests/conftest.py: bafybeiht62ubpiu2l4jsryb5lxbzvxavro2p6yj6xk3o3ikjkyhdd2gln4
   tests/test_dialogues.py: bafybeiclggcr4ccrytnphxiyox6zbjay6ve37jrhxw2pifvr7oytapii7e
   tests/test_handlers.py: bafybeid3cvk6paowrfufl7vccjljw7jvdu66scghtgfsg76y5lxulpui2q
-  tests/test_models.py: bafybeibf7eicyg2tehcyalb3r3ie2ngib64u2lestzei5wn2bmlwssunma
-  tests/test_payloads.py: bafybeifl3jhdjmpvjbepiqaf4ml3bc7rnb2tvglf4zbuh3qwzyboimlrey
-  tests/test_rounds.py: bafybeid4ccwdr3enur63fxjhz2bgl2urh665mcfjz6vhfn7do5sd6sgtma
+  tests/test_models.py: bafybeidckp3vioztqvjrhtvcciheje3xq5kxjebbtwdvjmjmiaaxbx6pqi
+  tests/test_payloads.py: bafybeib76anve5flkkdnmr2hfpgo2cyodd5qshqz2xlpdqb77hljpzq7ba
+  tests/test_rounds.py: bafybeiebr4xcfa74ujenggx7d6mxcpco6fyjrvudnfius777yuypyzxdge
 fingerprint_ignore_patterns: []
 connections: []
-is_abstract: false
+is_abstract: true
 dependencies: {}
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeice337zvg3ol4cwpw2iikxcukmthwmw32ytwtdnkcju222qfc323y

@@ -19,8 +19,6 @@
 
 """Tests for rounds in the omen_fpmm_remove_liquidity_abci skill."""
 
-# pylint: disable=import-outside-toplevel
-
 import pytest
 
 from packages.valory.skills.abstract_round_abci.base import (

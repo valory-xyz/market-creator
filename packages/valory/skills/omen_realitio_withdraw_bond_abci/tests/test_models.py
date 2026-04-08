@@ -17,12 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Test the models.py module of the skill."""
-
-# pylint: disable=unused-argument,import-outside-toplevel
+"""Tests for models."""
 
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from packages.valory.skills.abstract_round_abci.models import BaseParams
 from packages.valory.skills.omen_realitio_withdraw_bond_abci.models import (
@@ -40,21 +38,9 @@ def test_import() -> None:
 
 
 def test_params_init_carries_required_params() -> None:
-    """Test the params constructor ensures every expected param is set.
+    """The params constructor consumes all expected kwargs."""
 
-    The params are pulled from kwargs via ``_ensure`` — this test
-    verifies the constructor consumes the renamed
-    ``realitio_withdraw_bond_batch_size`` and that the deleted
-    ``realitio_start_block`` param is NOT carried over.
-    """
-
-    # Stub out _ensure so it just pops and returns the value.
-    def fake_ensure(
-        self: Any,
-        key: str,
-        kwargs: dict,
-        type_: type,  # pylint: disable=unused-argument
-    ) -> Any:
+    def fake_ensure(self: Any, key: str, kwargs: dict, type_: type) -> Any:
         return kwargs.pop(key)
 
     kwargs: dict = {
@@ -62,8 +48,6 @@ def test_params_init_carries_required_params() -> None:
         "min_realitio_withdraw_balance": 10**19,
         "realitio_contract": "0xRealitio",
     }
-    # Create a real instance without calling __init__, then patch
-    # _ensure and BaseParams.__init__ and call our __init__ by hand.
     instance = RealitioWithdrawBondParams.__new__(RealitioWithdrawBondParams)
     with (
         patch.object(RealitioWithdrawBondParams, "_ensure", new=fake_ensure),
@@ -73,24 +57,14 @@ def test_params_init_carries_required_params() -> None:
     assert instance.realitio_withdraw_bond_batch_size == 10
     assert instance.min_realitio_withdraw_balance == 10**19
     assert instance.realitio_contract == "0xRealitio"
-    # realitio_start_block must NOT exist on the params object —
-    # deleted per the skill plan (Fix C's per-question from_block makes
-    # the global param obsolete and misleading).
+    # realitio_start_block was deleted from the design.
     assert not hasattr(instance, "realitio_start_block")
 
 
-def test_shared_state_init() -> None:
-    """Test SharedState can be instantiated and carries the abci_app_cls."""
+def test_shared_state_abci_app_cls() -> None:
+    """SharedState carries the correct abci_app_cls."""
     from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
         OmenRealitioWithdrawBondAbciApp,
     )
 
     assert SharedState.abci_app_cls is OmenRealitioWithdrawBondAbciApp
-    # Exercise the __init__ so line 47 (the super() call) is covered.
-    mock_ctx = MagicMock()
-    with patch(
-        "packages.valory.skills.abstract_round_abci.models.SharedState.__init__",
-        return_value=None,
-    ):
-        instance = SharedState.__new__(SharedState)
-        SharedState.__init__(instance, skill_context=mock_ctx)

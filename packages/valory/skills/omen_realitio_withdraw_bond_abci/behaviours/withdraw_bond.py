@@ -19,8 +19,6 @@
 
 """RealitioWithdrawBondBehaviour for the omen_realitio_withdraw_bond_abci skill."""
 
-# pylint: disable=too-many-ancestors
-
 from string import Template
 from typing import Any, Dict, Generator, List, Optional, cast
 
@@ -41,27 +39,12 @@ from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
     RealitioWithdrawBondRound,
 )
 
-# tx_submitter tag for the post-settlement router in the parent composition.
 TX_SUBMITTER = "omen_realitio_withdraw_bond"
 
-
-# Realitio subgraph: most recent finalized, still-unclaimed responses
-# by the safe.
-#
-# We deliberately do NOT paginate. The query returns at most
-# `realitio_withdraw_bond_batch_size` items ordered by id DESCENDING —
-# i.e. the most recently submitted responses first. This bounds per-round
-# work to a constant `O(batch_size)` regardless of how many bonds the
-# safe has ever posted.
-#
-# Critically, the `historyHash_not` filter excludes questions whose
-# on-chain history hash has already been cleared to zero — i.e. questions
-# that have already been successfully claimed. Without this filter, once
-# the skill claims a batch of questions the NEXT period's query would
-# return the same N (now-claimed) questions forever, because the
-# id-based ordering doesn't change when the on-chain state changes.
-# That would deadlock the backlog drain after exactly one successful
-# batch.
+# The ``historyHash_not`` filter excludes questions already claimed on-chain
+# (their history hash is cleared to zero). Without it, a query bounded by
+# batch_size would keep returning the same already-claimed questions and
+# deadlock the backlog drain.
 CLAIMABLE_RESPONSES_QUERY = Template("""{
     responses(
       where: {
@@ -84,15 +67,7 @@ CLAIMABLE_RESPONSES_QUERY = Template("""{
 
 
 class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
-    """Single-round behaviour: query, build, wrap, settle-or-skip.
-
-    Builds a multisend that bundles an optional Realitio.withdraw() tx
-    (when the safe's internal balance crosses the configured threshold)
-    plus up to ``realitio_withdraw_bond_batch_size`` Realitio.claimWinnings
-    txs (one per unique unclaimed question, deduplicated). The behaviour
-    produces a payload with the safe tx hash, or None when there's
-    nothing to do this period.
-    """
+    """Query the Realitio subgraph and build a multisend of withdraw + claimWinnings txs."""
 
     matching_round = RealitioWithdrawBondRound
 
@@ -114,25 +89,17 @@ class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
     def _prepare_multisend(self) -> Generator[None, None, Optional[str]]:
         """Build optional withdraw tx + claim txs and wrap in a multisend.
 
-        Withdraw is built FIRST so that even if the claim loop is slow
-        or partially fails, the (fast, O(1)) withdraw tx is still queued
-        in this period's payload.
-
         :yield: contract-api / ledger-api requests during the build.
-        :return: the multisend tx hash, or ``None`` when neither a
-            withdraw nor any claim is producible (the round then routes
-            to ``FinishedWithoutRealitioWithdrawBondTxRound`` and skips
-            TxSettlement entirely).
+        :return: multisend tx hash, or ``None`` when nothing to do.
         """
         txs: List[Dict[str, Any]] = []
 
-        # Step 1 (Fix A from claim_bonds_fix.md): withdraw FIRST so a
-        # broken or slow claim loop can never starve the withdraw step.
+        # Withdraw first: the O(1) withdraw must not be starved by a slow
+        # or partially failing claim loop.
         withdraw_tx = yield from self._maybe_build_withdraw_tx()
         if withdraw_tx is not None:
             txs.append(withdraw_tx)
 
-        # Step 2: build per-question claim txs (may produce 0..N items).
         claim_txs = yield from self._build_claim_txs()
         txs.extend(claim_txs)
 
@@ -142,7 +109,6 @@ class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
             )
             return None
 
-        # Step 3: wrap in a multisend and compute the safe tx hash.
         tx_hash = yield from self._to_multisend(txs)
         if tx_hash is None:
             self.context.logger.warning(f"{SKILL_LOG_PREFIX} multisend build failed")
@@ -199,16 +165,12 @@ class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
         self, resp: Dict[str, Any]
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Build a claimWinnings tx for one response, or None if it should be skipped."""
-        # Realitio subgraph always uses composite ids of the form
-        # "{contract_address}-{question_id}".
+        # Realitio subgraph composite ids are "{contract_address}-{question_id}".
         question_id_hex = resp["question"]["id"].split("-")[-1]
         question_id_bytes = bytes.fromhex(question_id_hex.replace("0x", ""))
 
-        # Fix C from claim_bonds_fix.md: per-question lower bound for
-        # the eth_getLogs window. Subtract 1 as a defensive margin
-        # against subgraph indexing skew. Missing createdBlock means
-        # the subgraph row is malformed — skip it rather than fall
-        # back to scanning from 0.
+        # Per-question lower bound for the eth_getLogs window, minus 1
+        # as a defensive margin against subgraph indexing skew.
         created_block_raw = resp["question"].get("createdBlock")
         if created_block_raw is None:
             self.context.logger.warning(
@@ -218,12 +180,6 @@ class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
             return None
         from_block = max(0, int(created_block_raw) - 1)
 
-        # Linear bail-out chain: each helper logs its own failure, so
-        # we just return None on the first step that doesn't produce a
-        # value. The subgraph filter (Fix E) already excludes
-        # already-claimed questions, so we skip the on-chain
-        # getHistoryHash check — any stale-index edge case is caught
-        # naturally by simulation.
         claim_params = yield from self._get_claim_params(question_id_bytes, from_block)
         if claim_params is None:
             return None
@@ -244,14 +200,10 @@ class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
     def _get_claimable_responses(
         self,
     ) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Query the Realitio subgraph for the next batch of finalized responses.
-
-        Returns at most ``realitio_withdraw_bond_batch_size`` items,
-        ordered by id desc (newest first). No pagination — the per-round
-        work is bounded by configuration, not by history size.
+        """Query the Realitio subgraph for finalized, still-unclaimed responses.
 
         :yield: subgraph HTTP requests during the build.
-        :return: list of response dicts (possibly empty).
+        :return: list of response dicts (possibly empty), bounded by batch_size.
         """
         safe = self.synchronized_data.safe_contract_address.lower()
         response = yield from self.get_realitio_subgraph_result(
@@ -270,12 +222,7 @@ class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
     def _get_claim_params(
         self, question_id: bytes, from_block: int
     ) -> Generator[None, None, Optional[Any]]:
-        """Get claim parameters for a question from on-chain event logs.
-
-        Returns the reverse-chronological 4-tuple expected by
-        ``Realitio.claimWinnings``. The contract wrapper returns raw
-        chronological events; the reshape into the 4-tuple happens via
-        ``assemble_claim_params``.
+        """Get the reverse-chronological 4-tuple expected by ``Realitio.claimWinnings``.
 
         :param question_id: the Realitio question id (32-byte).
         :param from_block: lower bound block for the LogNewAnswer scan.

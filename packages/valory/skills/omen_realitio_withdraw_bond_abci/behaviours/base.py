@@ -17,16 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Base behaviour + helpers for omen_realitio_withdraw_bond_abci.
-
-Carries only the helpers this skill actually uses (Realitio subgraph,
-multisend wrapping, type-cast properties) plus the
-``_assemble_claim_params`` calldata-shape helper that was previously
-inlined in claim_bonds.py. Promoting the helper to module level makes
-it directly unit-testable without instantiating a full behaviour.
-"""
-
-# pylint: disable=too-many-ancestors,too-many-arguments,too-many-positional-arguments
+"""Base behaviour and helpers for the omen_realitio_withdraw_bond_abci skill."""
 
 import json
 from abc import ABC
@@ -93,25 +84,14 @@ def get_callable_name(method: Callable) -> str:
 def assemble_claim_params(answered: List[Dict[str, Any]]) -> ClaimParamsType:
     """Convert a chronological event list into the claimWinnings 4-tuple.
 
-    The Realitio v2.1 contract walks the four supplied arrays in
-    **reverse-chronological** order (newest entry at index 0, oldest at
-    index N-1) and at each step verifies that the running
-    ``last_history_hash`` matches ``keccak256(history_hashes[i] || answer
-    || bond || addr || is_commitment)``. Critically, ``history_hashes[i]``
-    is the hash that existed *before* the i-th entry was posted —
-    equivalently, the stored ``history_hash`` of the previous (older)
-    chronological entry, or ``0x00…00`` if the i-th entry is the very
-    first one.
+    Realitio v2.1 ``claimWinnings`` walks the four arrays in
+    reverse-chronological order (newest first) and verifies that each
+    ``history_hashes[i]`` equals the history hash that existed *before*
+    the i-th entry was posted — i.e. the stored hash of the older
+    chronological entry, or ``ZERO_BYTES32`` for the first entry.
 
-    Source of the algorithm: ``Realitio.sol::claimWinnings`` +
-    ``_verifyHistoryInputOrRevert`` in
-    https://github.com/realitio/realitio-contracts.
-
-    :param answered: list of decoded ``LogNewAnswer`` events in
-        **chronological** order (oldest first), as returned by
-        ``RealitioContract.get_claim_params``.
-    :return: tuple ``(history_hashes, addresses, bonds, answers)`` in
-        reverse-chronological order, ready to pass to ``claimWinnings``.
+    :param answered: LogNewAnswer events in chronological order (oldest first).
+    :return: ``(history_hashes, addresses, bonds, answers)`` reverse-chronological.
     """
     history_hashes: List[Any] = []
     addresses: List[str] = []

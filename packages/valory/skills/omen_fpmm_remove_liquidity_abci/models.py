@@ -17,11 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the shared state and parameters for the omen_fpmm_remove_liquidity_abci skill."""
+"""Shared state and params for the omen_fpmm_remove_liquidity_abci skill."""
 
 from typing import Any, Type
 
-from aea.skills.base import SkillContext
+from aea.exceptions import enforce
 
 from packages.valory.skills.abstract_round_abci.base import AbciApp
 from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
@@ -38,22 +38,14 @@ from packages.valory.skills.omen_fpmm_remove_liquidity_abci.rounds import (
 
 
 class SharedState(BaseSharedState):
-    """Keep the current shared state of the skill."""
+    """Shared state of the skill."""
 
     abci_app_cls: Type[AbciApp] = OmenFpmmRemoveLiquidityAbciApp
-
-    def __init__(  # pylint: disable=useless-parent-delegation
-        self, *args: Any, skill_context: SkillContext, **kwargs: Any
-    ) -> None:
-        """Initialize the shared state object."""
-        super().__init__(*args, skill_context=skill_context, **kwargs)
 
 
 class FpmmRemoveLiquidityParams(BaseParams):
     """Parameters for the omen_fpmm_remove_liquidity_abci skill."""
 
-    # multisend_address is declared in BaseParams already; we only declare
-    # the skill-specific parameters below.
     multisend_address: str
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -64,17 +56,27 @@ class FpmmRemoveLiquidityParams(BaseParams):
         self.fpmm_remove_liquidity_batch_size: int = self._ensure(
             "fpmm_remove_liquidity_batch_size", kwargs, type_=int
         )
-        self.conditional_tokens_contract: str = self._ensure(
-            key="conditional_tokens_contract", kwargs=kwargs, type_=str
+        # Contract addresses are read without popping so sibling params
+        # classes in a composed MRO can still see them.
+        self.conditional_tokens_contract: str = kwargs.get(
+            "conditional_tokens_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.conditional_tokens_contract is not None,
+            "`conditional_tokens_contract` is required",
         )
-        self.collateral_tokens_contract: str = self._ensure(
-            key="collateral_tokens_contract", kwargs=kwargs, type_=str
+        self.collateral_tokens_contract: str = kwargs.get(
+            "collateral_tokens_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.collateral_tokens_contract is not None,
+            "`collateral_tokens_contract` is required",
         )
         super().__init__(*args, **kwargs)
 
 
 class OmenSubgraph(ApiSpecs):
-    """A model that wraps ApiSpecs for the Omen subgraph."""
+    """ApiSpecs wrapper for the Omen subgraph."""
 
 
 Requests = BaseRequests

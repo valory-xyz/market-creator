@@ -4,9 +4,9 @@
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihsw4japfcrypq5kxoffio6jchjjukewg54gu6hzvftkhdmpkmjwa",
         "skill/valory/market_maker_abci/0.1.0": "bafybeidbwisrp2p4ep6lzvgipxxbztfsme55xk3j5kqjntdcgbrd77asym",
-        "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeic5jhft74l4kg7exceogxv2c3pfaj35bzijzsnrzwisxsa2zrbth4",
-        "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeiadt36bvknkoglmg7jr32auycclu4voouibhfv64juguynginhnge",
-        "skill/valory/omen_realitio_withdraw_bond_abci/0.1.0": "bafybeigesdt5xqjxlcv454fuguflrmy727lwpdbcgmqaqrjiaqgsqogmxa",
+        "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeif5rxndrf7e4wpcfgyntcwhtowhzfxntuuvwqpwfgmbppiztfygbi",
+        "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeiefyiq7e3wdi73jlgcyoszwofdiisprywrm5wzwwjsijcqfzy5hay",
+        "skill/valory/omen_realitio_withdraw_bond_abci/0.1.0": "bafybeigz36wooue6koa7mh5qvw7qoai4l4jrykprviskf7biefcvtabcwu",
         "agent/valory/market_maker/0.1.0": "bafybeih75kn5avbsxinq6pk4a36ysre6k6rk2ofaf2apacfhlbxh3y6wfe",
         "service/valory/market_maker/0.1.0": "bafybeicuiebzhlkqd56bc5enblpvrnfbxrsg57xk3vuzv27ohs5j7xgck4"
     },

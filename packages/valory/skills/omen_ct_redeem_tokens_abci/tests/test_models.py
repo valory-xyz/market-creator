@@ -19,8 +19,6 @@
 
 """Tests for the omen_ct_redeem_tokens_abci models."""
 
-# pylint: disable=protected-access,too-few-public-methods
-
 from unittest.mock import MagicMock, patch
 
 from packages.valory.skills.abstract_round_abci.models import BaseParams
@@ -57,16 +55,6 @@ class TestSharedState:
     def test_abci_app_cls(self) -> None:
         """Test abci_app_cls is set correctly."""
         assert SharedState.abci_app_cls is OmenCtRedeemTokensAbciApp
-
-    def test_init(self) -> None:
-        """Test SharedState __init__ calls super().__init__."""
-        mock_context = MagicMock()
-        with patch(
-            "packages.valory.skills.abstract_round_abci.models.SharedState.__init__",
-            return_value=None,
-        ):
-            obj = SharedState.__new__(SharedState)
-            SharedState.__init__(obj, skill_context=mock_context)
 
 
 class TestCtRedeemTokensParams:

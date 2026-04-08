@@ -19,9 +19,6 @@
 
 """Tests for FpmmRemoveLiquidityBaseBehaviour utility methods."""
 
-# pylint: disable=protected-access,attribute-defined-outside-init
-# pylint: disable=unused-argument,import-outside-toplevel
-
 import json
 from typing import Any
 from unittest.mock import MagicMock, patch

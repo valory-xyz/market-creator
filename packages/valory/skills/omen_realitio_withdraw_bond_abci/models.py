@@ -17,11 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Models for the omen_realitio_withdraw_bond_abci skill."""
+"""Shared state and params for the omen_realitio_withdraw_bond_abci skill."""
 
 from typing import Any, Type
 
-from aea.skills.base import SkillContext
+from aea.exceptions import enforce
 
 from packages.valory.skills.abstract_round_abci.base import AbciApp
 from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
@@ -38,32 +38,14 @@ from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
 
 
 class SharedState(BaseSharedState):
-    """Keep the current shared state of the skill."""
+    """Shared state of the skill."""
 
     abci_app_cls: Type[AbciApp] = OmenRealitioWithdrawBondAbciApp
 
-    def __init__(  # pylint: disable=useless-parent-delegation
-        self, *args: Any, skill_context: SkillContext, **kwargs: Any
-    ) -> None:
-        """Initialize the shared state object."""
-        super().__init__(*args, skill_context=skill_context, **kwargs)
-
 
 class RealitioWithdrawBondParams(BaseParams):
-    """Parameters for the omen_realitio_withdraw_bond_abci skill.
+    """Parameters for the omen_realitio_withdraw_bond_abci skill."""
 
-    Carries only the params this skill actually uses. Notably absent:
-
-    - ``realitio_start_block``: deleted from the design entirely. The
-      per-question ``from_block = max(0, createdBlock - 1)`` is computed
-      from the subgraph result inside the behaviour, so a global lower
-      bound is unnecessary and misleading. Keeping it would invite
-      operators to set it back to a chain-wide value and re-introduce
-      the timeout bug fixed in the prior debugging session.
-    """
-
-    # Inherited from BaseParams via the skill.yaml override path,
-    # declared here as class attributes for mypy.
     multisend_address: str
     multisend_batch_size: int
 
@@ -75,14 +57,20 @@ class RealitioWithdrawBondParams(BaseParams):
         self.min_realitio_withdraw_balance = self._ensure(
             "min_realitio_withdraw_balance", kwargs, type_=int
         )
-        self.realitio_contract = self._ensure(
-            key="realitio_contract", kwargs=kwargs, type_=str
+        # Contract address is read without popping so sibling params
+        # classes in a composed MRO can still see it.
+        self.realitio_contract: str = kwargs.get(
+            "realitio_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.realitio_contract is not None,
+            "`realitio_contract` is required",
         )
         super().__init__(*args, **kwargs)
 
 
 class RealitioSubgraph(ApiSpecs):
-    """A model that wraps ApiSpecs for the Realitio subgraph."""
+    """ApiSpecs wrapper for the Realitio subgraph."""
 
 
 Requests = BaseRequests

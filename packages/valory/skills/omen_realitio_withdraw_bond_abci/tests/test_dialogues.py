@@ -19,8 +19,6 @@
 
 """Test the dialogues.py module of the skill."""
 
-# pylint: disable=unused-import
-
 import packages.valory.skills.omen_realitio_withdraw_bond_abci.dialogues  # noqa: F401
 
 

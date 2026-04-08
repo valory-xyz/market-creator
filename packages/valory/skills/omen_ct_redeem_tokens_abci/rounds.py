@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the rounds of the OmenCtRedeemTokensAbciApp."""
+"""Rounds for the OmenCtRedeemTokensAbciApp."""
 
 from enum import Enum
 from typing import Dict, Set, Tuple, cast
@@ -73,9 +73,6 @@ class SynchronizedData(TxSynchronizedData):
         return self._get_deserialized("participant_to_ct_redeem_tokens_tx")
 
 
-# --- Active Rounds ---
-
-
 class CtRedeemTokensRound(CollectSameUntilThresholdRound):
     """A round for redeeming conditional token positions from resolved markets."""
 
@@ -89,9 +86,6 @@ class CtRedeemTokensRound(CollectSameUntilThresholdRound):
         get_name(SynchronizedData.most_voted_tx_hash),
     )
     collection_key = get_name(SynchronizedData.participant_to_ct_redeem_tokens_tx)
-
-
-# --- Final (Degenerate) Rounds ---
 
 
 class FinishedWithCtRedeemTokensTxRound(DegenerateRound):

@@ -19,16 +19,6 @@
 
 """Tests for RealitioWithdrawBondBehaviour."""
 
-# Standard pytest test-file conventions that pylint flags as code smells.
-# These disables match the idiomatic patterns used across the OA
-# ecosystem for setup_method-based test classes, protected-member
-# patching, and fixture-heavy test scaffolding.
-# pylint: disable=protected-access,attribute-defined-outside-init
-# pylint: disable=unused-argument,import-outside-toplevel
-# pylint: disable=too-many-public-methods,too-many-lines
-# pylint: disable=unsubscriptable-object,use-implicit-booleaness-not-comparison
-# pylint: disable=unpacking-non-sequence
-
 import contextlib
 from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch

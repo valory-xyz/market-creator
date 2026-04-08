@@ -19,13 +19,6 @@
 
 """Tests for CtRedeemTokensBehaviour."""
 
-# Standard pytest test-file conventions that pylint flags as code smells.
-# pylint: disable=protected-access,attribute-defined-outside-init
-# pylint: disable=unused-argument,import-outside-toplevel
-# pylint: disable=too-many-public-methods,too-many-locals,too-many-lines
-# pylint: disable=unsubscriptable-object,unsupported-membership-test
-# pylint: disable=use-implicit-booleaness-not-comparison
-
 from typing import Any
 from unittest.mock import MagicMock, patch
 

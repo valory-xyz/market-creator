@@ -17,10 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains FpmmRemoveLiquidityBehaviour for the omen_fpmm_remove_liquidity_abci skill."""
-
-# pylint: disable=too-many-ancestors,too-many-locals,too-many-arguments
-# pylint: disable=too-many-positional-arguments
+"""FpmmRemoveLiquidityBehaviour for the omen_fpmm_remove_liquidity_abci skill."""
 
 from string import Template
 from typing import Any, Dict, Generator, List, Optional, Tuple, cast
@@ -130,12 +127,12 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
     def _classify_market(
         self, market: Dict[str, Any], now: int
     ) -> Generator[None, None, str]:
-        """Classify a market into one of skip / remove_and_merge / remove_only.
+        """Classify a market as skip / remove_only / remove_and_merge.
 
-        :param market: market dict with opening_timestamp and condition_id keys
-        :param now: the last synced timestamp (seconds)
+        :param market: market dict with opening_timestamp and condition_id keys.
+        :param now: last synced timestamp (seconds).
         :yield: contract-api requests during the on-chain resolve check.
-        :return: action string
+        :return: one of _ACTION_SKIP, _ACTION_REMOVE_ONLY, _ACTION_REMOVE_AND_MERGE.
         """
         opening_ts = market["opening_timestamp"]
         lead_time = self.params.liquidity_removal_lead_time
@@ -157,12 +154,12 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
     def _build_market_txs(
         self, market: Dict[str, Any], action: str
     ) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Build transaction list for the given market and action.
+        """Build the transaction list for the given market and action.
 
-        :param market: market dict
-        :param action: one of remove_only or remove_and_merge
+        :param market: market dict.
+        :param action: _ACTION_REMOVE_ONLY or _ACTION_REMOVE_AND_MERGE.
         :yield: contract-api requests while building the txs.
-        :return: list of encoded transaction dicts
+        :return: list of encoded transaction dicts (possibly empty).
         """
         address = market["address"]
         condition_id = market["condition_id"]
@@ -191,7 +188,6 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
         if action == _ACTION_REMOVE_ONLY:
             return [remove_funding_tx]
 
-        # remove_and_merge
         merge_positions_tx = yield from self._get_merge_positions_tx(
             collateral_token=self.params.collateral_tokens_contract,
             parent_collection_id=ZERO_HASH,

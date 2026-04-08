@@ -17,11 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the shared state for the omen_ct_redeem_tokens_abci skill."""
+"""Shared state and params for the omen_ct_redeem_tokens_abci skill."""
 
 from typing import Any, Type
 
-from aea.skills.base import SkillContext
+from aea.exceptions import enforce
 
 from packages.valory.skills.abstract_round_abci.base import AbciApp
 from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
@@ -38,15 +38,9 @@ from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import (
 
 
 class SharedState(BaseSharedState):
-    """Keep the current shared state of the skill."""
+    """Shared state of the skill."""
 
     abci_app_cls: Type[AbciApp] = OmenCtRedeemTokensAbciApp
-
-    def __init__(  # pylint: disable=useless-parent-delegation
-        self, *args: Any, skill_context: SkillContext, **kwargs: Any
-    ) -> None:
-        """Initialize the shared state object."""
-        super().__init__(*args, skill_context=skill_context, **kwargs)
 
 
 class CtRedeemTokensParams(BaseParams):
@@ -62,24 +56,38 @@ class CtRedeemTokensParams(BaseParams):
         self.ct_redeem_tokens_batch_size = self._ensure(
             "ct_redeem_tokens_batch_size", kwargs, type_=int
         )
-        self.conditional_tokens_contract = self._ensure(
-            key="conditional_tokens_contract", kwargs=kwargs, type_=str
+        # Contract addresses are read without popping so sibling params
+        # classes in a composed MRO can still see them.
+        self.conditional_tokens_contract: str = kwargs.get(
+            "conditional_tokens_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.conditional_tokens_contract is not None,
+            "`conditional_tokens_contract` is required",
         )
-        self.realitio_oracle_proxy_contract = self._ensure(
-            key="realitio_oracle_proxy_contract", kwargs=kwargs, type_=str
+        self.collateral_tokens_contract: str = kwargs.get(
+            "collateral_tokens_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.collateral_tokens_contract is not None,
+            "`collateral_tokens_contract` is required",
         )
-        self.collateral_tokens_contract = self._ensure(
-            key="collateral_tokens_contract", kwargs=kwargs, type_=str
+        self.realitio_oracle_proxy_contract: str = kwargs.get(
+            "realitio_oracle_proxy_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.realitio_oracle_proxy_contract is not None,
+            "`realitio_oracle_proxy_contract` is required",
         )
         super().__init__(*args, **kwargs)
 
 
 class OmenSubgraph(ApiSpecs):
-    """A model that wraps ApiSpecs for the Omen subgraph."""
+    """ApiSpecs wrapper for the Omen subgraph."""
 
 
 class ConditionalTokensSubgraph(ApiSpecs):
-    """A model that wraps ApiSpecs for the ConditionalTokens subgraph."""
+    """ApiSpecs wrapper for the ConditionalTokens subgraph."""
 
 
 Requests = BaseRequests

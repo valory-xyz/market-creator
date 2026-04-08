@@ -19,8 +19,6 @@
 
 """Tests for models in the omen_fpmm_remove_liquidity_abci skill."""
 
-# pylint: disable=protected-access,import-outside-toplevel
-
 from unittest.mock import MagicMock
 
 from packages.valory.skills.omen_fpmm_remove_liquidity_abci.models import (
@@ -41,21 +39,6 @@ class TestSharedState:
     def test_abci_app_cls(self) -> None:
         """abci_app_cls is OmenFpmmRemoveLiquidityAbciApp."""
         assert SharedState.abci_app_cls is OmenFpmmRemoveLiquidityAbciApp
-
-    def test_init_delegates_to_base(self) -> None:
-        """__init__ delegates to BaseSharedState.__init__ with the same kwargs."""
-        from unittest.mock import patch
-
-        from packages.valory.skills.abstract_round_abci.models import (
-            SharedState as BaseSharedState,
-        )
-
-        instance = SharedState.__new__(SharedState)
-        skill_context = MagicMock()
-        with patch.object(BaseSharedState, "__init__", return_value=None) as mock_init:
-            SharedState.__init__(instance, skill_context=skill_context)
-        mock_init.assert_called_once()
-        assert mock_init.call_args.kwargs["skill_context"] is skill_context
 
 
 class TestFpmmRemoveLiquidityParams:
