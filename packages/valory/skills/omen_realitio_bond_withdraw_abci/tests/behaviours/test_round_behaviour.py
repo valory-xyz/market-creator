@@ -20,7 +20,7 @@
 """Tests for OmenRealitioBondWithdrawRoundBehaviour."""
 
 from packages.valory.skills.abstract_round_abci.behaviours import AbstractRoundBehaviour
-from packages.valory.skills.omen_realitio_bond_withdraw_abci.behaviours.behaviour import (
+from packages.valory.skills.omen_realitio_bond_withdraw_abci.behaviours.realitio_bond_withdraw import (
     RealitioBondWithdrawBehaviour,
 )
 from packages.valory.skills.omen_realitio_bond_withdraw_abci.behaviours.round_behaviour import (

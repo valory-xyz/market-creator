@@ -29,7 +29,7 @@ from packages.valory.skills.omen_ct_redeem_abci.behaviours.base import (
     get_callable_name,
     to_content,
 )
-from packages.valory.skills.omen_ct_redeem_abci.behaviours.behaviour import (
+from packages.valory.skills.omen_ct_redeem_abci.behaviours.ct_redeem import (
     CtRedeemBehaviour,
 )
 from packages.valory.skills.omen_ct_redeem_abci.tests.behaviours.conftest import (

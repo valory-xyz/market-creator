@@ -20,7 +20,7 @@
 """This module contains the round behaviour for the omen_ct_redeem_abci skill."""
 
 from packages.valory.skills.abstract_round_abci.behaviours import AbstractRoundBehaviour
-from packages.valory.skills.omen_ct_redeem_abci.behaviours.behaviour import (
+from packages.valory.skills.omen_ct_redeem_abci.behaviours.ct_redeem import (
     CtRedeemBehaviour,
 )
 from packages.valory.skills.omen_ct_redeem_abci.rounds import OmenCtRedeemAbciApp

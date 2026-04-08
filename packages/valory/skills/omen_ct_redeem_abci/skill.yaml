@@ -10,8 +10,8 @@ fingerprint:
   __init__.py: bafybeid3dlnq2jh7nqcllcrdiwwlpcd7swlxagadtlw5dkjbozpz2fhyay
   behaviours/__init__.py: bafybeid5y5p2hzayiojv5bbm4z5kowklr3znhdlw64wmw57mcty2ogjnam
   behaviours/base.py: bafybeigyv6sdpmov57exrvtglywu6675psbz6ze6eriltyzr5wenb4e2km
-  behaviours/behaviour.py: bafybeihmpk5hndrz5lvparnxqinknl5k5kugpgcnez5ddlgdg7egqnqrzq
-  behaviours/round_behaviour.py: bafybeicdh6zoaelyqzp6lc3lcx4okfqbp2sc5ig4d5riwtvfam5baifvcu
+  behaviours/ct_redeem.py: bafybeihmpk5hndrz5lvparnxqinknl5k5kugpgcnez5ddlgdg7egqnqrzq
+  behaviours/round_behaviour.py: bafybeiet767g3gmehrodm2rf3rfzogyzd6l7h2cssg5y4xy43wf7kpp2kq
   dialogues.py: bafybeigl47pm7ladjmcwblqohetm7bmsmrmmcctldavtr3h4otcebmeuum
   fsm_specification.yaml: bafybeigcvnk6ye3cv6kc2utj6z6kzg3cefwf52cl5o6v4qdtwz5iqchqyq
   handlers.py: bafybeiaimqcy54a3kjqjp64wsiydyfc5ovawzvitkv6k7prh26hyhcpdoa
@@ -21,9 +21,9 @@ fingerprint:
   tests/__init__.py: bafybeia3fckhutztmm75ekiqerf5vbvzlbsb754nwizdnneoqdzsmkq4hm
   tests/behaviours/__init__.py: bafybeiaqy4qnokrq3j7vcg4xwv6r7ctcfkjpyfljcsgsucnj3linphbjwy
   tests/behaviours/conftest.py: bafybeihjqch5k45kduyjsrbvndi7xjrhotwvigo4ijnbk7ktrze4wtcdti
-  tests/behaviours/test_base.py: bafybeig2caxdkj3wtnl3vmazcwjtoc7p3aiz37s3wx2vhucs6juov7d7yu
-  tests/behaviours/test_behaviour.py: bafybeiaxhsbssvgyjgxtmd425mebwlmaoknzcq67ig3vwzxdcorzqzhw5u
-  tests/behaviours/test_round_behaviour.py: bafybeicpvmr7rjmzbwekdqk3o5i4j55iirmvxop7w5eqmsahsfsxvr3b3q
+  tests/behaviours/test_base.py: bafybeihvzgizvzebquu2micf5obltfuzji2slbi4ifsyljibovolu4qzu4
+  tests/behaviours/test_ct_redeem.py: bafybeiac7pfrkzzsvx76nfc52nwt6xxtoe25qg3s6hplr2odfmiqwsmjiu
+  tests/behaviours/test_round_behaviour.py: bafybeidv4jmahnpeiip65fubx7d7doszhvp2c2pfm72duzamj4qro6heqq
   tests/conftest.py: bafybeidl643qvkauz6xroztv24z5bi6433jsadetxxu23so7uxcg3g7eti
   tests/test_dialogues.py: bafybeihohrpq4mhncxw3epfgulhcbeeuevtvjskixxuogsaxdepkkljd6i
   tests/test_handlers.py: bafybeiczbfhyphm3l63gvyturbgnrctqwvr4hx5zoeswtgk5omlmhswsr4

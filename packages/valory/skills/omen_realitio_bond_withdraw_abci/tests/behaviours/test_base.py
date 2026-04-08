@@ -33,7 +33,7 @@ from packages.valory.skills.omen_realitio_bond_withdraw_abci.behaviours.base imp
     to_content,
     wei_to_str,
 )
-from packages.valory.skills.omen_realitio_bond_withdraw_abci.behaviours.behaviour import (
+from packages.valory.skills.omen_realitio_bond_withdraw_abci.behaviours.realitio_bond_withdraw import (
     RealitioBondWithdrawBehaviour,
 )
 from packages.valory.skills.omen_realitio_bond_withdraw_abci.tests.behaviours.conftest import (

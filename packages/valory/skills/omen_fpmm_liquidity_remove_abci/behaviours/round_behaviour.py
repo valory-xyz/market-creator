@@ -20,7 +20,7 @@
 """Round behaviour for the omen_fpmm_liquidity_remove_abci skill."""
 
 from packages.valory.skills.abstract_round_abci.behaviours import AbstractRoundBehaviour
-from packages.valory.skills.omen_fpmm_liquidity_remove_abci.behaviours.behaviour import (
+from packages.valory.skills.omen_fpmm_liquidity_remove_abci.behaviours.fpmm_liquidity_remove import (
     FpmmLiquidityRemoveBehaviour,
 )
 from packages.valory.skills.omen_fpmm_liquidity_remove_abci.rounds import (

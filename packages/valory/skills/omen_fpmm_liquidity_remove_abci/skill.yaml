@@ -7,7 +7,30 @@ description: An ABCI skill that removes LP shares from closing or closed Omen FP
   closed-resolved) and issues removeFunding plus optional mergePositions transactions.
 license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
-fingerprint: {}
+fingerprint:
+  __init__.py: bafybeibvilpohfsuutto3ilvjy3vlvap62ehiw24vodix4ie36tjjwupga
+  behaviours/__init__.py: bafybeiaej2qb7vqaimr2tujzthnoxm2imkkr22y46ea5q6n233upqx3wru
+  behaviours/base.py: bafybeidyivs2sro2p7ha7hyvwhanajnufrgcbjetz36b2z7f73slosuspm
+  behaviours/fpmm_liquidity_remove.py: bafybeigzo6znz43adoa7mtvxuz5n77cldmalapnjvx7jcd2xhw43qptx6u
+  behaviours/round_behaviour.py: bafybeicacw7f2asbgzqahxck2i4mukhyju45mdt5t4rdlpatv4ojqepifm
+  dialogues.py: bafybeiggtz66vhblzqiaoteavnzmfwwxzn7epfxbljw6rcpnnhnlwd26ay
+  fsm_specification.yaml: bafybeicj7o7mjjx5aetmpioyvmr5upbrkghhee5jwyrzkocyakvf4pblrq
+  handlers.py: bafybeigffjfq6xvdeudg54qr6y7a5xm3h2zeiq3yib7of347yvd2ilwime
+  models.py: bafybeifqaf5tt7zy46n36564oiwk3hmxkimozvtdps4to4de6tbqexy5mu
+  payloads.py: bafybeichqdctattkwvxxsnjqeuwf3rse626bhe53c6nnpdsopsbrxhuyc4
+  rounds.py: bafybeigy3v5zlmwyl6lbgd52bkmdnlx6eoimobk7qrtpwcwamprhufcl6y
+  tests/__init__.py: bafybeiavdwcltkdnjbbywjd6h5egll7qccupd2dykw3j6nnjtrlolume2y
+  tests/behaviours/__init__.py: bafybeic6hwvpkwd2cu4z3wg2fqal6dof6ekwnnlagxtgmlapvu5yftf7he
+  tests/behaviours/conftest.py: bafybeig7j4khxn227vln7dvmpcpldcdflcowxadlnryg57fetchvax34hq
+  tests/behaviours/test_base.py: bafybeihlbvj7c5qxajolg2mjww7cubn7tmwcvxdewkrgrqi6ygvlqdq4xa
+  tests/behaviours/test_fpmm_liquidity_remove.py: bafybeifdpign6fbl6ph43movostd6gfzrlc2opm5m7qgj7uz3umaeua5bu
+  tests/behaviours/test_round_behaviour.py: bafybeifqk7kv2mh7ehs2es2kmr36lbkwntoacgvydo5um6c54smmx3pfwe
+  tests/conftest.py: bafybeigycc4dsjupn7ojm24hmpd4log3jpzimetyyozenhqd2nxhbxuaje
+  tests/test_dialogues.py: bafybeife4pbwu4uga3xvc5hqpvp4yxmc7xi4ojtwsnkz4fvu4knlejtona
+  tests/test_handlers.py: bafybeic4p6ds2x2op6sumjpnhflnxalt6hdinqxmnr7ronze62w5ilr6te
+  tests/test_models.py: bafybeigtdmc2uht7d4gsenggaqxbxxg7k7mf4f27hdjbfcaufycyxymwpu
+  tests/test_payloads.py: bafybeig2rcfg4edjugggsdnj7mgieks7qi7nsw7i3hf3a377o4fzoq5i6m
+  tests/test_rounds.py: bafybeifrfidkvk3my7df33s2n666cvxq5xlxqqfzorhrydx73j6xh63rc4
 fingerprint_ignore_patterns: []
 connections: []
 is_abstract: false

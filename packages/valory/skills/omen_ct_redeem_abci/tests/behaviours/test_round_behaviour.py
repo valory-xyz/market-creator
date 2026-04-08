@@ -20,7 +20,7 @@
 """Tests for CtRedeemRoundBehaviour."""
 
 from packages.valory.skills.abstract_round_abci.behaviours import AbstractRoundBehaviour
-from packages.valory.skills.omen_ct_redeem_abci.behaviours.behaviour import (
+from packages.valory.skills.omen_ct_redeem_abci.behaviours.ct_redeem import (
     CtRedeemBehaviour,
 )
 from packages.valory.skills.omen_ct_redeem_abci.behaviours.round_behaviour import (
