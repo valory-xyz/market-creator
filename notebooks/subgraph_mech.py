@@ -95,11 +95,7 @@ query requests_query(
 # ---------------------------------------------------------------------------
 
 def get_request_ipfs_url(mech_request: Dict[str, Any]) -> str:
-    """Build the IPFS URL for the request metadata.
-
-    Returns an empty string if ``parsedRequest`` is missing or malformed
-    (e.g. the subgraph failed to parse the on-chain request content).
-    """
+    """Build the IPFS URL for the request metadata."""
     parsed = mech_request.get("parsedRequest") or {}
     ipfs_hash = parsed.get("hash")
     if not ipfs_hash:
