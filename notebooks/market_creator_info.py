@@ -94,9 +94,10 @@ GNOSIS_SAFE_ABI = [
 
 
 class MarketCreatorConfig(TypedDict):
-    """Configuration for a single market creator."""
+    """Configuration for a single market creator or trusted resolver."""
 
     name: str
+    icon: str
     safe_contract_address: str
     markets_to_approve_per_day: int
     thresholds: dict
@@ -132,6 +133,9 @@ def _get_balances(address: str, token_addresses: set) -> dict:
 def get_creator_info(config: MarketCreatorConfig) -> MarketCreatorInfo:
     """Get Safe owner and balance info for a market creator.
 
+    Handles both Gnosis Safe contracts (fetches owners + threshold) and plain
+    EOAs (treated as a single-owner "safe" with threshold 1/1).
+
     :param config: market creator configuration.
     :return: MarketCreatorInfo with balances for all tokens referenced in thresholds.
     """
@@ -139,10 +143,17 @@ def get_creator_info(config: MarketCreatorConfig) -> MarketCreatorInfo:
     safe_contract_address = config["safe_contract_address"]
     thresholds = config.get("thresholds", {})
     checksum = web3.to_checksum_address(safe_contract_address)
-    safe_contract = web3.eth.contract(address=checksum, abi=GNOSIS_SAFE_ABI)
 
-    owner_addresses = safe_contract.functions.getOwners().call()
-    sig_threshold = safe_contract.functions.getThreshold().call()
+    # Detect EOA vs contract by checking deployed code
+    code = web3.eth.get_code(checksum)
+    if len(code) == 0:
+        # EOA — treat as a single-owner "safe" with threshold 1/1
+        owner_addresses: list[str] = [safe_contract_address]
+        sig_threshold = 1
+    else:
+        safe_contract = web3.eth.contract(address=checksum, abi=GNOSIS_SAFE_ABI)
+        owner_addresses = safe_contract.functions.getOwners().call()
+        sig_threshold = safe_contract.functions.getThreshold().call()
 
     # Collect all token addresses we need to query
     safe_tokens = set(thresholds.get("safe", {}).keys())

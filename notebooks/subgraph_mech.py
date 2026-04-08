@@ -95,8 +95,15 @@ query requests_query(
 # ---------------------------------------------------------------------------
 
 def get_request_ipfs_url(mech_request: Dict[str, Any]) -> str:
-    """Build the IPFS URL for the request metadata."""
-    ipfs_hash = mech_request["parsedRequest"]["hash"]
+    """Build the IPFS URL for the request metadata.
+
+    Returns an empty string if ``parsedRequest`` is missing or malformed
+    (e.g. the subgraph failed to parse the on-chain request content).
+    """
+    parsed = mech_request.get("parsedRequest") or {}
+    ipfs_hash = parsed.get("hash")
+    if not ipfs_hash:
+        return ""
     return f"{IPFS_GATEWAY}{ipfs_hash}/metadata.json"
 
 
@@ -194,7 +201,9 @@ def _populate_ipfs_contents(
     pending = []
     for req in mech_requests.values():
         if "ipfsContents" not in req:
-            pending.append((req, get_request_ipfs_url(req)))
+            url = get_request_ipfs_url(req)
+            if url:
+                pending.append((req, url))
         deliver = req.get("deliver")
         if deliver and "ipfsContents" not in deliver:
             url = get_deliver_ipfs_url(deliver)
