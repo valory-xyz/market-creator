@@ -62,7 +62,7 @@ def test_params_init_carries_required_params() -> None:
 
 
 def test_shared_state_abci_app_cls() -> None:
-    """SharedState carries the correct abci_app_cls."""
+    """Test SharedState carries the correct abci_app_cls."""
     from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
         OmenRealitioWithdrawBondAbciApp,
     )
