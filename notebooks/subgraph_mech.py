@@ -346,14 +346,33 @@ def fetch_mech_requests(sender: str) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 def categorize_mech_result(result_str: str) -> str:
-    """Categorize a mech deliver result into a human-readable label."""
+    """Categorize a mech deliver result into a human-readable label.
+
+    Hierarchy: is_valid → is_determinable → has_occurred.
+    If a higher-priority field is False the rest are irrelevant.
+
+    :param result_str: JSON string from mech deliver IPFS contents.
+    :return: human-readable label for the most relevant outcome.
+    """
     try:
         parsed = json.loads(result_str)
-        if isinstance(parsed, dict) and parsed:
-            first_key = list(parsed.keys())[0]
-            first_val = parsed[first_key]
-            return f"{first_key}={first_val}"
-        return "Valid (other)"
+        if not isinstance(parsed, dict) or not parsed:
+            return "Valid (other)"
+
+        is_valid = parsed.get("is_valid", True)
+        if is_valid is False:
+            return "is_valid=False"
+
+        is_det = parsed.get("is_determinable", True)
+        if is_det is False:
+            return "is_determinable=False"
+
+        if "has_occurred" in parsed:
+            return f"has_occurred={parsed['has_occurred']}"
+
+        # Fallback: show first key=value for non-standard responses
+        first_key = list(parsed.keys())[0]
+        return f"{first_key}={parsed[first_key]}"
     except (json.JSONDecodeError, TypeError, ValueError):
         return "Error"
 

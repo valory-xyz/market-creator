@@ -97,6 +97,8 @@ query fpmms_query($creator: Bytes, $creationTimestamp_gt: BigInt) {
         currentAnswer
         currentAnswerBond
         collateralVolume
+        outcomeTokenMarginalPrices
+        outcomeTokenAmounts
     }
 }
 """
@@ -120,6 +122,23 @@ query fpmms_query($fpmm: String, $id_gt: ID) {
         creationTimestamp
         feeAmount
   }
+}
+"""
+
+LAST_TRADES_BATCH_QUERY = """
+query last_trades($fpmm_ids: [String!]!, $id_gt: ID!) {
+    fpmmTrades(
+        where: {fpmm_in: $fpmm_ids, id_gt: $id_gt}
+        orderBy: id
+        orderDirection: asc
+        first: 1000
+    ) {
+        id
+        fpmm { id }
+        outcomeIndex
+        outcomeTokenMarginalPrice
+        creationTimestamp
+    }
 }
 """
 
@@ -253,6 +272,72 @@ def _write_db_to_file(fpmms: Dict[str, Any], force_write: bool = False) -> None:
         last_write_time = now
 
 
+_LAST_TRADE_BATCH_SIZE = 200
+
+
+def _fetch_last_trades_batch(
+    market_ids: List[str],
+) -> Dict[str, Dict[str, Any]]:
+    """Fetch all trades for a batch of markets (paginated).
+
+    Keeps only the latest trade per market (highest creationTimestamp).
+
+    :param market_ids: list of market addresses (max ~200 per call).
+    :return: mapping of market_id -> last trade dict (raw subgraph).
+    """
+    transport = RequestsHTTPTransport(url=THEGRAPH_ENDPOINT)
+    client = Client(transport=transport, fetch_schema_from_transport=True)
+
+    result: Dict[str, Dict[str, Any]] = {}
+    id_gt = "0x00"
+    while True:
+        response = client.execute(
+            gql(LAST_TRADES_BATCH_QUERY),
+            variable_values={"fpmm_ids": market_ids, "id_gt": id_gt},
+        )
+        trades = response.get("fpmmTrades", [])
+        if not trades:
+            break
+        for t in trades:
+            mid = t["fpmm"]["id"]
+            prev = result.get(mid)
+            if not prev or t["creationTimestamp"] > prev["creationTimestamp"]:
+                result[mid] = t
+        id_gt = trades[-1]["id"]
+        if len(trades) < 1000:
+            break
+    return result
+
+
+def _fetch_last_trades(market_ids: List[str]) -> Dict[str, Dict[str, Any]]:
+    """Fetch the last trade for each market, batched and threaded.
+
+    :param market_ids: list of market addresses to query.
+    :return: mapping of market_id -> last trade dict (raw subgraph).
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    batches = [
+        market_ids[i : i + _LAST_TRADE_BATCH_SIZE]
+        for i in range(0, len(market_ids), _LAST_TRADE_BATCH_SIZE)
+    ]
+
+    result: Dict[str, Dict[str, Any]] = {}
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        futures = {
+            pool.submit(_fetch_last_trades_batch, batch): batch
+            for batch in batches
+        }
+        for future in tqdm(
+            as_completed(futures),
+            total=len(futures),
+            desc=f"{'Fetching last trades':>{TEXT_ALIGNMENT}}",
+            miniters=1,
+        ):
+            result.update(future.result())
+    return result
+
+
 def get_fpmms(creator: str) -> dict:
     """Get Fixed Product Market Makers for one or more creators."""
 
@@ -284,6 +369,28 @@ def get_fpmms(creator: str) -> dict:
 
     spinner.close()
     return {"fixedProductMarketMakers": fpmms}
+
+
+def enrich_last_trades(fpmms: dict, market_ids: List[str]) -> None:
+    """Fetch last trades only for the given market IDs and attach to fpmms.
+
+    Call this from the notebook after filtering to only the markets that
+    will be displayed (e.g. pending/finalizing).
+
+    :param fpmms: mapping of market_id -> market dict (mutated in place).
+    :param market_ids: list of market IDs to fetch last trades for.
+    """
+    need = [
+        mid for mid in market_ids
+        if mid in fpmms
+        and not fpmms[mid].get("outcomeTokenMarginalPrices")
+        and int(fpmms[mid].get("collateralVolume") or 0) > 0
+    ]
+    if not need:
+        return
+    last_trades = _fetch_last_trades(need)
+    for mid, trade in last_trades.items():
+        fpmms[mid]["lastTrade"] = trade
 
 
 # ---------------------------------------------------------------------------
@@ -330,10 +437,56 @@ def markets_to_dataframe(fpmms_dict: dict) -> pd.DataFrame:
                 "is_invalid": is_invalid,
                 "current_answer_bond": bond,
                 "collateral_volume": float(m.get("collateralVolume") or 0) / 1e18,
+                "outcome_prices": _calc_prices(m),
             }
         )
 
     return pd.DataFrame(rows)
+
+
+def _calc_prices(m: dict) -> list:
+    """Compute outcome prices from subgraph data.
+
+    Priority:
+      1. ``outcomeTokenMarginalPrices`` — live prices (active liquidity)
+      2. ``outcomeTokenAmounts`` — CPMM formula (same as Presagio)
+      3. ``lastTrade.outcomeTokenMarginalPrice`` — historical snapshot
+         from the last trade before liquidity was removed
+
+    :param m: raw market dict from the subgraph.
+    :return: list of floats (one per outcome, summing to ~1), or [].
+    """
+    # 1. Prefer marginal prices when the subgraph provides them
+    raw_prices = m.get("outcomeTokenMarginalPrices")
+    if raw_prices and all(float(p) > 0 for p in raw_prices):
+        return [float(p) for p in raw_prices]
+
+    # 2. Fallback: CPMM formula from outcomeTokenAmounts
+    raw_amounts = m.get("outcomeTokenAmounts") or []
+    amounts = [int(a) for a in raw_amounts]
+    if amounts and all(a > 0 for a in amounts):
+        product = 1
+        for a in amounts:
+            product *= a
+        inv = [product // a for a in amounts]
+        denom = sum(inv)
+        return [v / denom for v in inv]
+
+    # 3. Fallback: last trade marginal price (binary markets only)
+    last_trade = m.get("lastTrade")
+    if last_trade and last_trade.get("outcomeTokenMarginalPrice"):
+        n_outcomes = len(
+            (m.get("question") or {}).get("outcomes") or []
+        )
+        if n_outcomes == 2:
+            p = float(last_trade["outcomeTokenMarginalPrice"])
+            idx = int(last_trade.get("outcomeIndex", 0))
+            prices = [0.0, 0.0]
+            prices[idx] = p
+            prices[1 - idx] = 1.0 - p
+            return prices
+
+    return []
 
 
 def _ts_to_datetime(ts) -> datetime | None:
