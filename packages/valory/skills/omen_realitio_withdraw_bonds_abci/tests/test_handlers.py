@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Test the dialogues.py module of the skill."""
+"""Test the handlers.py module of the skill."""
 
-import packages.valory.skills.omen_realitio_withdraw_bond_abci.dialogues  # noqa: F401
+import packages.valory.skills.omen_realitio_withdraw_bonds_abci.handlers  # noqa: F401
 
 
 def test_import() -> None:

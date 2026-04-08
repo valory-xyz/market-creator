@@ -17,49 +17,49 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for OmenRealitioWithdrawBondRoundBehaviour."""
+"""Tests for OmenRealitioWithdrawBondsRoundBehaviour."""
 
 from packages.valory.skills.abstract_round_abci.behaviours import AbstractRoundBehaviour
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.behaviours.round_behaviour import (
-    OmenRealitioWithdrawBondRoundBehaviour,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.round_behaviour import (
+    OmenRealitioWithdrawBondsRoundBehaviour,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.behaviours.withdraw_bond import (
-    RealitioWithdrawBondBehaviour,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.withdraw_bonds import (
+    RealitioWithdrawBondsBehaviour,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
-    OmenRealitioWithdrawBondAbciApp,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
+    OmenRealitioWithdrawBondsAbciApp,
 )
 
 
-class TestOmenRealitioWithdrawBondRoundBehaviour:
-    """Tests for OmenRealitioWithdrawBondRoundBehaviour class."""
+class TestOmenRealitioWithdrawBondsRoundBehaviour:
+    """Tests for OmenRealitioWithdrawBondsRoundBehaviour class."""
 
     def test_inherits_abstract_round_behaviour(self) -> None:
         """Test that it inherits from AbstractRoundBehaviour."""
         assert issubclass(
-            OmenRealitioWithdrawBondRoundBehaviour, AbstractRoundBehaviour
+            OmenRealitioWithdrawBondsRoundBehaviour, AbstractRoundBehaviour
         )
 
     def test_initial_behaviour_cls(self) -> None:
-        """Test initial_behaviour_cls is RealitioWithdrawBondBehaviour."""
+        """Test initial_behaviour_cls is RealitioWithdrawBondsBehaviour."""
         assert (
-            OmenRealitioWithdrawBondRoundBehaviour.initial_behaviour_cls
-            is RealitioWithdrawBondBehaviour
+            OmenRealitioWithdrawBondsRoundBehaviour.initial_behaviour_cls
+            is RealitioWithdrawBondsBehaviour
         )
 
     def test_abci_app_cls(self) -> None:
-        """Test abci_app_cls is OmenRealitioWithdrawBondAbciApp."""
+        """Test abci_app_cls is OmenRealitioWithdrawBondsAbciApp."""
         assert (
-            OmenRealitioWithdrawBondRoundBehaviour.abci_app_cls
-            is OmenRealitioWithdrawBondAbciApp
+            OmenRealitioWithdrawBondsRoundBehaviour.abci_app_cls
+            is OmenRealitioWithdrawBondsAbciApp
         )
 
     def test_behaviours_set(self) -> None:
-        """Test behaviours set contains exactly RealitioWithdrawBondBehaviour."""
-        assert OmenRealitioWithdrawBondRoundBehaviour.behaviours == {
-            RealitioWithdrawBondBehaviour
+        """Test behaviours set contains exactly RealitioWithdrawBondsBehaviour."""
+        assert OmenRealitioWithdrawBondsRoundBehaviour.behaviours == {
+            RealitioWithdrawBondsBehaviour
         }
 
     def test_behaviours_count(self) -> None:
         """Test that there is exactly 1 behaviour."""
-        assert len(OmenRealitioWithdrawBondRoundBehaviour.behaviours) == 1
+        assert len(OmenRealitioWithdrawBondsRoundBehaviour.behaviours) == 1

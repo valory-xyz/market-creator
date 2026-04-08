@@ -17,4 +17,22 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Behaviours for the omen_realitio_withdraw_bond_abci skill."""
+"""Transaction payloads for the OmenRealitioWithdrawBondsAbciApp."""
+
+from dataclasses import dataclass
+from typing import Optional
+
+from packages.valory.skills.abstract_round_abci.base import BaseTxPayload
+
+
+@dataclass(frozen=True)
+class RealitioWithdrawBondsPayload(BaseTxPayload):
+    """Payload for the RealitioWithdrawBondsRound.
+
+    Carries the safe tx hash for the multisend that bundles
+    Realitio.claimWinnings + Realitio.withdraw txs, or both fields
+    None when there is nothing to claim or withdraw this period.
+    """
+
+    tx_submitter: Optional[str] = None
+    tx_hash: Optional[str] = None

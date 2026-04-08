@@ -22,12 +22,12 @@
 from unittest.mock import patch
 
 from packages.valory.skills.abstract_round_abci.base import AbciAppDB
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
     Event,
-    FinishedWithRealitioWithdrawBondTxRound,
-    FinishedWithoutRealitioWithdrawBondTxRound,
-    OmenRealitioWithdrawBondAbciApp,
-    RealitioWithdrawBondRound,
+    FinishedWithRealitioWithdrawBondsTxRound,
+    FinishedWithoutRealitioWithdrawBondsTxRound,
+    OmenRealitioWithdrawBondsAbciApp,
+    RealitioWithdrawBondsRound,
     SynchronizedData,
 )
 
@@ -36,81 +36,81 @@ def test_import() -> None:
     """Test that the module can be imported and key symbols are present."""
     assert Event is not None
     assert SynchronizedData is not None
-    assert RealitioWithdrawBondRound is not None
-    assert FinishedWithRealitioWithdrawBondTxRound is not None
-    assert FinishedWithoutRealitioWithdrawBondTxRound is not None
-    assert OmenRealitioWithdrawBondAbciApp is not None
+    assert RealitioWithdrawBondsRound is not None
+    assert FinishedWithRealitioWithdrawBondsTxRound is not None
+    assert FinishedWithoutRealitioWithdrawBondsTxRound is not None
+    assert OmenRealitioWithdrawBondsAbciApp is not None
 
 
 def test_abci_app_transition_function_shape() -> None:
     """The FSM has one consensus round with two final states."""
-    tf = OmenRealitioWithdrawBondAbciApp.transition_function
-    # RealitioWithdrawBondRound has exactly 4 event → state entries.
-    assert len(tf[RealitioWithdrawBondRound]) == 4
+    tf = OmenRealitioWithdrawBondsAbciApp.transition_function
+    # RealitioWithdrawBondsRound has exactly 4 event → state entries.
+    assert len(tf[RealitioWithdrawBondsRound]) == 4
     # DONE routes to the "with tx" final state.
     assert (
-        tf[RealitioWithdrawBondRound][Event.DONE]
-        is FinishedWithRealitioWithdrawBondTxRound
+        tf[RealitioWithdrawBondsRound][Event.DONE]
+        is FinishedWithRealitioWithdrawBondsTxRound
     )
     # NONE / NO_MAJORITY / ROUND_TIMEOUT all route to the "without tx" final state.
     for ev in (Event.NONE, Event.NO_MAJORITY, Event.ROUND_TIMEOUT):
         assert (
-            tf[RealitioWithdrawBondRound][ev]
-            is FinishedWithoutRealitioWithdrawBondTxRound
+            tf[RealitioWithdrawBondsRound][ev]
+            is FinishedWithoutRealitioWithdrawBondsTxRound
         )
     # Final states have empty transition functions.
-    assert tf[FinishedWithRealitioWithdrawBondTxRound] == {}
-    assert tf[FinishedWithoutRealitioWithdrawBondTxRound] == {}
+    assert tf[FinishedWithRealitioWithdrawBondsTxRound] == {}
+    assert tf[FinishedWithoutRealitioWithdrawBondsTxRound] == {}
 
 
 def test_abci_app_final_states() -> None:
     """The two final states are both registered."""
-    assert OmenRealitioWithdrawBondAbciApp.final_states == {
-        FinishedWithRealitioWithdrawBondTxRound,
-        FinishedWithoutRealitioWithdrawBondTxRound,
+    assert OmenRealitioWithdrawBondsAbciApp.final_states == {
+        FinishedWithRealitioWithdrawBondsTxRound,
+        FinishedWithoutRealitioWithdrawBondsTxRound,
     }
 
 
 def test_abci_app_initial_state() -> None:
-    """The only initial state is RealitioWithdrawBondRound."""
-    assert OmenRealitioWithdrawBondAbciApp.initial_states == {RealitioWithdrawBondRound}
+    """The only initial state is RealitioWithdrawBondsRound."""
+    assert OmenRealitioWithdrawBondsAbciApp.initial_states == {RealitioWithdrawBondsRound}
     assert (
-        OmenRealitioWithdrawBondAbciApp.initial_round_cls is RealitioWithdrawBondRound
+        OmenRealitioWithdrawBondsAbciApp.initial_round_cls is RealitioWithdrawBondsRound
     )
 
 
 def test_abci_app_event_to_timeout() -> None:
     """ROUND_TIMEOUT is set to 120 seconds."""
     assert (
-        OmenRealitioWithdrawBondAbciApp.event_to_timeout[Event.ROUND_TIMEOUT] == 120.0
+        OmenRealitioWithdrawBondsAbciApp.event_to_timeout[Event.ROUND_TIMEOUT] == 120.0
     )
 
 
 def test_db_post_conditions_require_tx_hash_on_with_tx_final() -> None:
     """The with-tx final state posts the tx_hash to db; the without-tx does not."""
-    post = OmenRealitioWithdrawBondAbciApp.db_post_conditions
-    assert post[FinishedWithRealitioWithdrawBondTxRound] == {"most_voted_tx_hash"}
-    assert post[FinishedWithoutRealitioWithdrawBondTxRound] == set()
+    post = OmenRealitioWithdrawBondsAbciApp.db_post_conditions
+    assert post[FinishedWithRealitioWithdrawBondsTxRound] == {"most_voted_tx_hash"}
+    assert post[FinishedWithoutRealitioWithdrawBondsTxRound] == set()
 
 
 def test_synchronized_data_properties() -> None:
     """Test that SynchronizedData exposes the expected typed properties.
 
     Covers tx_submitter, most_voted_tx_hash, and the
-    participant_to_realitio_withdraw_bond_tx mapping.
+    participant_to_realitio_withdraw_bonds_tx mapping.
     """
     initial_data: dict = {
-        "tx_submitter": ["omen_realitio_withdraw_bond"],
+        "tx_submitter": ["omen_realitio_withdraw_bonds"],
         "most_voted_tx_hash": ["0xdeadbeef"],
         # The collection field's raw value is read via db.get_strict
         # and then passed to CollectionRound.deserialize_collection.
         # We use a placeholder here and mock the deserializer.
-        "participant_to_realitio_withdraw_bond_tx": ["<serialized>"],
+        "participant_to_realitio_withdraw_bonds_tx": ["<serialized>"],
     }
     db = AbciAppDB(setup_data=initial_data)
     synced = SynchronizedData(db=db)
 
-    assert synced.tx_submitter == "omen_realitio_withdraw_bond"
+    assert synced.tx_submitter == "omen_realitio_withdraw_bonds"
     assert synced.most_voted_tx_hash == "0xdeadbeef"
 
     # Exercise the _get_deserialized method body (lines 62-63) by
@@ -118,9 +118,9 @@ def test_synchronized_data_properties() -> None:
     # method path runs without a real serialized payload.
     sentinel: dict = {"agent_0": "payload"}
     with patch(
-        "packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds.CollectionRound.deserialize_collection",
+        "packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds.CollectionRound.deserialize_collection",
         return_value=sentinel,
     ) as mock_deserialize:
-        result = synced.participant_to_realitio_withdraw_bond_tx
+        result = synced.participant_to_realitio_withdraw_bonds_tx
     assert result is sentinel
     mock_deserialize.assert_called_once_with("<serialized>")

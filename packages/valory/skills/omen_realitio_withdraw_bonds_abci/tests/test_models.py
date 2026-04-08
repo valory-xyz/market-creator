@@ -23,16 +23,16 @@ from typing import Any
 from unittest.mock import patch
 
 from packages.valory.skills.abstract_round_abci.models import BaseParams
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.models import (
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.models import (
     RealitioSubgraph,
-    RealitioWithdrawBondParams,
+    RealitioWithdrawBondsParams,
     SharedState,
 )
 
 
 def test_import() -> None:
     """Test that the module can be imported and the types are defined."""
-    assert RealitioWithdrawBondParams is not None
+    assert RealitioWithdrawBondsParams is not None
     assert RealitioSubgraph is not None
     assert SharedState is not None
 
@@ -44,17 +44,17 @@ def test_params_init_carries_required_params() -> None:
         return kwargs.pop(key)
 
     kwargs: dict = {
-        "realitio_withdraw_bond_batch_size": 10,
+        "realitio_withdraw_bonds_batch_size": 10,
         "min_realitio_withdraw_balance": 10**19,
         "realitio_contract": "0xRealitio",
     }
-    instance = RealitioWithdrawBondParams.__new__(RealitioWithdrawBondParams)
+    instance = RealitioWithdrawBondsParams.__new__(RealitioWithdrawBondsParams)
     with (
-        patch.object(RealitioWithdrawBondParams, "_ensure", new=fake_ensure),
+        patch.object(RealitioWithdrawBondsParams, "_ensure", new=fake_ensure),
         patch.object(BaseParams, "__init__", return_value=None),
     ):
-        RealitioWithdrawBondParams.__init__(instance, **kwargs)
-    assert instance.realitio_withdraw_bond_batch_size == 10
+        RealitioWithdrawBondsParams.__init__(instance, **kwargs)
+    assert instance.realitio_withdraw_bonds_batch_size == 10
     assert instance.min_realitio_withdraw_balance == 10**19
     assert instance.realitio_contract == "0xRealitio"
     # realitio_start_block was deleted from the design.
@@ -63,8 +63,8 @@ def test_params_init_carries_required_params() -> None:
 
 def test_shared_state_abci_app_cls() -> None:
     """Test SharedState carries the correct abci_app_cls."""
-    from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
-        OmenRealitioWithdrawBondAbciApp,
+    from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
+        OmenRealitioWithdrawBondsAbciApp,
     )
 
-    assert SharedState.abci_app_cls is OmenRealitioWithdrawBondAbciApp
+    assert SharedState.abci_app_cls is OmenRealitioWithdrawBondsAbciApp

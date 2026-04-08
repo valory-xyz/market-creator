@@ -17,29 +17,29 @@
 #
 # ------------------------------------------------------------------------------
 
-"""RealitioWithdrawBondBehaviour for the omen_realitio_withdraw_bond_abci skill."""
+"""RealitioWithdrawBondsBehaviour for the omen_realitio_withdraw_bonds_abci skill."""
 
 from string import Template
 from typing import Any, Dict, Generator, List, Optional, cast
 
 from packages.valory.contracts.realitio.contract import RealitioContract
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.behaviours.base import (
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.base import (
     ETHER_VALUE,
-    RealitioWithdrawBondBaseBehaviour,
+    RealitioWithdrawBondsBaseBehaviour,
     SKILL_LOG_PREFIX,
     assemble_claim_params,
     get_callable_name,
     wei_to_str,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.payloads import (
-    RealitioWithdrawBondPayload,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.payloads import (
+    RealitioWithdrawBondsPayload,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
-    RealitioWithdrawBondRound,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
+    RealitioWithdrawBondsRound,
 )
 
-TX_SUBMITTER = "omen_realitio_withdraw_bond"
+TX_SUBMITTER = "omen_realitio_withdraw_bonds"
 
 # The ``historyHash_not`` filter excludes questions already claimed on-chain
 # (their history hash is cleared to zero). Without it, a query bounded by
@@ -66,17 +66,17 @@ CLAIMABLE_RESPONSES_QUERY = Template("""{
   }""")
 
 
-class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
+class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
     """Query the Realitio subgraph and build a multisend of withdraw + claimWinnings txs."""
 
-    matching_round = RealitioWithdrawBondRound
+    matching_round = RealitioWithdrawBondsRound
 
     def async_act(self) -> Generator:
         """Single-round act: query → build → wrap → settle-or-skip."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             tx_hash = yield from self._prepare_multisend()
             tx_submitter: Optional[str] = TX_SUBMITTER if tx_hash is not None else None
-            payload = RealitioWithdrawBondPayload(
+            payload = RealitioWithdrawBondsPayload(
                 sender=self.context.agent_address,
                 tx_submitter=tx_submitter,
                 tx_hash=tx_hash,
@@ -146,7 +146,7 @@ class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
             seen_question_ids.add(qid)
             unique_responses.append(resp)
 
-        batch_size = self.params.realitio_withdraw_bond_batch_size
+        batch_size = self.params.realitio_withdraw_bonds_batch_size
         txs: List[Dict[str, Any]] = []
         for resp in unique_responses:
             if len(txs) >= batch_size:
@@ -209,7 +209,7 @@ class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
         response = yield from self.get_realitio_subgraph_result(
             query=CLAIMABLE_RESPONSES_QUERY.substitute(
                 safe=safe,
-                batch_size=self.params.realitio_withdraw_bond_batch_size,
+                batch_size=self.params.realitio_withdraw_bonds_batch_size,
             )
         )
         if response is None:

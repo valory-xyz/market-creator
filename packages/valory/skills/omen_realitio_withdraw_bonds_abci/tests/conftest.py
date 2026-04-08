@@ -17,8 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the omen_realitio_withdraw_bond_abci skill."""
+"""Conftest for omen_realitio_withdraw_bonds_abci tests."""
 
-from aea.configurations.base import PublicId
+import os
+from pathlib import Path
 
-PUBLIC_ID = PublicId.from_str("valory/omen_realitio_withdraw_bond_abci:0.1.0")
+from hypothesis import settings  # type: ignore[import-not-found]
+
+CI = "CI"
+PACKAGE_DIR = Path(__file__).parent.parent
+
+settings.register_profile(CI, deadline=5000)
+profile_name = ("default", CI)[bool(os.getenv(CI))]
+settings.load_profile(profile_name)

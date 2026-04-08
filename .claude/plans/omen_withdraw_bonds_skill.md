@@ -1,4 +1,4 @@
-# Plan — `omen_realitio_withdraw_bond_abci` skill
+# Plan — `omen_realitio_withdraw_bonds_abci` skill
 
 **Part of:** [omen_funds_recoverer_split.md](omen_funds_recoverer_split.md) (read the overview first for shared design decisions)
 **Baseline reference:** [`packages/valory/skills/omen_funds_recoverer_abci/behaviours/claim_bonds.py`](../../packages/valory/skills/omen_funds_recoverer_abci/behaviours/claim_bonds.py) — the tx-building logic of the new skill is equivalent to this file's `ClaimBondsBehaviour`, which itself is the result of a six-fix cascade documented in [claim_bonds_fix.md](claim_bonds_fix.md)
@@ -57,7 +57,7 @@ This skill has the most history of the three. Every non-obvious fix from the ear
 
 1. **Fix A — decouple withdraw from claim**: the behaviour builds the optional `withdraw` tx *first*, then appends claim txs, so the withdraw step runs every period regardless of whether the claim loop has anything to do. This preserves the ability to sweep a non-zero `Realitio.balanceOf` even on periods where no new bonds are claimable.
 
-2. **Fix B — `first: $realitio_withdraw_bond_batch_size` subgraph query ordered `id desc`**: the subgraph query never paginates; it always returns at most `realitio_withdraw_bond_batch_size` entries ordered newest-first. Dramatically reduces per-round work and avoids the "stuck on the same broken item at the head of the id space" failure mode. (The baseline monolith calls this parameter `claim_bonds_batch_size`; renamed in the new skill to match the skill name.)
+2. **Fix B — `first: $realitio_withdraw_bonds_batch_size` subgraph query ordered `id desc`**: the subgraph query never paginates; it always returns at most `realitio_withdraw_bonds_batch_size` entries ordered newest-first. Dramatically reduces per-round work and avoids the "stuck on the same broken item at the head of the id space" failure mode. (The baseline monolith calls this parameter `claim_bonds_batch_size`; renamed in the new skill to match the skill name.)
 
 3. **Fix C — per-question `from_block = createdBlock - 1`**: the `eth_getLogs` window for reconstructing `LogNewAnswer` events is bounded to each question's individual lifetime instead of scanning from block 0. Reduces RPC cost by ~1000×.
 
@@ -78,20 +78,20 @@ All six fixes transfer verbatim. **None of them can be accidentally regressed du
 The skill produces a multisend when either:
 
 1. **`Realitio.balanceOf(safe) >= min_realitio_withdraw_balance`** → the safe has enough internal balance to be worth withdrawing. This produces a `withdraw()` tx.
-2. **At least one unclaimed, finalized response from the safe exists in the Realitio subgraph** → produces up to `realitio_withdraw_bond_batch_size` `claimWinnings(...)` txs.
+2. **At least one unclaimed, finalized response from the safe exists in the Realitio subgraph** → produces up to `realitio_withdraw_bonds_batch_size` `claimWinnings(...)` txs.
 
 These two conditions are independent. A given period may trigger:
 
 - Both: balance is above threshold AND there are new claimable questions → produces `[withdraw, claim_1, claim_2, ..., claim_N]`
 - Only withdraw: balance is above threshold, no new claimables → produces `[withdraw]`
 - Only claim: balance is below threshold, new claimables exist → produces `[claim_1, ..., claim_N]` (the claims will push the balance up; the next period's withdraw sweeps it)
-- Neither: no tx, skill emits `tx_hash=None` and routes to `FinishedWithoutRealitioWithdrawBondTxRound`
+- Neither: no tx, skill emits `tx_hash=None` and routes to `FinishedWithoutRealitioWithdrawBondsTxRound`
 
 ## Subgraphs used
 
 One subgraph only:
 
-1. **Realitio subgraph** (`https://realitio.subgraph.autonolas.tech` or the decentralized network equivalent `E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh`) — fetches `responses(user: $safe, question_.answerFinalizedTimestamp_gt: 0, question_.historyHash_not: "0x00...")` ordered by `id` descending, limited to `realitio_withdraw_bond_batch_size`
+1. **Realitio subgraph** (`https://realitio.subgraph.autonolas.tech` or the decentralized network equivalent `E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh`) — fetches `responses(user: $safe, question_.answerFinalizedTimestamp_gt: 0, question_.historyHash_not: "0x00...")` ordered by `id` descending, limited to `realitio_withdraw_bonds_batch_size`
 
 The question's `createdBlock` is read from the subgraph result and used as the per-question `from_block` lower bound for the contract's `eth_getLogs` window (Fix C above).
 
@@ -108,19 +108,19 @@ Note that `Realitio.get_claim_params` is the contract wrapper's name for what is
 ## File structure
 
 ```text
-packages/valory/skills/omen_realitio_withdraw_bond_abci/
+packages/valory/skills/omen_realitio_withdraw_bonds_abci/
 ├── __init__.py                    # PUBLIC_ID definition
 ├── skill.yaml                     # dependencies, params, realitio_subgraph model, round_behaviour
 ├── fsm_specification.yaml
-├── rounds.py                      # ~80 lines: Event, SynchronizedData, RealitioWithdrawBondRound, 2 final states, AbciApp
-├── payloads.py                    # ~15 lines: RealitioWithdrawBondPayload
-├── models.py                      # ~80 lines: RealitioWithdrawBondParams, SharedState, RealitioSubgraph
+├── rounds.py                      # ~80 lines: Event, SynchronizedData, RealitioWithdrawBondsRound, 2 final states, AbciApp
+├── payloads.py                    # ~15 lines: RealitioWithdrawBondsPayload
+├── models.py                      # ~80 lines: RealitioWithdrawBondsParams, SharedState, RealitioSubgraph
 ├── handlers.py
 ├── dialogues.py
 ├── behaviours/
 │   ├── __init__.py
 │   ├── base.py                    # ~200 lines: base behaviour + the promoted _assemble_claim_params helper
-│   ├── behaviour.py               # ~350 lines: RealitioWithdrawBondBehaviour with _prepare_multisend + helpers
+│   ├── behaviour.py               # ~350 lines: RealitioWithdrawBondsBehaviour with _prepare_multisend + helpers
 │   └── round_behaviour.py         # boilerplate
 └── tests/...
 ```
@@ -135,8 +135,8 @@ This skill's `behaviours/base.py` is the largest of the three because it hosts `
 Same shape as the CT redeem skill. One consensus round, two final states:
 
 ```python
-class RealitioWithdrawBondRound(CollectSameUntilThresholdRound):
-    payload_class = RealitioWithdrawBondPayload
+class RealitioWithdrawBondsRound(CollectSameUntilThresholdRound):
+    payload_class = RealitioWithdrawBondsPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
     none_event = Event.NONE
@@ -148,24 +148,24 @@ class RealitioWithdrawBondRound(CollectSameUntilThresholdRound):
     collection_key = "participant_to_realitio_withdraw_bond_tx"
 
 
-class FinishedWithRealitioWithdrawBondTxRound(DegenerateRound): ...
-class FinishedWithoutRealitioWithdrawBondTxRound(DegenerateRound): ...
+class FinishedWithRealitioWithdrawBondsTxRound(DegenerateRound): ...
+class FinishedWithoutRealitioWithdrawBondsTxRound(DegenerateRound): ...
 
 
-class OmenRealitioWithdrawBondAbciApp(AbciApp[Event]):
-    initial_round_cls = RealitioWithdrawBondRound
-    initial_states = {RealitioWithdrawBondRound}
+class OmenRealitioWithdrawBondsAbciApp(AbciApp[Event]):
+    initial_round_cls = RealitioWithdrawBondsRound
+    initial_states = {RealitioWithdrawBondsRound}
     transition_function = {
-        RealitioWithdrawBondRound: {
-            Event.DONE: FinishedWithRealitioWithdrawBondTxRound,
-            Event.NONE: FinishedWithoutRealitioWithdrawBondTxRound,
-            Event.NO_MAJORITY: FinishedWithoutRealitioWithdrawBondTxRound,
-            Event.ROUND_TIMEOUT: FinishedWithoutRealitioWithdrawBondTxRound,
+        RealitioWithdrawBondsRound: {
+            Event.DONE: FinishedWithRealitioWithdrawBondsTxRound,
+            Event.NONE: FinishedWithoutRealitioWithdrawBondsTxRound,
+            Event.NO_MAJORITY: FinishedWithoutRealitioWithdrawBondsTxRound,
+            Event.ROUND_TIMEOUT: FinishedWithoutRealitioWithdrawBondsTxRound,
         },
-        FinishedWithRealitioWithdrawBondTxRound: {},
-        FinishedWithoutRealitioWithdrawBondTxRound: {},
+        FinishedWithRealitioWithdrawBondsTxRound: {},
+        FinishedWithoutRealitioWithdrawBondsTxRound: {},
     }
-    final_states = {FinishedWithRealitioWithdrawBondTxRound, FinishedWithoutRealitioWithdrawBondTxRound}
+    final_states = {FinishedWithRealitioWithdrawBondsTxRound, FinishedWithoutRealitioWithdrawBondsTxRound}
     event_to_timeout = {Event.ROUND_TIMEOUT: 120.0}
 ```
 
@@ -176,16 +176,16 @@ class OmenRealitioWithdrawBondAbciApp(AbciApp[Event]):
 Identical shape to the CT redeem skill — the differences are only in `_prepare_multisend`.
 
 ```python
-class RealitioWithdrawBondBehaviour(RealitioWithdrawBondBaseBehaviour):
+class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
     """Build a multisend that claims Realitio bonds and/or withdraws internal balance."""
 
-    matching_round = RealitioWithdrawBondRound
+    matching_round = RealitioWithdrawBondsRound
 
     def async_act(self) -> Generator:
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             tx_hash = yield from self._prepare_multisend()
             tx_submitter = "omen_realitio_bond_withdraw" if tx_hash is not None else None
-            payload = RealitioWithdrawBondPayload(
+            payload = RealitioWithdrawBondsPayload(
                 sender=self.context.agent_address,
                 tx_submitter=tx_submitter,
                 tx_hash=tx_hash,
@@ -237,7 +237,7 @@ def _prepare_multisend(self) -> Generator[None, None, Optional[str]]:
 
 - `_maybe_build_withdraw_tx()` — reads `balance_of(safe)`, builds `build_withdraw_tx` if above `min_realitio_withdraw_balance`, otherwise returns None. Verbatim from baseline.
 - `_get_claimable_responses()` — single Realitio subgraph query with Fix E filter. Verbatim from baseline.
-- `_build_claim_txs()` — iterates responses up to `realitio_withdraw_bond_batch_size`, dedups by question id (Fix F), calls `_try_build_single_claim` per unique question. Verbatim.
+- `_build_claim_txs()` — iterates responses up to `realitio_withdraw_bonds_batch_size`, dedups by question id (Fix F), calls `_try_build_single_claim` per unique question. Verbatim.
 - `_try_build_single_claim(response)` — extracts `question_id_hex` + `createdBlock`, calls `_get_claim_params(from_block=created_block - 1)`, then `_simulate_claim`, then `_build_claim_tx`. Verbatim except for the fact that `_assemble_claim_params` now lives in `base.py` instead of being a module-level helper.
 - `_get_claim_params(question_id, from_block)` — calls the contract wrapper and applies `_assemble_claim_params` to the result. Verbatim.
 - `_simulate_claim(question_id, claim_params)` — eth_call against `claimWinnings` to validate the calldata before building the tx. Verbatim.
@@ -252,13 +252,13 @@ The base helper (promoted from behaviour file to `base.py`):
 Subset of the current `OmenFundsRecovererParams`, only what this skill uses:
 
 ```yaml
-realitio_withdraw_bond_batch_size: 10         # renamed from claim_bonds_batch_size
+realitio_withdraw_bonds_batch_size: 10         # renamed from claim_bonds_batch_size
 min_realitio_withdraw_balance: 10000000000000000000  # 10 xDAI, unchanged
 realitio_contract: "0x..."                    # unchanged
 multisend_address: "0x..."                    # inherited from BaseParams
 ```
 
-**Renamed from baseline**: `claim_bonds_batch_size` → `realitio_withdraw_bond_batch_size`. The rename aligns the parameter name with the new skill name (`omen_realitio_withdraw_bond_abci`). The semantics are unchanged — it still caps the number of `claimWinnings` calls bundled into a single multisend per period. The rename happens during migration step 2 and requires updating the default in `skill.yaml`, the `_ensure` call in `models.py`, and any operator env var overrides (`CLAIM_BONDS_BATCH_SIZE` → `REALITIO_BOND_WITHDRAW_BATCH_SIZE`) in downstream service configs.
+**Renamed from baseline**: `claim_bonds_batch_size` → `realitio_withdraw_bonds_batch_size`. The rename aligns the parameter name with the new skill name (`omen_realitio_withdraw_bonds_abci`). The semantics are unchanged — it still caps the number of `claimWinnings` calls bundled into a single multisend per period. The rename happens during migration step 2 and requires updating the default in `skill.yaml`, the `_ensure` call in `models.py`, and any operator env var overrides (`CLAIM_BONDS_BATCH_SIZE` → `REALITIO_BOND_WITHDRAW_BATCH_SIZE`) in downstream service configs.
 
 **Parameters NOT carried over**: `liquidity_removal_lead_time`, `remove_liquidity_batch_size` (→ `fpmm_remove_liquidity_batch_size` in the LP skill), `redeem_positions_batch_size` (→ `ct_redeem_tokens_batch_size` in the CT skill), `conditional_tokens_contract`, `realitio_oracle_proxy_contract`, `collateral_tokens_contract`. Those belong to the other two skills.
 
@@ -266,15 +266,15 @@ multisend_address: "0x..."                    # inherited from BaseParams
 
 ## Base behaviour helpers
 
-`RealitioWithdrawBondBaseBehaviour` provides:
+`RealitioWithdrawBondsBaseBehaviour` provides:
 
 ```python
-class RealitioWithdrawBondBaseBehaviour(BaseBehaviour, ABC):
+class RealitioWithdrawBondsBaseBehaviour(BaseBehaviour, ABC):
     # Type-cast properties
     @property
     def synchronized_data(self) -> SynchronizedData: ...
     @property
-    def params(self) -> RealitioWithdrawBondParams: ...
+    def params(self) -> RealitioWithdrawBondsParams: ...
     @property
     def last_synced_timestamp(self) -> int: ...
     @property
@@ -303,12 +303,12 @@ The helper is at module level (not a method on the base class) because it's a pu
 
 | Current location | New location |
 |---|---|
-| `tests/behaviours/test_claim_bonds.py` | `omen_realitio_withdraw_bond_abci/tests/behaviours/test_behaviour.py` |
-| `tests/behaviours/test_base.py` (relevant portions + `_assemble_claim_params` tests) | `omen_realitio_withdraw_bond_abci/tests/behaviours/test_base.py` |
-| `tests/behaviours/conftest.py` | `omen_realitio_withdraw_bond_abci/tests/behaviours/conftest.py` (Realitio subgraph fixtures only) |
-| `tests/test_rounds.py` (the `ClaimBondsRound` portion) | `omen_realitio_withdraw_bond_abci/tests/test_rounds.py` |
-| `tests/test_models.py` (the `claim_bonds_batch_size` + `min_realitio_withdraw_balance` assertions) | `omen_realitio_withdraw_bond_abci/tests/test_models.py` (update the assertions to use the renamed `realitio_withdraw_bond_batch_size`) |
-| `tests/test_payloads.py` | `omen_realitio_withdraw_bond_abci/tests/test_payloads.py` |
+| `tests/behaviours/test_claim_bonds.py` | `omen_realitio_withdraw_bonds_abci/tests/behaviours/test_behaviour.py` |
+| `tests/behaviours/test_base.py` (relevant portions + `_assemble_claim_params` tests) | `omen_realitio_withdraw_bonds_abci/tests/behaviours/test_base.py` |
+| `tests/behaviours/conftest.py` | `omen_realitio_withdraw_bonds_abci/tests/behaviours/conftest.py` (Realitio subgraph fixtures only) |
+| `tests/test_rounds.py` (the `ClaimBondsRound` portion) | `omen_realitio_withdraw_bonds_abci/tests/test_rounds.py` |
+| `tests/test_models.py` (the `claim_bonds_batch_size` + `min_realitio_withdraw_balance` assertions) | `omen_realitio_withdraw_bonds_abci/tests/test_models.py` (update the assertions to use the renamed `realitio_withdraw_bonds_batch_size`) |
+| `tests/test_payloads.py` | `omen_realitio_withdraw_bonds_abci/tests/test_payloads.py` |
 
 The `_assemble_claim_params` tests (there are ~10 in the current test suite covering the 1-entry, 2-entry, 3-entry, bond-coerced-to-int cases) are particularly important to port verbatim because they encode the fix for the calldata-shape bug.
 
@@ -324,15 +324,15 @@ The param name is verbose but matches convention. Not renaming.
 
 ## Round timeout
 
-120 seconds, same as the CT redeem skill. The Realitio contract's `get_claim_params` call is the slowest step in this skill (it's an `eth_getLogs` call) and 120s is generous enough to handle a batch of `realitio_withdraw_bond_batch_size=10` questions even on a slow public RPC. Can be tuned down after the first production deployment.
+120 seconds, same as the CT redeem skill. The Realitio contract's `get_claim_params` call is the slowest step in this skill (it's an `eth_getLogs` call) and 120s is generous enough to handle a batch of `realitio_withdraw_bonds_batch_size=10` questions even on a slow public RPC. Can be tuned down after the first production deployment.
 
 ## Open questions specific to this skill
 
-1. **Should `_assemble_claim_params` become a method on `RealitioWithdrawBondBaseBehaviour` instead of a module-level function?** I recommend module-level because it's a pure function and method-ifying it pulls in `self` for no reason. But the convention in the existing monolith is to have everything as behaviour methods. Decision: module-level, because it improves testability.
+1. **Should `_assemble_claim_params` become a method on `RealitioWithdrawBondsBaseBehaviour` instead of a module-level function?** I recommend module-level because it's a pure function and method-ifying it pulls in `self` for no reason. But the convention in the existing monolith is to have everything as behaviour methods. Decision: module-level, because it improves testability.
 
 2. **Should the subgraph URL be sourced from a param or hardcoded in `skill.yaml`?** Current monolith has it as a param with a default in `skill.yaml`. Keep it as a param for operator override flexibility. No change.
 
-3. **Log format**: suggested prefix `[OmenRealitioWithdrawBond]`. The prefix is long but matches the skill name exactly, which helps log filtering.
+3. **Log format**: suggested prefix `[OmenRealitioWithdrawBonds]`. The prefix is long but matches the skill name exactly, which helps log filtering.
 
 ## References
 

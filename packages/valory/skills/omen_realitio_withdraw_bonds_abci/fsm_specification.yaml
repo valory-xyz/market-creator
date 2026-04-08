@@ -1,0 +1,21 @@
+alphabet_in:
+- DONE
+- NONE
+- NO_MAJORITY
+- ROUND_TIMEOUT
+default_start_state: RealitioWithdrawBondsRound
+final_states:
+- FinishedWithRealitioWithdrawBondsTxRound
+- FinishedWithoutRealitioWithdrawBondsTxRound
+label: OmenRealitioWithdrawBondsAbciApp
+start_states:
+- RealitioWithdrawBondsRound
+states:
+- FinishedWithRealitioWithdrawBondsTxRound
+- FinishedWithoutRealitioWithdrawBondsTxRound
+- RealitioWithdrawBondsRound
+transition_func:
+    (RealitioWithdrawBondsRound, DONE): FinishedWithRealitioWithdrawBondsTxRound
+    (RealitioWithdrawBondsRound, NONE): FinishedWithoutRealitioWithdrawBondsTxRound
+    (RealitioWithdrawBondsRound, NO_MAJORITY): FinishedWithoutRealitioWithdrawBondsTxRound
+    (RealitioWithdrawBondsRound, ROUND_TIMEOUT): FinishedWithoutRealitioWithdrawBondsTxRound

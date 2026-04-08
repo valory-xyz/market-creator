@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for RealitioWithdrawBondBehaviour."""
+"""Tests for RealitioWithdrawBondsBehaviour."""
 
 import contextlib
 from typing import Any, Dict, List
@@ -25,14 +25,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.behaviours.base import (
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.base import (
     ETHER_VALUE,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.behaviours.withdraw_bond import (
-    RealitioWithdrawBondBehaviour,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.withdraw_bonds import (
+    RealitioWithdrawBondsBehaviour,
     TX_SUBMITTER,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.tests.behaviours.conftest import (
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.tests.behaviours.conftest import (
     exhaust_gen,
     make_contract_error_response,
     make_contract_state_response,
@@ -40,8 +40,8 @@ from packages.valory.skills.omen_realitio_withdraw_bond_abci.tests.behaviours.co
 )
 
 
-class TestRealitioWithdrawBondBehaviour:
-    """Tests for RealitioWithdrawBondBehaviour."""
+class TestRealitioWithdrawBondsBehaviour:
+    """Tests for RealitioWithdrawBondsBehaviour."""
 
     def setup_method(self) -> None:
         """Set up test fixtures."""
@@ -49,7 +49,7 @@ class TestRealitioWithdrawBondBehaviour:
         context_mock.logger = MagicMock()
         context_mock.params = MagicMock()
         context_mock.params.realitio_contract = "0xRealitio"
-        context_mock.params.realitio_withdraw_bond_batch_size = 10
+        context_mock.params.realitio_withdraw_bonds_batch_size = 10
         context_mock.params.min_realitio_withdraw_balance = 10000000000000000000
         context_mock.params.multisend_address = "0xMultisend"
         context_mock.state.round_sequence = MagicMock()
@@ -65,7 +65,7 @@ class TestRealitioWithdrawBondBehaviour:
             "method": "POST",
             "url": "https://realitio.example.com",
         }
-        self.behaviour: Any = RealitioWithdrawBondBehaviour(
+        self.behaviour: Any = RealitioWithdrawBondsBehaviour(
             name="test", skill_context=context_mock
         )
 
@@ -492,8 +492,8 @@ class TestRealitioWithdrawBondBehaviour:
     # ─── _build_claim_txs (batching, dedup) ──────────────────────────────────
 
     def test_build_claim_txs_batch_size_limit(self) -> None:
-        """_build_claim_txs stops after reaching realitio_withdraw_bond_batch_size."""
-        self.behaviour.context.params.realitio_withdraw_bond_batch_size = 1
+        """_build_claim_txs stops after reaching realitio_withdraw_bonds_batch_size."""
+        self.behaviour.context.params.realitio_withdraw_bonds_batch_size = 1
         responses = [
             {"question": {"id": "0xaaaa", "createdBlock": "111"}, "bond": "100"},
             {"question": {"id": "0xbbbb", "createdBlock": "222"}, "bond": "200"},
@@ -659,7 +659,7 @@ class TestRealitioWithdrawBondBehaviour:
 
     def test_get_claimable_responses_query_uses_batch_size(self) -> None:
         """Test the rendered query interpolates the renamed batch_size param as `first:`."""
-        self.behaviour.context.params.realitio_withdraw_bond_batch_size = 7
+        self.behaviour.context.params.realitio_withdraw_bonds_batch_size = 7
         captured_query: Dict[str, str] = {}
 
         def mock_subgraph(*args: Any, **kwargs: Any) -> Any:

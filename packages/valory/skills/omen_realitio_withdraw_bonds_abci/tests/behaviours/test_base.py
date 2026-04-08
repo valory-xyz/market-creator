@@ -17,23 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for RealitioWithdrawBondBaseBehaviour and base helpers."""
+"""Tests for RealitioWithdrawBondsBaseBehaviour and base helpers."""
 
 import json
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.behaviours.base import (
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.base import (
     ZERO_BYTES32,
     assemble_claim_params,
     get_callable_name,
     to_content,
     wei_to_str,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.behaviours.withdraw_bond import (
-    RealitioWithdrawBondBehaviour,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.withdraw_bonds import (
+    RealitioWithdrawBondsBehaviour,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.tests.behaviours.conftest import (
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.tests.behaviours.conftest import (
     exhaust_gen,
     make_contract_error_response,
     make_contract_state_response,
@@ -150,17 +150,17 @@ class TestAssembleClaimParams:
         assert isinstance(bonds[0], int)
 
 
-class TestRealitioWithdrawBondBaseBehaviour:
-    """Tests for RealitioWithdrawBondBaseBehaviour using a concrete subclass."""
+class TestRealitioWithdrawBondsBaseBehaviour:
+    """Tests for RealitioWithdrawBondsBaseBehaviour using a concrete subclass."""
 
     def setup_method(self) -> None:
-        """Set up test fixtures using RealitioWithdrawBondBehaviour as a concrete subclass."""
+        """Set up test fixtures using RealitioWithdrawBondsBehaviour as a concrete subclass."""
         context_mock = MagicMock()
         context_mock.logger = MagicMock()
         context_mock.params = MagicMock()
         context_mock.params.multisend_address = "0x" + "A0" * 20
         context_mock.params.realitio_contract = "0xRealitio"
-        context_mock.params.realitio_withdraw_bond_batch_size = 10
+        context_mock.params.realitio_withdraw_bonds_batch_size = 10
         context_mock.params.min_realitio_withdraw_balance = 10**19
         context_mock.state.round_sequence = MagicMock()
         context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
@@ -175,7 +175,7 @@ class TestRealitioWithdrawBondBaseBehaviour:
             "method": "POST",
             "url": "https://realitio.example.com",
         }
-        self.behaviour: Any = RealitioWithdrawBondBehaviour(
+        self.behaviour: Any = RealitioWithdrawBondsBehaviour(
             name="test", skill_context=context_mock
         )
 
@@ -187,7 +187,7 @@ class TestRealitioWithdrawBondBaseBehaviour:
         assert sd is not None
 
     def test_params(self) -> None:
-        """Test params property returns cast RealitioWithdrawBondParams."""
+        """Test params property returns cast RealitioWithdrawBondsParams."""
         p = self.behaviour.params
         assert p is not None
 

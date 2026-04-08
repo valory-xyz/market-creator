@@ -1,4 +1,4 @@
-name: omen_realitio_withdraw_bond_abci
+name: omen_realitio_withdraw_bonds_abci
 author: valory
 version: 0.1.0
 type: skill
@@ -46,7 +46,7 @@ skills:
 behaviours:
   main:
     args: {}
-    class_name: OmenRealitioWithdrawBondRoundBehaviour
+    class_name: OmenRealitioWithdrawBondsRoundBehaviour
 handlers:
   abci:
     args: {}
@@ -91,7 +91,7 @@ models:
     class_name: LedgerApiDialogues
   params:
     args:
-      realitio_withdraw_bond_batch_size: 10
+      realitio_withdraw_bonds_batch_size: 10
       min_realitio_withdraw_balance: 10000000000000000000
       realitio_contract: '0x0000000000000000000000000000000000000000'
       cleanup_history_depth: 1
@@ -132,7 +132,7 @@ models:
       retry_attempts: 400
       retry_timeout: 3
       round_timeout_seconds: 120.0
-      service_id: omen_realitio_withdraw_bond
+      service_id: omen_realitio_withdraw_bonds
       service_registry_address: null
       setup:
         all_participants:
@@ -154,7 +154,7 @@ models:
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
-    class_name: RealitioWithdrawBondParams
+    class_name: RealitioWithdrawBondsParams
   realitio_subgraph:
     args:
       api_id: realitio

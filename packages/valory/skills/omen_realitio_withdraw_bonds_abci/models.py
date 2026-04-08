@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Shared state and params for the omen_realitio_withdraw_bond_abci skill."""
+"""Shared state and params for the omen_realitio_withdraw_bonds_abci skill."""
 
 from typing import Any, Type
 
@@ -32,27 +32,27 @@ from packages.valory.skills.abstract_round_abci.models import Requests as BaseRe
 from packages.valory.skills.abstract_round_abci.models import (
     SharedState as BaseSharedState,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
-    OmenRealitioWithdrawBondAbciApp,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
+    OmenRealitioWithdrawBondsAbciApp,
 )
 
 
 class SharedState(BaseSharedState):
     """Shared state of the skill."""
 
-    abci_app_cls: Type[AbciApp] = OmenRealitioWithdrawBondAbciApp
+    abci_app_cls: Type[AbciApp] = OmenRealitioWithdrawBondsAbciApp
 
 
-class RealitioWithdrawBondParams(BaseParams):
-    """Parameters for the omen_realitio_withdraw_bond_abci skill."""
+class RealitioWithdrawBondsParams(BaseParams):
+    """Parameters for the omen_realitio_withdraw_bonds_abci skill."""
 
     multisend_address: str
     multisend_batch_size: int
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the parameters object."""
-        self.realitio_withdraw_bond_batch_size = self._ensure(
-            "realitio_withdraw_bond_batch_size", kwargs, type_=int
+        self.realitio_withdraw_bonds_batch_size = self._ensure(
+            "realitio_withdraw_bonds_batch_size", kwargs, type_=int
         )
         self.min_realitio_withdraw_balance = self._ensure(
             "min_realitio_withdraw_balance", kwargs, type_=int

@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Test the handlers.py module of the skill."""
+"""Test the payloads.py module of the skill."""
 
-import packages.valory.skills.omen_realitio_withdraw_bond_abci.handlers  # noqa: F401
+import packages.valory.skills.omen_realitio_withdraw_bonds_abci.payloads  # noqa: F401
 
 
 def test_import() -> None:

@@ -7,7 +7,7 @@
 
 Call `FPMM.removeFunding(sharesToBurn)` on FPMMs where the safe holds LP shares and the market is either (a) approaching its close window, or (b) already closed — regardless of whether the oracle has resolved it yet. Optionally prepend `ConditionalTokens.mergePositions(...)` when the market has not yet resolved, to extract the "equal part" of the returned outcome tokens as wxDAI.
 
-This is the skill for **liquidity providers** — actors who provided funding to an FPMM and want to withdraw their LP shares. The flow is distinct from both the trader flow (`omen_ct_redeem_tokens_abci`) and the answerer flow (`omen_realitio_withdraw_bond_abci`).
+This is the skill for **liquidity providers** — actors who provided funding to an FPMM and want to withdraw their LP shares. The flow is distinct from both the trader flow (`omen_ct_redeem_tokens_abci`) and the answerer flow (`omen_realitio_withdraw_bonds_abci`).
 
 ## Why the skill is named `omen_fpmm_*` and not `omen_ct_*`
 
@@ -368,7 +368,7 @@ The **winning tokens** from that residual are then picked up in a later period b
 
 The **losing tokens** from that residual are unrecoverable — they're worth zero after resolution. This is a natural cost of leaving LP in a market past resolution, and it's why state 2 and 3 handling matters (merging before resolution captures more value than state 4's remove-only path).
 
-The two-skill handoff (LP remove → CT redeem) happens across composition cycles. If the composition runs all three recovery skills every period in sequence (FpmmRemoveLiquidity → CtRedeemTokens → RealitioWithdrawBond), then:
+The two-skill handoff (LP remove → CT redeem) happens across composition cycles. If the composition runs all three recovery skills every period in sequence (FpmmRemoveLiquidity → CtRedeemTokens → RealitioWithdrawBonds), then:
 
 - Period N, state 4 market: `FpmmRemoveLiquidity` does `removeFunding`, tx settles, outcome tokens land in safe. `CtRedeemTokens`'s subgraph query in the same period **will not** see them yet because the subgraph hasn't indexed the settlement tx. So the winning tokens sit until period N+1.
 - Period N+1: `CtRedeemTokens`'s subgraph query now sees the residual winning tokens, builds `redeemPositions` tx, settles.

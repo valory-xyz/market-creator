@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Dialogues for the omen_realitio_withdraw_bond_abci skill."""
+"""Dialogues for the omen_realitio_withdraw_bonds_abci skill."""
 
 from packages.valory.skills.abstract_round_abci.dialogues import (
     AbciDialogue as BaseAbciDialogue,

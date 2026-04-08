@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Base behaviour and helpers for the omen_realitio_withdraw_bond_abci skill."""
+"""Base behaviour and helpers for the omen_realitio_withdraw_bonds_abci skill."""
 
 import json
 from abc import ABC
@@ -33,11 +33,11 @@ from packages.valory.contracts.multisend.contract import (
 )
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.abstract_round_abci.behaviours import BaseBehaviour
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.models import (
-    RealitioWithdrawBondParams,
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.models import (
+    RealitioWithdrawBondsParams,
     SharedState,
 )
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
     SynchronizedData,
 )
 from packages.valory.skills.transaction_settlement_abci.payload_tools import (
@@ -55,7 +55,7 @@ ETHER_VALUE = 0
 # the response history.
 ZERO_BYTES32 = b"\x00" * 32
 
-SKILL_LOG_PREFIX = "[OmenRealitioWithdrawBond]"
+SKILL_LOG_PREFIX = "[OmenRealitioWithdrawBonds]"
 
 
 # Type alias for the 4-tuple expected by Realitio.claimWinnings:
@@ -110,8 +110,8 @@ def assemble_claim_params(answered: List[Dict[str, Any]]) -> ClaimParamsType:
     return history_hashes, addresses, bonds, answers
 
 
-class RealitioWithdrawBondBaseBehaviour(BaseBehaviour, ABC):
-    """Base behaviour for the omen_realitio_withdraw_bond_abci skill."""
+class RealitioWithdrawBondsBaseBehaviour(BaseBehaviour, ABC):
+    """Base behaviour for the omen_realitio_withdraw_bonds_abci skill."""
 
     @property
     def synchronized_data(self) -> SynchronizedData:
@@ -119,9 +119,9 @@ class RealitioWithdrawBondBaseBehaviour(BaseBehaviour, ABC):
         return cast(SynchronizedData, super().synchronized_data)
 
     @property
-    def params(self) -> RealitioWithdrawBondParams:
+    def params(self) -> RealitioWithdrawBondsParams:
         """Return the params."""
-        return cast(RealitioWithdrawBondParams, super().params)
+        return cast(RealitioWithdrawBondsParams, super().params)
 
     @property
     def last_synced_timestamp(self) -> int:

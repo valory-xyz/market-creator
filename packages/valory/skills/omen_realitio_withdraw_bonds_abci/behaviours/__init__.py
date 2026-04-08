@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Behaviour tests for the omen_realitio_withdraw_bond_abci skill."""
+"""Behaviours for the omen_realitio_withdraw_bonds_abci skill."""

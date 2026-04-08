@@ -9,13 +9,13 @@
 Three independent single-purpose ABCI skills, each handling exactly one recovery flow for a specific actor in the Omen/CT/Realitio ecosystem:
 
 1. **`omen_ct_redeem_tokens_abci`** — for traders holding winning `ConditionalTokens` outcome shares. Calls `ConditionalTokens.redeemPositions` (optionally preceded by `RealitioProxy.resolve` if the condition isn't yet reported on CT).
-2. **`omen_realitio_withdraw_bond_abci`** — for answerers who posted Realitio bonds. Calls `Realitio.claimWinnings` per question and `Realitio.withdraw` to sweep the internal balance.
+2. **`omen_realitio_withdraw_bonds_abci`** — for answerers who posted Realitio bonds. Calls `Realitio.claimWinnings` per question and `Realitio.withdraw` to sweep the internal balance.
 3. **`omen_fpmm_remove_liquidity_abci`** — for liquidity providers holding FPMM LP shares. Calls `FPMM.removeFunding`, with an optional follow-up `ConditionalTokens.mergePositions` when the market isn't resolved yet.
 
 Per-skill details live in:
 
 - [omen_redeem_tokens_skill.md](omen_redeem_tokens_skill.md)
-- [omen_withdraw_bond_skill.md](omen_withdraw_bond_skill.md)
+- [omen_withdraw_bonds_skill.md](omen_withdraw_bonds_skill.md)
 - [omen_remove_liquidity_skill.md](omen_remove_liquidity_skill.md)
 
 ## Why three skills
@@ -24,7 +24,7 @@ Three reasons, in decreasing order of importance:
 
 1. **Three distinct actors, three distinct flows.** A trader buying outcome shares, an answerer posting Realitio bonds, and an LP providing FPMM liquidity are unrelated roles. They touch different contracts, read different subgraphs, and have different trigger conditions. Keeping the scaffolding isolated per skill makes each behaviour easy to read without cross-concern noise.
 
-2. **True composability.** A "trader-only" service wants `omen_ct_redeem_tokens_abci` but not the other two. An "answerer-only" service wants only `omen_realitio_withdraw_bond_abci`. An LP management service wants only `omen_fpmm_remove_liquidity_abci`. Any subset is a valid composition.
+2. **True composability.** A "trader-only" service wants `omen_ct_redeem_tokens_abci` but not the other two. An "answerer-only" service wants only `omen_realitio_withdraw_bonds_abci`. An LP management service wants only `omen_fpmm_remove_liquidity_abci`. Any subset is a valid composition.
 
 3. **Per-skill cadence control.** Each skill can be composed into a parent FSM independently, so an operator can configure (for example) bond claiming to run every period but LP removal to run once per day.
 
@@ -35,7 +35,7 @@ Three reasons, in decreasing order of importance:
 Each skill is named `omen_<contract>_<verb>_<object>_abci`. The `<contract>` in the name is the *primary* contract the skill interacts with:
 
 - `omen_ct_redeem_tokens_abci` → primary contract is `ConditionalTokens`, primary verb is `redeemPositions` on outcome-token positions
-- `omen_realitio_withdraw_bond_abci` → primary contract is `Realitio`, object is "bond," verb emphasizes the user-visible outcome (`withdraw`). Internally the skill calls both `claimWinnings` and `withdraw`; the name emphasizes the second because it's the one that produces a wallet-visible balance change
+- `omen_realitio_withdraw_bonds_abci` → primary contract is `Realitio`, object is "bond," verb emphasizes the user-visible outcome (`withdraw`). Internally the skill calls both `claimWinnings` and `withdraw`; the name emphasizes the second because it's the one that produces a wallet-visible balance change
 - `omen_fpmm_remove_liquidity_abci` → primary contract is `FPMM`, verb is `removeFunding` (shortened to "remove" for brevity, "liquidity" is the object being removed). The secondary `ConditionalTokens.mergePositions` call is not named because it's conditional on market state
 
 Reader contract: a new developer reading any skill name should be able to answer "which Solidity file do I read first to understand this skill?" — each name points at exactly one contract.
@@ -45,16 +45,16 @@ Reader contract: a new developer reading any skill name should be able to answer
 Each skill owns its full FSM with **one consensus round** + **two final states**:
 
 ```text
-omen_fpmm_remove_liquidity_abci          omen_ct_redeem_tokens_abci         omen_realitio_withdraw_bond_abci
+omen_fpmm_remove_liquidity_abci          omen_ct_redeem_tokens_abci         omen_realitio_withdraw_bonds_abci
 ┌─────────────────────────────┐         ┌──────────────────────┐           ┌──────────────────────────────┐
-│  FpmmRemoveLiquidityRound   │         │   CtRedeemTokensRound│           │  RealitioWithdrawBondRound   │
+│  FpmmRemoveLiquidityRound   │         │   CtRedeemTokensRound│           │  RealitioWithdrawBondsRound   │
 │   ┌────┴────┐               │         │    ┌────┴────┐       │           │       ┌────┴────┐            │
 │   │         │               │         │    │         │       │           │       │         │            │
 │ with_tx  without_tx         │         │  with_tx  without_tx │           │    with_tx   without_tx      │
 └────┬──────────┬─────────────┘         └────┬──────────┬──────┘           └───────┬──────────┬───────────┘
      │          │                            │          │                          │          │
      ▼          ▼                            ▼          ▼                          ▼          ▼
-TxSettlement ──► CtRedeemTokens        TxSettlement ──► RealitioWithdrawBond  TxSettlement ──► next
+TxSettlement ──► CtRedeemTokens        TxSettlement ──► RealitioWithdrawBonds TxSettlement ──► next
                                                                                        (e.g. ResetPause
                                                                                        or MarketCreation)
 ```
@@ -75,7 +75,7 @@ When a skill produces no multisend (nothing to recover this period), it routes t
 Each skill carries its own `behaviours/base.py` with only the helpers it actually needs. The three bases differ:
 
 - `omen_ct_redeem_tokens_abci/behaviours/base.py` — CT subgraph helper + Omen subgraph helper + multisend helpers + type-cast properties
-- `omen_realitio_withdraw_bond_abci/behaviours/base.py` — Realitio subgraph helper + multisend helpers + type-cast properties + the module-level `assemble_claim_params` helper
+- `omen_realitio_withdraw_bonds_abci/behaviours/base.py` — Realitio subgraph helper + multisend helpers + type-cast properties + the module-level `assemble_claim_params` helper
 - `omen_fpmm_remove_liquidity_abci/behaviours/base.py` — Omen subgraph helper + multisend helpers + type-cast properties
 
 **Duplication accepted**: the multisend helpers (`_to_multisend`, `_get_safe_tx_hash`) are identical across all three skills. Each skill gets its own copy. This is the tradeoff chosen in exchange for full skill independence — no cross-skill imports, no "library skill" to maintain.
@@ -136,8 +136,8 @@ packages/valory/skills/
 │   └── tests/...
 ├── omen_fpmm_remove_liquidity_abci/
 │   └── ... (same layout, behaviour file named remove_liquidity.py)
-└── omen_realitio_withdraw_bond_abci/
-    └── ... (same layout, behaviour file named withdraw_bond.py)
+└── omen_realitio_withdraw_bonds_abci/
+    └── ... (same layout, behaviour file named withdraw_bonds.py)
 ```
 
 The per-skill plan documents give each skill's full file layout and sketch the contents of `rounds.py`, the behaviour module, and `base.py`.
@@ -166,9 +166,9 @@ AgentRegistrationAbci
   → OmenCtRedeemTokensAbciApp
   ├── FinishedWithCtRedeemTokensTxRound → TransactionSubmissionAbciApp → (back to next)
   └── FinishedWithoutCtRedeemTokensTxRound → next
-  → OmenRealitioWithdrawBondAbciApp
-  ├── FinishedWithRealitioWithdrawBondTxRound → TransactionSubmissionAbciApp → (back to next)
-  └── FinishedWithoutRealitioWithdrawBondTxRound → next
+  → OmenRealitioWithdrawBondsAbciApp
+  ├── FinishedWithRealitioWithdrawBondsTxRound → TransactionSubmissionAbciApp → (back to next)
+  └── FinishedWithoutRealitioWithdrawBondsTxRound → next
   → MarketCreationManagerAbciApp
   → TransactionSubmissionAbciApp
   → MechInteractAbciApp
@@ -181,7 +181,7 @@ Each new skill has its own `tx_submitter` tag:
 
 - `"omen_fpmm_remove_liquidity"`
 - `"omen_ct_redeem_tokens"`
-- `"omen_realitio_withdraw_bond"`
+- `"omen_realitio_withdraw_bonds"`
 
 These tags are set by the respective skill's behaviour before submitting the payload and read by the parent's `PostTransactionRound` to dispatch to the correct next state.
 
@@ -209,5 +209,5 @@ Coverage target: 100% statement + branch per `.coveragerc`.
 
 - [omen_redeem_tokens_skill.md](omen_redeem_tokens_skill.md) — `omen_ct_redeem_tokens_abci` per-skill plan
 - [omen_remove_liquidity_skill.md](omen_remove_liquidity_skill.md) — `omen_fpmm_remove_liquidity_abci` per-skill plan
-- [omen_withdraw_bond_skill.md](omen_withdraw_bond_skill.md) — `omen_realitio_withdraw_bond_abci` per-skill plan
+- [omen_withdraw_bonds_skill.md](omen_withdraw_bonds_skill.md) — `omen_realitio_withdraw_bonds_abci` per-skill plan
 - [ct_omen_realitio.md](../docs/ct_omen_realitio.md) — the ecosystem primer explaining why there are three distinct actors

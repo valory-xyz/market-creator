@@ -35,7 +35,7 @@ The skill's job is to detect winning positions, ensure the `reportPayouts` step 
 
 ## What this skill does NOT do
 
-- Does NOT call `Realitio.claimWinnings` or `Realitio.withdraw`. That's the **answerer** flow, handled by [omen_realitio_withdraw_bond_abci](omen_realitio_bond_withdraw_skill.md). `redeemPositions` and `claimWinnings` are independent contract flows on independent contracts — a trader never needs to claim Realitio bonds because a trader never posts Realitio answers.
+- Does NOT call `Realitio.claimWinnings` or `Realitio.withdraw`. That's the **answerer** flow, handled by [omen_realitio_withdraw_bonds_abci](omen_realitio_bond_withdraw_skill.md). `redeemPositions` and `claimWinnings` are independent contract flows on independent contracts — a trader never needs to claim Realitio bonds because a trader never posts Realitio answers.
 - Does NOT call `FPMM.removeFunding` or `ConditionalTokens.mergePositions`. That's the **LP** flow, handled by [omen_fpmm_remove_liquidity_abci](omen_fpmm_liquidity_remove_skill.md).
 
 ## Trigger conditions
@@ -287,7 +287,7 @@ class CtRedeemTokensBaseBehaviour(BaseBehaviour, ABC):
 
 Helpers it does NOT carry (which are in the monolith base.py):
 
-- `get_realitio_subgraph_result` — only used by `omen_realitio_withdraw_bond_abci`
+- `get_realitio_subgraph_result` — only used by `omen_realitio_withdraw_bonds_abci`
 
 This is per design decision 3 of the overview — accept duplication across skills in exchange for full independence.
 

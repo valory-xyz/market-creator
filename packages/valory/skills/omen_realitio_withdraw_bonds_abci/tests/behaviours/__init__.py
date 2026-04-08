@@ -17,20 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Round behaviour wiring for the omen_realitio_withdraw_bond_abci skill."""
-
-from packages.valory.skills.abstract_round_abci.behaviours import AbstractRoundBehaviour
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.behaviours.withdraw_bond import (
-    RealitioWithdrawBondBehaviour,
-)
-from packages.valory.skills.omen_realitio_withdraw_bond_abci.rounds import (
-    OmenRealitioWithdrawBondAbciApp,
-)
-
-
-class OmenRealitioWithdrawBondRoundBehaviour(AbstractRoundBehaviour):
-    """OmenRealitioWithdrawBondRoundBehaviour."""
-
-    initial_behaviour_cls = RealitioWithdrawBondBehaviour
-    abci_app_cls = OmenRealitioWithdrawBondAbciApp
-    behaviours = {RealitioWithdrawBondBehaviour}
+"""Behaviour tests for the omen_realitio_withdraw_bonds_abci skill."""
