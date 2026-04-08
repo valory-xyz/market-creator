@@ -5,6 +5,9 @@
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihsw4japfcrypq5kxoffio6jchjjukewg54gu6hzvftkhdmpkmjwa",
         "skill/valory/market_maker_abci/0.1.0": "bafybeidbwisrp2p4ep6lzvgipxxbztfsme55xk3j5kqjntdcgbrd77asym",
         "skill/valory/omen_funds_recoverer_abci/0.1.0": "bafybeibjqwvn2qy62axkbaklea4flr2ln4ceely3pj3cac6vardqgtapum",
+        "skill/valory/omen_ct_redeem_abci/0.1.0": "",
+        "skill/valory/omen_fpmm_liquidity_remove_abci/0.1.0": "",
+        "skill/valory/omen_realitio_bond_withdraw_abci/0.1.0": "bafybeidmkpdatakrnkiyi4dk2lzyie6xfwlrzefhzpu4rlkkxonaztitx4",
         "agent/valory/market_maker/0.1.0": "bafybeih75kn5avbsxinq6pk4a36ysre6k6rk2ofaf2apacfhlbxh3y6wfe",
         "service/valory/market_maker/0.1.0": "bafybeicuiebzhlkqd56bc5enblpvrnfbxrsg57xk3vuzv27ohs5j7xgck4"
     },
