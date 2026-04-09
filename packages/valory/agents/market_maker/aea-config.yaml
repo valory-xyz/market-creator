@@ -39,9 +39,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeict6h3wfmddpvam5gmmanqzuokup6ppoev3t4j5uyl7xxahjaols4
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
-- valory/market_maker_abci:0.1.0:bafybeiho4plzx45ioron4keu2krvcss5pywox53dfkl7hdligm5loyt4aq
+- valory/market_maker_abci:0.1.0:bafybeidpj5gyullux3istpy7mbctnmhrnyuhu7srfkjcwuv5um6zapauze
 - valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
-- valory/market_creation_manager_abci:0.1.0:bafybeib2btuld7t4hy47hor7jkgegazl43gildsatqpebobcf5lfpzbwai
+- valory/market_creation_manager_abci:0.1.0:bafybeif6tzui5xoaguaij3iq2ruongpq5zsgq4klkekfltswplr2pju7fy
 - valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
 - valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq

@@ -50,7 +50,7 @@ fingerprint:
   tests/behaviours/conftest.py: bafybeidezlbfk2r2632ohq6wnwx34dlpqw5siigsx47fwvfdc5d6taj4xa
   tests/behaviours/test_approve_markets.py: bafybeigk6qzldtpb3cazu4nziu7ufxvnkixozag4wnyaedmafofe6qvvsq
   tests/behaviours/test_approve_markets_behaviour.py: bafybeiandmz47phcwjabwrpb25xmqskv62pkvls7ypjeotqm22ivw3zzf4
-  tests/behaviours/test_base.py: bafybeiekifuwppftofc6xwp7h7ubcjovf7nq5kqjoblmve4aq5gyq5u6ue
+  tests/behaviours/test_base.py: bafybeifiijpxqjyu5knwxjm7j2rdeg5lkofj7qsdky34nregbpitelzwui
   tests/behaviours/test_collect_proposed_markets.py: bafybeibknuchv6ueexfr77ktqpayac4ewybhzq2dj3z3d2tcqinja4wr4y
   tests/behaviours/test_deposit_dai.py: bafybeietyzfzvyeldpw5hn7x44ip22hwvyrtuz5lgko3gayalbxe6didbu
   tests/behaviours/test_post_transaction.py: bafybeibdprejyq2dp4bd5aysyaq6cbmqnwmwr65eeuj43tbijq3vw3sklq

@@ -521,7 +521,7 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
 
         mock_resp = MagicMock()
         mock_resp.performative = ContractApiMessage.Performative.STATE
-        mock_resp.state.body = {"token": 12345}
+        mock_resp.state.body = {"token": 10**18}
 
         with patch.object(
             self.behaviour,
