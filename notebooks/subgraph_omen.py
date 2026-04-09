@@ -142,6 +142,30 @@ query last_trades($fpmm_ids: [String!]!, $id_gt: ID!) {
 }
 """
 
+TRADES_BY_USER_QUERY = """
+query trades_by_user($user: String!, $id_gt: ID!) {
+    fpmmTrades(
+        where: {creator: $user, id_gt: $id_gt}
+        orderBy: id
+        orderDirection: asc
+        first: 1000
+    ) {
+        id
+        type
+        creator { id }
+        fpmm { id }
+        outcomeIndex
+        outcomeTokensTraded
+        collateralAmount
+        collateralAmountUSD
+        oldOutcomeTokenMarginalPrice
+        outcomeTokenMarginalPrice
+        creationTimestamp
+        feeAmount
+    }
+}
+"""
+
 
 class MarketState(Enum):
     """Market state"""
@@ -437,14 +461,14 @@ def markets_to_dataframe(fpmms_dict: dict) -> pd.DataFrame:
                 "is_invalid": is_invalid,
                 "current_answer_bond": bond,
                 "collateral_volume": float(m.get("collateralVolume") or 0) / 1e18,
-                "outcome_prices": _calc_prices(m),
+                "outcome_prices": calc_prices(m),
             }
         )
 
     return pd.DataFrame(rows)
 
 
-def _calc_prices(m: dict) -> list:
+def calc_prices(m: dict) -> list:
     """Compute outcome prices from subgraph data.
 
     Priority:
@@ -461,14 +485,15 @@ def _calc_prices(m: dict) -> list:
     if raw_prices and all(float(p) > 0 for p in raw_prices):
         return [float(p) for p in raw_prices]
 
-    # 2. Fallback: CPMM formula from outcomeTokenAmounts
+    # 2. Fallback: CPMM formula from outcomeTokenAmounts.
+    # Work in floats to avoid the rounding bias of integer division.
     raw_amounts = m.get("outcomeTokenAmounts") or []
-    amounts = [int(a) for a in raw_amounts]
+    amounts = [float(a) for a in raw_amounts]
     if amounts and all(a > 0 for a in amounts):
-        product = 1
+        product = 1.0
         for a in amounts:
             product *= a
-        inv = [product // a for a in amounts]
+        inv = [product / a for a in amounts]
         denom = sum(inv)
         return [v / denom for v in inv]
 
@@ -487,6 +512,134 @@ def _calc_prices(m: dict) -> list:
             return prices
 
     return []
+
+
+def opinion_verdict(outcome_prices: list, threshold: float = 0.5) -> str:
+    """Map FPMM outcome prices to a normalized verdict.
+
+    Binary markets only. Returns one of ``Yes``, ``No``, or ``Unknown``.
+    ``Invalid`` is not representable in FPMM pricing.
+
+    :param outcome_prices: list of floats summing to ~1 (from ``calc_prices``).
+    :param threshold: strict-majority cutoff. ``prices[0] > threshold`` → Yes,
+        ``prices[0] < 1 - threshold`` → No, otherwise Unknown.
+    :return: verdict label.
+    """
+    if not isinstance(outcome_prices, list) or len(outcome_prices) < 2:
+        return "Unknown"
+    try:
+        p_yes = float(outcome_prices[0])
+    except (TypeError, ValueError):
+        return "Unknown"
+    if p_yes > threshold:
+        return "Yes"
+    if p_yes < 1.0 - threshold:
+        return "No"
+    return "Unknown"
+
+
+def get_fpmm_trades(user: str) -> dict:
+    """Fetch all FPMM trades made by a user (trader) address.
+
+    Paginates through the Omen subgraph. Note: on ``fpmmTrades``, the
+    Omen subgraph names the trader field ``creator`` (Account reference),
+    which is unfortunate naming — it has nothing to do with the market
+    *creator*. Here we use ``user`` throughout to avoid confusion.
+
+    :param user: trader address (checksum or lowercase).
+    :return: dict with one key ``"fpmmTrades"`` mapping trade_id -> raw
+        trade dict.
+    """
+    trades: Dict[str, Any] = {}
+
+    transport = RequestsHTTPTransport(url=THEGRAPH_ENDPOINT)
+    client = Client(transport=transport, fetch_schema_from_transport=True)
+
+    spinner = tqdm(
+        desc=f"Fetching fpmmTrades for {user[:10]}…",
+        unit=" trades",
+        bar_format="{desc}: {n}{unit} {elapsed}",
+    )
+    id_gt = ""
+    while True:
+        response = client.execute(
+            gql(TRADES_BY_USER_QUERY),
+            variable_values={"user": user.lower(), "id_gt": id_gt},
+        )
+        items = response.get("fpmmTrades", [])
+        if not items:
+            break
+        for trade in items:
+            if trade["id"] not in trades:
+                trades[trade["id"]] = trade
+        spinner.n = len(trades)
+        spinner.refresh()
+        id_gt = items[-1]["id"]
+        if len(items) < 1000:
+            break
+    spinner.close()
+    return {"fpmmTrades": trades}
+
+
+def fpmm_trades_to_dataframe(trades_dict: dict) -> pd.DataFrame:
+    """Convert the output of ``get_fpmm_trades`` into a DataFrame.
+
+    :param trades_dict: the value returned by ``get_fpmm_trades``.
+    :return: DataFrame with one row per trade and the columns
+        ``trade_id, user, fpmm_id, type, outcome_index,
+        collateral_xdai, collateral_amount_wei, outcome_tokens_traded,
+        old_price, new_price, creation_ts, collateral_usd``. The
+        ``user`` column is the trader address (called ``creator`` in
+        the raw Omen subgraph, which is confusing — ``user`` here
+        denotes the account that executed the trade).
+    """
+    rows = []
+    trades = trades_dict.get("fpmmTrades") or {}
+    for trade_id, t in trades.items():
+        try:
+            collateral_wei = int(t.get("collateralAmount") or 0)
+        except (ValueError, TypeError):
+            collateral_wei = 0
+        rows.append(
+            {
+                "trade_id": trade_id,
+                "user": (t.get("creator") or {}).get("id", "").lower(),
+                "fpmm_id": (t.get("fpmm") or {}).get("id", "").lower(),
+                "type": t.get("type"),
+                "outcome_index": int(t.get("outcomeIndex") or 0),
+                "collateral_amount_wei": collateral_wei,
+                "collateral_xdai": collateral_wei / 1e18,
+                "outcome_tokens_traded": int(t.get("outcomeTokensTraded") or 0),
+                "old_price": float(t["oldOutcomeTokenMarginalPrice"])
+                if t.get("oldOutcomeTokenMarginalPrice") is not None
+                else None,
+                "new_price": float(t["outcomeTokenMarginalPrice"])
+                if t.get("outcomeTokenMarginalPrice") is not None
+                else None,
+                "creation_ts": _ts_to_datetime(t.get("creationTimestamp")),
+                "collateral_usd": float(t["collateralAmountUSD"])
+                if t.get("collateralAmountUSD") is not None
+                else None,
+            }
+        )
+    if not rows:
+        return pd.DataFrame(
+            columns=[
+                "trade_id",
+                "user",
+                "fpmm_id",
+                "type",
+                "outcome_index",
+                "collateral_amount_wei",
+                "collateral_xdai",
+                "outcome_tokens_traded",
+                "old_price",
+                "new_price",
+                "creation_ts",
+                "collateral_usd",
+            ]
+        )
+    return pd.DataFrame(rows)
 
 
 def _ts_to_datetime(ts) -> datetime | None:

@@ -158,6 +158,39 @@ def realitio_to_dataframe(questions: Dict[str, Any]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def normalize_realitio_answer(answer_hex) -> str:
+    """Normalize a raw Realitio answer hex to ``Yes``/``No``/``Invalid``/``Unknown``.
+
+    Assumes the standard binary-market outcome encoding used by Omen:
+      - ``0x00..00`` → ``Yes`` (outcome index 0)
+      - ``0x00..01`` → ``No`` (outcome index 1)
+      - ``0xff..ff`` → ``Invalid`` (special sentinel)
+      - anything else, None, or unparseable → ``Unknown``
+
+    :param answer_hex: raw answer bytes32 as a hex string (with or without 0x),
+        or None.
+    :return: verdict label.
+    """
+    if not isinstance(answer_hex, str) or not answer_hex:
+        return "Unknown"
+    cleaned = answer_hex.lower().strip()
+    if cleaned.startswith("0x"):
+        cleaned = cleaned[2:]
+    if len(cleaned) != 64:
+        return "Unknown"
+    if cleaned == "f" * 64:
+        return "Invalid"
+    try:
+        idx = int(cleaned, 16)
+    except ValueError:
+        return "Unknown"
+    if idx == 0:
+        return "Yes"
+    if idx == 1:
+        return "No"
+    return "Unknown"
+
+
 # ---------------------------------------------------------------------------
 # Locked bonds (on-chain claim status)
 # ---------------------------------------------------------------------------

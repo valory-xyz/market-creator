@@ -382,23 +382,67 @@ def categorize_mech_result(result_str: str) -> str:
         return "Error"
 
 
+def normalize_mech_verdict(deliver: Optional[Dict[str, Any]]) -> str:
+    """Normalize a mech deliver response to ``Yes``/``No``/``Invalid``/``Unknown``.
+
+    Rules (in order):
+      - deliver missing / no ipfsContents / parse error  -> ``Unknown``
+      - ``result.is_valid`` is ``False``                 -> ``Unknown``
+      - ``result.is_determinable`` is ``False``          -> ``Unknown``
+      - ``result.has_occurred`` is ``True``              -> ``Yes``
+      - ``result.has_occurred`` is ``False``             -> ``No``
+      - any other shape                                  -> ``Unknown``
+
+    Note: this helper mirrors the hierarchy used by ``categorize_mech_result``
+    but maps into the shared verdict enum used by ``resolver_comparison.ipynb``.
+    ``Invalid`` is never produced here — the Realitio invalid sentinel is
+    expressed on-chain, not in the mech tool output.
+
+    :param deliver: the ``deliver`` sub-dict of a mech request, or None.
+    :return: verdict label.
+    """
+    if not deliver or "ipfsContents" not in deliver:
+        return "Unknown"
+    try:
+        parsed = json.loads(str(deliver["ipfsContents"].get("result", "")))
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return "Unknown"
+    if not isinstance(parsed, dict):
+        return "Unknown"
+    if parsed.get("is_valid") is False:
+        return "Unknown"
+    if parsed.get("is_determinable") is False:
+        return "Unknown"
+    has_occurred = parsed.get("has_occurred")
+    if has_occurred is True:
+        return "Yes"
+    if has_occurred is False:
+        return "No"
+    return "Unknown"
+
+
 def mech_requests_to_dataframe(mech_requests: dict) -> pd.DataFrame:
     """Convert a dict of mech request dicts into a DataFrame.
 
     :param mech_requests: mapping of request_id -> request dict as returned
         by ``fetch_mech_requests()``.
     :return: DataFrame with one row per request and pre-computed columns for
-        nonce, deliver status, delay, and result category.
+        nonce, tool, prompt, deliver status, delay, result category, IPFS
+        links, and normalized verdict.
     """
     rows = []
     for request_id, req in mech_requests.items():
         request_ts = int(req.get("blockTimestamp", 0))
 
-        # Extract nonce from parsedRequest.content JSON
+        # Extract nonce, tool, prompt from parsedRequest.content JSON
         nonce = None
+        tool = None
+        prompt = None
         try:
             content = json.loads(req["parsedRequest"]["content"])
             nonce = content.get("nonce")
+            tool = content.get("tool")
+            prompt = content.get("prompt")
         except (json.JSONDecodeError, KeyError, TypeError):
             pass
 
@@ -419,6 +463,8 @@ def mech_requests_to_dataframe(mech_requests: dict) -> pd.DataFrame:
                 "sender": req.get("sender", {}).get("id"),
                 "request_ts": datetime.fromtimestamp(request_ts, tz=timezone.utc) if request_ts else None,
                 "nonce": nonce,
+                "tool": tool,
+                "prompt": prompt,
                 "has_deliver": has_deliver,
                 "deliver_ts": (
                     datetime.fromtimestamp(deliver_ts, tz=timezone.utc)
@@ -428,6 +474,9 @@ def mech_requests_to_dataframe(mech_requests: dict) -> pd.DataFrame:
                 "deliver_delay_seconds": (deliver_ts - request_ts) if deliver_ts else None,
                 "result_category": result_category,
                 "is_failed": result_category in ("Error", "No delivery"),
+                "verdict": normalize_mech_verdict(deliver),
+                "request_ipfs_url": get_request_ipfs_url(req),
+                "deliver_ipfs_url": get_deliver_ipfs_url(deliver) if deliver else "",
             }
         )
 
