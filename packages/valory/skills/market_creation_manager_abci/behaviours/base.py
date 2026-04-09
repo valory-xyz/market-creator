@@ -37,10 +37,7 @@ from packages.valory.contracts.multisend.contract import (
     MultiSendOperation,
 )
 from packages.valory.protocols.contract_api import ContractApiMessage
-from packages.valory.protocols.llm.message import LlmMessage
 from packages.valory.skills.abstract_round_abci.behaviours import BaseBehaviour
-from packages.valory.skills.abstract_round_abci.models import Requests
-from packages.valory.skills.market_creation_manager_abci.dialogues import LlmDialogue
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
     SharedState,
@@ -299,27 +296,3 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             )
             return None
         return cast(int, response.state.body.get("token"))
-
-    def do_llm_request(
-        self,
-        llm_message: LlmMessage,
-        llm_dialogue: LlmDialogue,
-        timeout: Optional[float] = None,
-    ) -> Generator[None, None, LlmMessage]:
-        """
-        Do a request and wait the response, asynchronously.
-
-        :param llm_message: The request message
-        :param llm_dialogue: the HTTP dialogue associated to the request
-        :param timeout: seconds to wait for the reply.
-        :yield: LLMMessage object
-        :return: the response message
-        """
-        self.context.outbox.put_message(message=llm_message)
-        request_nonce = self._get_request_nonce_from_dialogue(llm_dialogue)
-        cast(Requests, self.context.requests).request_id_to_callback[
-            request_nonce
-        ] = self.get_callback_request()
-        # notify caller by propagating potential timeout exception.
-        response = yield from self.wait_for_message(timeout=timeout)
-        return response

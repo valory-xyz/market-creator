@@ -85,13 +85,6 @@ class ApproveMarketsPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
-class GetPendingQuestionsPayload(BaseTxPayload):
-    """Represent a transaction payload for the GetPendingQuestionsRound."""
-
-    content: str
-
-
-@dataclass(frozen=True)
 class MultisigTxPayload(BaseTxPayload):
     """Represents a transaction payload for preparing an on-chain transaction to be sent via the agents' multisig."""
 

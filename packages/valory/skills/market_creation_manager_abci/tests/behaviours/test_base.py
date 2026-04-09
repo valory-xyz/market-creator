@@ -185,8 +185,8 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
 
     def setup_method(self) -> None:
         """Setup test fixtures."""
-        from packages.valory.skills.market_creation_manager_abci.behaviours.answer_questions import (
-            AnswerQuestionsBehaviour,
+        from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_winnings import (
+            RedeemWinningsBehaviour,
         )
 
         context_mock = MagicMock()
@@ -210,7 +210,7 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         context_mock.requests = MagicMock()
         context_mock.outbox = MagicMock()
         # Use a concrete subclass to test the base methods
-        self.behaviour = AnswerQuestionsBehaviour(
+        self.behaviour = RedeemWinningsBehaviour(
             name="test", skill_context=context_mock
         )
 
@@ -511,15 +511,44 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         assert self.behaviour.params is not None
 
     def test_last_synced_timestamp_property(self) -> None:
-        """Test the last_synced_timestamp property."""
+        """Test the last_synced_timestamp property reads from round_sequence."""
+        result = self.behaviour.last_synced_timestamp
+        assert result == 1700000000
+
+    def test_get_wxdai_balance_success(self) -> None:
+        """Test get_wxdai_balance returns the token balance."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.STATE
+        mock_resp.state.body = {"token": 12345}
+
         with patch.object(
-            type(self.behaviour),
-            "last_synced_timestamp",
-            new_callable=PropertyMock,
-            return_value=1700000000,
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
         ):
-            result = self.behaviour.last_synced_timestamp
-            assert result == 1700000000
+            gen = self.behaviour.get_wxdai_balance("0xAddr")
+            result = _exhaust_gen(gen)
+
+        assert result == 12345
+
+    def test_get_wxdai_balance_error(self) -> None:
+        """Test get_wxdai_balance returns None on error."""
+        from packages.valory.protocols.contract_api import ContractApiMessage
+
+        mock_resp = MagicMock()
+        mock_resp.performative = ContractApiMessage.Performative.ERROR
+
+        with patch.object(
+            self.behaviour,
+            "get_contract_api_response",
+            new=_make_gen(mock_resp),
+        ):
+            gen = self.behaviour.get_wxdai_balance("0xAddr")
+            result = _exhaust_gen(gen)
+
+        assert result is None
 
     def test_shared_state_property(self) -> None:
         """Test the shared_state property."""
@@ -532,31 +561,3 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         ):
             result = self.behaviour.shared_state
             assert result is mock_state
-
-    def test_do_llm_request(self) -> None:
-        """Test do_llm_request basic flow."""
-        mock_llm_message = MagicMock()
-        mock_llm_dialogue = MagicMock()
-        mock_response = MagicMock()
-
-        with (
-            patch.object(
-                self.behaviour,
-                "_get_request_nonce_from_dialogue",
-                return_value="nonce123",
-            ),
-            patch.object(
-                self.behaviour,
-                "get_callback_request",
-                return_value=MagicMock(),
-            ),
-            patch.object(
-                self.behaviour,
-                "wait_for_message",
-                new=_make_gen(mock_response),
-            ),
-        ):
-            gen = self.behaviour.do_llm_request(mock_llm_message, mock_llm_dialogue)
-            result = _exhaust_gen(gen)
-
-        assert result is mock_response

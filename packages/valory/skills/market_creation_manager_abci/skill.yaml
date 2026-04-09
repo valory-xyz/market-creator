@@ -11,41 +11,35 @@ fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeihiyq6pmvff63y34vwsvawazkh3lw5io3lpsl5ihksvjs5thgylbm
   behaviours/__init__.py: bafybeifp3hykazw2qx32t2lg2mwehcyjdekq3tywde26pm77imco45xz3a
-  behaviours/answer_questions.py: bafybeicoyrimh2avhnwdx53uecghntobheu4klgcpvnymzoxny5kiconyi
   behaviours/approve_markets.py: bafybeidhss62y6pybyit4fqq2ygkccr7jlv6ty2yg6cq3yehqy7xmendhe
-  behaviours/base.py: bafybeig5qwfwh2yk576pxxpelwsxzzs5tuh2wxvnsjyr6r6qhuwxrtpusm
+  behaviours/base.py: bafybeiep2zrafklzfxtr7htyujuikznoxb3dpnpfcs6uutbbswkl57iqr4
   behaviours/collect_proposed_markets.py: bafybeibjhkningmccsdet7lnpnnmf77fgvcumflbfcfeikji3ytechlxc4
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
   behaviours/deposit_dai.py: bafybeig6f4oyha7lukqnursw64hdspu3tnrodjnbljacd2np7ze2gbgrye
-  behaviours/get_pending_questions.py: bafybeibvzqlowzvivrm66uq3jbewnwls3ndb6xc2fzemttlj4fcfjemp5u
-  behaviours/post_transaction.py: bafybeihsbyqfvtio7jkzib4yehlazu7tkovfa3cbbp5sce767vntfgzcqy
+  behaviours/post_transaction.py: bafybeielkussmcke3wzntsnlj3vyqjeec7wqmq4mqy3cxyo3fotyxckdhe
   behaviours/prepare_transaction.py: bafybeia4ivej3givyfauneb2pvjhjhwenj4krvqmk4t4loslibmjnm4ps4
-  behaviours/redeem_bond.py: bafybeidqouhjjorqvsrqwxg7b2icchbct7eib4fgqvq6ak2eoiwss43xci
   behaviours/redeem_winnings.py: bafybeih6i4rgtqvzdbmpmiw666ekfz2pqqtahqsg4ocdunodagoyzovxti
   behaviours/remove_funding.py: bafybeihueoo6z2fy54nqui5lrzwovhddi7cfk6ecktwe3z6fscckjqunxy
   behaviours/retrieve_approved_market.py: bafybeicjf222ubg3jd4fqndgdh532g6i2uhmioly2hzuilfgd2svsvc4o4
-  behaviours/round_behaviour.py: bafybeifvdbdpinjezoooi26noergatktmif27afnetzdr5rxfs74gdggje
+  behaviours/round_behaviour.py: bafybeibym7dimrff5oazzrdnag6esljobbl5uswup2cla5bis5bmfxt2yy
   behaviours/select_keeper.py: bafybeiadkoyybfqxc2wsrkjk3hta5yrmp5cf6h44cru3k6pchmmuiwr3by
   behaviours/sync_markets.py: bafybeiheu7dxajveh7auh4v4xbhft6g5ioh3ulsl4ujuo4i25poueeqcxe
-  dialogues.py: bafybeihp6k73otltjqeyluqizrhtbepcmjqcemz4adgug3rqtc4ysry4ve
-  fsm_specification.yaml: bafybeid5cgtaacqj7yr62yaaqsdeyxic423xrqhdux6kbpqjgifbutvnju
-  handlers.py: bafybeifjipvibmq77gavlncqrbbmlfokp7axk3sjemouxaewgolp3nfbey
-  models.py: bafybeigxycewlxlwo7cmthgemqd2s2vzrpxgbi6sy343vcleqrpw7snbxu
-  payloads.py: bafybeibbvv2rpzrs77vl45eac7bjownr3abrms3pg7orqpqzob2pglwqhm
+  dialogues.py: bafybeic6fb46t3c6uti6qbg2fwxuhcbqhzhx5bennahq7wp74atfibdkk4
+  fsm_specification.yaml: bafybeigyqlvgq2zyawczhsq3fz3yq5rjmo6fgt5j6vx7hnq3smjf47sh4u
+  handlers.py: bafybeie634p6j3vwo72nis5jr3mhdd7nunsewevh44lo7vsjneyboellgu
+  models.py: bafybeigxwb2gx5htgpcnx75l3frdeup74zbtsfjyqftmrlnyzyqj3ccafy
+  payloads.py: bafybeibjw4oro7zfjboyv2hovp4qd2tfh2omkn7nunt25boui3td4fcpwy
   propose_questions.py: bafybeift5o4chfdnb76jpktc2yyycn6zuknyq6fzy6de2oanntfatfj2ee
-  rounds.py: bafybeigyidv5rutq72wllqtfrhpq42fbi55wp4ofxoyfu4c5b7drcdstem
+  rounds.py: bafybeig627fn5miprfcvp4qxq257e2nloycmqtxd7pgwqsvwdlns5wwtim
   states/__init__.py: bafybeibogw3ljdly5zf2zesfdltrxc4ncw67imtys6srp7w5by2u5ajhhu
-  states/answer_questions.py: bafybeiecaz7ft745bluxy2x3obaw3elpguplsedp3j4hsbh7yahovi3xrm
   states/approve_markets.py: bafybeierwnnm2tejqprnx4kfoaxmaajog7jt7lnexzgbycryhmkw62jn2u
-  states/base.py: bafybeihniaj4q4mrfsjy2axi2czdim5uvxfiy73rqjwzlr3e7bzduj4zhm
+  states/base.py: bafybeibf32p566flypdywoatcgedj6roncelmpctbx4no7hcu6irahurlq
   states/collect_proposed_markets.py: bafybeiaopaehmme7wwlkok74dzshayg4x5hhvub5njlruphuryuyejyd6m
   states/collect_randomness.py: bafybeifkdchmeidte5vfqqpeeomyaxlel4irxtrho6xxelexu5vds4vx54
   states/deposit_dai.py: bafybeicc27nq6hyj6hyzgfxuru2nghgt65s33xr6aohwgr3nixc5jdrxzu
-  states/final_states.py: bafybeibw5kfnv5uqpooflomqxhe7pskqq3omq76qd5wchont2cec2ulpku
-  states/get_pending_questions.py: bafybeidonk3bpnvkbptg6curfjpmcdiok3cxq6cpwy7kassv5bctsdwmfy
-  states/post_transaction.py: bafybeifcarb4uvslifbjkr244mqb54u6vsu3dbsu6j3w2txocl3d252ss4
+  states/final_states.py: bafybeifwef5gyhfkfosrpib5f7siugnai3jbfhkn5mvq6zj4wasobqrtvy
+  states/post_transaction.py: bafybeiajj2xyweswinxuku2powyblmhhry3ehen5rv6yz6ub6bowwqplom
   states/prepare_transaction.py: bafybeibemmt3jm7hsoqjeisikakllokjhgi2yqpozj4foqpfyqa4rv2qza
-  states/redeem_bond.py: bafybeifjskyhqhp5ow2ggoybcbfcjejlovvnnn4r3hy2jp2bdbfxvmjg7q
   states/redeem_winnings.py: bafybeiag4vgxa4kdzxbjyxdixbljyz4lpjhrjpc3wxc5xn6u56lab5slye
   states/remove_funding.py: bafybeihwwdxe2mfn4tm5elijn2flbe2gjfc6ycirehv63hdvoyv2yfz3uq
   states/retrieve_approved_market.py: bafybeibx3brusywumqh6g24liwscq2y4ts4bkdd5k733yhtcf4gktykdde
@@ -53,17 +47,14 @@ fingerprint:
   states/sync_markets.py: bafybeibuqnfsvlk67ra2n3pa2yhfiyjzxrbqnxamyj5d4vgmexzqo3jn3m
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
   tests/behaviours/__init__.py: bafybeifngz2wcqbk7sior2um2gh4j55i7ugi7mjhz3tak7zezplkccfovi
-  tests/behaviours/conftest.py: bafybeif2bdy3vespiroz4qfltynh33tjxzvuyg57uydyhsnxs33sdf3utq
-  tests/behaviours/test_answer_questions.py: bafybeidh5aod4cbwdw2kijh7xo7ypdp5felrtycezdl6ice5ev2ppvb2fm
+  tests/behaviours/conftest.py: bafybeidezlbfk2r2632ohq6wnwx34dlpqw5siigsx47fwvfdc5d6taj4xa
   tests/behaviours/test_approve_markets.py: bafybeigk6qzldtpb3cazu4nziu7ufxvnkixozag4wnyaedmafofe6qvvsq
   tests/behaviours/test_approve_markets_behaviour.py: bafybeiandmz47phcwjabwrpb25xmqskv62pkvls7ypjeotqm22ivw3zzf4
-  tests/behaviours/test_base.py: bafybeihq7w3zyfbwipb2e5tkfg2xiettny3fmi3dlqye2oyiyvc7njihc4
+  tests/behaviours/test_base.py: bafybeiekifuwppftofc6xwp7h7ubcjovf7nq5kqjoblmve4aq5gyq5u6ue
   tests/behaviours/test_collect_proposed_markets.py: bafybeibknuchv6ueexfr77ktqpayac4ewybhzq2dj3z3d2tcqinja4wr4y
   tests/behaviours/test_deposit_dai.py: bafybeietyzfzvyeldpw5hn7x44ip22hwvyrtuz5lgko3gayalbxe6didbu
-  tests/behaviours/test_get_pending_questions.py: bafybeic6xypfgu63o2r4lhuonlfbcoizxzu6uoptd2mdpa2ft5ixmfxwwm
-  tests/behaviours/test_post_transaction.py: bafybeihnpi4647nlwt7crje6uyfjpu3tehqx3253kxvsrsvwld7izhpbrq
+  tests/behaviours/test_post_transaction.py: bafybeibdprejyq2dp4bd5aysyaq6cbmqnwmwr65eeuj43tbijq3vw3sklq
   tests/behaviours/test_prepare_transaction.py: bafybeicej35dlvw7jgb3ro4mioreygn7ms37zqhtzzmbahbnkuqhvh6iwi
-  tests/behaviours/test_redeem_bond.py: bafybeichbng2aae4csb5622jvhwzmefq6nnsnf3bfblfylm5ggbfdx5xqm
   tests/behaviours/test_redeem_winnings.py: bafybeiakkaa5maubadgnn46ipsdhnqhw6tbaskhv3vntn6o42qdjhvylpu
   tests/behaviours/test_remove_funding.py: bafybeifne3fr5mcvwdlyz6vmqz6tjhjr4jjgsosjq22vyh2exlvdemwppy
   tests/behaviours/test_retrieve_approved_market.py: bafybeig2yo7mc5nghmihttws5lzd4hqnmkpqqb6tqxmgnymbvkpqhwjfqa
@@ -71,19 +62,17 @@ fingerprint:
   tests/conftest.py: bafybeiawchmkylfcavckf73slvfqnyrz73owyubjua3k2e3txvsrkqs7hm
   tests/states/__init__.py: bafybeia5upph3nlp3opku7erao46kkvbsddderrgmwfrcustzobnq2h44e
   tests/states/test_approve_markets.py: bafybeih4v3ml2gizo356a6z4tqwrdmfnxkqgs6tmhlzzvpb45fypoedhlu
-  tests/states/test_base.py: bafybeibkmyxo3la7j2jaoj3zl4novq73semes2jj23jiunm7s6lgvdt2xy
+  tests/states/test_base.py: bafybeigogamcgbzyscioaob674rpnronkd6gfof74ol3vebmhwxz6uykmq
   tests/states/test_collect_proposed_markets.py: bafybeiegx53b4vktvw35r2tqfzhi462vcagydiii36oqd5jilggoi374v4
-  tests/states/test_final_states.py: bafybeidtqbibt2qq4jjd2wlgbts5hzjlwx75zugyd6kelhgumo6jezk62u
-  tests/states/test_get_pending_questions.py: bafybeiaiihezlwh5lg2wa3bdqkrl3jlvhnmwwyzjrfk53vnhngqc725b4y
-  tests/states/test_post_transaction.py: bafybeiea6eboxi5lquiyev5u7weashqyuyrkpzpolbyf2r2st6d6kh655q
+  tests/states/test_final_states.py: bafybeihd6ihfa7omxt43abp3pujqkgr6cefvkbygzl5aiek7xz6qx65gb4
+  tests/states/test_post_transaction.py: bafybeibi2gvxv75onyw7fijhv2sdoizjhqv5jp2q4istg7mnibsfibavne
   tests/states/test_redeem_winnings.py: bafybeihmmm5vg4bhuiksvcbfxfex32nageecxojjucm2y3kns65f6zaf5a
   tests/states/test_remove_funding.py: bafybeifmylsqoyxja6x4wts6gwlpnk7cu3nxj7opzegq3eqfrmyaayvqgm
   tests/states/test_retrieve_approved_market.py: bafybeiggsxsrnbj3keevbim7mqs6fro2jcteg5457uiw34sg6kpxfuvnzi
   tests/states/test_sync_markets.py: bafybeiamd47774ud26jd5fywoaiqnxugqern53khdxcdrdvgcon4zp5sry
-  tests/test_dialogues.py: bafybeiesmzycauqtuv6wixghbidu44lvnptijvosysz6ifr2d5qvwk35nm
-  tests/test_handlers.py: bafybeibobdd3b7vweme7y7oki45afnbi5vmcb77wjgbir3duzxtppet4fa
-  tests/test_payloads.py: bafybeihbwhcnrn4kxahv35erfz3h745pm3rvqjh446gzfxvkdl2ixir3bi
-  tests/test_rounds.py: bafybeib473yr3tt4zgmuf2nridbgjtmofoz2wip3txzbnwnj5pvhdr4b5e
+  tests/test_dialogues.py: bafybeihlhfzepbrtx74qf6375v3onnx3aydpagpgt3gatycxj7qkfq7hdy
+  tests/test_handlers.py: bafybeicjrrjj4utmbslhpaquvxkdsbfjasv2t2vf233yr6bu2rimfvamxa
+  tests/test_payloads.py: bafybeiahjiihlf6fvuzrpxlgzxlonb6777gsbfmja2qry7glfwn6vhtlou
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
@@ -96,13 +85,11 @@ contracts:
 - valory/erc20:0.1.0:bafybeifq6zn2p5nafi6bmtf4xo3ctgymazr2udtlwyiwjf5g5mpndsthfy
 - valory/fpmm:0.1.0:bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e
 protocols:
-- valory/llm:1.0.0:bafybeiardrklsughnm6tdnc3seqderlnq5nj4xolgnk42crr3kxexjlrfe
 - valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
 - valory/ledger_api:1.0.0:bafybeiecq56phjfws36rgrefw6niyo4ezesloodsfis647mpm5ygqo4ysi
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
-- valory/mech_interact_abci:0.1.0:bafybeibrmrdpys5xfivpmlyerbwlu2am2rmqb75bwub3cvcrvfwdbqxv54
 behaviours:
   main:
     args: {}
@@ -129,9 +116,6 @@ handlers:
   tendermint:
     args: {}
     class_name: TendermintHandler
-  llm:
-    args: {}
-    class_name: LlmHandler
 models:
   abci_dialogues:
     args: {}
@@ -152,9 +136,6 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
-  llm_dialogues:
-    args: {}
-    class_name: LlmDialogues
   params:
     args:
       market_identification_prompt: market_identification_prompt
@@ -244,7 +225,6 @@ models:
       request_retry_delay: 1.0
       request_timeout: 10.0
       reset_pause_duration: 1800
-      mech_interact_round_timeout_seconds: 1200
       reset_tendermint_after: 1
       retry_attempts: 400
       retry_timeout: 3
@@ -264,9 +244,7 @@ models:
       tendermint_p2p_url: localhost:26656
       tendermint_url: http://localhost:26657
       tx_timeout: 10.0
-      realitio_answer_question_bond: 1000000000000000
       realitio_answer_question_bounty: 0
-      questions_to_close_batch_size: 1
       validate_timeout: 1205
       use_termination: false
       use_slashing: false
@@ -275,14 +253,6 @@ models:
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
-      mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
-      mech_tool_resolve_market: resolve-market-reasoning-gpt-4.1
-      answer_retry_intervals:
-      - 0
-      - 86400
-      - 259200
-      - 604800
-      - 1209600
       service_endpoint_base: https://dummy_service.autonolas.tech/
       redeem_winnings_batch_size: 5
     class_name: MarketCreationManagerParams
@@ -297,18 +267,6 @@ models:
       retries: 5
       url: https://drand.cloudflare.com/public/latest
     class_name: RandomnessApi
-  mech_response:
-    args:
-      api_id: mech_response
-      headers:
-        Content-Type: application/json
-      method: GET
-      parameters: {}
-      response_key: result
-      response_type: str
-      retries: 5
-      url: ''
-    class_name: MechResponseSpecs
   conditional_tokens_subgraph:
     args:
       api_id: conditional_tokens
