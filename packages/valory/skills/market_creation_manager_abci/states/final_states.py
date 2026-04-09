@@ -34,25 +34,9 @@ class FinishedWithDepositDaiRound(DegenerateRound):
     """FinishedWithDepositDaiRound"""
 
 
-class FinishedWithRedeemBondRound(DegenerateRound):
-    """FinishedWithRedeemBondRound"""
-
-
 class FinishedWithRedeemWinningsRound(DegenerateRound):
     """FinishedWithRedeemWinningsRound"""
 
 
 class FinishedWithoutTxRound(DegenerateRound):
     """FinishedWithoutTxRound"""
-
-
-class FinishedWithGetPendingQuestionsRound(DegenerateRound):
-    """FinishedWithGetPendingQuestionsRound"""
-
-
-class FinishedWithAnswerQuestionsRound(DegenerateRound):
-    """FinishedWithAnswerQuestionsRound"""
-
-
-class FinishedWithMechRequestRound(DegenerateRound):
-    """FinishedWithMechRequestRound"""

@@ -88,12 +88,3 @@ def mock_subgraph_client() -> MagicMock:
     client = MagicMock()
     client.query = MagicMock(return_value={})
     return client
-
-
-@pytest.fixture
-def mock_mech_tool() -> MagicMock:
-    """Create a mocked mech tool."""
-    tool = MagicMock()
-    tool.request = MagicMock(return_value=None)
-    tool.get_response = MagicMock(return_value=None)
-    return tool
