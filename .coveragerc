@@ -1,18 +1,29 @@
 [run]
+branch = True
 source =
     packages/valory/contracts/fpmm_deterministic_factory
     packages/valory/contracts/fpmm
     packages/valory/skills/market_creation_manager_abci
     packages/valory/skills/market_maker_abci
+omit =
+    */tests/*
+    */__init__.py
+    */__pycache__/*
+    */*_pb2.py
+    */*_pb2_grpc.py
+    */propose_questions.py
 
 [report]
-omit =
-    */propose_questions.py
-    */__init__.py
-    */tests/*
-
+fail_under = 100
+show_missing = True
 exclude_lines =
     pragma: no cover
     raise NotImplementedError
-    if TYPE_CHECKING
+    if TYPE_CHECKING:
+    @abstractmethod
     pass
+partial_branches =
+    pragma: no branch
+
+[html]
+directory = htmlcov

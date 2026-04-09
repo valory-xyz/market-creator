@@ -82,3 +82,10 @@ af9837782f2045b19cb0b7410ceb19b34e24ddfb:notebooks/roi_analysis.ipynb:easypost-a
 e2acd61bb65d83d7b5ad6eda57517ccc738d4fb8:packages/valory/skills/funds_forwarder_abci/tests/test_behaviours.py:generic-api-key:41
 6d00e97b5c69d9a286948a304071284f2530c778:packages/valory/skills/omen_funds_recoverer_abci/skill.yaml:generic-api-key:114
 6d00e97b5c69d9a286948a304071284f2530c778:packages/valory/skills/omen_funds_recoverer_abci/tests/test_models.py:generic-api-key:159
+3f28106ae1be24266c869af23d7bfc252f274c8d:packages/valory/skills/omen_ct_redeem_tokens_abci/skill.yaml:generic-api-key:13
+3f28106ae1be24266c869af23d7bfc252f274c8d:packages/valory/skills/omen_ct_redeem_tokens_abci/skill.yaml:generic-api-key:25
+31980ef6430fb270b91320ac532ce69f9af83d04:packages/valory/skills/omen_ct_redeem_tokens_abci/skill.yaml:generic-api-key:13
+31980ef6430fb270b91320ac532ce69f9af83d04:packages/valory/skills/omen_ct_redeem_tokens_abci/skill.yaml:generic-api-key:25
+269c54413d8c6aea163be47d562b346e2cbb36bc:packages/valory/skills/omen_ct_redeem_abci/skill.yaml:generic-api-key:99
+269c54413d8c6aea163be47d562b346e2cbb36bc:packages/valory/skills/omen_fpmm_liquidity_remove_abci/skill.yaml:generic-api-key:89
+269c54413d8c6aea163be47d562b346e2cbb36bc:packages/valory/skills/omen_realitio_bond_withdraw_abci/skill.yaml:generic-api-key:99

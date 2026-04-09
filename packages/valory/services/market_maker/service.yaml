@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeiaimuybn4amfql4zbgfkcdpgvkh2qt6ldrsuq4sygtxafdx73ax3u
+agent: valory/market_maker:0.1.0:bafybeih75kn5avbsxinq6pk4a36ysre6k6rk2ofaf2apacfhlbxh3y6wfe
 number_of_agents: 1
 deployment:
   agent:
@@ -20,7 +20,7 @@ type: skill
 models:
   benchmark_tool:
     args:
-      log_dir: /logs
+      log_dir: ${LOG_DIR:str:/benchmarks}
   params:
     args:
       market_identification_prompt: ${MARKET_IDENTIFICATION_PROMPT:str:Based on the
@@ -81,7 +81,7 @@ models:
       mech_interaction_sleep_time: ${MECH_INTERACTION_SLEEP_TIME:int:10}
       use_mech_marketplace: ${USE_MECH_MARKETPLACE:bool:true}
       mech_marketplace_config: ${MECH_MARKETPLACE_CONFIG:dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","use_dynamic_mech_selection":false,"response_timeout":300}}
-      service_id: market_maker
+      service_id: ${SERVICE_ID:str:market_maker}
       agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x9338b5153AE39BB89f50468E608eD9d764B755fD}
       setup:
@@ -129,7 +129,7 @@ models:
       - stabilityai-stable-diffusion-512-v2-1
       - stabilityai-stable-diffusion-768-v2-1
       ignored_mechs: []
-      penalize_mech_time_window: 1800
+      penalize_mech_time_window: ${PENALIZE_MECH_TIME_WINDOW:int:1800}
       deliveries_lookback_days: ${DELIVERIES_LOOKBACK_DAYS:int:30}
   randomness_api:
     args:
@@ -199,3 +199,11 @@ cert_requests:
   public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
   save_path: .certs/acn_cosmos_11000.txt
 is_abstract: true
+---
+public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfeztlgrlcoxhr7kf6nbq
+type: connection
+config:
+  host: ${HTTP_SERVER_HOST:str:0.0.0.0}
+  port: ${HTTP_SERVER_PORT:int:8716}
+  timeout: ${HTTP_SERVER_TIMEOUT:float:30.0}
+  target_skill_id: valory/market_maker_abci:0.1.0

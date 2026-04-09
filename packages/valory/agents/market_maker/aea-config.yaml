@@ -56,9 +56,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeict6h3wfmddpvam5gmmanqzuokup6ppoev3t4j5uyl7xxahjaols4
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
-- valory/market_maker_abci:0.1.0:bafybeia5p46lslcuokuziblvvj3zjuqmxnzenih2b76q7q4prqcnbrd3py
+- valory/market_maker_abci:0.1.0:bafybeidbwisrp2p4ep6lzvgipxxbztfsme55xk3j5kqjntdcgbrd77asym
 - valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
-- valory/market_creation_manager_abci:0.1.0:bafybeidyd5d4uh724qcfhitsk6on46cex6omyunlsh2bf32o2fkylw2ory
+- valory/market_creation_manager_abci:0.1.0:bafybeihsw4japfcrypq5kxoffio6jchjjukewg54gu6hzvftkhdmpkmjwa
 - valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
 - valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
@@ -218,7 +218,7 @@ models:
       mech_interaction_sleep_time: ${int:10}
       use_mech_marketplace: ${bool:true}
       mech_marketplace_config: ${dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","use_dynamic_mech_selection":false,"response_timeout":300}}
-      service_id: market_maker
+      service_id: ${str:market_maker}
       agent_registry_address: ${str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
       service_registry_address: ${str:0x9338b5153AE39BB89f50468E608eD9d764B755fD}
       setup:
@@ -235,7 +235,7 @@ models:
       termination_sleep: ${int:900}
       termination_from_block: ${int:0}
       tx_timeout: ${float:10.0}
-      round_timeout_seconds: ${float:60}
+      round_timeout_seconds: ${float:120}
       use_termination: ${bool:false}
       use_slashing: ${bool:false}
       slash_cooldown_hours: ${int:3}
@@ -268,7 +268,7 @@ models:
       - stabilityai-stable-diffusion-512-v2-1
       - stabilityai-stable-diffusion-768-v2-1
       ignored_mechs: []
-      penalize_mech_time_window: 1800
+      penalize_mech_time_window: ${int:1800}
       mech_wrapped_native_token_address: ${str:0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d}
       deliveries_lookback_days: ${int:30}
   mech_tools:
@@ -331,5 +331,7 @@ is_abstract: false
 public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfeztlgrlcoxhr7kf6nbq
 type: connection
 config:
-  host: 0.0.0.0
+  host: ${str:0.0.0.0}
+  port: ${int:8716}
+  timeout: ${float:30.0}
   target_skill_id: valory/market_maker_abci:0.1.0
