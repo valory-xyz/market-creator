@@ -27,7 +27,6 @@ from typing import Any, Callable, Dict, Generator, List, Optional, cast
 from packages.valory.contracts.conditional_tokens.contract import (
     ConditionalTokensContract,
 )
-from packages.valory.contracts.erc20.contract import ERC20TokenContract
 from packages.valory.contracts.gnosis_safe.contract import (
     GnosisSafeContract,
     SafeOperation,
@@ -249,50 +248,3 @@ class MarketCreationManagerBaseBehaviour(BaseBehaviour, ABC):
             return None
 
         return json.loads(response.body.decode())
-
-    def get_conditional_tokens_subgraph_result(
-        self,
-        query: str,
-    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
-        """Query the ConditionalTokens subgraph."""
-        response = yield from self.get_http_response(
-            content=to_content(query),
-            **self.context.conditional_tokens_subgraph.get_spec(),
-        )
-
-        if response is None:
-            self.context.logger.error(
-                "Could not retrieve response from ConditionalTokens subgraph. "
-                "Response was None."
-            )
-            return None
-        if response.status_code != HTTP_OK:
-            self.context.logger.error(
-                f"Could not retrieve response from ConditionalTokens subgraph. "
-                f"Received status code {response.status_code}.\n{response}"
-            )
-            return None
-
-        return json.loads(response.body.decode())
-
-    def get_wxdai_balance(self, address: str) -> Generator[None, None, Optional[int]]:
-        """Get the wxDAI balance of an address.
-
-        :param address: the address to check.
-        :yield: None
-        :return: the balance in wei, or None on error.
-        """
-        response = yield from self.get_contract_api_response(
-            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            contract_address=self.params.collateral_tokens_contract,
-            contract_id=str(ERC20TokenContract.contract_id),
-            contract_callable=get_callable_name(ERC20TokenContract.check_balance),
-            account=address,
-        )
-        if response.performative != ContractApiMessage.Performative.STATE:
-            self.context.logger.error(
-                f"Couldn't get wxDAI balance for {address}: "
-                f"{response.performative.value}"
-            )
-            return None
-        return cast(int, response.state.body.get("token"))

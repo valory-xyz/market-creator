@@ -5,6 +5,9 @@ source =
     packages/valory/contracts/fpmm
     packages/valory/skills/market_creation_manager_abci
     packages/valory/skills/market_maker_abci
+    packages/valory/skills/omen_ct_redeem_tokens_abci
+    packages/valory/skills/omen_fpmm_remove_liquidity_abci
+    packages/valory/skills/omen_realitio_withdraw_bonds_abci
 omit =
     */tests/*
     */__init__.py

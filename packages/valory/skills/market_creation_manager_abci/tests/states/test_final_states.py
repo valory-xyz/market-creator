@@ -24,18 +24,22 @@ import pytest
 from packages.valory.skills.abstract_round_abci.base import DegenerateRound
 from packages.valory.skills.market_creation_manager_abci.states.final_states import (
     FinishedMarketCreationManagerRound,
+    FinishedWithCtRedeemTokensPostTxRound,
     FinishedWithDepositDaiRound,
-    FinishedWithRedeemWinningsRound,
-    FinishedWithRemoveFundingRound,
+    FinishedWithFpmmRemoveLiquidityPostTxRound,
+    FinishedWithFundsForwarderPostTxRound,
+    FinishedWithRealitioWithdrawBondsPostTxRound,
     FinishedWithoutTxRound,
 )
 
 ALL_FINAL_STATES = [
     FinishedMarketCreationManagerRound,
-    FinishedWithRemoveFundingRound,
-    FinishedWithRedeemWinningsRound,
     FinishedWithDepositDaiRound,
     FinishedWithoutTxRound,
+    FinishedWithFundsForwarderPostTxRound,
+    FinishedWithFpmmRemoveLiquidityPostTxRound,
+    FinishedWithCtRedeemTokensPostTxRound,
+    FinishedWithRealitioWithdrawBondsPostTxRound,
 ]
 
 

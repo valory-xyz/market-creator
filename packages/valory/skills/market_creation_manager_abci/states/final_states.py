@@ -26,17 +26,25 @@ class FinishedMarketCreationManagerRound(DegenerateRound):
     """FinishedMarketCreationManagerRound"""
 
 
-class FinishedWithRemoveFundingRound(DegenerateRound):
-    """FinishedWithRemoveFundingRound"""
-
-
 class FinishedWithDepositDaiRound(DegenerateRound):
     """FinishedWithDepositDaiRound"""
 
 
-class FinishedWithRedeemWinningsRound(DegenerateRound):
-    """FinishedWithRedeemWinningsRound"""
-
-
 class FinishedWithoutTxRound(DegenerateRound):
     """FinishedWithoutTxRound"""
+
+
+class FinishedWithFundsForwarderPostTxRound(DegenerateRound):
+    """FinishedWithFundsForwarderPostTxRound"""
+
+
+class FinishedWithFpmmRemoveLiquidityPostTxRound(DegenerateRound):
+    """FinishedWithFpmmRemoveLiquidityPostTxRound"""
+
+
+class FinishedWithCtRedeemTokensPostTxRound(DegenerateRound):
+    """FinishedWithCtRedeemTokensPostTxRound"""
+
+
+class FinishedWithRealitioWithdrawBondsPostTxRound(DegenerateRound):
+    """FinishedWithRealitioWithdrawBondsPostTxRound"""

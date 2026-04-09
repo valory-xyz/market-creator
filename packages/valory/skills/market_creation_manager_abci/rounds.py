@@ -45,9 +45,11 @@ from packages.valory.skills.market_creation_manager_abci.states.deposit_dai impo
 )
 from packages.valory.skills.market_creation_manager_abci.states.final_states import (
     FinishedMarketCreationManagerRound,
+    FinishedWithCtRedeemTokensPostTxRound,
     FinishedWithDepositDaiRound,
-    FinishedWithRedeemWinningsRound,
-    FinishedWithRemoveFundingRound,
+    FinishedWithFpmmRemoveLiquidityPostTxRound,
+    FinishedWithFundsForwarderPostTxRound,
+    FinishedWithRealitioWithdrawBondsPostTxRound,
     FinishedWithoutTxRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.post_transaction import (
@@ -56,20 +58,11 @@ from packages.valory.skills.market_creation_manager_abci.states.post_transaction
 from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction import (
     PrepareTransactionRound,
 )
-from packages.valory.skills.market_creation_manager_abci.states.redeem_winnings import (
-    RedeemWinningsRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.remove_funding import (
-    RemoveFundingRound,
-)
 from packages.valory.skills.market_creation_manager_abci.states.retrieve_approved_market import (
     RetrieveApprovedMarketRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.select_keeper import (
     SelectKeeperRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.sync_markets import (
-    SyncMarketsRound,
 )
 
 
@@ -78,23 +71,24 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
 
     Initial round: CollectRandomnessRound
 
-    Initial states: {CollectRandomnessRound, DepositDaiRound, PostTransactionRound, RedeemWinningsRound, SyncMarketsRound}
+    Initial states: {CollectRandomnessRound, DepositDaiRound, PostTransactionRound}
 
     Transition states:
         0. DepositDaiRound
-            - done: 14.
+            - done: 9.
             - no majority: 2.
             - none: 2.
             - round timeout: 2.
         1. PostTransactionRound
-            - done: 15.
+            - done: 10.
             - api error: 0.
             - no majority: 1.
             - none: 1.
             - deposit dai done: 2.
-            - remove funding done: 10.
-            - redeem winnings done: 0.
-            - fund sweep done: 8.
+            - funds forwarder tx done: 11.
+            - fpmm remove liquidity tx done: 12.
+            - ct redeem tokens tx done: 13.
+            - realitio withdraw bonds tx done: 14.
         2. CollectRandomnessRound
             - done: 3.
             - no majority: 2.
@@ -121,39 +115,23 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             - api error: 6.
         6. RetrieveApprovedMarketRound
             - done: 7.
-            - round timeout: 15.
-            - api error: 15.
-            - no markets retrieved: 15.
-        7. PrepareTransactionRound
-            - done: 11.
-            - no majority: 15.
-            - none: 15.
-            - round timeout: 15.
-        8. SyncMarketsRound
-            - done: 9.
-            - no majority: 0.
-            - none: 0.
-            - api error: 0.
-            - round timeout: 0.
-        9. RemoveFundingRound
-            - done: 12.
-            - none: 10.
-            - no majority: 10.
             - round timeout: 10.
-            - no tx: 10.
             - api error: 10.
-        10. RedeemWinningsRound
-            - done: 13.
-            - no majority: 0.
-            - none: 0.
-            - round timeout: 0.
-        11. FinishedMarketCreationManagerRound
-        12. FinishedWithRemoveFundingRound
-        13. FinishedWithRedeemWinningsRound
-        14. FinishedWithDepositDaiRound
-        15. FinishedWithoutTxRound
+            - no markets retrieved: 10.
+        7. PrepareTransactionRound
+            - done: 8.
+            - no majority: 10.
+            - none: 10.
+            - round timeout: 10.
+        8. FinishedMarketCreationManagerRound
+        9. FinishedWithDepositDaiRound
+        10. FinishedWithoutTxRound
+        11. FinishedWithFundsForwarderPostTxRound
+        12. FinishedWithFpmmRemoveLiquidityPostTxRound
+        13. FinishedWithCtRedeemTokensPostTxRound
+        14. FinishedWithRealitioWithdrawBondsPostTxRound
 
-    Final states: {FinishedMarketCreationManagerRound, FinishedWithDepositDaiRound, FinishedWithRedeemWinningsRound, FinishedWithRemoveFundingRound, FinishedWithoutTxRound}
+    Final states: {FinishedMarketCreationManagerRound, FinishedWithCtRedeemTokensPostTxRound, FinishedWithDepositDaiRound, FinishedWithFpmmRemoveLiquidityPostTxRound, FinishedWithFundsForwarderPostTxRound, FinishedWithRealitioWithdrawBondsPostTxRound, FinishedWithoutTxRound}
 
     Timeouts:
         round timeout: 180.0
@@ -164,8 +142,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         CollectRandomnessRound,
         DepositDaiRound,
         PostTransactionRound,
-        RedeemWinningsRound,
-        SyncMarketsRound,
     }
     transition_function: AbciAppTransitionFunction = {
         DepositDaiRound: {
@@ -180,9 +156,10 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NO_MAJORITY: PostTransactionRound,
             Event.NONE: PostTransactionRound,
             Event.DEPOSIT_DAI_DONE: CollectRandomnessRound,
-            Event.REMOVE_FUNDING_DONE: RedeemWinningsRound,
-            Event.REDEEM_WINNINGS_DONE: DepositDaiRound,
-            Event.FUND_SWEEP_DONE: SyncMarketsRound,
+            Event.FUNDS_FORWARDER_TX_DONE: FinishedWithFundsForwarderPostTxRound,
+            Event.FPMM_REMOVE_LIQUIDITY_TX_DONE: FinishedWithFpmmRemoveLiquidityPostTxRound,
+            Event.CT_REDEEM_TOKENS_TX_DONE: FinishedWithCtRedeemTokensPostTxRound,
+            Event.REALITIO_WITHDRAW_BONDS_TX_DONE: FinishedWithRealitioWithdrawBondsPostTxRound,
         },
         CollectRandomnessRound: {
             Event.DONE: SelectKeeperRound,
@@ -224,39 +201,22 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.NONE: FinishedWithoutTxRound,
             Event.ROUND_TIMEOUT: FinishedWithoutTxRound,
         },
-        SyncMarketsRound: {
-            Event.DONE: RemoveFundingRound,
-            Event.NO_MAJORITY: DepositDaiRound,
-            Event.NONE: DepositDaiRound,
-            Event.ERROR: DepositDaiRound,
-            Event.ROUND_TIMEOUT: DepositDaiRound,
-        },
-        RemoveFundingRound: {
-            Event.DONE: FinishedWithRemoveFundingRound,
-            Event.NONE: RedeemWinningsRound,
-            Event.NO_MAJORITY: RedeemWinningsRound,
-            Event.ROUND_TIMEOUT: RedeemWinningsRound,
-            Event.NO_TX: RedeemWinningsRound,
-            Event.ERROR: RedeemWinningsRound,
-        },
-        RedeemWinningsRound: {
-            Event.DONE: FinishedWithRedeemWinningsRound,
-            Event.NO_MAJORITY: DepositDaiRound,
-            Event.NONE: DepositDaiRound,
-            Event.ROUND_TIMEOUT: DepositDaiRound,
-        },
         FinishedMarketCreationManagerRound: {},
-        FinishedWithRemoveFundingRound: {},
-        FinishedWithRedeemWinningsRound: {},
         FinishedWithDepositDaiRound: {},
         FinishedWithoutTxRound: {},
+        FinishedWithFundsForwarderPostTxRound: {},
+        FinishedWithFpmmRemoveLiquidityPostTxRound: {},
+        FinishedWithCtRedeemTokensPostTxRound: {},
+        FinishedWithRealitioWithdrawBondsPostTxRound: {},
     }
     final_states: Set[AppState] = {
         FinishedMarketCreationManagerRound,
-        FinishedWithRemoveFundingRound,
-        FinishedWithRedeemWinningsRound,
         FinishedWithDepositDaiRound,
         FinishedWithoutTxRound,
+        FinishedWithFundsForwarderPostTxRound,
+        FinishedWithFpmmRemoveLiquidityPostTxRound,
+        FinishedWithCtRedeemTokensPostTxRound,
+        FinishedWithRealitioWithdrawBondsPostTxRound,
     }
     event_to_timeout: Dict[Event, float] = {
         Event.ROUND_TIMEOUT: 180.0,
@@ -271,8 +231,6 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         DepositDaiRound: set(),
         CollectRandomnessRound: set(),
         PostTransactionRound: set(),
-        RedeemWinningsRound: set(),
-        SyncMarketsRound: set(),
     }
     db_post_conditions: Dict[AppState, Set[str]] = {
         FinishedWithDepositDaiRound: {
@@ -281,11 +239,9 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
         FinishedMarketCreationManagerRound: {
             get_name(SynchronizedData.most_voted_tx_hash),
         },
-        FinishedWithRemoveFundingRound: {
-            get_name(SynchronizedData.most_voted_tx_hash),
-        },
-        FinishedWithRedeemWinningsRound: {
-            get_name(SynchronizedData.most_voted_tx_hash),
-        },
         FinishedWithoutTxRound: set(),
+        FinishedWithFundsForwarderPostTxRound: set(),
+        FinishedWithFpmmRemoveLiquidityPostTxRound: set(),
+        FinishedWithCtRedeemTokensPostTxRound: set(),
+        FinishedWithRealitioWithdrawBondsPostTxRound: set(),
     }

@@ -37,8 +37,13 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     DepositDaiRound,
     PostTransactionRound,
     PrepareTransactionRound,
-    RedeemWinningsRound,
-    RemoveFundingRound,
+)
+from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import CtRedeemTokensRound
+from packages.valory.skills.omen_fpmm_remove_liquidity_abci.rounds import (
+    FpmmRemoveLiquidityRound,
+)
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
+    RealitioWithdrawBondsRound,
 )
 
 
@@ -68,15 +73,24 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         if self.synchronized_data.tx_submitter == DepositDaiRound.auto_round_id():
             return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_submitter == RemoveFundingRound.auto_round_id():
-            return PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
+        if (
+            self.synchronized_data.tx_submitter
+            == FpmmRemoveLiquidityRound.auto_round_id()
+        ):
+            return PostTransactionRound.FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_submitter == RedeemWinningsRound.auto_round_id():
-            return PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
+        if self.synchronized_data.tx_submitter == CtRedeemTokensRound.auto_round_id():
+            return PostTransactionRound.CT_REDEEM_TOKENS_TX_DONE_PAYLOAD
+
+        if (
+            self.synchronized_data.tx_submitter
+            == RealitioWithdrawBondsRound.auto_round_id()
+        ):
+            return PostTransactionRound.REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD
 
         # Funds forwarder round from funds_forwarder_abci skill (string to avoid cross-skill import)
         if self.synchronized_data.tx_submitter == "funds_forwarder_round":
-            return PostTransactionRound.FUND_SWEEP_DONE_PAYLOAD
+            return PostTransactionRound.FUNDS_FORWARDER_TX_DONE_PAYLOAD
 
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set

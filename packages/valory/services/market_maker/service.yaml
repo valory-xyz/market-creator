@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeibbidtvs47ietuumxby3gzfw2gjrjj4dl3ktzlln32dxuhk43dsci
+agent: valory/market_maker:0.1.0:bafybeich5mytksn6g7zijigo72jaaj6litvhaqf5wwd25giyyv2jvpfzla
 number_of_agents: 1
 deployment:
   agent:
@@ -103,10 +103,14 @@ models:
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
       service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
-      redeem_winnings_batch_size: ${REDEEM_WINNINGS_BATCH_SIZE:int:5}
       expected_service_owner_address: ${EXPECTED_SERVICE_OWNER_ADDRESS:str:0x0000000000000000000000000000000000000000}
       funds_forwarder_token_config: ${FUNDS_FORWARDER_TOKEN_CONFIG:dict:{"0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d":{"retain_balance":300000000000000000000,"max_transfer":1000000000000000000000,
         "min_transfer":100000000000000000000}}}
+      liquidity_removal_lead_time: ${LIQUIDITY_REMOVAL_LEAD_TIME:int:86400}
+      fpmm_remove_liquidity_batch_size: ${FPMM_REMOVE_LIQUIDITY_BATCH_SIZE:int:1}
+      ct_redeem_tokens_batch_size: ${CT_REDEEM_TOKENS_BATCH_SIZE:int:5}
+      realitio_withdraw_bonds_batch_size: ${REALITIO_WITHDRAW_BONDS_BATCH_SIZE:int:10}
+      min_realitio_withdraw_balance: ${MIN_REALITIO_WITHDRAW_BALANCE:int:1000000000000000000}
   randomness_api:
     args:
       method: ${RANDOMNESS_API_METHOD:str:GET}
@@ -122,7 +126,7 @@ models:
       response_key: ${CT_SUBGRAPH_RESPONSE_KEY:str:data}
       response_type: ${CT_SUBGRAPH_RESPONSE_TYPE:str:list}
       retries: ${CT_SUBGRAPH_RETRIES:int:5}
-      url: ${CT_SUBGRAPH_URL:str:https://conditional-tokens.subgraph.autonolas.tech}
+      url: ${CT_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/7s9rGBffUTL8kDZuxvvpuc46v44iuDarbrADBFw5uVp2}
   omen_subgraph:
     args:
       headers:
@@ -132,6 +136,15 @@ models:
       response_type: ${OMEN_SUBGRAPH_RESPONSE_TYPE:str:list}
       retries: ${OMEN_SUBGRAPH_RETRIES:int:5}
       url: ${OMEN_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz}
+  realitio_subgraph:
+    args:
+      headers:
+        Content-Type: ${REALITIO_SUBGRAPH_CONTENT_TYPE:str:application/json}
+      method: ${REALITIO_SUBGRAPH_METHOD:str:POST}
+      response_key: ${REALITIO_SUBGRAPH_RESPONSE_KEY:str:data}
+      response_type: ${REALITIO_SUBGRAPH_RESPONSE_TYPE:str:list}
+      retries: ${REALITIO_SUBGRAPH_RETRIES:int:5}
+      url: ${REALITIO_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh}
 ---
 public_id: valory/ledger:0.19.0
 type: connection

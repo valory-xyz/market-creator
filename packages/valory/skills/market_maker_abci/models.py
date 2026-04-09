@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the shared state for the price estimation app ABCI application."""
+"""This module contains the shared state for the market maker ABCI application."""
 
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
@@ -29,9 +29,6 @@ from packages.valory.skills.funds_forwarder_abci.rounds import (
 )
 from packages.valory.skills.identify_service_owner_abci.rounds import (
     Event as IdentifyServiceOwnerEvent,
-)
-from packages.valory.skills.market_creation_manager_abci.models import (
-    ConditionalTokensSubgraph as BaseConditionalTokensSubgraph,
 )
 from packages.valory.skills.market_creation_manager_abci.models import (
     MarketCreationManagerParams,
@@ -49,6 +46,30 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     Event as MarketCreationManagerEvent,
 )
 from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
+from packages.valory.skills.omen_ct_redeem_tokens_abci.models import (
+    ConditionalTokensSubgraph as BaseConditionalTokensSubgraph,
+)
+from packages.valory.skills.omen_ct_redeem_tokens_abci.models import (
+    CtRedeemTokensParams,
+)
+from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import (
+    Event as OmenCtRedeemTokensEvent,
+)
+from packages.valory.skills.omen_fpmm_remove_liquidity_abci.models import (
+    FpmmRemoveLiquidityParams,
+)
+from packages.valory.skills.omen_fpmm_remove_liquidity_abci.rounds import (
+    Event as OmenFpmmRemoveLiquidityEvent,
+)
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.models import (
+    RealitioSubgraph as BaseRealitioSubgraph,
+)
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.models import (
+    RealitioWithdrawBondsParams,
+)
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
+    Event as OmenRealitioWithdrawBondsEvent,
+)
 from packages.valory.skills.reset_pause_abci.rounds import Event as ResetPauseEvent
 from packages.valory.skills.termination_abci.models import TerminationParams
 from packages.valory.skills.transaction_settlement_abci.rounds import Event as TSEvent
@@ -59,8 +80,9 @@ MULTIPLIER = 2
 Requests = BaseRequests
 BenchmarkTool = BaseBenchmarkTool
 RandomnessApi = MarketCreationManagerRandomnessApi
-ConditionalTokensSubgraph = BaseConditionalTokensSubgraph
 OmenSubgraph = BaseOmenSubgraph
+ConditionalTokensSubgraph = BaseConditionalTokensSubgraph
+RealitioSubgraph = BaseRealitioSubgraph
 
 
 class SharedState(BaseSharedState):
@@ -77,7 +99,6 @@ class SharedState(BaseSharedState):
         MarketCreatorAbciApp.event_to_timeout[TSEvent.ROUND_TIMEOUT] = (
             self.context.params.round_timeout_seconds
         )
-
         MarketCreatorAbciApp.event_to_timeout[ResetPauseEvent.ROUND_TIMEOUT] = (
             self.context.params.round_timeout_seconds
         )
@@ -102,11 +123,23 @@ class SharedState(BaseSharedState):
         MarketCreatorAbciApp.event_to_timeout[FundsForwarderEvent.ROUND_TIMEOUT] = (
             self.context.params.round_timeout_seconds
         )
+        MarketCreatorAbciApp.event_to_timeout[
+            OmenFpmmRemoveLiquidityEvent.ROUND_TIMEOUT
+        ] = self.context.params.round_timeout_seconds
+        MarketCreatorAbciApp.event_to_timeout[OmenCtRedeemTokensEvent.ROUND_TIMEOUT] = (
+            self.context.params.round_timeout_seconds
+        )
+        MarketCreatorAbciApp.event_to_timeout[
+            OmenRealitioWithdrawBondsEvent.ROUND_TIMEOUT
+        ] = self.context.params.round_timeout_seconds
 
 
 class Params(
     MarketCreationManagerParams,
     FundsForwarderParams,
+    FpmmRemoveLiquidityParams,
+    CtRedeemTokensParams,
+    RealitioWithdrawBondsParams,
     TerminationParams,
 ):
     """A model to represent params for multiple abci apps."""
