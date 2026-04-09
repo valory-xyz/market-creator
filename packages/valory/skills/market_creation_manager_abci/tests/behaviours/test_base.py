@@ -531,7 +531,7 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
             gen = self.behaviour.get_wxdai_balance("0xAddr")
             result = _exhaust_gen(gen)
 
-        assert result == 12345
+        assert result == 10**18
 
     def test_get_wxdai_balance_error(self) -> None:
         """Test get_wxdai_balance returns None on error."""
