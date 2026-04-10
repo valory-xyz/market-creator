@@ -62,12 +62,6 @@ from packages.valory.skills.abstract_round_abci.dialogues import (
 from packages.valory.skills.abstract_round_abci.dialogues import (
     TendermintDialogues as BaseTendermintDialogues,
 )
-from packages.valory.skills.market_creation_manager_abci.dialogues import (
-    LlmDialogue as ManagerLlmDialogue,
-)
-from packages.valory.skills.market_creation_manager_abci.dialogues import (
-    LlmDialogues as ManagerLlmDialogues,
-)
 from packages.valory.skills.market_maker_abci.dialogues import (
     AbciDialogue,
     AbciDialogues,
@@ -79,8 +73,6 @@ from packages.valory.skills.market_maker_abci.dialogues import (
     IpfsDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
-    LlmDialogue,
-    LlmDialogues,
     SigningDialogue,
     SigningDialogues,
     TendermintDialogue,
@@ -109,13 +101,3 @@ def test_dialogue_aliases() -> None:
     assert TendermintDialogues is BaseTendermintDialogues
     assert IpfsDialogue is BaseIpfsDialogue
     assert IpfsDialogues is BaseIpfsDialogues
-
-
-def test_llm_dialogue_alias() -> None:
-    """Test that LlmDialogue comes from the manager skill."""
-    assert LlmDialogue is ManagerLlmDialogue
-
-
-def test_llm_dialogues_alias() -> None:
-    """Test that LlmDialogues comes from the manager skill."""
-    assert LlmDialogues is ManagerLlmDialogues

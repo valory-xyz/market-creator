@@ -73,8 +73,6 @@ from packages.valory.skills.market_creation_manager_abci.dialogues import (
     IpfsDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
-    LlmDialogue,
-    LlmDialogues,
     SigningDialogue,
     SigningDialogues,
     TendermintDialogue,
@@ -103,37 +101,3 @@ def test_dialogue_aliases() -> None:
     assert TendermintDialogues is BaseTendermintDialogues
     assert IpfsDialogue is BaseIpfsDialogue
     assert IpfsDialogues is BaseIpfsDialogues
-
-
-def test_llm_dialogue_alias() -> None:
-    """Test that LlmDialogue is correctly aliased."""
-    from packages.valory.protocols.llm.dialogues import LlmDialogue as BaseLlmDialogue
-
-    assert LlmDialogue is BaseLlmDialogue
-
-
-def test_llm_dialogues_is_class() -> None:
-    """Test that LlmDialogues is a class (not just an alias)."""
-    assert isinstance(LlmDialogues, type)
-
-
-def test_llm_dialogues_initialization() -> None:
-    """Test that LlmDialogues can be initialized with proper skill_context."""
-    from unittest.mock import MagicMock
-
-    from packages.valory.protocols.llm.dialogues import (
-        LlmDialogues as BaseLlmDialoguesProto,
-    )
-
-    # Create a mock skill_context
-    skill_context = MagicMock()
-    skill_context.agent_address = "agent_address"
-    skill_context.skill_id = "market_creation_manager_abci/llm_dialogue"
-
-    # Instantiate LlmDialogues - this will cover line 124 (BaseLlmDialogues.__init__)
-    dialogues = LlmDialogues(name="llm_dialogues", skill_context=skill_context)
-
-    # Verify it was instantiated successfully
-    assert isinstance(dialogues, LlmDialogues)
-    assert isinstance(dialogues, BaseLlmDialoguesProto)
-    assert dialogues.skill_id == "market_creation_manager_abci/llm_dialogue"

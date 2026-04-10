@@ -7,11 +7,68 @@ This document covers the full lifecycle of an Omen prediction market on Gnosis C
 | Contract | Gnosis Address | Role |
 |----------|---------------|------|
 | **ConditionalTokens** | `0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce` | ERC-1155 token system for outcome positions. Manages conditions, position splitting/merging, and redemption. |
-| **Realitio** (Reality.eth v3) | configured per deployment | Oracle for question resolution. Holds bonds, accepts answers, and pays out winners. |
-| **RealitioProxy** | configured per deployment | Bridge between Realitio answers and ConditionalTokens conditions. Calls `reportPayouts` on CT. |
+| **Realitio** (Reality.eth v2.1) | `0x79e32aE03fb27B07C89c0c568F80287C01ca2E57` | Oracle for question resolution. Holds bonds, accepts answers, and pays out bond winners. Has its own internal balance per address. |
+| **RealitioProxy** | configured per deployment | Bridge between Realitio answers and ConditionalTokens conditions. Reads finalized answers from Realitio and calls `reportPayouts` on CT. |
 | **FPMMDeterministicFactory** | configured per deployment | Factory that deploys FPMM market contracts with deterministic addresses (CREATE2). |
 | **FPMM** (FixedProductMarketMaker) | per-market address | AMM pool for trading outcome tokens. Implements constant-product formula. |
 | **wxDAI** (ERC20) | `0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d` | Wrapped xDAI, used as collateral for all markets on Gnosis chain. |
+
+## Two independent value flows
+
+There are **two completely separate pots of money** in an Omen market. They use different contracts and different recovery mechanisms:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    CONDITIONAL TOKENS FLOW                          │
+│                    (outcome token redemption)                       │
+│                                                                     │
+│  Source: LP residual tokens / Trader bought tokens                  │
+│  Contract: ConditionalTokens                                        │
+│  Currency: wxDAI (collateral)                                       │
+│  Prerequisite: resolve() must be called first                       │
+│  Recovery: redeemPositions() → wxDAI to caller                     │
+│                                                                     │
+│  resolve()  ──────────→  redeemPositions()  ──────→  wxDAI         │
+│  (RealitioProxy)         (ConditionalTokens)                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                    REALITIO BOND FLOW                                │
+│                    (answer bond settlement)                          │
+│                                                                     │
+│  Source: Bonds posted when answering questions                      │
+│  Contract: Realitio                                                  │
+│  Currency: native xDAI                                               │
+│  Prerequisite: claimWinnings() must be called first                 │
+│  Recovery: claimWinnings() → internal balance → withdraw() → xDAI  │
+│                                                                     │
+│  claimWinnings()  ──→  Realitio.balanceOf()  ──→  withdraw()       │
+│  (Realitio)            (internal balance)          (Realitio)        │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+These flows are **completely independent**. You can do one without the other. They unlock different funds from different contracts.
+
+### `resolve()` vs `claimWinnings()` — the key distinction
+
+| | `resolve()` | `claimWinnings()` |
+|---|---|---|
+| **Contract** | RealitioProxy → ConditionalTokens | Realitio |
+| **What it does** | Reports the finalized Realitio answer to ConditionalTokens (`reportPayouts`) | Settles the bond chain for a question, credits the winner's internal Realitio balance |
+| **Event emitted** | `ConditionResolution` (on CT) | `LogClaim` (on Realitio) |
+| **Unlocks** | `redeemPositions()` — exchange outcome tokens for wxDAI | `withdraw()` — transfer xDAI from Realitio to caller |
+| **Who needs it** | Anyone holding conditional tokens (LPs with residual tokens, traders with bought tokens) | Anyone who posted bonds when answering (typically the market creator, sometimes challengers) |
+| **Currency recovered** | wxDAI (collateral from the market pool) | native xDAI (bond refunds + loser's bonds) |
+| **Parameters** | `question_id, template_id, question_data, num_outcomes` | `question_id, history_hashes[], addrs[], bonds[], answers[]` |
+| **Complexity** | Simple — 4 params from the subgraph | Complex — requires reconstructing the full answer history chain from `LogNewAnswer` events |
+
+### Who calls what in practice
+
+| Caller | `resolve()` | `claimWinnings()` | `redeemPositions()` | `withdraw()` |
+|--------|---|---|---|---|
+| **Trader** | Yes (to unlock their token redemption) | Sometimes (if they also answered) | Yes (to get their winning bet back) | Sometimes |
+| **Market creator (LP)** | Yes (to unlock LP residual token redemption) | Yes (to recover the bonds it posted) | Yes (to redeem LP excess tokens) | Yes (to extract the claimed bonds) |
+| **External answerer** | No | Yes (to recover their bonds) | No | Yes |
 
 ## Phase 1: Market Creation (LP)
 
@@ -58,21 +115,22 @@ Sell:
      → Return outcome tokens, receive collateral back
 ```
 
-Each trade shifts the pool's token ratio, changing the implied probability (price) of each outcome. This imbalances the pool — one side accumulates more tokens than the other.
+Each trade shifts the pool's token ratio, changing the implied probability (price) of each outcome. This imbalances the pool — one side accumulates more tokens than the other. Trading fees stay in the pool and are captured by the LP when removing liquidity.
 
 ## Phase 3: Question Resolution (Oracle)
 
 After the market's `openingTimestamp` passes, anyone can answer the question:
 
 ```
-1. Realitio.submitAnswer(question_id, answer, max_previous)
-   → Submit an answer with a bond (value sent with tx).
-   → answer: 0x00...00 = Yes, 0x00...01 = No, 0xff...ff = Invalid
-   → Each subsequent answer must double the bond.
-   → After timeout with no new answer, the last answer is finalized.
+Realitio.submitAnswer(question_id, answer, max_previous)
+  → Submit an answer with a bond (native xDAI sent as tx value).
+  → answer: 0x00...00 = Yes, 0x00...01 = No, 0xff...ff = Invalid
+  → Each subsequent answer must at least double the bond.
+  → After timeout with no new answer, the last answer is finalized.
+  → The bond is held in the Realitio contract until claimWinnings is called.
 ```
 
-The market-creator's `AnswerQuestionsBehaviour` does this using Mech (AI oracle) responses.
+The market-creator's `AnswerQuestionsBehaviour` does this using Mech (AI oracle) responses. It unwraps wxDAI to xDAI before posting the bond.
 
 ## Phase 4: Remove Liquidity (LP)
 
@@ -83,6 +141,7 @@ The market-creator removes its LP position through a multisend:
    → Burn LP tokens, receive proportional outcome tokens for each side.
    → Due to trading activity, the pool is imbalanced — you get MORE tokens
      on the side traders bought (the "heavier" side) and FEWER on the other.
+   → Accumulated trading fees are included (no separate fee claim needed).
 
 2. ConditionalTokens.mergePositions(collateralToken, parentCollectionId, conditionId, partition, amount)
    → Merge equal amounts of ALL outcome tokens back into collateral.
@@ -98,61 +157,77 @@ The market-creator removes its LP position through a multisend:
 
 ## Phase 5: Condition Resolution (Bridge Oracle → CT)
 
-Before anyone can redeem positions, the Realitio answer must be reported to ConditionalTokens:
+Before anyone can redeem conditional tokens, the Realitio answer must be reported to ConditionalTokens:
 
 ```
 RealitioProxy.resolve(question_id, template_id, question, num_outcomes)
   → Reads the finalized answer from Realitio
   → Calls ConditionalTokens.reportPayouts(questionId, payouts)
+  → Emits ConditionResolution event
   → Sets payoutNumerators and payoutDenominator for the condition
   → Example: Yes wins → numerators=[1,0], denominator=1
 ```
 
-This is typically called by traders during their own redemption flow. The market-creator v1 assumes someone else has already done this.
+**Who calls this?** Typically traders as part of their redemption flow. The market-creator's `RedeemWinningsBehaviour` also calls it for conditions not yet resolved ("lazy resolution").
 
-## Phase 6: Redeem Bond (LP)
+**Important:** This only unlocks `redeemPositions`. It has nothing to do with bonds.
 
-The market-creator claims accumulated bonds from answering questions:
+## Phase 6: Redeem Conditional Tokens (LP and Trader)
 
-```
-1. Realitio.balanceOf(safeAddress)  [read-only]
-   → Check if there's a withdrawable balance (from winning answer bonds)
-
-2. Realitio.withdraw()
-   → Withdraw accumulated bonds to the safe
-   → Only called if balance > 0.1 DAI
-```
-
-## Phase 7: Redeem Winnings (LP)
-
-The market-creator redeems residual conditional tokens for collateral:
+Exchange outcome tokens for collateral. Works for both LP residual tokens and trader-bought tokens:
 
 ```
 ConditionalTokens.redeemPositions(collateralToken, parentCollectionId, conditionId, indexSets)
   → For each outcome: payout = balance[i] * payoutNumerator[i] / payoutDenominator
-  → Burns the conditional tokens, transfers collateral (wxDAI) to the caller
-  → If the safe's tokens are on the WINNING side → receives collateral
-  → If the safe's tokens are on the LOSING side → receives nothing (0 * anything = 0)
-  → Safe to call with losing tokens — doesn't revert, just returns 0
+  → Burns the conditional tokens (TransferSingle to 0x000...000)
+  → Transfers collateral (wxDAI) to the caller
+  → If the caller's tokens are on the WINNING side → receives collateral
+  → If the caller's tokens are on the LOSING side → receives nothing (payout = 0)
+  → Safe to call with losing tokens — doesn't revert, just burns them
+  → Emits PayoutRedemption event with the payout amount
   → indexSets = [1, 2] for binary markets (one bit per outcome)
 ```
 
-## Phase 8: Trader Redemption (Trader)
+**Prerequisite:** `resolve()` must have been called (Phase 5). Without it, `payoutDenominator == 0` and payout is always 0.
 
-Traders use a 3-step multisend to claim everything:
+## Phase 7: Claim Bond Winnings (Answerer)
+
+Settle the Realitio bond chain and credit the winner's internal balance:
 
 ```
-1. RealitioProxy.resolve(...)        [optional — only if condition not yet resolved]
-   → See Phase 5 above
+Realitio.claimWinnings(question_id, history_hashes[], addrs[], bonds[], answers[])
+  → Processes the answer history chain in reverse chronological order
+  → The final (correct) answerer receives all accumulated bonds
+  → Credits the winner's INTERNAL Realitio balance (not a transfer!)
+  → Emits LogClaim event
+  → Parameters must be reconstructed from LogNewAnswer events
 
-2. Realitio.claimWinnings(question_id, history_hashes[], addrs[], bonds[], answers[])
-   → Claim oracle bonds from the question's answer history
-   → Parameters reconstructed from LogNewAnswer events
-   → Only the final (correct) answerer wins the accumulated bonds
+  For uncontested answers (sole answerer, common for market-creator):
+    history_hashes = [bytes32(0)]
+    addrs = [answerer_address]
+    bonds = [bond_amount]
+    answers = [answer_bytes]
 
-3. ConditionalTokens.redeemPositions(collateralToken, 0x00...00, conditionId, indexSets)
-   → Same as LP redemption above — exchange winning outcome tokens for collateral
+  For contested answers (multiple answerers):
+    Full history chain needed from LogNewAnswer events, reverse-chronological
 ```
+
+**Important:** This only credits the Realitio internal balance. The xDAI is NOT transferred yet.
+
+## Phase 8: Withdraw Bonds (Answerer)
+
+Transfer the claimed bonds from Realitio's internal balance to the caller:
+
+```
+1. Realitio.balanceOf(address)  [read-only]
+   → Check the internal balance (credited by claimWinnings)
+
+2. Realitio.withdraw()
+   → Transfer the entire internal balance as native xDAI to the caller
+   → Emits LogWithdraw event
+```
+
+**Prerequisite:** `claimWinnings()` must have been called (Phase 7). Without it, `balanceOf == 0`.
 
 ## Phase 9: Deposit DAI (LP)
 
@@ -163,6 +238,24 @@ wxDAI.deposit()   [payable]
   → Wrap native xDAI into wxDAI (ERC20)
   → wxDAI is the collateral used for creating new markets
 ```
+
+## Market-Creator FSM mapping
+
+| FSM Round | Lifecycle Phase | What it does |
+|-----------|----------------|---|
+| `SyncMarketsRound` | — | Query subgraph for existing markets |
+| `RemoveFundingRound` | Phase 4 | removeFunding + mergePositions + withdraw |
+| `RedeemWinningsRound` | Phase 5 + 6 | resolve (if needed) + redeemPositions |
+| `DepositDaiRound` | Phase 9 | wxDAI.deposit() |
+| `GetPendingQuestionsRound` | — | Query subgraph for unanswered questions |
+| `MechInteract` | — | Get AI answers from Mech |
+| `AnswerQuestionsRound` | Phase 3 | wxDAI.withdraw() + submitAnswer |
+| `RedeemBondRound` | Phase 8 | Realitio.withdraw() (claimWinnings not yet implemented) |
+| `CollectProposedMarketsRound` | — | Fetch market proposals |
+| `ApproveMarketsRound` | — | Validate via LLM |
+| `PrepareTransactionRound` | Phase 1 | approve + askQuestion + prepareCondition + create2FPMM |
+
+**Known gap:** `claimWinnings` (Phase 7) is not yet implemented. The `RedeemBondRound` only calls `withdraw()`, which depends on others (traders) having called `claimWinnings`. For uncontested answers, bonds remain locked until claimed. See plan: `.claude/plans/claim_winnings.md`.
 
 ## Visual Summary
 
@@ -195,14 +288,32 @@ wxDAI.deposit()   [payable]
     │ mergePositions│      │              │
     │ withdraw      │      │              │
     └───────┬───────┘      │              │
+            │              │              │
+            │    CONDITIONAL TOKENS FLOW  │
+            │    ~~~~~~~~~~~~~~~~~~~~~~~~ │
             │              │       ┌──────┴──────┐
-            │              │       │   resolve   │
-            │              │       │ claimWinngs │
-            │              │       │ redeemPos.  │
+            │              │       │   resolve   │ ← reports answer to CT
             │              │       └──────┬──────┘
+    ┌───────┴───────┐      │       ┌──────┴──────┐
+    │ redeemPositns │◄─────┼───────│ redeemPositns│ ← both get wxDAI back
+    └───────┬───────┘      │       └──────┬──────┘
+            │              │              │
+            │    REALITIO BOND FLOW       │
+            │    ~~~~~~~~~~~~~~~~~~~~~~   │
+            │              │       ┌──────┴──────┐
+            │              │       │claimWinnings│ ← settles bond chain
+    ┌───────┴───────┐      │       └──────┬──────┘
+    │ claimWinnings │      │       ┌──────┴──────┐
+    │ withdraw()    │      │       │  withdraw() │ ← both get xDAI back
+    └───────┬───────┘      │       └──────┬──────┘
+            │              │              │
     ┌───────┴───────┐      │              │
-    │ redeemBond    │      │              │
-    │ redeemWinngs  │◄─────┘              │
-    │ depositDai    │                     │
-    └───────────────┘                     │
+    │ depositDai    │      │              │
+    │ (wrap xDAI)   │      │              │
+    └───────┬───────┘      │              │
+            │              │              │
+    ┌───────┴───────┐      │              │
+    │ create new    │      │              │
+    │ markets       │      │              │
+    └───────────────┘      │              │
 ```

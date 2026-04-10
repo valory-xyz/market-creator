@@ -25,9 +25,6 @@ from packages.valory.skills.abstract_round_abci.behaviours import (
     AbstractRoundBehaviour,
     BaseBehaviour,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.answer_questions import (
-    AnswerQuestionsBehaviour,
-)
 from packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets import (
     ApproveMarketsBehaviour,
 )
@@ -40,17 +37,11 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.collect_rand
 from packages.valory.skills.market_creation_manager_abci.behaviours.deposit_dai import (
     DepositDaiBehaviour,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.get_pending_questions import (
-    GetPendingQuestionsBehaviour,
-)
 from packages.valory.skills.market_creation_manager_abci.behaviours.post_transaction import (
     PostTransactionBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_transaction import (
     PrepareTransactionBehaviour,
-)
-from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_bond import (
-    RedeemBondBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_winnings import (
     RedeemWinningsBehaviour,
@@ -80,8 +71,6 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     behaviours: Set[Type[BaseBehaviour]] = {
         CollectRandomnessBehaviour,
         CollectProposedMarketsBehaviour,
-        GetPendingQuestionsBehaviour,
-        AnswerQuestionsBehaviour,
         ApproveMarketsBehaviour,
         SelectKeeperMarketProposalBehaviour,
         RetrieveApprovedMarketBehaviour,
@@ -89,7 +78,6 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
         SyncMarketsBehaviour,
         RemoveFundingBehaviour,
         DepositDaiBehaviour,
-        RedeemBondBehaviour,
         RedeemWinningsBehaviour,
         PostTransactionBehaviour,
     }

@@ -32,10 +32,6 @@ from packages.valory.skills.abstract_round_abci.base import (
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     MultisigTxPayload,
 )
-from packages.valory.skills.mech_interact_abci.states.base import (
-    MechInteractionResponse,
-    MechMetadata,
-)
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
 )
@@ -52,11 +48,8 @@ class Event(Enum):
     ERROR = "api_error"
     MAX_APPROVED_MARKETS_REACHED = "max_approved_markets_reached"
     MAX_RETRIES_REACHED = "max_retries_reached"
-    MECH_REQUEST_DONE = "mech_request_done"
     NO_MARKETS_RETRIEVED = "no_markets_retrieved"
-    REDEEM_BOND_DONE = "redeem_bond_done"
     DEPOSIT_DAI_DONE = "deposit_dai_done"
-    ANSWER_QUESTION_DONE = "answer_question_done"
     REMOVE_FUNDING_DONE = "remove_funding_done"
     REDEEM_WINNINGS_DONE = "redeem_winnings_done"
     SKIP_MARKET_APPROVAL = "skip_market_approval"
@@ -123,24 +116,6 @@ class SynchronizedData(TxSynchronizedData):
                 DEFAULT_COLLECTED_PROPOSED_MARKETS_DATA,
             ),
         )
-
-    @property
-    def mech_requests(self) -> List[MechMetadata]:
-        """Get the mech requests."""
-        serialized = self.db.get("mech_requests", "[]")
-        if serialized is None:
-            serialized = "[]"
-        requests = json.loads(serialized)
-        return [MechMetadata(**metadata_item) for metadata_item in requests]
-
-    @property
-    def mech_responses(self) -> List[MechInteractionResponse]:
-        """Get the mech responses."""
-        serialized = self.db.get("mech_responses", "[]")
-        if serialized is None:
-            serialized = "[]"
-        responses = json.loads(serialized)
-        return [MechInteractionResponse(**response_item) for response_item in responses]
 
     @property
     def approved_markets_data(self) -> dict:

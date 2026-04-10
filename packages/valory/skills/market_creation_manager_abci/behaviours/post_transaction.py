@@ -22,7 +22,6 @@
 import json
 from typing import Any, Dict, Generator, Optional, Type, cast
 
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.contracts.fpmm_deterministic_factory.contract import (
     FPMMDeterministicFactory,
 )
@@ -35,11 +34,9 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import PostTxPayload
 from packages.valory.skills.market_creation_manager_abci.rounds import (
-    AnswerQuestionsRound,
     DepositDaiRound,
     PostTransactionRound,
     PrepareTransactionRound,
-    RedeemBondRound,
     RedeemWinningsRound,
     RemoveFundingRound,
 )
@@ -68,20 +65,8 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No settled tx hash.")
             return PostTransactionRound.DONE_PAYLOAD
 
-        if (
-            self.synchronized_data.tx_submitter
-            == MechRequestStates.MechRequestRound.auto_round_id()
-        ):
-            return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
-
-        if self.synchronized_data.tx_submitter == RedeemBondRound.auto_round_id():
-            return PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
-
         if self.synchronized_data.tx_submitter == DepositDaiRound.auto_round_id():
             return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
-
-        if self.synchronized_data.tx_submitter == AnswerQuestionsRound.auto_round_id():
-            return PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
 
         if self.synchronized_data.tx_submitter == RemoveFundingRound.auto_round_id():
             return PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD

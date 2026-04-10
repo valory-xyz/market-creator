@@ -45,9 +45,6 @@ from packages.valory.skills.abstract_round_abci.handlers import (
 from packages.valory.skills.abstract_round_abci.handlers import (
     TendermintHandler as BaseTendermintHandler,
 )
-from packages.valory.skills.market_creation_manager_abci.handlers import (
-    LlmHandler as BaseLlmHandler,
-)
 from packages.valory.skills.market_maker_abci.handlers import (
     ContractApiHandler,
     HttpCode,
@@ -55,7 +52,6 @@ from packages.valory.skills.market_maker_abci.handlers import (
     HttpMethod,
     IpfsHandler,
     LedgerApiHandler,
-    LlmHandler,
     MarketCreatorABCIRoundHandler,
     SigningHandler,
     TendermintHandler,
@@ -101,10 +97,6 @@ class TestHandlerAliases:
     def test_ipfs_handler(self) -> None:
         """Test IpfsHandler alias."""
         assert IpfsHandler is BaseIpfsHandler
-
-    def test_llm_handler(self) -> None:
-        """Test LlmHandler alias."""
-        assert LlmHandler is BaseLlmHandler
 
 
 class TestHttpCode:

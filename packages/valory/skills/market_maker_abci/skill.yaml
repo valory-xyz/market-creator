@@ -9,19 +9,18 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeicr7qsikxguag7ozqdriirxxmqbhuxidbgpqjv5galsjmxrr5gbwu
-  behaviours.py: bafybeibcijcl5kef57zkpmgtw6o7hjdwp2i5f4ot6y6pebgzgp5gbfca54
-  composition.py: bafybeifaa342pn7qs5kb24gwu5x6zfwibbydom2lnf3cp5ytxsxk3znxy4
-  dialogues.py: bafybeicuditmewgo3w7pcju22rtkzkrmjfxpcqpyils33fy7uzcbontd5m
-  fsm_specification.yaml: bafybeidxd63dvupmfhfs3kk3iypalrrbe2tge3zbrsp6fvcqv4nz75l5gu
-  handlers.py: bafybeib36vtg2ng4mel67liodkku7v6rkjelehsdnw2x7fazq44hfp356u
-  models.py: bafybeifos2q32h5y2iyue5v47yg5yugvx2ujranbkxjfhobq2tkkwlnnxu
+  behaviours.py: bafybeiavr6kcqsepf2kqbvgh45zbco6ojojsabbouceay72s2v2y76jnw4
+  composition.py: bafybeiazgoqbre6y4onr5n76ewcpsyv53eqd6dlwuwcoqnsffwfs34ilsu
+  dialogues.py: bafybeiafgwadv6kzts6yx5gtjyuvaftnofyn3rrwvczfd5seihpydzukju
+  fsm_specification.yaml: bafybeicvkhy6wdmrdufcsdhzn7sce5w6elicbwizydfesitgqckallkuwi
+  handlers.py: bafybeidxnunmyadmbrouiitawmaettqel55i3wl4e4v7wp6gemdbt3d6mu
+  models.py: bafybeihzwjx23cjxsxcuts2jsfowlwk4rz2u5azbspcuy3uw2bk7qunsbm
   tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
-  tests/test_behaviours.py: bafybeiaww7je4u5uyyl44ybdi57dpangy4syxcgxuepdiolqeqb4yfpk24
-  tests/test_composition.py: bafybeiam45vgvpvhyl344ai6hpirf5y6lrstopigpew2zswut6pyxpzcc4
-  tests/test_dialogues.py: bafybeih7xzdqcg6yjtqhb2aydthhnqgcyjaaar6hqbzcl23ubg5po6qft4
-  tests/test_handlers.py: bafybeif5zhig5fvro4pwx42fng5exbwk45lzyugzcb6uzo5nusbrnhz4au
-  tests/test_models.py: bafybeifv6v4cetxq3h7bgulhhoysinukb2rqugbn2nzrct6nozlj4hv6ve
+  tests/test_behaviours.py: bafybeiapyvud7fsne3cg2oowm2u7jni5ngixv4p3mudukisluccjzpc5l4
+  tests/test_dialogues.py: bafybeiedpuwlfc24gxkjoi4wvncfnjsgc7xfqiajqmvrjdvfpfrw2bcqnm
+  tests/test_handlers.py: bafybeih7lr2hncsv55vh2a2wdkt2kbhcoqe33kitgmtmcb3nbixh2pxq3e
+  tests/test_models.py: bafybeihpplz5jpldwc3dwoiikpgq5pzfijgrparak25k722l6lw3ypifli
 fingerprint_ignore_patterns: []
 connections:
 - valory/http_server:0.22.0:bafybeid4oqsfkqo36lryoecymjnq4whme3tgupqfq6m4l7lbr5r4yxtswu
@@ -32,10 +31,9 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
 - valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
 - valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
-- valory/market_creation_manager_abci:0.1.0:bafybeidyd5d4uh724qcfhitsk6on46cex6omyunlsh2bf32o2fkylw2ory
+- valory/market_creation_manager_abci:0.1.0:bafybeidzioavqzrhw4npakdo5zydmoljf3ty2jwsvvtgs4gvnipk2ueo7i
 - valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
-- valory/mech_interact_abci:0.1.0:bafybeibrmrdpys5xfivpmlyerbwlu2am2rmqb75bwub3cvcrvfwdbqxv54
 - valory/identify_service_owner_abci:0.1.0:bafybeid3uz3zy2feigoyw47jknqg3m5nwettuazprefzmz57jgktdsumne
 - valory/funds_forwarder_abci:0.1.0:bafybeig4kflknvmbpbsaeeim4kurgpjvpduu36xfcjm3ehrjhxamt6byaa
 behaviours:
@@ -64,9 +62,6 @@ handlers:
   tendermint:
     args: {}
     class_name: TendermintHandler
-  llm:
-    args: {}
-    class_name: LlmHandler
 models:
   abci_dialogues:
     args: {}
@@ -87,9 +82,6 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
-  llm_dialogues:
-    args: {}
-    class_name: LlmDialogues
   params:
     args:
       market_identification_prompt: market_identification_prompt
@@ -174,21 +166,10 @@ models:
       request_retry_delay: 1.0
       request_timeout: 10.0
       reset_pause_duration: 1800
-      mech_interact_round_timeout_seconds: 1200
-      mech_interaction_sleep_time: 10
-      use_mech_marketplace: false
-      mech_marketplace_config:
-        mech_marketplace_address: '0x0000000000000000000000000000000000000000'
-        priority_mech_address: '0x0000000000000000000000000000000000000000'
-        priority_mech_staking_instance_address: '0x0000000000000000000000000000000000000000'
-        priority_mech_service_id: 0
-        requester_staking_instance_address: '0x0000000000000000000000000000000000000000'
-        response_timeout: 300
-        use_dynamic_mech_selection: false
       reset_tendermint_after: 1
       retry_attempts: 400
       retry_timeout: 3
-      round_timeout_seconds: 60.0
+      round_timeout_seconds: 120.0
       service_id: market_creator
       agent_registry_address: null
       service_registry_address: null
@@ -197,7 +178,6 @@ models:
         - '0x0000000000000000000000000000000000000000'
         safe_contract_address: '0x0000000000000000000000000000000000000000'
         consensus_threshold: null
-      use_acn_for_delivers: false
       share_tm_config_on_startup: false
       sleep_time: 1
       tendermint_check_sleep_delay: 3
@@ -212,43 +192,20 @@ models:
       use_termination: false
       use_slashing: false
       slash_cooldown_hours: 3
-      questions_to_close_batch_size: 1
       serper_api_key: serper_api_key
       subgraph_api_key: subgraph_api_key
       google_api_key: google_api_key
       google_engine_id: google_engine_id
       openai_api_key: openai_api_key
       xdai_threshold: 3000000000000000000
-      realitio_answer_question_bond: 1000000000000000
       realitio_answer_question_bounty: 0
       slash_threshold_amount: 10000000000000000
       light_slash_unit_amount: 5000000000000000
       serious_slash_unit_amount: 8000000000000000
-      mech_contract_address: '0x77af31de935740567cf4ff1986d04b2c964a786a'
-      mech_tool_resolve_market: resolve-market-reasoning-gpt-4.1
-      answer_retry_intervals:
-      - 0
-      - 86400
-      - 259200
-      - 604800
-      - 1209600
       service_endpoint_base: https://dummy_service.autonolas.tech/
       redeem_winnings_batch_size: 5
       expected_service_owner_address: '0x0000000000000000000000000000000000000000'
       funds_forwarder_token_config: {}
-      irrelevant_tools:
-      - openai-text-davinci-002
-      - openai-text-davinci-003
-      - openai-gpt-3.5-turbo
-      - openai-gpt-4
-      - stabilityai-stable-diffusion-v1-5
-      - stabilityai-stable-diffusion-xl-beta-v2-2-2
-      - stabilityai-stable-diffusion-512-v2-1
-      - stabilityai-stable-diffusion-768-v2-1
-      ignored_mechs: []
-      penalize_mech_time_window: 1800
-      mech_wrapped_native_token_address: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
-      deliveries_lookback_days: 30
     class_name: Params
   randomness_api:
     args:
@@ -261,18 +218,6 @@ models:
       retries: 5
       url: https://drand.cloudflare.com/public/latest
     class_name: RandomnessApi
-  mech_response:
-    args:
-      api_id: mech_response
-      headers:
-        Content-Type: application/json
-      method: GET
-      parameters: {}
-      response_key: result
-      response_type: str
-      retries: 5
-      url: ''
-    class_name: MechResponseSpecs
   conditional_tokens_subgraph:
     args:
       api_id: conditional_tokens
@@ -297,34 +242,6 @@ models:
       retries: 5
       url: https://api.thegraph.com/subgraphs/name/protofire/omen-xdai
     class_name: OmenSubgraph
-  mech_tools:
-    args:
-      api_id: mech_tools
-      headers:
-        Content-Type: application/json
-      method: GET
-      parameters: {}
-      response_key: tools
-      response_type: list
-      retries: 5
-      url: ''
-    class_name: MechToolsSpecs
-  mechs_subgraph:
-    args:
-      api_id: mechs
-      headers:
-        Content-Type: application/json
-      method: POST
-      parameters: {}
-      response_key: data:meches
-      response_type: list
-      error_key: errors
-      error_index: 0
-      error_type: dict
-      retries: 5
-      url: https://api.subgraph.autonolas.tech/api/proxy/marketplace-gnosis
-      delivery_rate_cap: 10000000000000000
-    class_name: MechsSubgraph
   requests:
     args: {}
     class_name: Requests

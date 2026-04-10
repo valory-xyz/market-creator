@@ -23,15 +23,12 @@ import json
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.post_transaction import (
     PostTransactionBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
-    AnswerQuestionsRound,
     DepositDaiRound,
-    RedeemBondRound,
     RedeemWinningsRound,
     RemoveFundingRound,
 )
@@ -87,28 +84,6 @@ class TestPostTransactionBehaviour:
 
         assert result == PostTransactionRound.DONE_PAYLOAD
 
-    def test_get_payload_mech_request_submitter(self) -> None:
-        """Test get_payload when tx_submitter is MechRequestRound."""
-        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
-        self.behaviour.synchronized_data.tx_submitter = (
-            MechRequestStates.MechRequestRound.auto_round_id()
-        )
-
-        gen = self.behaviour.get_payload()
-        result = _exhaust_gen(gen)
-
-        assert result == PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
-
-    def test_get_payload_redeem_bond_submitter(self) -> None:
-        """Test get_payload when tx_submitter is RedeemBondRound."""
-        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
-        self.behaviour.synchronized_data.tx_submitter = RedeemBondRound.auto_round_id()
-
-        gen = self.behaviour.get_payload()
-        result = _exhaust_gen(gen)
-
-        assert result == PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
-
     def test_get_payload_deposit_dai_submitter(self) -> None:
         """Test get_payload when tx_submitter is DepositDaiRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
@@ -118,18 +93,6 @@ class TestPostTransactionBehaviour:
         result = _exhaust_gen(gen)
 
         assert result == PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
-
-    def test_get_payload_answer_questions_submitter(self) -> None:
-        """Test get_payload when tx_submitter is AnswerQuestionsRound."""
-        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
-        self.behaviour.synchronized_data.tx_submitter = (
-            AnswerQuestionsRound.auto_round_id()
-        )
-
-        gen = self.behaviour.get_payload()
-        result = _exhaust_gen(gen)
-
-        assert result == PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
 
     def test_get_payload_remove_funding_submitter(self) -> None:
         """Test get_payload when tx_submitter is RemoveFundingRound."""

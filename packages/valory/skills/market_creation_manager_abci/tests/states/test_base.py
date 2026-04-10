@@ -85,34 +85,6 @@ class TestSynchronizedData:
         mocked_db.get.return_value = mock_val
         assert sync_data.collected_proposed_markets_data == mock_val
 
-    def test_mech_requests_empty(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test mech_requests with empty list."""
-        mocked_db.get.return_value = "[]"
-        assert sync_data.mech_requests == []
-
-    def test_mech_requests_none_fallback(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test mech_requests with None serialized value."""
-        mocked_db.get.return_value = None
-        assert sync_data.mech_requests == []
-
-    def test_mech_responses_empty(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test mech_responses with empty list."""
-        mocked_db.get.return_value = "[]"
-        assert sync_data.mech_responses == []
-
-    def test_mech_responses_none_fallback(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test mech_responses with None serialized value."""
-        mocked_db.get.return_value = None
-        assert sync_data.mech_responses == []
-
     def test_approved_markets_data(
         self, sync_data: SynchronizedData, mocked_db: MagicMock
     ) -> None:

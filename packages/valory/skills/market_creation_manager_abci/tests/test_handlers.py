@@ -19,12 +19,8 @@
 
 """Tests for the handlers of the MarketCreationManagerAbciApp."""
 
-from unittest.mock import MagicMock
-
 import pytest
-from aea.configurations.data_types import PublicId
 
-from packages.valory.protocols.llm import LlmMessage
 from packages.valory.skills.abstract_round_abci.handlers import (
     ABCIRoundHandler as BaseABCIRoundHandler,
 )
@@ -52,7 +48,6 @@ from packages.valory.skills.market_creation_manager_abci.handlers import (
     HttpHandler,
     IpfsHandler,
     LedgerApiHandler,
-    LlmHandler,
     SigningHandler,
     TendermintHandler,
 )
@@ -84,30 +79,3 @@ def test_handler_aliases() -> None:
 def test_handler_isinstance(handler_cls: type, base_handler_cls: type) -> None:
     """Test that handler aliases are the same class as their base."""
     assert handler_cls is base_handler_cls
-
-
-class TestLlmHandler:
-    """Tests for LlmHandler."""
-
-    def test_supported_protocol(self) -> None:
-        """Test that LlmHandler has the correct SUPPORTED_PROTOCOL."""
-        assert LlmHandler.SUPPORTED_PROTOCOL == LlmMessage.protocol_id
-
-    def test_allowed_response_performatives(self) -> None:
-        """Test that LlmHandler has the correct allowed_response_performatives."""
-        expected = frozenset(
-            {
-                LlmMessage.Performative.REQUEST,
-                LlmMessage.Performative.RESPONSE,
-            }
-        )
-        assert LlmHandler.allowed_response_performatives == expected
-
-    def test_instantiation(self) -> None:
-        """Test that LlmHandler can be instantiated."""
-        handler = LlmHandler(
-            name="llm_handler",
-            skill_context=MagicMock(skill_id=PublicId.from_str("dummy/skill:0.1.0")),
-        )
-        assert handler is not None
-        assert handler.SUPPORTED_PROTOCOL == LlmMessage.protocol_id

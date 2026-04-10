@@ -22,11 +22,6 @@
 import packages.valory.skills.funds_forwarder_abci.rounds as FundsForwarderAbci
 import packages.valory.skills.identify_service_owner_abci.rounds as IdentifyServiceOwnerAbci
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
-import packages.valory.skills.mech_interact_abci.rounds as MechInteractAbci
-import packages.valory.skills.mech_interact_abci.states.final_states as MechFinalStates
-import packages.valory.skills.mech_interact_abci.states.mech_version as MechVersionStates
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
-import packages.valory.skills.mech_interact_abci.states.response as MechResponseStates
 import packages.valory.skills.transaction_settlement_abci.rounds as TransactionSettlementAbci
 from packages.valory.skills.abstract_round_abci.abci_app_chain import (
     AbciAppTransitionMapping,
@@ -58,22 +53,9 @@ abci_app_transition_mapping: AbciAppTransitionMapping = {
     FundsForwarderAbci.FinishedFundsForwarderWithTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithoutTxRound: ResetAndPauseRound,
     MarketCreationManagerAbci.FinishedWithDepositDaiRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MarketCreationManagerAbci.FinishedWithRedeemBondRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedWithRemoveFundingRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MarketCreationManagerAbci.FinishedWithGetPendingQuestionsRound: MechVersionStates.MechVersionDetectionRound,
-    MechFinalStates.FinishedMarketplaceLegacyDetectedRound: MechRequestStates.MechRequestRound,
-    MechFinalStates.FinishedMechLegacyDetectedRound: MechRequestStates.MechRequestRound,
-    MechFinalStates.FinishedMechInformationRound: MechRequestStates.MechRequestRound,
-    MechFinalStates.FailedMechInformationRound: MechVersionStates.MechVersionDetectionRound,
-    MechFinalStates.FinishedMechRequestRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MechFinalStates.FinishedMechPurchaseSubscriptionRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MechFinalStates.FinishedMechResponseRound: MarketCreationManagerAbci.AnswerQuestionsRound,
-    MechFinalStates.FinishedMechRequestSkipRound: MarketCreationManagerAbci.CollectRandomnessRound,
-    MechFinalStates.FinishedMechResponseTimeoutRound: MarketCreationManagerAbci.CollectRandomnessRound,
-    MarketCreationManagerAbci.FinishedWithMechRequestRound: MechResponseStates.MechResponseRound,
     MarketCreationManagerAbci.FinishedWithRedeemWinningsRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MarketCreationManagerAbci.FinishedWithAnswerQuestionsRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     TransactionSettlementAbci.FinishedTransactionSubmissionRound: MarketCreationManagerAbci.PostTransactionRound,
     TransactionSettlementAbci.FailedRound: ResetAndPauseRound,
     FinishedResetAndPauseRound: IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound,
@@ -94,7 +76,6 @@ MarketCreatorAbciApp = chain(
         MarketCreationManagerAbci.MarketCreationManagerAbciApp,
         TransactionSettlementAbci.TransactionSubmissionAbciApp,
         ResetPauseAbciApp,
-        MechInteractAbci.MechInteractAbciApp,
     ),
     abci_app_transition_mapping,
 ).add_background_app(termination_config)
