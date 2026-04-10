@@ -21,6 +21,8 @@
 
 from typing import Any, List, Type
 
+from aea.exceptions import enforce
+
 from packages.valory.skills.abstract_round_abci.base import AbciApp
 from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
 from packages.valory.skills.abstract_round_abci.models import (
@@ -92,30 +94,40 @@ class MarketCreationManagerParams(BaseParams):
         self.approve_market_event_days_offset = self._ensure(
             "approve_market_event_days_offset", kwargs, type_=int
         )
-        self.realitio_contract = self._ensure(
-            key="realitio_contract",
-            kwargs=kwargs,
-            type_=str,
+        # Do not pop these contract addresses — they are also required by
+        # sibling Params classes in the composed MRO.
+        self.realitio_contract: str = kwargs.get(
+            "realitio_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.realitio_contract is not None,
+            "`realitio_contract` is required",
         )
-        self.realitio_oracle_proxy_contract = self._ensure(
-            key="realitio_oracle_proxy_contract",
-            kwargs=kwargs,
-            type_=str,
+        self.realitio_oracle_proxy_contract: str = kwargs.get(
+            "realitio_oracle_proxy_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.realitio_oracle_proxy_contract is not None,
+            "`realitio_oracle_proxy_contract` is required",
         )
-        self.conditional_tokens_contract = self._ensure(
-            key="conditional_tokens_contract",
-            kwargs=kwargs,
-            type_=str,
+        self.conditional_tokens_contract: str = kwargs.get(
+            "conditional_tokens_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.conditional_tokens_contract is not None,
+            "`conditional_tokens_contract` is required",
         )
         self.fpmm_deterministic_factory_contract = self._ensure(
             key="fpmm_deterministic_factory_contract",
             kwargs=kwargs,
             type_=str,
         )
-        self.collateral_tokens_contract = self._ensure(
-            key="collateral_tokens_contract",
-            kwargs=kwargs,
-            type_=str,
+        self.collateral_tokens_contract: str = kwargs.get(
+            "collateral_tokens_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.collateral_tokens_contract is not None,
+            "`collateral_tokens_contract` is required",
         )
         self.arbitrator_contract = self._ensure(
             key="arbitrator_contract",

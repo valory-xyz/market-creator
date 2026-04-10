@@ -45,12 +45,19 @@ TX_SUBMITTER = "omen_realitio_withdraw_bonds"
 # (their history hash is cleared to zero). Without it, a query bounded by
 # batch_size would keep returning the same already-claimed questions and
 # deadlock the backlog drain.
+#
+# ``answerFinalizedTimestamp_lt`` bounds the query to questions whose
+# finalization timestamp is already in the past. Without it, the query
+# returns questions still inside their Realitio timeout window (finalization
+# is set but in the future), causing thousands of failed on-chain
+# simulations per day ("question must be finalized" revert).
 CLAIMABLE_RESPONSES_QUERY = Template("""{
     responses(
       where: {
         user: "$safe",
         question_: {
           answerFinalizedTimestamp_gt: 0,
+          answerFinalizedTimestamp_lt: $current_timestamp,
           historyHash_not: "0x0000000000000000000000000000000000000000000000000000000000000000"
         }
       }
@@ -206,10 +213,12 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
         :return: list of response dicts (possibly empty), bounded by batch_size.
         """
         safe = self.synchronized_data.safe_contract_address.lower()
+        now = self.last_synced_timestamp
         response = yield from self.get_realitio_subgraph_result(
             query=CLAIMABLE_RESPONSES_QUERY.substitute(
                 safe=safe,
                 batch_size=self.params.realitio_withdraw_bonds_batch_size,
+                current_timestamp=now,
             )
         )
         if response is None:
