@@ -52,6 +52,8 @@ answer_mapping = defaultdict(
 TEXT_ALIGNMENT = 30
 MINIMUM_WRITE_FILE_DELAY_SECONDS = 20
 FPMMS_JSON_PATH = "fpmms.json"
+_CACHE_DIR = Path(__file__).resolve().parent / ".cache"
+_LAST_TRADES_CACHE_PATH = _CACHE_DIR / "last_trades.json"
 INVALID_ANSWER_HEX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 INVALID_ANSWER = "Invalid"
 NA_ANSWER = "N/A"
@@ -333,10 +335,16 @@ def _fetch_last_trades_batch(
     return result
 
 
-def _fetch_last_trades(market_ids: List[str]) -> Dict[str, Dict[str, Any]]:
+def _fetch_last_trades(
+    market_ids: List[str],
+    on_batch: Any = None,
+) -> Dict[str, Dict[str, Any]]:
     """Fetch the last trade for each market, batched and threaded.
 
     :param market_ids: list of market addresses to query.
+    :param on_batch: optional callback ``(batch_result: dict) -> None``
+        invoked after each batch completes. Use this to persist
+        intermediate results (e.g. save cache to disk periodically).
     :return: mapping of market_id -> last trade dict (raw subgraph).
     """
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -358,7 +366,10 @@ def _fetch_last_trades(market_ids: List[str]) -> Dict[str, Dict[str, Any]]:
             desc=f"{'Fetching last trades':>{TEXT_ALIGNMENT}}",
             miniters=1,
         ):
-            result.update(future.result())
+            batch_result = future.result()
+            result.update(batch_result)
+            if on_batch is not None:
+                on_batch(batch_result)
     return result
 
 
@@ -395,15 +406,42 @@ def get_fpmms(creator: str) -> dict:
     return {"fixedProductMarketMakers": fpmms}
 
 
+def _load_last_trades_cache() -> Dict[str, Dict[str, Any]]:
+    """Load the last-trades cache from disk.
+
+    :return: mapping of market_id (lowercased) -> last trade dict.
+    """
+    if _LAST_TRADES_CACHE_PATH.exists():
+        try:
+            with open(_LAST_TRADES_CACHE_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            pass
+    return {}
+
+
+def _save_last_trades_cache(cache: Dict[str, Dict[str, Any]]) -> None:
+    """Persist the last-trades cache to disk.
+
+    :param cache: mapping of market_id -> last trade dict.
+    """
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    with open(_LAST_TRADES_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(cache, f, indent=2, sort_keys=True)
+
+
 def enrich_last_trades(fpmms: dict, market_ids: List[str]) -> None:
     """Fetch last trades only for the given market IDs and attach to fpmms.
 
-    Call this from the notebook after filtering to only the markets that
-    will be displayed (e.g. pending/finalizing).
+    Uses a disk cache (``notebooks/.cache/last_trades.json``) so that
+    closed markets — whose last trade never changes — are only fetched
+    once. Subsequent runs only query the subgraph for markets not yet
+    in the cache.
 
     :param fpmms: mapping of market_id -> market dict (mutated in place).
     :param market_ids: list of market IDs to fetch last trades for.
     """
+    # Identify markets that need a last trade (no live prices, has volume)
     need = [
         mid for mid in market_ids
         if mid in fpmms
@@ -412,9 +450,42 @@ def enrich_last_trades(fpmms: dict, market_ids: List[str]) -> None:
     ]
     if not need:
         return
-    last_trades = _fetch_last_trades(need)
-    for mid, trade in last_trades.items():
-        fpmms[mid]["lastTrade"] = trade
+
+    # Load cache and split into hits / misses
+    cache = _load_last_trades_cache()
+    cache_hits = 0
+    fetch_ids = []
+    for mid in need:
+        cached = cache.get(mid.lower())
+        if cached is not None:
+            fpmms[mid]["lastTrade"] = cached
+            cache_hits += 1
+        else:
+            fetch_ids.append(mid)
+
+    if cache_hits > 0:
+        print(
+            f"  Last-trade cache: {cache_hits} hits, "
+            f"{len(fetch_ids)} misses (will fetch)"
+        )
+
+    # Fetch only the misses from the subgraph, saving cache after each batch
+    if fetch_ids:
+        _save_counter = {"n": 0}
+
+        def _on_batch(batch_result: Dict[str, Dict[str, Any]]) -> None:
+            for mid, trade in batch_result.items():
+                fpmms[mid]["lastTrade"] = trade
+                cache[mid.lower()] = trade
+            _save_counter["n"] += 1
+            # Save cache every 5 batches (or ~1000 markets)
+            if _save_counter["n"] % 5 == 0:
+                _save_last_trades_cache(cache)
+
+        _fetch_last_trades(fetch_ids, on_batch=_on_batch)
+        # Final save to catch any remaining entries
+        _save_last_trades_cache(cache)
+        print(f"  Last-trade cache updated: {len(cache)} total entries")
 
 
 # ---------------------------------------------------------------------------
