@@ -53,6 +53,7 @@ temp/
 agent/
 logs/
 .env
+.env.*
 
 ethereum_private_key.txt
 keys.json
