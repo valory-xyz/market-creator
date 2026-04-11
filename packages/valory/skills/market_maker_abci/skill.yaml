@@ -31,14 +31,14 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
 - valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
 - valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
-- valory/market_creation_manager_abci:0.1.0:bafybeieosg3qqgkqmyrsqyuvaqwmcnih7od2ihzfm6stl3zay3qvrrtha4
+- valory/market_creation_manager_abci:0.1.0:bafybeih6mvgdxn5ajbak7x4tlhv3nmkwv7tzjael7vk4xcov4pkoxxab2a
 - valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
 - valory/identify_service_owner_abci:0.1.0:bafybeid3uz3zy2feigoyw47jknqg3m5nwettuazprefzmz57jgktdsumne
 - valory/funds_forwarder_abci:0.1.0:bafybeig4kflknvmbpbsaeeim4kurgpjvpduu36xfcjm3ehrjhxamt6byaa
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif5rxndrf7e4wpcfgyntcwhtowhzfxntuuvwqpwfgmbppiztfygbi
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeiefyiq7e3wdi73jlgcyoszwofdiisprywrm5wzwwjsijcqfzy5hay
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeielh2ad2otll2bfvdyhhnbmtduokz3yzvytplfuo22boxv5jhs2pa
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeicaojcu6cystkcnnlf2573uqhs7i2ywbpbzof7uu7yarv3e6muomu
 behaviours:
   main:
     args: {}
