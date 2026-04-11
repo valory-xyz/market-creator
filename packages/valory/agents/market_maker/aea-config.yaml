@@ -39,9 +39,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeict6h3wfmddpvam5gmmanqzuokup6ppoev3t4j5uyl7xxahjaols4
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
-- valory/market_maker_abci:0.1.0:bafybeibpyx563yjm5c735hezs433mr66xbbuoiyd4j2cjjdhvnymbrqtxy
+- valory/market_maker_abci:0.1.0:bafybeicpmf5rsfpatthea4qzchv2fzhclr5trgfxxwoegnte34nsw6crhu
 - valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
-- valory/market_creation_manager_abci:0.1.0:bafybeihasmmn2yymcoordizd7clvkfw6rjv4drl5vxkys5m5knhdanikey
+- valory/market_creation_manager_abci:0.1.0:bafybeiggpeh4bjf6dtdd4zprpejtjv7hpvkurftjn7q243d2ekbwtfwzwe
 - valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
 - valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
@@ -49,7 +49,7 @@ skills:
 - valory/funds_forwarder_abci:0.1.0:bafybeig4kflknvmbpbsaeeim4kurgpjvpduu36xfcjm3ehrjhxamt6byaa
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif5rxndrf7e4wpcfgyntcwhtowhzfxntuuvwqpwfgmbppiztfygbi
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeiefyiq7e3wdi73jlgcyoszwofdiisprywrm5wzwwjsijcqfzy5hay
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeidh7ph6qvzrd7tr7op7l6zymhe6z2py2nskoaye3ygeyofsw7hmsq
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeibbcsggyckcoevjfhmcbmkqdkr7fqxj4skxjtkmucu363wmwplebe
 default_ledger: ethereum
 required_ledgers:
 - ethereum

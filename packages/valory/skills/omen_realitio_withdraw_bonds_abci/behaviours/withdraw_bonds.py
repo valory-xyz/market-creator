@@ -66,11 +66,21 @@ CLAIMABLE_RESPONSES_QUERY = Template("""{
       orderDirection: desc
     ) {
       id
-      question { id createdBlock }
+      question {
+        id
+        createdBlock
+        updatedBlock
+      }
       bond
       answer
     }
   }""")
+
+# Safety margin (blocks) added above ``Question.updatedBlock`` when
+# bounding the eth_getLogs upper bound. A small margin protects against
+# subgraph indexing skew where the final LogNewAnswer could land in a
+# block or two after what the subgraph has indexed as ``updatedBlock``.
+_TO_BLOCK_SAFETY_MARGIN = 2
 
 
 class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
@@ -173,12 +183,13 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
     ) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Build a claimWinnings tx for one response, or None if it should be skipped."""
         # Realitio subgraph composite ids are "{contract_address}-{question_id}".
-        question_id_hex = resp["question"]["id"].split("-")[-1]
+        question = resp.get("question") or {}
+        question_id_hex = question["id"].split("-")[-1]
         question_id_bytes = bytes.fromhex(question_id_hex.replace("0x", ""))
 
         # Per-question lower bound for the eth_getLogs window, minus 1
         # as a defensive margin against subgraph indexing skew.
-        created_block_raw = resp["question"].get("createdBlock")
+        created_block_raw = question.get("createdBlock")
         if created_block_raw is None:
             self.context.logger.warning(
                 f"{SKILL_LOG_PREFIX} missing createdBlock for "
@@ -187,7 +198,17 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             return None
         from_block = max(0, int(created_block_raw) - 1)
 
-        claim_params = yield from self._get_claim_params(question_id_bytes, from_block)
+        # Bound the upper end using the subgraph's createdTimestamp and
+        # answerFinalizedTimestamp. Without this, eth_getLogs is called
+        # with to_block="latest" which can span millions of blocks for
+        # old questions and be rejected or time out by RPC providers.
+        to_block = self._compute_to_block(question_id_hex, question, from_block)
+        if to_block is None:
+            return None
+
+        claim_params = yield from self._get_claim_params(
+            question_id_bytes, from_block, to_block
+        )
         if claim_params is None:
             return None
         simulation_ok = yield from self._simulate_claim(question_id_bytes, claim_params)
@@ -228,13 +249,44 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             return []
         return cast(List[Dict[str, Any]], response.get("data", {}).get("responses", []))
 
+    def _compute_to_block(
+        self,
+        question_id_hex: str,
+        question: Dict[str, Any],
+        from_block: int,
+    ) -> Optional[int]:
+        """Compute a bounded upper block for the LogNewAnswer scan.
+
+        Uses the subgraph's ``Question.updatedBlock`` — the block number
+        of the last state change to the question, which is the block of
+        the final ``LogNewAnswer`` event. A small safety margin protects
+        against subgraph indexing skew.
+
+        :param question_id_hex: the question id (for logging).
+        :param question: the subgraph question dict.
+        :param from_block: the already-computed from_block.
+        :return: the upper bound block, or None if the required field is
+            missing.
+        """
+        updated_block_raw = question.get("updatedBlock")
+        if updated_block_raw is None:
+            self.context.logger.warning(
+                f"{SKILL_LOG_PREFIX} missing updatedBlock for "
+                f"{question_id_hex}, skipping"
+            )
+            return None
+        to_block = int(updated_block_raw) + _TO_BLOCK_SAFETY_MARGIN
+        # Defensive: updatedBlock must be >= createdBlock.
+        return max(to_block, from_block)
+
     def _get_claim_params(
-        self, question_id: bytes, from_block: int
+        self, question_id: bytes, from_block: int, to_block: int
     ) -> Generator[None, None, Optional[Any]]:
         """Get the reverse-chronological 4-tuple expected by ``Realitio.claimWinnings``.
 
         :param question_id: the Realitio question id (32-byte).
         :param from_block: lower bound block for the LogNewAnswer scan.
+        :param to_block: upper bound block for the LogNewAnswer scan.
         :yield: contract-api requests during the build.
         :return: the 4-tuple, or ``None`` on any failure.
         """
@@ -244,7 +296,7 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             contract_id=str(RealitioContract.contract_id),
             contract_callable=get_callable_name(RealitioContract.get_claim_params),
             from_block=from_block,
-            to_block="latest",
+            to_block=to_block,
             question_id=question_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:

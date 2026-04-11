@@ -13,7 +13,7 @@ fingerprint:
   behaviours/__init__.py: bafybeifgomj4ofs2ukuh4n7kfy632cbaocnyleijcnc6hju55a4yufj3se
   behaviours/base.py: bafybeifalbqchdp55ak2mr2oh3fwy32rstilxixr6767xubjcti7j3y56a
   behaviours/round_behaviour.py: bafybeiaodlrwrwlwpvgrtd3exutkyubkdjcv4oi42afbfpiy5qljflpxrq
-  behaviours/withdraw_bonds.py: bafybeibd5ugcx45c6hs2xgvgv2oh3oryxmxl6zkjp4slqrujfgorke3t44
+  behaviours/withdraw_bonds.py: bafybeih7j35kzsesbejtwyemj2gfjdkedb2lebqkbcalnhfr563bzbn6su
   dialogues.py: bafybeigbqeyz4nfnbz7z56p5zdsdsesaxylerrj3zt56sf56a4ruxnppdu
   fsm_specification.yaml: bafybeihj45kamwsf4wfh7xaysomvad6xrf47xrc57mrjoslbbpzl2d5e5i
   handlers.py: bafybeibb3sx4mhtxl24k354j3sjyl7hlgua7ltxkeni2saq3mjndahpqjm

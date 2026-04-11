@@ -78,7 +78,7 @@ skills:
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif5rxndrf7e4wpcfgyntcwhtowhzfxntuuvwqpwfgmbppiztfygbi
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeiefyiq7e3wdi73jlgcyoszwofdiisprywrm5wzwwjsijcqfzy5hay
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeidh7ph6qvzrd7tr7op7l6zymhe6z2py2nskoaye3ygeyofsw7hmsq
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeibbcsggyckcoevjfhmcbmkqdkr7fqxj4skxjtkmucu363wmwplebe
 behaviours:
   main:
     args: {}

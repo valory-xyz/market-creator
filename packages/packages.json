@@ -2,13 +2,13 @@
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeiht3qssw52ita4hrfop36hcym7oaq2w446oefpkqpwmzckrcwq54u",
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihasmmn2yymcoordizd7clvkfw6rjv4drl5vxkys5m5knhdanikey",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeibpyx563yjm5c735hezs433mr66xbbuoiyd4j2cjjdhvnymbrqtxy",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiggpeh4bjf6dtdd4zprpejtjv7hpvkurftjn7q243d2ekbwtfwzwe",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeicpmf5rsfpatthea4qzchv2fzhclr5trgfxxwoegnte34nsw6crhu",
         "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeif5rxndrf7e4wpcfgyntcwhtowhzfxntuuvwqpwfgmbppiztfygbi",
         "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeiefyiq7e3wdi73jlgcyoszwofdiisprywrm5wzwwjsijcqfzy5hay",
-        "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeidh7ph6qvzrd7tr7op7l6zymhe6z2py2nskoaye3ygeyofsw7hmsq",
-        "agent/valory/market_maker/0.1.0": "bafybeid4b7gpdqpbhzdhvjs6ctce226qxv7qvgacga7a3jjys7eg4nyeri",
-        "service/valory/market_maker/0.1.0": "bafybeifjzhintxkyoinwbflj6kgzr3lklhpdk7bh3wvhopjqyq6igja4my"
+        "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeibbcsggyckcoevjfhmcbmkqdkr7fqxj4skxjtkmucu363wmwplebe",
+        "agent/valory/market_maker/0.1.0": "bafybeidybcvgev5i37w7cf3gz6qhgvfmbyis3lz7hs7v4kof5xmecjsjju",
+        "service/valory/market_maker/0.1.0": "bafybeie3sfcqikczsytuhsbl3blloswnd74lla6tuk53i76oxhe2ro7ezy"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
