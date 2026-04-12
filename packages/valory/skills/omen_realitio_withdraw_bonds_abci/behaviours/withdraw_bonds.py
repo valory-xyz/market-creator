@@ -298,6 +298,7 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             from_block=from_block,
             to_block=to_block,
             question_id=question_id,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -346,6 +347,7 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             question_id=question_id,
             claim_params=claim_params,
             sender_address=safe_address,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -369,6 +371,7 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             contract_callable=get_callable_name(RealitioContract.build_claim_winnings),
             question_id=question_id,
             claim_params=claim_params,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -396,6 +399,7 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             contract_id=str(RealitioContract.contract_id),
             contract_callable="balance_of",
             address=safe_address,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -414,6 +418,7 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             contract_address=self.params.realitio_contract,
             contract_id=str(RealitioContract.contract_id),
             contract_callable="build_withdraw_tx",
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(

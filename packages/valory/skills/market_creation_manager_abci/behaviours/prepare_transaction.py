@@ -82,6 +82,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             sender=self.synchronized_data.safe_contract_address,
             template_id=template_id,
             question_nonce=question_nonce,
+            chain_id=self.params.default_chain_id,
         )
         return cast(str, response.state.body["question_id"])
 
@@ -105,6 +106,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             arbitrator_contract=self.params.arbitrator_contract,
             template_id=template_id,
             question_nonce=question_nonce,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -131,6 +133,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             question_id=question_id,
             oracle_contract=self.params.realitio_oracle_proxy_contract,
             outcome_slot_count=outcome_slot_count,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -160,6 +163,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             collateral_token=self.params.collateral_tokens_contract,
             initial_funds=initial_funds,
             market_fee=market_fee,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -182,6 +186,7 @@ class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             contract_callable=get_callable_name(ERC20TokenContract.build_approval_tx),
             spender=self.params.fpmm_deterministic_factory_contract,
             amount=amount,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(f"build_approval_tx unsuccessful!: {response}")

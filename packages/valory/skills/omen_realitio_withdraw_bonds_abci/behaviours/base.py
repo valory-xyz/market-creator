@@ -156,6 +156,7 @@ class RealitioWithdrawBondsBaseBehaviour(BaseBehaviour, ABC):
             data=data,
             safe_tx_gas=safe_tx_gas,
             operation=operation,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(
@@ -188,6 +189,7 @@ class RealitioWithdrawBondsBaseBehaviour(BaseBehaviour, ABC):
             contract_id=str(MultiSendContract.contract_id),
             contract_callable="get_tx_data",
             multi_send_txs=multi_send_txs,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.RAW_TRANSACTION:
             self.context.logger.error(

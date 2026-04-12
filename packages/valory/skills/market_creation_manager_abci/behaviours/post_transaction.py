@@ -154,6 +154,7 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             contract_callable=get_callable_name(
                 FPMMDeterministicFactory.parse_market_creation_event
             ),
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(

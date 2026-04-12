@@ -263,6 +263,7 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
             contract_callable=get_callable_name(FPMMContract.get_markets_with_funds),
             markets=market_addresses,
             safe_address=safe_address,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -291,6 +292,7 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
             collateral_token=self.params.collateral_tokens_contract,
             market=market,
             parent_collection_id=ZERO_HASH,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -307,6 +309,7 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_balance),
             address=self.synchronized_data.safe_contract_address,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(f"{LOG_PREFIX} FPMMContract.get_balance failed")
@@ -318,6 +321,7 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
             contract_address=market,
             contract_id=str(FPMMContract.contract_id),
             contract_callable=get_callable_name(FPMMContract.get_total_supply),
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -352,6 +356,7 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
             contract_callable=get_callable_name(FPMMContract.build_remove_funding_tx),
             contract_address=address,
             amount_to_remove=amount_to_remove,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -384,6 +389,7 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
             condition_id=condition_id,
             outcome_slot_count=outcome_slot_count,
             amount=amount,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -409,6 +415,7 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
                 ConditionalTokensContract.check_resolved
             ),
             condition_id=condition_id,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(

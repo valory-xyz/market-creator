@@ -1,6 +1,4 @@
 {
-  "config/ledger_apis/ethereum/address": "ETHEREUM_LEDGER_RPC",
-  "config/ledger_apis/ethereum/chain_id": "ETHEREUM_CHAIN_ID",
   "config/ledger_apis/gnosis/address": "GNOSIS_LEDGER_RPC",
   "config/ledger_apis/gnosis/chain_id": "GNOSIS_CHAIN_ID",
   "models/params/args/setup/all_participants": "ALL_PARTICIPANTS",
