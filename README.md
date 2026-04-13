@@ -81,8 +81,8 @@ represented on-chain in the [Autonolas Protocol](https://stack.olas.network/prot
 Set up the following environment variables, which will modify the performance of the trading agent. **Please read their description below**. We provide some defaults, but feel free to experiment with different values. Note that you need to provide `YOUR_AGENT_ADDRESS` and `YOUR_SAFE_ADDRESS` from the section above.
 
 ```bash
-export ETHEREUM_LEDGER_RPC=INSERT_YOUR_RPC
-export ETHEREUM_LEDGER_CHAIN_ID=100
+export GNOSIS_LEDGER_RPC=INSERT_YOUR_RPC
+export GNOSIS_LEDGER_CHAIN_ID=100
 
 export ALL_PARTICIPANTS='["YOUR_AGENT_ADDRESS"]'
 export SAFE_CONTRACT_ADDRESS="YOUR_SAFE_ADDRESS"
@@ -109,8 +109,8 @@ export MARKET_IDENTIFICATION_PROMPT=$(sed -e ':a' -e 'N' -e '$!ba' \
 
 These are the descriptions of the variables used by the Market Creator service. If you do not define them, they will take their default values:
 
-- `ETHEREUM_LEDGER_RPC`: RPC endpoint for the agent (you can get an RPC endpoint, e.g. [here](https://getblock.io/)).
-- `ETHEREUM_LEDGER_CHAIN_ID`: identifier of the chain on which the service is running (Gnosis=100).
+- `GNOSIS_LEDGER_RPC`: RPC endpoint for the agent (you can get an RPC endpoint, e.g. [here](https://getblock.io/)).
+- `GNOSIS_LEDGER_CHAIN_ID`: identifier of the chain on which the service is running (Gnosis=100).
 - `ALL_PARTICIPANTS`: list of all the agent addresses participating in the service. In this example we only are using a single agent.
 - `SAFE_CONTRACT_ADDRESS`: address of the agents multisig wallet created [in the previous section](#prepare-the-keys-and-the-safe).
 - `NEWSAPI_ENDPOINT`: [Newsapi](https://newsapi.org/) endpoint to retrieve recent news headlines and summaries.
@@ -245,7 +245,7 @@ aea-helpers run-service --name valory/market_maker --env-file .env
 5. **Blockchain Connection**
    - Create Tenderly account
    - Generate virtual RPC endpoint
-   - Update `ETHEREUM_LEDGER_RPC` in `.env`
+   - Update `GNOSIS_LEDGER_RPC` in `.env`
 
 ### 2. Launch Services
 

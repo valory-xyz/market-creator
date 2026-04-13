@@ -41,7 +41,7 @@
         "skill/valory/registration_abci/0.1.0": "bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda",
         "skill/valory/reset_pause_abci/0.1.0": "bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq",
         "skill/valory/termination_abci/0.1.0": "bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq",
-        "skill/valory/identify_service_owner_abci/0.1.0": "bafybeid3uz3zy2feigoyw47jknqg3m5nwettuazprefzmz57jgktdsumne",
-        "skill/valory/funds_forwarder_abci/0.1.0": "bafybeig4kflknvmbpbsaeeim4kurgpjvpduu36xfcjm3ehrjhxamt6byaa"
+        "skill/valory/identify_service_owner_abci/0.1.0": "bafybeihj2q3kf5zfhqvpayvbis4uxpe45smnzdkdvmdwxya2oe4kfc5qam",
+        "skill/valory/funds_forwarder_abci/0.1.0": "bafybeid6yc7ld64oenx3ttbxahno6qcqk6fqffqrnl3d3ftwapkwqqvexq"
     }
 }
