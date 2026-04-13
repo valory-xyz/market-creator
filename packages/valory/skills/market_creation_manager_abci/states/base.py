@@ -43,7 +43,6 @@ class Event(Enum):
     NO_MAJORITY = "no_majority"
     DONE = "done"
     NONE = "none"
-    NO_TX = "no_tx"
     ROUND_TIMEOUT = "round_timeout"
     ERROR = "api_error"
     MAX_APPROVED_MARKETS_REACHED = "max_approved_markets_reached"

@@ -30,7 +30,7 @@ fingerprint:
   rounds.py: bafybeieormajhn5cqufools6qionvie4c75ppiiygvbnizn76nsmsqk5wq
   states/__init__.py: bafybeibogw3ljdly5zf2zesfdltrxc4ncw67imtys6srp7w5by2u5ajhhu
   states/approve_markets.py: bafybeierwnnm2tejqprnx4kfoaxmaajog7jt7lnexzgbycryhmkw62jn2u
-  states/base.py: bafybeiaolxleqpzz5vg7ar6utpcm72gohuvadlp2uyl4m2h52wwd3w5ib4
+  states/base.py: bafybeigoii7tz3a6a5frar7xekvw7n5jm56igwe6nlpig3h4vlq27qtp54
   states/collect_proposed_markets.py: bafybeiaopaehmme7wwlkok74dzshayg4x5hhvub5njlruphuryuyejyd6m
   states/collect_randomness.py: bafybeifkdchmeidte5vfqqpeeomyaxlel4irxtrho6xxelexu5vds4vx54
   states/deposit_dai.py: bafybeicc27nq6hyj6hyzgfxuru2nghgt65s33xr6aohwgr3nixc5jdrxzu
