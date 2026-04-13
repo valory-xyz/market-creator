@@ -39,9 +39,10 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
     DONE_PAYLOAD = "DONE_PAYLOAD"
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
     DEPOSIT_DAI_DONE_PAYLOAD = "DEPOSIT_DAI_DONE_PAYLOAD"
-    REMOVE_FUNDING_DONE_PAYLOAD = "REMOVE_FUNDING_DONE_PAYLOAD"
-    REDEEM_WINNINGS_DONE_PAYLOAD = "REDEEM_WINNINGS_DONE_PAYLOAD"
-    FUND_SWEEP_DONE_PAYLOAD = "FUND_SWEEP_DONE_PAYLOAD"
+    FUNDS_FORWARDER_TX_DONE_PAYLOAD = "FUNDS_FORWARDER_TX_DONE_PAYLOAD"
+    FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD = "FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD"
+    CT_REDEEM_TOKENS_TX_DONE_PAYLOAD = "CT_REDEEM_TOKENS_TX_DONE_PAYLOAD"
+    REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD = "REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD"
 
     payload_class = PostTxPayload
     synchronized_data_class = SynchronizedData
@@ -60,14 +61,17 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
             if self.most_voted_payload == self.DEPOSIT_DAI_DONE_PAYLOAD:
                 return self.synchronized_data, Event.DEPOSIT_DAI_DONE
 
-            if self.most_voted_payload == self.REMOVE_FUNDING_DONE_PAYLOAD:
-                return self.synchronized_data, Event.REMOVE_FUNDING_DONE
+            if self.most_voted_payload == self.FUNDS_FORWARDER_TX_DONE_PAYLOAD:
+                return self.synchronized_data, Event.FUNDS_FORWARDER_TX_DONE
 
-            if self.most_voted_payload == self.REDEEM_WINNINGS_DONE_PAYLOAD:
-                return self.synchronized_data, Event.REDEEM_WINNINGS_DONE
+            if self.most_voted_payload == self.FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD:
+                return self.synchronized_data, Event.FPMM_REMOVE_LIQUIDITY_TX_DONE
 
-            if self.most_voted_payload == self.FUND_SWEEP_DONE_PAYLOAD:
-                return self.synchronized_data, Event.FUND_SWEEP_DONE
+            if self.most_voted_payload == self.CT_REDEEM_TOKENS_TX_DONE_PAYLOAD:
+                return self.synchronized_data, Event.CT_REDEEM_TOKENS_TX_DONE
+
+            if self.most_voted_payload == self.REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD:
+                return self.synchronized_data, Event.REALITIO_WITHDRAW_BONDS_TX_DONE
 
             return self.synchronized_data, Event.DONE
 

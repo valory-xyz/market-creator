@@ -66,6 +66,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             performative=LedgerApiMessage.Performative.GET_STATE,  # type: ignore
             ledger_callable="get_balance",
             account=address,
+            chain_id=self.params.default_chain_id,
         )
         if ledger_api_response.performative != LedgerApiMessage.Performative.STATE:
             self.context.logger.error(
@@ -131,6 +132,7 @@ class DepositDaiBehaviour(MarketCreationManagerBaseBehaviour):
             contract_id=str(ERC20TokenContract.contract_id),
             contract_callable=get_callable_name(ERC20TokenContract.build_deposit_tx),
             contract_address=wxdai_address,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.error(

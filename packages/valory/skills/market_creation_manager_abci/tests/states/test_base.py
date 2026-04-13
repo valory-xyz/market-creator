@@ -129,21 +129,6 @@ class TestSynchronizedData:
         mocked_db.get_strict.return_value = "0xkeeper"
         assert sync_data.most_voted_keeper_address == "0xkeeper"
 
-    def test_markets_to_remove_liquidity(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test markets_to_remove_liquidity property."""
-        markets = [{"address": "0x1"}, {"address": "0x2"}]
-        mocked_db.get.return_value = markets
-        assert sync_data.markets_to_remove_liquidity == markets
-
-    def test_market_from_block(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test market_from_block property."""
-        mocked_db.get.return_value = 12345
-        assert sync_data.market_from_block == 12345
-
     def test_settled_tx_hash(
         self, sync_data: SynchronizedData, mocked_db: MagicMock
     ) -> None:

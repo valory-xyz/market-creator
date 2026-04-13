@@ -82,14 +82,21 @@ class TestPostTransactionRound:
             PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD == "DEPOSIT_DAI_DONE_PAYLOAD"
         )
         assert (
-            PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
-            == "REMOVE_FUNDING_DONE_PAYLOAD"
+            PostTransactionRound.FUNDS_FORWARDER_TX_DONE_PAYLOAD
+            == "FUNDS_FORWARDER_TX_DONE_PAYLOAD"
         )
         assert (
-            PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
-            == "REDEEM_WINNINGS_DONE_PAYLOAD"
+            PostTransactionRound.FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD
+            == "FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD"
         )
-        assert PostTransactionRound.FUND_SWEEP_DONE_PAYLOAD == "FUND_SWEEP_DONE_PAYLOAD"
+        assert (
+            PostTransactionRound.CT_REDEEM_TOKENS_TX_DONE_PAYLOAD
+            == "CT_REDEEM_TOKENS_TX_DONE_PAYLOAD"
+        )
+        assert (
+            PostTransactionRound.REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD
+            == "REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD"
+        )
 
 
 class TestPostTransactionRoundEndBlock:
@@ -108,9 +115,16 @@ class TestPostTransactionRoundEndBlock:
         [
             ("ERROR_PAYLOAD", Event.ERROR),
             ("DEPOSIT_DAI_DONE_PAYLOAD", Event.DEPOSIT_DAI_DONE),
-            ("REMOVE_FUNDING_DONE_PAYLOAD", Event.REMOVE_FUNDING_DONE),
-            ("REDEEM_WINNINGS_DONE_PAYLOAD", Event.REDEEM_WINNINGS_DONE),
-            ("FUND_SWEEP_DONE_PAYLOAD", Event.FUND_SWEEP_DONE),
+            ("FUNDS_FORWARDER_TX_DONE_PAYLOAD", Event.FUNDS_FORWARDER_TX_DONE),
+            (
+                "FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD",
+                Event.FPMM_REMOVE_LIQUIDITY_TX_DONE,
+            ),
+            ("CT_REDEEM_TOKENS_TX_DONE_PAYLOAD", Event.CT_REDEEM_TOKENS_TX_DONE),
+            (
+                "REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD",
+                Event.REALITIO_WITHDRAW_BONDS_TX_DONE,
+            ),
             ("some_other_payload", Event.DONE),
         ],
     )

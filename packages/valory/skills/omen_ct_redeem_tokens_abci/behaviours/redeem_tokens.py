@@ -320,6 +320,7 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
                 ConditionalTokensContract.check_resolved
             ),
             condition_id=condition_id,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -354,6 +355,7 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
             template_id=template_id,
             question=question_data,
             num_outcomes=num_outcomes,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
@@ -386,6 +388,7 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
             parent_collection_id=ZERO_HASH,
             condition_id=condition_id,
             index_sets=index_sets,
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(

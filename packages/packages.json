@@ -2,13 +2,13 @@
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeiht3qssw52ita4hrfop36hcym7oaq2w446oefpkqpwmzckrcwq54u",
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeidzioavqzrhw4npakdo5zydmoljf3ty2jwsvvtgs4gvnipk2ueo7i",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeihxoyntzmtnn3we742e733njjdqdfkjvvijg7iz4gxyupvkiwomdm",
-        "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeif5rxndrf7e4wpcfgyntcwhtowhzfxntuuvwqpwfgmbppiztfygbi",
-        "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeiefyiq7e3wdi73jlgcyoszwofdiisprywrm5wzwwjsijcqfzy5hay",
-        "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeicme52ijrxogbrrm3e3frclowpgeoko6po6nxmu2wi4kqjvqoysgm",
-        "agent/valory/market_maker/0.1.0": "bafybeibbidtvs47ietuumxby3gzfw2gjrjj4dl3ktzlln32dxuhk43dsci",
-        "service/valory/market_maker/0.1.0": "bafybeiaskah43cv4lrgi6c76rlbemjoy2khsom63nqbeckq7a7i47kutlu"
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeibipq5v63cjjbntfculbitwl7o5t72tuairyjyo6wunawxzrsrkoi",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeihoytff2jhxhn4xn43lz25mlzlttxcesjnxi32lurcpgjqdrmp7na",
+        "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeih7cp5kz2phbffw3k45rcxsbyvw6egnitrxwwdlw7ihhkzdjkkvqm",
+        "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeibfbtuliclpudh6pjzjoygphb7rbc335fstqw2yzjarbldcoseutq",
+        "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeiaglcxckeq4pvskrrow3b6tnmjsxzebxk7vqfv5ltcapmoj32trnm",
+        "agent/valory/market_maker/0.1.0": "bafybeic64llyra4hnmlbc5jnhnddirzacgbizokwyh7gdd3ckum4u5vvea",
+        "service/valory/market_maker/0.1.0": "bafybeigrvr4n4zu2wjl3fwnsn5rcqzcccmkgcba277zyfrghryuv6xmqyu"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
@@ -21,7 +21,7 @@
         "protocol/valory/tendermint/0.1.0": "bafybeihzb7e32f7jcrzvubilqaxzmyk7ea6ss3pg3tliatdlrr76qeknyq",
         "protocol/valory/acn_data_share/0.1.0": "bafybeieqisfr6lhaaesq37lk7vyaxza2h6nucshksgyo2djqfyf2saqo4i",
         "contract/valory/multisend/0.1.0": "bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq",
-        "contract/valory/realitio/0.1.0": "bafybeibj7wequqhgxcke2bwsq5onp6amk35vdhzf5zcczhytiohz2tfqua",
+        "contract/valory/realitio/0.1.0": "bafybeierg4lftuskddcstqz65na2ydfk3yzrhcyei5qdv7xiqedy6loiuu",
         "contract/valory/realitio_proxy/0.1.0": "bafybeiehe26tllwbni57zomdyxtwipmdvmrirgc54fp5gwtg324lbfl7im",
         "contract/valory/conditional_tokens/0.1.0": "bafybeieumljzqj6dw3aifiza4msx6m4etyqhsthvcgw3s26kn73oktxdk4",
         "contract/valory/gnosis_safe_proxy_factory/0.1.0": "bafybeieonbkuskzg2rwgbqwmouusnfdd4npow2pzasimetiebo3jhwjh7m",

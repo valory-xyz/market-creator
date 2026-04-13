@@ -43,20 +43,11 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.post_transac
 from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_transaction import (
     PrepareTransactionBehaviour,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_winnings import (
-    RedeemWinningsBehaviour,
-)
-from packages.valory.skills.market_creation_manager_abci.behaviours.remove_funding import (
-    RemoveFundingBehaviour,
-)
 from packages.valory.skills.market_creation_manager_abci.behaviours.retrieve_approved_market import (
     RetrieveApprovedMarketBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.behaviours.select_keeper import (
     SelectKeeperMarketProposalBehaviour,
-)
-from packages.valory.skills.market_creation_manager_abci.behaviours.sync_markets import (
-    SyncMarketsBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     MarketCreationManagerAbciApp,
@@ -75,9 +66,6 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
         SelectKeeperMarketProposalBehaviour,
         RetrieveApprovedMarketBehaviour,
         PrepareTransactionBehaviour,
-        SyncMarketsBehaviour,
-        RemoveFundingBehaviour,
         DepositDaiBehaviour,
-        RedeemWinningsBehaviour,
         PostTransactionBehaviour,
     }

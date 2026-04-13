@@ -9,8 +9,8 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   __init__.py: bafybeib4kjyui2xe33pltjouup4lstknxxh2xarqxim6jduf7itsgixj2u
   behaviours/__init__.py: bafybeiabhvvnnijguzfh2gzoatyv2bptmgvkphxqzbkj3m6lrmqrbzalsi
-  behaviours/base.py: bafybeifdk7vyjqjjjcbqxdsa6oic7kxgycqxo4ci5grvklg63sophoupze
-  behaviours/redeem_tokens.py: bafybeidkyg4cppyu4ccvjlyt7giepnpjunoczvljkxzorzevtjbpu4bwci
+  behaviours/base.py: bafybeifmpfclk7jiikqh47cru7tizoajkn3ktof4tosbflsijuys7i6iey
+  behaviours/redeem_tokens.py: bafybeidnzkmknda2yqueldqowmohensyjqjgufz4da6eeafgkwsoatja34
   behaviours/round_behaviour.py: bafybeihxsxypivbkuqeghngqfkijcusfiluidjhotzmzrtwu5defaysgfm
   dialogues.py: bafybeia4lfrdzgijfkluh54kxfjxvjovgmbs2j2syf7a22p6yjwcthhd2a
   fsm_specification.yaml: bafybeib4adkbxcznmkzoawvdodoalqj2noz2mbij5sknq75feu6zwfguxi

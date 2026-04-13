@@ -98,7 +98,9 @@ class TestRealitioWithdrawBondsBehaviour:
             "get_contract_api_response",
             new=make_gen(resp),
         ):
-            gen = self.behaviour._get_claim_params(b"\x01" * 32, from_block=12345)
+            gen = self.behaviour._get_claim_params(
+                b"\x01" * 32, from_block=12345, to_block=12400
+            )
             result = exhaust_gen(gen)
         history_hashes, addrs, bonds, answers = result
         assert addrs == ["0xUserNew", "0xUserOld"]
@@ -130,7 +132,9 @@ class TestRealitioWithdrawBondsBehaviour:
             "get_contract_api_response",
             new=make_gen(resp),
         ):
-            gen = self.behaviour._get_claim_params(b"\x01" * 32, from_block=12345)
+            gen = self.behaviour._get_claim_params(
+                b"\x01" * 32, from_block=12345, to_block=12400
+            )
             result = exhaust_gen(gen)
         assert result is None
 
@@ -381,7 +385,14 @@ class TestRealitioWithdrawBondsBehaviour:
     def test_prepare_multisend_claim_and_withdraw_ordering(self) -> None:
         """Withdraw is FIRST in the multisend, claims follow (Fix A from claim_bonds_fix.md)."""
         responses = [
-            {"question": {"id": "0xabcd", "createdBlock": "12345"}, "bond": "100"}
+            {
+                "question": {
+                    "id": "0xabcd",
+                    "createdBlock": "12345",
+                    "updatedBlock": "12400",
+                },
+                "bond": "100",
+            }
         ]
         claim_tx = {"to": "0xR", "data": "0xclaim", "value": 0}
         withdraw_tx = {"to": "0xR", "data": "0xw", "value": 0}
@@ -455,7 +466,14 @@ class TestRealitioWithdrawBondsBehaviour:
         :param build_tx: mocked _build_claim_tx return value.
         """
         responses = [
-            {"question": {"id": "0xabcd", "createdBlock": "12345"}, "bond": "100"}
+            {
+                "question": {
+                    "id": "0xabcd",
+                    "createdBlock": "12345",
+                    "updatedBlock": "12400",
+                },
+                "bond": "100",
+            }
         ]
 
         patches = [
@@ -495,8 +513,22 @@ class TestRealitioWithdrawBondsBehaviour:
         """_build_claim_txs stops after reaching realitio_withdraw_bonds_batch_size."""
         self.behaviour.context.params.realitio_withdraw_bonds_batch_size = 1
         responses = [
-            {"question": {"id": "0xaaaa", "createdBlock": "111"}, "bond": "100"},
-            {"question": {"id": "0xbbbb", "createdBlock": "222"}, "bond": "200"},
+            {
+                "question": {
+                    "id": "0xaaaa",
+                    "createdBlock": "111",
+                    "updatedBlock": "150",
+                },
+                "bond": "100",
+            },
+            {
+                "question": {
+                    "id": "0xbbbb",
+                    "createdBlock": "222",
+                    "updatedBlock": "260",
+                },
+                "bond": "200",
+            },
         ]
         claim_tx = {"to": "0xR", "data": "0xclaim", "value": 0}
 
@@ -701,16 +733,36 @@ class TestRealitioWithdrawBondsBehaviour:
             result = exhaust_gen(gen)
         assert result is None
 
-    def test_try_build_single_claim_passes_per_question_from_block(self) -> None:
-        """from_block is derived as max(0, createdBlock - 1) and forwarded (Fix C)."""
+    def test_try_build_single_claim_missing_updated_block(self) -> None:
+        """A response with createdBlock but missing updatedBlock is skipped."""
         resp = {
             "question": {"id": "0xabcd", "createdBlock": "12345"},
             "bond": "100",
         }
+        with patch.object(
+            self.behaviour, "_get_claim_params", side_effect=AssertionError
+        ):
+            gen = self.behaviour._try_build_single_claim(resp)
+            result = exhaust_gen(gen)
+        assert result is None
+
+    def test_try_build_single_claim_passes_per_question_from_block(self) -> None:
+        """from_block is derived as max(0, createdBlock - 1) and forwarded (Fix C)."""
+        resp = {
+            "question": {
+                "id": "0xabcd",
+                "createdBlock": "12345",
+                "updatedBlock": "12400",
+            },
+            "bond": "100",
+        }
         captured: Dict[str, int] = {}
 
-        def fake_get_claim_params(question_id: bytes, from_block: int) -> Any:
+        def fake_get_claim_params(
+            question_id: bytes, from_block: int, to_block: int
+        ) -> Any:
             captured["from_block"] = from_block
+            captured["to_block"] = to_block
             return [{"p": "v"}]
             yield  # noqa
 
@@ -732,12 +784,14 @@ class TestRealitioWithdrawBondsBehaviour:
     def test_try_build_single_claim_from_block_clamped_at_zero(self) -> None:
         """createdBlock=0 (edge case) clamps to from_block=0, never negative."""
         resp = {
-            "question": {"id": "0xabcd", "createdBlock": "0"},
+            "question": {"id": "0xabcd", "createdBlock": "0", "updatedBlock": "5"},
             "bond": "100",
         }
         captured: Dict[str, int] = {}
 
-        def fake_get_claim_params(question_id: bytes, from_block: int) -> Any:
+        def fake_get_claim_params(
+            question_id: bytes, from_block: int, to_block: int
+        ) -> Any:
             captured["from_block"] = from_block
             return None
             yield  # noqa

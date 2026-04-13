@@ -11,9 +11,9 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   __init__.py: bafybeidlkvzfji4l2c3llk2a6flvtdyfrcip57wud6oryadkqxrerz7ixy
   behaviours/__init__.py: bafybeifgomj4ofs2ukuh4n7kfy632cbaocnyleijcnc6hju55a4yufj3se
-  behaviours/base.py: bafybeifalbqchdp55ak2mr2oh3fwy32rstilxixr6767xubjcti7j3y56a
+  behaviours/base.py: bafybeibmjmizjcu2bzesc75suytyuyekaxwfbebow52v7zj77o4zy3tfue
   behaviours/round_behaviour.py: bafybeiaodlrwrwlwpvgrtd3exutkyubkdjcv4oi42afbfpiy5qljflpxrq
-  behaviours/withdraw_bonds.py: bafybeigtn62mfqfvkajv5nnbjhvr5hctoohskbtrld36c3rdixuh75mvya
+  behaviours/withdraw_bonds.py: bafybeidqtrul4zmw7bn72eaevxlce6ffx2ykzmyiyh4ndzpdznvkitkzuq
   dialogues.py: bafybeigbqeyz4nfnbz7z56p5zdsdsesaxylerrj3zt56sf56a4ruxnppdu
   fsm_specification.yaml: bafybeihj45kamwsf4wfh7xaysomvad6xrf47xrc57mrjoslbbpzl2d5e5i
   handlers.py: bafybeibb3sx4mhtxl24k354j3sjyl7hlgua7ltxkeni2saq3mjndahpqjm
@@ -25,7 +25,7 @@ fingerprint:
   tests/behaviours/conftest.py: bafybeifs7ndup6ljnzu75f4mki6uowdelbrl7zd75723kzyj4l5hskh7ke
   tests/behaviours/test_base.py: bafybeicpwcmrpmeacfxsjdza7i6rhgulzut5bjhsyxnleub27ihjkxymdu
   tests/behaviours/test_round_behaviour.py: bafybeiggrxud3ntgm2d575bippzxooglnk2bfjr25xqp6xk4vqayfg2vg4
-  tests/behaviours/test_withdraw_bonds.py: bafybeifklwltndl225ug6gszq4znkodgw4a5gcp3vdnt3jd7umjcvrepsm
+  tests/behaviours/test_withdraw_bonds.py: bafybeiesb2sywkylvfjyxd2onzgrtp6tvwfyytugyuxyelyre2tskwqizy
   tests/conftest.py: bafybeifdrl7gcdyccpvrklbuya4mzusblsxryebhl6d4o6oeanzbiorhoy
   tests/test_dialogues.py: bafybeiaeezyc4h2bahxub6oy7htxvhhlioxspcxvfq5hoy3jvkvxa4jyfm
   tests/test_handlers.py: bafybeic7y6tyvrd5cdv7argfe5ccbb5qjlefunnoxbsjafiy6q4upq3ln4
@@ -37,7 +37,7 @@ connections: []
 contracts:
 - valory/gnosis_safe:0.1.0:bafybeice337zvg3ol4cwpw2iikxcukmthwmw32ytwtdnkcju222qfc323y
 - valory/multisend:0.1.0:bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq
-- valory/realitio:0.1.0:bafybeibj7wequqhgxcke2bwsq5onp6amk35vdhzf5zcczhytiohz2tfqua
+- valory/realitio:0.1.0:bafybeierg4lftuskddcstqz65na2ydfk3yzrhcyei5qdv7xiqedy6loiuu
 protocols:
 - valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
 skills:

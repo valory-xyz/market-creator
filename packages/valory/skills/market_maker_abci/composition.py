@@ -17,11 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the price estimation ABCI application."""
+"""This module contains the market maker composed ABCI application."""
 
 import packages.valory.skills.funds_forwarder_abci.rounds as FundsForwarderAbci
 import packages.valory.skills.identify_service_owner_abci.rounds as IdentifyServiceOwnerAbci
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
+import packages.valory.skills.omen_ct_redeem_tokens_abci.rounds as OmenCtRedeemTokensAbci
+import packages.valory.skills.omen_fpmm_remove_liquidity_abci.rounds as OmenFpmmRemoveLiquidityAbci
+import packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds as OmenRealitioWithdrawBondsAbci
 import packages.valory.skills.transaction_settlement_abci.rounds as TransactionSettlementAbci
 from packages.valory.skills.abstract_round_abci.abci_app_chain import (
     AbciAppTransitionMapping,
@@ -46,18 +49,41 @@ from packages.valory.skills.termination_abci.rounds import (
 )
 
 abci_app_transition_mapping: AbciAppTransitionMapping = {
+    # Registration → IdentifyServiceOwner
     FinishedRegistrationRound: IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound,
+    # IdentifyServiceOwner → FundsForwarder (ok) / FpmmRemoveLiquidity (error — skip FundsForwarder)
     IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound: FundsForwarderAbci.FundsForwarderRound,
-    IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound: MarketCreationManagerAbci.SyncMarketsRound,
-    FundsForwarderAbci.FinishedFundsForwarderNoTxRound: MarketCreationManagerAbci.SyncMarketsRound,
+    IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound: OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound,
+    # FundsForwarder: tx → TxSettlement (returns via PostTx → FpmmRemoveLiquidity).
+    # No tx → FpmmRemoveLiquidity directly.
+    FundsForwarderAbci.FinishedFundsForwarderNoTxRound: OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound,
     FundsForwarderAbci.FinishedFundsForwarderWithTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    # Linear recovery chain: each skill either builds a multisend (→ TxSettlement →
+    # PostTx → next skill) or produces no tx (→ next skill directly). Every cycle walks
+    # through all three recovery skills in order before reaching the core market-creation flow.
+    #
+    # Step 1: FpmmRemoveLiquidity
+    OmenFpmmRemoveLiquidityAbci.FinishedWithFpmmRemoveLiquidityTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    OmenFpmmRemoveLiquidityAbci.FinishedWithoutFpmmRemoveLiquidityTxRound: OmenCtRedeemTokensAbci.CtRedeemTokensRound,
+    # Step 2: CtRedeemTokens
+    OmenCtRedeemTokensAbci.FinishedWithCtRedeemTokensTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    OmenCtRedeemTokensAbci.FinishedWithoutCtRedeemTokensTxRound: OmenRealitioWithdrawBondsAbci.RealitioWithdrawBondsRound,
+    # Step 3: RealitioWithdrawBonds
+    OmenRealitioWithdrawBondsAbci.FinishedWithRealitioWithdrawBondsTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    OmenRealitioWithdrawBondsAbci.FinishedWithoutRealitioWithdrawBondsTxRound: MarketCreationManagerAbci.DepositDaiRound,
+    # PostTx fan-out: each recovery tx returns to the NEXT step of the chain.
+    MarketCreationManagerAbci.FinishedWithFundsForwarderPostTxRound: OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound,
+    MarketCreationManagerAbci.FinishedWithFpmmRemoveLiquidityPostTxRound: OmenCtRedeemTokensAbci.CtRedeemTokensRound,
+    MarketCreationManagerAbci.FinishedWithCtRedeemTokensPostTxRound: OmenRealitioWithdrawBondsAbci.RealitioWithdrawBondsRound,
+    MarketCreationManagerAbci.FinishedWithRealitioWithdrawBondsPostTxRound: MarketCreationManagerAbci.DepositDaiRound,
+    # Core market-creation flow (unchanged) -----------------------------------
     MarketCreationManagerAbci.FinishedWithoutTxRound: ResetAndPauseRound,
     MarketCreationManagerAbci.FinishedWithDepositDaiRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
     MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MarketCreationManagerAbci.FinishedWithRemoveFundingRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MarketCreationManagerAbci.FinishedWithRedeemWinningsRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
+    # TxSettlement → PostTransactionRound (multiplexes by tx_submitter)
     TransactionSettlementAbci.FinishedTransactionSubmissionRound: MarketCreationManagerAbci.PostTransactionRound,
     TransactionSettlementAbci.FailedRound: ResetAndPauseRound,
+    # Reset → next period
     FinishedResetAndPauseRound: IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound,
     FinishedResetAndPauseErrorRound: RegistrationRound,
 }
@@ -73,6 +99,9 @@ MarketCreatorAbciApp = chain(
         AgentRegistrationAbciApp,
         IdentifyServiceOwnerAbci.IdentifyServiceOwnerAbciApp,
         FundsForwarderAbci.FundsForwarderAbciApp,
+        OmenFpmmRemoveLiquidityAbci.OmenFpmmRemoveLiquidityAbciApp,
+        OmenCtRedeemTokensAbci.OmenCtRedeemTokensAbciApp,
+        OmenRealitioWithdrawBondsAbci.OmenRealitioWithdrawBondsAbciApp,
         MarketCreationManagerAbci.MarketCreationManagerAbciApp,
         TransactionSettlementAbci.TransactionSubmissionAbciApp,
         ResetPauseAbciApp,

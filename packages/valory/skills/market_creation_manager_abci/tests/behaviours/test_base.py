@@ -185,8 +185,8 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
 
     def setup_method(self) -> None:
         """Setup test fixtures."""
-        from packages.valory.skills.market_creation_manager_abci.behaviours.redeem_winnings import (
-            RedeemWinningsBehaviour,
+        from packages.valory.skills.market_creation_manager_abci.behaviours.post_transaction import (
+            PostTransactionBehaviour,
         )
 
         context_mock = MagicMock()
@@ -210,7 +210,7 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         context_mock.requests = MagicMock()
         context_mock.outbox = MagicMock()
         # Use a concrete subclass to test the base methods
-        self.behaviour = RedeemWinningsBehaviour(
+        self.behaviour = PostTransactionBehaviour(
             name="test", skill_context=context_mock
         )
 
@@ -422,75 +422,6 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
 
         assert result is None
 
-    def test_get_ct_subgraph_result_success(self) -> None:
-        """Test get_conditional_tokens_subgraph_result returns parsed JSON."""
-        import json
-
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.body = json.dumps({"data": {"user": {}}}).encode()
-        self.behaviour.context.conditional_tokens_subgraph = MagicMock()
-        self.behaviour.context.conditional_tokens_subgraph.get_spec.return_value = {
-            "method": "POST",
-            "url": "http://ct-subgraph.example.com",
-        }
-
-        with patch.object(
-            self.behaviour,
-            "get_http_response",
-            new=_make_gen(mock_resp),
-        ):
-            gen = self.behaviour.get_conditional_tokens_subgraph_result(
-                query="{ user {} }"
-            )
-            result = _exhaust_gen(gen)
-
-        assert result is not None
-        assert "data" in result
-
-    def test_get_ct_subgraph_result_none_response(self) -> None:
-        """Test get_conditional_tokens_subgraph_result returns None when response is None."""
-        self.behaviour.context.conditional_tokens_subgraph = MagicMock()
-        self.behaviour.context.conditional_tokens_subgraph.get_spec.return_value = {
-            "method": "POST",
-            "url": "http://ct-subgraph.example.com",
-        }
-
-        with patch.object(
-            self.behaviour,
-            "get_http_response",
-            new=_make_gen(None),
-        ):
-            gen = self.behaviour.get_conditional_tokens_subgraph_result(
-                query="{ user {} }"
-            )
-            result = _exhaust_gen(gen)
-
-        assert result is None
-
-    def test_get_ct_subgraph_result_non_200(self) -> None:
-        """Test get_conditional_tokens_subgraph_result returns None on non-200."""
-        mock_resp = MagicMock()
-        mock_resp.status_code = 500
-        mock_resp.body = b"Server Error"
-        self.behaviour.context.conditional_tokens_subgraph = MagicMock()
-        self.behaviour.context.conditional_tokens_subgraph.get_spec.return_value = {
-            "method": "POST",
-            "url": "http://ct-subgraph.example.com",
-        }
-
-        with patch.object(
-            self.behaviour,
-            "get_http_response",
-            new=_make_gen(mock_resp),
-        ):
-            gen = self.behaviour.get_conditional_tokens_subgraph_result(
-                query="{ user {} }"
-            )
-            result = _exhaust_gen(gen)
-
-        assert result is None
-
     def test_synchronized_data_property(self) -> None:
         """Test the synchronized_data property."""
         from packages.valory.skills.market_creation_manager_abci.rounds import (
@@ -514,41 +445,6 @@ class TestMarketCreationManagerBaseBehaviourGenerators:
         """Test the last_synced_timestamp property reads from round_sequence."""
         result = self.behaviour.last_synced_timestamp
         assert result == 1700000000
-
-    def test_get_wxdai_balance_success(self) -> None:
-        """Test get_wxdai_balance returns the token balance."""
-        from packages.valory.protocols.contract_api import ContractApiMessage
-
-        mock_resp = MagicMock()
-        mock_resp.performative = ContractApiMessage.Performative.STATE
-        mock_resp.state.body = {"token": 10**18}
-
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(mock_resp),
-        ):
-            gen = self.behaviour.get_wxdai_balance("0xAddr")
-            result = _exhaust_gen(gen)
-
-        assert result == 10**18
-
-    def test_get_wxdai_balance_error(self) -> None:
-        """Test get_wxdai_balance returns None on error."""
-        from packages.valory.protocols.contract_api import ContractApiMessage
-
-        mock_resp = MagicMock()
-        mock_resp.performative = ContractApiMessage.Performative.ERROR
-
-        with patch.object(
-            self.behaviour,
-            "get_contract_api_response",
-            new=_make_gen(mock_resp),
-        ):
-            gen = self.behaviour.get_wxdai_balance("0xAddr")
-            result = _exhaust_gen(gen)
-
-        assert result is None
 
     def test_shared_state_property(self) -> None:
         """Test the shared_state property."""
