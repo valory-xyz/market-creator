@@ -2,13 +2,13 @@
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeiht3qssw52ita4hrfop36hcym7oaq2w446oefpkqpwmzckrcwq54u",
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeibipq5v63cjjbntfculbitwl7o5t72tuairyjyo6wunawxzrsrkoi",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeih5nh3taz7gakmoyeptwfggtddypoqfjuugbe4vutxx2z4hy76ypu",
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiez6mnculzxwrmqjnjnw4qxqg4qutkklucvdrxcvyrfheen5fn6ie",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeiekceso2zwfdendo66jfof6xmhstqspsqygxgg5eubuy5tmbce4um",
         "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeih7cp5kz2phbffw3k45rcxsbyvw6egnitrxwwdlw7ihhkzdjkkvqm",
         "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeibfbtuliclpudh6pjzjoygphb7rbc335fstqw2yzjarbldcoseutq",
-        "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeiaglcxckeq4pvskrrow3b6tnmjsxzebxk7vqfv5ltcapmoj32trnm",
-        "agent/valory/market_maker/0.1.0": "bafybeigx7ekceke4wgt64wefw5dses223srot2zpe2cwjnbgnf3w6kllxa",
-        "service/valory/market_maker/0.1.0": "bafybeiguv4pswij3pbkko35zhehk5jcmprxwbglbja4tmowtv5yddtgtxi"
+        "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeicmrxhqnuzgookhm4ewqw5f4w4w2xafxm7vamptmqxbnwgvxx6ywq",
+        "agent/valory/market_maker/0.1.0": "bafybeiczunxopinkulqu4k4h3wpzcllkrxkdrmoujxbn5jgug34bspnfsi",
+        "service/valory/market_maker/0.1.0": "bafybeidkpm724vn3zcckdy2fq2llid2nji342vanmwi34bdu4ek5u36ljq"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
@@ -21,7 +21,7 @@
         "protocol/valory/tendermint/0.1.0": "bafybeihzb7e32f7jcrzvubilqaxzmyk7ea6ss3pg3tliatdlrr76qeknyq",
         "protocol/valory/acn_data_share/0.1.0": "bafybeieqisfr6lhaaesq37lk7vyaxza2h6nucshksgyo2djqfyf2saqo4i",
         "contract/valory/multisend/0.1.0": "bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq",
-        "contract/valory/realitio/0.1.0": "bafybeierg4lftuskddcstqz65na2ydfk3yzrhcyei5qdv7xiqedy6loiuu",
+        "contract/valory/realitio/0.1.0": "bafybeidhivb4ty47ki3fxo2tmztt47bi3zw2xthu4xdp73tidx6eby2tge",
         "contract/valory/realitio_proxy/0.1.0": "bafybeiehe26tllwbni57zomdyxtwipmdvmrirgc54fp5gwtg324lbfl7im",
         "contract/valory/conditional_tokens/0.1.0": "bafybeieumljzqj6dw3aifiza4msx6m4etyqhsthvcgw3s26kn73oktxdk4",
         "contract/valory/gnosis_safe_proxy_factory/0.1.0": "bafybeieonbkuskzg2rwgbqwmouusnfdd4npow2pzasimetiebo3jhwjh7m",
