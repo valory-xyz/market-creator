@@ -163,6 +163,11 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     Your task is to formulate {num_questions} novel prediction market question(s)
     based on these states. Use the measurable states to guide your framing.
 
+    CRITICAL CONSTRAINT: You have a WINDOW of only {window_days} days
+    (today → EVENT_DAY). Every date, threshold, and authority action in
+    your question must be achievable within {window_days} days. Do NOT
+    reference dates outside this window or in the past.
+
     RULES:
     - For "measurement" states: frame as "Will [metric] be above/below [threshold]
       on EVENT_DAY, as confirmed by [source]?"
@@ -178,16 +183,20 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
       and known after EVENT_DAY.
     - Must not encourage unethical behavior or violence.
     - Must not include unmeasurable statements like "significant increase".
+    - ALL dates in the question must be between today and EVENT_DAY. Never
+      reference past dates or dates beyond EVENT_DAY.
 
     SPECIFIC FRAMING CHECKS (apply to every question):
     1. DEADLINE FEASIBILITY — Can the criterion physically/procedurally occur
-       by EVENT_DAY? If not, reframe to something that can.
+       within {window_days} days? If not, reframe to something that can.
     2. PROCESS-STAGE CLARITY — If multi-stage process, name the exact stage.
        Never use "formal passage" or "official approval" without a stage qualifier.
     3. DIRECTLY-PUBLISHED FIGURE — Thresholds must be figures a source publishes
        directly, not derived by arithmetic on separate figures.
     4. AUTHORITY RESPONSE TIME — The deadline must be realistic for the named
        authority. Government reviews, regulatory investigations take weeks/months.
+       If the authority cannot plausibly act within {window_days} days, do NOT
+       frame the question around that authority's action.
     5. RESOLUTION SOURCE — Name WHO confirms and WHAT document/channel.
 
     MEASURABLE_STATES
@@ -303,6 +312,38 @@ class LLMStorySelectionSchema(BaseModel):
     topic: str
     article_id: int
     reasoning: str
+
+
+import re
+
+def validate_question_dates(question: str, resolution_ts: int) -> Optional[str]:
+    """Check that all dates in a question are between today and the deadline.
+
+    Returns None if OK, or a rejection reason string if a date is out of range.
+    """
+    now = datetime.now(tz=timezone.utc)
+    deadline = datetime.fromtimestamp(resolution_ts, tz=timezone.utc)
+
+    # Find all date-like patterns: "April 21, 2026", "21 April 2026",
+    # "September 20, 2024", "February 1, 2027", etc.
+    date_patterns = [
+        r'(\w+ \d{1,2},? \d{4})',      # "April 21, 2026"
+        r'(\d{1,2} \w+ \d{4})',          # "21 April 2026"
+    ]
+    for pattern in date_patterns:
+        for match in re.findall(pattern, question):
+            for fmt in ('%B %d, %Y', '%B %d %Y', '%d %B %Y'):
+                try:
+                    d = datetime.strptime(match.replace(',', ''), fmt.replace(',', ''))
+                    d = d.replace(tzinfo=timezone.utc)
+                    if d < now - __import__('datetime').timedelta(days=1):
+                        return f"Date '{match}' is in the past"
+                    if d > deadline + __import__('datetime').timedelta(days=365):
+                        return f"Date '{match}' is too far beyond the deadline"
+                    break
+                except ValueError:
+                    continue
+    return None
 
 
 class KeyChain:
@@ -735,12 +776,18 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             )
             model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
 
+            # Generate more candidates than needed; self-review + date check
+            # will filter down. This makes self-review a selector, not just a gate.
+            n_candidates = max(num_questions * 3, 3)
+            window_days = max(1, (int(resolution_time) - int(datetime.now(tz=timezone.utc).timestamp())) // 86400)
+
             prompt_values = {
                 "article": f"{article_text}",
                 "event_day": format_utc_timestamp(int(resolution_time)),
                 "latest_questions": latest_questions_string,
                 "measurable_states": states_string,
-                "num_questions": f"{num_questions}",
+                "num_questions": f"{n_candidates}",
+                "window_days": str(window_days),
             }
 
             prompt = PROPOSE_QUESTION_PROMPT.format(**prompt_values)
@@ -833,15 +880,35 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             else:
                 rejected_questions.append({
                     "question": rev["question"],
-                    "reason": rev.get("rejection_reason", "failed self-review"),
+                    "reason": rev.get("reasoning", rev.get("rejection_reason", "failed self-review")),
                 })
+
+        # Programmatic date validation — catches past dates and out-of-range
+        # dates that the LLM self-review misses (100% recall on date issues).
+        date_validated = []
+        for q in accepted_questions:
+            date_issue = validate_question_dates(q, int(resolution_time))
+            if date_issue:
+                rejected_questions.append({"question": q, "reason": f"DATE CHECK: {date_issue}"})
+            else:
+                date_validated.append(q)
 
         print(f"Self-review: {len(accepted_questions)} accepted, "
               f"{len(rejected_questions)} rejected out of {len(questions)} proposed")
         for rej in rejected_questions:
-            print(f"  REJECTED: {rej['question'][:80]}... — {rej['reason']}")
+            print(f"  REJECTED: {rej['question'][:80]}... — {rej['reason'][:60]}")
 
-        questions = accepted_questions if accepted_questions else questions
+        # Pick the best num_questions from validated candidates.
+        # Do NOT fall back to rejected questions — return error instead.
+        if date_validated:
+            questions = date_validated[:num_questions]
+        else:
+            return (
+                f'{{"error": "All {len(questions)} proposed questions were rejected by self-review or date validation.", "tool": {tool}}}',
+                None,
+                None,
+                counter_callback,
+            )
 
         # Generate output
         answers = ["Yes", "No"]
