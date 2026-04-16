@@ -107,6 +107,16 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
     to create questions for prediction markets. The chosen article should be that the
     questions created are of public interest. The chosen article should ideally
     be used to create questions based on topics different from the EXISTING_QUESTIONS.
+
+    PREFER articles that support MEASUREMENT or STATE questions over articles
+    that only support specific-announcement questions. Good signals:
+    - The article mentions a measurable quantity (price, rate, index, count,
+      percentage, ranking) that can be checked on a future date.
+    - The article describes an ongoing state or trend that can be asked about
+      as a continuation ("Will X remain above Y?").
+    Avoid articles whose only angle is "will authority X announce Y?" unless
+    a scheduled announcement is specifically anticipated in the article.
+
     You must output the article ID a topic from TOPICS and a brief reasoning.
 
     EXISTING_QUESTIONS
@@ -123,19 +133,64 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     under ARTICLE. Your task is to formulate {num_questions} novel prediction market question
     with clear, objective outcomes based on the information from the ARTICLE.
     The questions must satisfy all the following criteria:
+
+    GENERAL CRITERIA
     - Must be of public interest.
     - Must be semantically different.
     - Must be different from EXISTING_QUESTIONS.
     - Must be related to an event happening before EVENT_DAY or on EVENT_DAY.
     - Must not encourage unethical behavior or violence.
-    - Should follow a structure similar to these: "Will EVENT occur on or before EVENT_DAY?", "Will EVENT occur by EVENT_DAY?", etc.
-    - Must not include unmeasurable statements like "significant increase".
-    - Do not reference matches, sport events or any other event that do not occur on or before EVENT_DAY.
-    - The answer must be 'yes' or 'no.
+    - The answer must be 'yes' or 'no'.
     - The answer must be verified using publicly available sources or news media.
     - The answer must not be an opinion.
     - The answer must be unambiguous.
     - The answer must be known after EVENT_DAY.
+    - Do not reference matches, sport events or any other event that do not occur on or before EVENT_DAY.
+    - Must not include unmeasurable statements like "significant increase".
+
+    QUESTION TYPE — PREFER MEASUREMENT AND CONTINUATION FRAMINGS
+    Prefer questions whose answer is determined by MEASUREMENT ("Will the
+    metric X be above Y on EVENT_DAY?", "Will the price of Z stay below W
+    until EVENT_DAY?") or by CONTINUATION of an existing state ("Will X
+    remain in position through EVENT_DAY?"). These framings resolve more
+    reliably on short windows because the outcome is determined by checking
+    a published value or verifying that a status-quo persists — rather than
+    requiring a specific new event to fire.
+    Use specific-announcement framings ("Will authority X publicly announce Y
+    by EVENT_DAY?") ONLY when the article specifically anticipates a
+    scheduled announcement.
+
+    POLARITY — AIM FOR A BALANCED MIX
+    Not every question should ask "Will X happen?". Where the article
+    supports it, consider the opposite polarity: "Will X NOT happen?" or
+    "Will [ongoing state] continue through EVENT_DAY?". The goal is to
+    produce a balanced mix of questions where roughly half are expected
+    to resolve Yes and half No.
+
+    SPECIFIC FRAMING RULES (to avoid known failure modes)
+    1. DEADLINE FEASIBILITY — Before finalizing, verify the specific outcome
+       being asked about can physically or procedurally occur on or before
+       EVENT_DAY. If the article describes a process that takes longer than
+       the available window (spaceflight milestones, legislative stages,
+       regulatory reviews), do NOT frame the question around the late-stage
+       milestone. Instead, ask about an earlier measurable state.
+    2. PROCESS-STAGE CLARITY — If the question mentions a multi-stage legal,
+       regulatory, or legislative process, specify the exact stage. Do NOT
+       use ambiguous phrases like "formal passage", "official approval", or
+       "formal review". Instead use the specific stage: "full-parliament vote
+       and passage", "committee approval", "signed into law", etc.
+    3. DIRECTLY-PUBLISHED FIGURE — If the question asks whether a numeric
+       threshold has been exceeded, verify the threshold is a figure a source
+       would publish DIRECTLY. Do NOT create questions whose answer requires
+       multiplying, dividing, or summing two separately-published figures.
+    4. AUTHORITY RESPONSE TIME — If the question requires action by a specific
+       authority, verify the deadline is realistic for that authority's typical
+       response time. Antitrust reviews, regulatory investigations, and formal
+       government announcements typically take weeks to months — not days.
+    5. RESOLUTION SOURCE — The question must specify WHO must make the
+       announcement and WHAT document or channel would confirm it. Prefer
+       official sources ("as confirmed by an SEC 8-K filing") over generic
+       media references.
 
     EXISTING_QUESTIONS
     {latest_questions}
@@ -145,6 +200,48 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
 
     ARTICLE
     {article}
+    """
+
+SELF_REVIEW_PROMPT = """You are auditing prediction-market questions for
+    quality. For each question below, answer four YES/NO checks:
+
+    1. DEADLINE FEASIBILITY: Given the source article and event timeline,
+       is it physically/procedurally possible for the question's specific
+       criterion to be satisfied by the deadline? (e.g. a distance-record
+       question cannot be satisfied before the spacecraft has reached that
+       distance.)
+    2. PROCESS-STAGE CLARITY: If the question mentions a multi-stage process
+       (legislation, regulation, judicial ruling), is the exact stage
+       specified? ("formal passage" alone is ambiguous → NO.)
+    3. FIGURE DERIVABILITY: If the question asks about a numeric threshold,
+       can that specific figure be looked up directly in a published source,
+       or does it require arithmetic on two other figures? (derivable but
+       not explicit → NO.)
+    4. AUTHORITY RESPONSE TIME: If the question requires action by a specific
+       authority, is the deadline realistic for that authority's typical
+       response time? (antitrust reviews don't initiate within days → NO.)
+
+    Return a JSON array. For each question:
+    {{
+      "question": "...",
+      "deadline_feasibility": true/false,
+      "process_stage_clarity": true/false,
+      "figure_derivability": true/false,
+      "authority_response_time": true/false,
+      "accept": true/false,
+      "rejection_reason": "..." (only if accept is false)
+    }}
+
+    A question should only be accepted if ALL four checks pass.
+
+    QUESTIONS
+    {questions}
+
+    SOURCE ARTICLE
+    {article}
+
+    EVENT_DAY
+    {event_day}
     """
 
 client: Optional[OpenAI] = None
@@ -157,6 +254,24 @@ class LLMQuestionProposalSchema(BaseModel):
     """Schema for proposed questions."""
 
     questions: List[str]
+
+
+class SelfReviewItem(BaseModel):
+    """One question's self-review result."""
+
+    question: str
+    deadline_feasibility: bool
+    process_stage_clarity: bool
+    figure_derivability: bool
+    authority_response_time: bool
+    accept: bool
+    rejection_reason: Optional[str] = None
+
+
+class LLMSelfReviewSchema(BaseModel):
+    """Schema for the self-review pass output."""
+
+    reviews: List[SelfReviewItem]
 
 
 class LLMStorySelectionSchema(BaseModel):
@@ -440,6 +555,33 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             articles, min(MAX_ARTICLES, len(articles))
         )  # nosec: B311
 
+        # Pre-filter: drop articles that individually trigger content
+        # moderation before building the selection prompt.  Without this,
+        # a single violent-news snippet flags the entire 40-article prompt.
+        with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+            assert client is not None
+            clean_articles = []
+            for article in articles:
+                text = f"{article.get('title', '')}: {article.get('content', '')}"
+                try:
+                    mod = client.moderations.create(input=text)
+                    if not mod.results[0].flagged:
+                        clean_articles.append(article)
+                except Exception:
+                    clean_articles.append(article)  # keep on moderation API error
+            n_dropped = len(articles) - len(clean_articles)
+            if n_dropped > 0:
+                print(f"Moderation pre-filter: dropped {n_dropped} flagged article(s)")
+            articles = clean_articles
+
+        if not articles:
+            return (
+                f'{{"error": "All articles were flagged by content moderation.", "tool": {tool}}}',
+                None,
+                None,
+                counter_callback,
+            )
+
         articles_string = ""
         for i, article in enumerate(articles, start=0):
             articles_string += f"{i} - {article['title']} ({article['publishedAt']}): {article['content']}\n"
@@ -575,8 +717,67 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 )
             response = json.loads(response.choices[0].message.content)
 
-        # Generate output
+        # Self-review pass: audit proposed questions against the four trap checks.
+        # Questions that fail any check are rejected before they reach the output.
         questions = response["questions"][:num_questions]
+
+        with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+            assert client is not None
+            review_prompt = SELF_REVIEW_PROMPT.format(
+                questions=json.dumps(questions, indent=2),
+                article=f"{scrape_result['text'][:4000]}",
+                event_day=format_utc_timestamp(int(resolution_time)),
+            )
+            review_messages = [
+                {"role": "system", "content": "You are a prediction-market question auditor."},
+                {"role": "user", "content": review_prompt},
+            ]
+            review_response = client.chat.completions.create(
+                model=model,
+                messages=review_messages,
+                temperature=0.0,
+                max_tokens=2048,
+                n=1,
+                timeout=120,
+                stop=None,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "LLMSelfReviewSchema",
+                        "schema": LLMSelfReviewSchema.model_json_schema(),
+                    },
+                },
+            )
+            if counter_callback:
+                counter_callback(
+                    input_tokens=review_response.usage.prompt_tokens,
+                    output_tokens=review_response.usage.completion_tokens,
+                    model=model,
+                    token_counter=count_tokens,
+                )
+            review_data = json.loads(review_response.choices[0].message.content)
+            reviews = review_data.get("reviews", [])
+
+        # Filter: keep only accepted questions.
+        accepted_questions = []
+        rejected_questions = []
+        for rev in reviews:
+            if rev.get("accept", False):
+                accepted_questions.append(rev["question"])
+            else:
+                rejected_questions.append({
+                    "question": rev["question"],
+                    "reason": rev.get("rejection_reason", "failed self-review"),
+                })
+
+        print(f"Self-review: {len(accepted_questions)} accepted, "
+              f"{len(rejected_questions)} rejected out of {len(questions)} proposed")
+        for rej in rejected_questions:
+            print(f"  REJECTED: {rej['question'][:80]}... — {rej['reason']}")
+
+        questions = accepted_questions if accepted_questions else questions
+
+        # Generate output
         answers = ["Yes", "No"]
         language = "en_US"
         questions_dict = {}
