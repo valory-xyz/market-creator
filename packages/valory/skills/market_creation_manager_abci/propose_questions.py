@@ -778,7 +778,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
             # Generate more candidates than needed; self-review + date check
             # will filter down. This makes self-review a selector, not just a gate.
-            n_candidates = max(num_questions * 3, 3)
+            n_candidates = max(num_questions * 5, 5)
             window_days = max(1, (int(resolution_time) - int(datetime.now(tz=timezone.utc).timestamp())) // 86400)
 
             prompt_values = {
@@ -871,11 +871,20 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             review_data = json.loads(review_response.choices[0].message.content)
             reviews = review_data.get("reviews", [])
 
-        # Filter: keep only accepted questions.
+        # Filter: accept questions where at least 3 of 4 checks pass.
+        # This is softer than iteration 3's all-4-required, which killed
+        # too many valid continuation/measurement questions.
         accepted_questions = []
         rejected_questions = []
         for rev in reviews:
-            if rev.get("accept", False):
+            checks = [
+                rev.get("deadline_is_feasible", True),
+                rev.get("process_stage_named", True),
+                rev.get("figure_is_directly_published", True),
+                rev.get("authority_can_act_in_time", True),
+            ]
+            passes = sum(1 for c in checks if c)
+            if passes >= 3:
                 accepted_questions.append(rev["question"])
             else:
                 rejected_questions.append({
