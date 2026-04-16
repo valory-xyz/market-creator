@@ -316,10 +316,13 @@ class LLMStorySelectionSchema(BaseModel):
 
 import re
 
+
 def validate_question_dates(question: str, resolution_ts: int) -> Optional[str]:
     """Check that all dates in a question are between today and the deadline.
 
-    Returns None if OK, or a rejection reason string if a date is out of range.
+    :param question: the question text to scan for date references.
+    :param resolution_ts: the market resolution timestamp (Unix epoch).
+    :return: None if OK, or a rejection reason string if a date is out of range.
     """
     now = datetime.now(tz=timezone.utc)
     deadline = datetime.fromtimestamp(resolution_ts, tz=timezone.utc)
@@ -327,18 +330,18 @@ def validate_question_dates(question: str, resolution_ts: int) -> Optional[str]:
     # Find all date-like patterns: "April 21, 2026", "21 April 2026",
     # "September 20, 2024", "February 1, 2027", etc.
     date_patterns = [
-        r'(\w+ \d{1,2},? \d{4})',      # "April 21, 2026"
-        r'(\d{1,2} \w+ \d{4})',          # "21 April 2026"
+        r"(\w+ \d{1,2},? \d{4})",  # "April 21, 2026"
+        r"(\d{1,2} \w+ \d{4})",  # "21 April 2026"
     ]
     for pattern in date_patterns:
         for match in re.findall(pattern, question):
-            for fmt in ('%B %d, %Y', '%B %d %Y', '%d %B %Y'):
+            for fmt in ("%B %d, %Y", "%B %d %Y", "%d %B %Y"):
                 try:
-                    d = datetime.strptime(match.replace(',', ''), fmt.replace(',', ''))
+                    d = datetime.strptime(match.replace(",", ""), fmt.replace(",", ""))
                     d = d.replace(tzinfo=timezone.utc)
-                    if d < now - __import__('datetime').timedelta(days=1):
+                    if d < now - __import__("datetime").timedelta(days=1):
                         return f"Date '{match}' is in the past"
-                    if d > deadline + __import__('datetime').timedelta(days=365):
+                    if d > deadline + __import__("datetime").timedelta(days=365):
                         return f"Date '{match}' is too far beyond the deadline"
                     break
                 except ValueError:
@@ -728,13 +731,16 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         # Step 2: Extract measurable states from the article (iteration 2).
         # This constrains the LLM to identify what CAN be measured before
         # framing a question — breaking the default "Will X announce Y?" prior.
-        article_text = scrape_result['text'][:6000]  # cap to avoid token limits
+        article_text = scrape_result["text"][:6000]  # cap to avoid token limits
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
             assert client is not None
             model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
             extract_prompt = EXTRACT_STATE_PROMPT.format(article=article_text)
             extract_messages = [
-                {"role": "system", "content": "You are an analyst extracting measurable facts from news articles."},
+                {
+                    "role": "system",
+                    "content": "You are an analyst extracting measurable facts from news articles.",
+                },
                 {"role": "user", "content": extract_prompt},
             ]
             extract_response = client.chat.completions.create(
@@ -765,7 +771,9 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             states_string = json.dumps(states, indent=2) if states else "(none found)"
             print(f"Extracted {len(states)} measurable states:")
             for s in states:
-                print(f"  [{s.get('framing', '?')}] {s.get('state', '?')} — source: {s.get('source', '?')}")
+                print(
+                    f"  [{s.get('framing', '?')}] {s.get('state', '?')} — source: {s.get('source', '?')}"
+                )
 
         # Step 3: Generate questions using the extracted states
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
@@ -779,7 +787,11 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             # Generate more candidates than needed; self-review + date check
             # will filter down. This makes self-review a selector, not just a gate.
             n_candidates = max(num_questions * 5, 5)
-            window_days = max(1, (int(resolution_time) - int(datetime.now(tz=timezone.utc).timestamp())) // 86400)
+            window_days = max(
+                1,
+                (int(resolution_time) - int(datetime.now(tz=timezone.utc).timestamp()))
+                // 86400,
+            )
 
             prompt_values = {
                 "article": f"{article_text}",
@@ -842,7 +854,10 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 event_day=format_utc_timestamp(int(resolution_time)),
             )
             review_messages = [
-                {"role": "system", "content": "You are a prediction-market question auditor."},
+                {
+                    "role": "system",
+                    "content": "You are a prediction-market question auditor.",
+                },
                 {"role": "user", "content": review_prompt},
             ]
             review_response = client.chat.completions.create(
@@ -887,10 +902,15 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             if passes >= 3:
                 accepted_questions.append(rev["question"])
             else:
-                rejected_questions.append({
-                    "question": rev["question"],
-                    "reason": rev.get("reasoning", rev.get("rejection_reason", "failed self-review")),
-                })
+                rejected_questions.append(
+                    {
+                        "question": rev["question"],
+                        "reason": rev.get(
+                            "reasoning",
+                            rev.get("rejection_reason", "failed self-review"),
+                        ),
+                    }
+                )
 
         # Programmatic date validation — catches past dates and out-of-range
         # dates that the LLM self-review misses (100% recall on date issues).
@@ -898,12 +918,16 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         for q in accepted_questions:
             date_issue = validate_question_dates(q, int(resolution_time))
             if date_issue:
-                rejected_questions.append({"question": q, "reason": f"DATE CHECK: {date_issue}"})
+                rejected_questions.append(
+                    {"question": q, "reason": f"DATE CHECK: {date_issue}"}
+                )
             else:
                 date_validated.append(q)
 
-        print(f"Self-review: {len(accepted_questions)} accepted, "
-              f"{len(rejected_questions)} rejected out of {len(questions)} proposed")
+        print(
+            f"Self-review: {len(accepted_questions)} accepted, "
+            f"{len(rejected_questions)} rejected out of {len(questions)} proposed"
+        )
         for rej in rejected_questions:
             print(f"  REJECTED: {rej['question'][:80]}... — {rej['reason'][:60]}")
 
