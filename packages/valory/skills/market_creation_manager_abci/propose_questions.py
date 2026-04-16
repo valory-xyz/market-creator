@@ -45,17 +45,22 @@ NEWSAPI_DEFAULT_NEWS_SOURCES = [
     "bbc-sport",
     "abc-news",
     "cnn",
-    #    "google-news",
     "reuters",
     "usa-today",
     "breitbart-news",
     "the-verge",
     "techradar",
+    "associated-press",
+    "bloomberg",
+    "business-insider",
+    "ars-technica",
+    "national-geographic",
+    "new-scientist",
 ]
 
 OMEN_SUBGRAPH_URL = "https://gateway-arbitrum.network.thegraph.com/api/{subgraph_api_key}/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz"
 HTTP_OK = 200
-MAX_ARTICLES = 40
+MAX_ARTICLES = 60
 MAX_LATEST_QUESTIONS = 40
 
 FPMM_CREATORS = [
@@ -129,68 +134,64 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
     {topics}
     """
 
-PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
-    under ARTICLE. Your task is to formulate {num_questions} novel prediction market question
-    with clear, objective outcomes based on the information from the ARTICLE.
-    The questions must satisfy all the following criteria:
+EXTRACT_STATE_PROMPT = """You are analysing a news article to find MEASURABLE
+    STATES that can be turned into prediction-market questions. A measurable
+    state is something that can be checked on a specific future date by looking
+    up a published value, verifying an ongoing condition, or confirming a
+    status-quo persists.
 
-    GENERAL CRITERIA
-    - Must be of public interest.
-    - Must be semantically different.
-    - Must be different from EXISTING_QUESTIONS.
-    - Must be related to an event happening before EVENT_DAY or on EVENT_DAY.
+    For each measurable state you find, output:
+    - "state": a short description of what can be measured
+    - "source": who publishes or confirms this (e.g. "Freddie Mac weekly report",
+      "SEC 10-Q filing", "NWS flood gauge", "official company statement")
+    - "framing": one of "measurement" (numeric value check), "continuation"
+      (will status-quo persist?), or "announcement" (specific event expected)
+
+    PREFER "measurement" and "continuation" framings. Only use "announcement"
+    if the article specifically describes an imminent scheduled event.
+
+    If the article has no measurable states at all, return an empty list.
+
+    Return at most 5 states.
+
+    ARTICLE
+    {article}
+    """
+
+PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
+    under ARTICLE, and a list of MEASURABLE STATES extracted from it.
+    Your task is to formulate {num_questions} novel prediction market question(s)
+    based on these states. Use the measurable states to guide your framing.
+
+    RULES:
+    - For "measurement" states: frame as "Will [metric] be above/below [threshold]
+      on EVENT_DAY, as confirmed by [source]?"
+    - For "continuation" states: frame as "Will [condition] still hold on EVENT_DAY,
+      as confirmed by [source]?"
+    - For "announcement" states: frame as "Will [entity] [action] on or before
+      EVENT_DAY, as confirmed by [source]?"
+    - If MEASURABLE_STATES is empty, you may create an announcement-style question,
+      but it must pass ALL the checks below.
+    - Must be of public interest, semantically different, different from
+      EXISTING_QUESTIONS.
+    - The answer must be 'yes' or 'no', verifiable, not an opinion, unambiguous,
+      and known after EVENT_DAY.
     - Must not encourage unethical behavior or violence.
-    - The answer must be 'yes' or 'no'.
-    - The answer must be verified using publicly available sources or news media.
-    - The answer must not be an opinion.
-    - The answer must be unambiguous.
-    - The answer must be known after EVENT_DAY.
-    - Do not reference matches, sport events or any other event that do not occur on or before EVENT_DAY.
     - Must not include unmeasurable statements like "significant increase".
 
-    QUESTION TYPE — PREFER MEASUREMENT AND CONTINUATION FRAMINGS
-    Prefer questions whose answer is determined by MEASUREMENT ("Will the
-    metric X be above Y on EVENT_DAY?", "Will the price of Z stay below W
-    until EVENT_DAY?") or by CONTINUATION of an existing state ("Will X
-    remain in position through EVENT_DAY?"). These framings resolve more
-    reliably on short windows because the outcome is determined by checking
-    a published value or verifying that a status-quo persists — rather than
-    requiring a specific new event to fire.
-    Use specific-announcement framings ("Will authority X publicly announce Y
-    by EVENT_DAY?") ONLY when the article specifically anticipates a
-    scheduled announcement.
+    SPECIFIC FRAMING CHECKS (apply to every question):
+    1. DEADLINE FEASIBILITY — Can the criterion physically/procedurally occur
+       by EVENT_DAY? If not, reframe to something that can.
+    2. PROCESS-STAGE CLARITY — If multi-stage process, name the exact stage.
+       Never use "formal passage" or "official approval" without a stage qualifier.
+    3. DIRECTLY-PUBLISHED FIGURE — Thresholds must be figures a source publishes
+       directly, not derived by arithmetic on separate figures.
+    4. AUTHORITY RESPONSE TIME — The deadline must be realistic for the named
+       authority. Government reviews, regulatory investigations take weeks/months.
+    5. RESOLUTION SOURCE — Name WHO confirms and WHAT document/channel.
 
-    POLARITY — AIM FOR A BALANCED MIX
-    Not every question should ask "Will X happen?". Where the article
-    supports it, consider the opposite polarity: "Will X NOT happen?" or
-    "Will [ongoing state] continue through EVENT_DAY?". The goal is to
-    produce a balanced mix of questions where roughly half are expected
-    to resolve Yes and half No.
-
-    SPECIFIC FRAMING RULES (to avoid known failure modes)
-    1. DEADLINE FEASIBILITY — Before finalizing, verify the specific outcome
-       being asked about can physically or procedurally occur on or before
-       EVENT_DAY. If the article describes a process that takes longer than
-       the available window (spaceflight milestones, legislative stages,
-       regulatory reviews), do NOT frame the question around the late-stage
-       milestone. Instead, ask about an earlier measurable state.
-    2. PROCESS-STAGE CLARITY — If the question mentions a multi-stage legal,
-       regulatory, or legislative process, specify the exact stage. Do NOT
-       use ambiguous phrases like "formal passage", "official approval", or
-       "formal review". Instead use the specific stage: "full-parliament vote
-       and passage", "committee approval", "signed into law", etc.
-    3. DIRECTLY-PUBLISHED FIGURE — If the question asks whether a numeric
-       threshold has been exceeded, verify the threshold is a figure a source
-       would publish DIRECTLY. Do NOT create questions whose answer requires
-       multiplying, dividing, or summing two separately-published figures.
-    4. AUTHORITY RESPONSE TIME — If the question requires action by a specific
-       authority, verify the deadline is realistic for that authority's typical
-       response time. Antitrust reviews, regulatory investigations, and formal
-       government announcements typically take weeks to months — not days.
-    5. RESOLUTION SOURCE — The question must specify WHO must make the
-       announcement and WHAT document or channel would confirm it. Prefer
-       official sources ("as confirmed by an SEC 8-K filing") over generic
-       media references.
+    MEASURABLE_STATES
+    {measurable_states}
 
     EXISTING_QUESTIONS
     {latest_questions}
@@ -203,36 +204,42 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     """
 
 SELF_REVIEW_PROMPT = """You are auditing prediction-market questions for
-    quality. For each question below, answer four YES/NO checks:
+    quality. For EACH question, you must perform explicit step-by-step
+    reasoning before deciding accept/reject. Do not skip steps.
 
-    1. DEADLINE FEASIBILITY: Given the source article and event timeline,
-       is it physically/procedurally possible for the question's specific
-       criterion to be satisfied by the deadline? (e.g. a distance-record
-       question cannot be satisfied before the spacecraft has reached that
-       distance.)
-    2. PROCESS-STAGE CLARITY: If the question mentions a multi-stage process
-       (legislation, regulation, judicial ruling), is the exact stage
-       specified? ("formal passage" alone is ambiguous → NO.)
-    3. FIGURE DERIVABILITY: If the question asks about a numeric threshold,
-       can that specific figure be looked up directly in a published source,
-       or does it require arithmetic on two other figures? (derivable but
-       not explicit → NO.)
-    4. AUTHORITY RESPONSE TIME: If the question requires action by a specific
-       authority, is the deadline realistic for that authority's typical
-       response time? (antitrust reviews don't initiate within days → NO.)
+    STEP-BY-STEP PROCESS for each question:
 
-    Return a JSON array. For each question:
-    {{
-      "question": "...",
-      "deadline_feasibility": true/false,
-      "process_stage_clarity": true/false,
-      "figure_derivability": true/false,
-      "authority_response_time": true/false,
-      "accept": true/false,
-      "rejection_reason": "..." (only if accept is false)
-    }}
+    A. STATE THE DEADLINE: Write the exact deadline date from the question.
 
-    A question should only be accepted if ALL four checks pass.
+    B. DEADLINE FEASIBILITY: What specific outcome does the question ask
+       for? What is the EARLIEST DATE this could physically/procedurally
+       happen? Compare: is earliest_date <= deadline_date?
+       - Example: "BBC to complete 1,000 job cuts" — large-scale layoffs take
+         weeks/months to execute. Earliest realistic completion: months away.
+         If deadline is 5 days away → REJECT.
+       - Example: "Hurricane landfall in April" — Atlantic hurricane season
+         starts June. Earliest possible: June. April deadline → REJECT.
+       - Example: "FAA suspend laser weapon approval" — regulatory suspensions
+         require review processes taking weeks. 5-day deadline → REJECT.
+
+    C. PROCESS-STAGE CLARITY: Does the question use ambiguous terms like
+       "formal passage", "official approval", "formal review"? If yes → REJECT
+       unless a specific stage is named.
+
+    D. FIGURE DERIVABILITY: Does the question ask for a figure that requires
+       arithmetic on two separately-published numbers? If yes → REJECT.
+
+    E. AUTHORITY RESPONSE TIME: Does the question require a government agency,
+       regulator, court, or large organization to complete an action? How long
+       does that type of action typically take? Is the deadline realistic?
+       - Antitrust reviews: weeks to months → 5-day deadline = REJECT
+       - Regulatory investigations (NHTSA, FAA): weeks → 5-day deadline = REJECT
+       - Large-scale layoffs (1000+ jobs): weeks/months → 5-day deadline = REJECT
+       - Company press release about existing decision: days → OK
+
+    F. DECISION: Accept ONLY if ALL of B, C, D, E pass.
+
+    Return JSON with your explicit reasoning at each step.
 
     QUESTIONS
     {questions}
@@ -250,6 +257,20 @@ client: Optional[OpenAI] = None
 MechResponse = Tuple[str, Optional[str], Optional[Dict[str, Any]], Any, Any]
 
 
+class MeasurableState(BaseModel):
+    """One measurable state extracted from an article."""
+
+    state: str
+    source: str
+    framing: str  # "measurement", "continuation", or "announcement"
+
+
+class LLMExtractStateSchema(BaseModel):
+    """Schema for the extract-state step output."""
+
+    states: List[MeasurableState]
+
+
 class LLMQuestionProposalSchema(BaseModel):
     """Schema for proposed questions."""
 
@@ -257,15 +278,17 @@ class LLMQuestionProposalSchema(BaseModel):
 
 
 class SelfReviewItem(BaseModel):
-    """One question's self-review result."""
+    """One question's self-review result with chain-of-thought reasoning."""
 
     question: str
-    deadline_feasibility: bool
-    process_stage_clarity: bool
-    figure_derivability: bool
-    authority_response_time: bool
+    deadline_date: str  # "The deadline is April 21, 2026"
+    earliest_plausible_date: str  # "The earliest the authority could act is..."
+    deadline_is_feasible: bool
+    process_stage_named: bool
+    figure_is_directly_published: bool
+    authority_can_act_in_time: bool
+    reasoning: str  # chain-of-thought explanation
     accept: bool
-    rejection_reason: Optional[str] = None
 
 
 class LLMSelfReviewSchema(BaseModel):
@@ -661,7 +684,49 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 counter_callback,
             )
 
-        # Second call to LLM
+        # Step 2: Extract measurable states from the article (iteration 2).
+        # This constrains the LLM to identify what CAN be measured before
+        # framing a question — breaking the default "Will X announce Y?" prior.
+        article_text = scrape_result['text'][:6000]  # cap to avoid token limits
+        with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+            assert client is not None
+            model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
+            extract_prompt = EXTRACT_STATE_PROMPT.format(article=article_text)
+            extract_messages = [
+                {"role": "system", "content": "You are an analyst extracting measurable facts from news articles."},
+                {"role": "user", "content": extract_prompt},
+            ]
+            extract_response = client.chat.completions.create(
+                model=model,
+                messages=extract_messages,
+                temperature=0.3,
+                max_tokens=1024,
+                n=1,
+                timeout=120,
+                stop=None,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "LLMExtractStateSchema",
+                        "schema": LLMExtractStateSchema.model_json_schema(),
+                    },
+                },
+            )
+            if counter_callback:
+                counter_callback(
+                    input_tokens=extract_response.usage.prompt_tokens,
+                    output_tokens=extract_response.usage.completion_tokens,
+                    model=model,
+                    token_counter=count_tokens,
+                )
+            extract_data = json.loads(extract_response.choices[0].message.content)
+            states = extract_data.get("states", [])
+            states_string = json.dumps(states, indent=2) if states else "(none found)"
+            print(f"Extracted {len(states)} measurable states:")
+            for s in states:
+                print(f"  [{s.get('framing', '?')}] {s.get('state', '?')} — source: {s.get('source', '?')}")
+
+        # Step 3: Generate questions using the extracted states
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
             assert client is not None
             max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
@@ -671,9 +736,10 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
 
             prompt_values = {
-                "article": f"{scrape_result['text']}",
+                "article": f"{article_text}",
                 "event_day": format_utc_timestamp(int(resolution_time)),
                 "latest_questions": latest_questions_string,
+                "measurable_states": states_string,
                 "num_questions": f"{num_questions}",
             }
 
