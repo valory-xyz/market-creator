@@ -120,10 +120,20 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
 
     def _prepare_multisend(self) -> Generator[None, None, Optional[str]]:
         """Run the full CT redemption pipeline as a linear recipe."""
-        # Step 1: find what the safe holds
+        # Step 1: find what the safe holds (excluding ignored positions)
         held_positions = yield from self._get_held_positions()
+        ignored = self.shared_state.ignored_ct_positions
+        if ignored:
+            held_positions = {
+                cid: idx_sets
+                for cid, idx_sets in held_positions.items()
+                if cid not in ignored
+            }
         if not held_positions:
-            self.context.logger.info(f"{SKILL_LOG_PREFIX} no CT positions held by safe")
+            self.context.logger.info(
+                f"{SKILL_LOG_PREFIX} no CT positions held by safe "
+                f"({len(ignored)} ignored)"
+            )
             return None
 
         # Step 2: find which conditions those positions belong to that have resolved
@@ -131,7 +141,8 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
         if not redeemable:
             self.context.logger.info(
                 f"{SKILL_LOG_PREFIX} safe holds {len(held_positions)} positions but "
-                f"none have resolved to a winning payout"
+                f"none have resolved to a winning payout "
+                f"({len(ignored)} ignored)"
             )
             return None
 
@@ -155,22 +166,45 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
     def _get_redeemable_markets(
         self, held_positions: Dict[str, Set[int]]
     ) -> Generator[None, None, List[Dict[str, Any]]]:
-        """Cross-reference held positions with finalized markets and filter by winning payout."""
+        """Cross-reference held positions with finalized markets.
+
+        When ct_redeem_tokens_min_payout == 0: include ALL finalized
+        markets with held positions (even losers) so their tokens get
+        burned, cleaning up the CT subgraph.
+
+        When ct_redeem_tokens_min_payout > 0: only include winners and
+        add confirmed losers to the ignored set to skip them in future
+        cycles.
+
+        :param held_positions: mapping of condition_id to held index sets.
+        :yield: None
+        :return: list of redeemable market dicts.
+        """
         positions_to_redeem = yield from self._get_markets_for_conditions(
             list(held_positions.keys())
         )
 
+        burn_losers = self.params.ct_redeem_tokens_min_payout == 0
         redeemable: List[Dict[str, Any]] = []
+        n_losers = 0
         for market in positions_to_redeem:
             condition_id = market.get("condition_id", "").lower()
             held_index_sets = set(held_positions.get(condition_id, []))
             payouts = market.get("payouts", [])
-            if payouts and self._has_winning_position(payouts, held_index_sets):
+            is_winner = payouts and self._has_winning_position(payouts, held_index_sets)
+            if is_winner:
                 redeemable.append(market)
+            elif burn_losers:
+                redeemable.append(market)
+                n_losers += 1
+            else:
+                self.shared_state.ignored_ct_positions.add(condition_id)
 
         self.context.logger.info(
             f"{SKILL_LOG_PREFIX} found {len(held_positions)} held conditions, "
-            f"{len(positions_to_redeem)} finalized, {len(redeemable)} redeemable"
+            f"{len(positions_to_redeem)} finalized, "
+            f"{len(redeemable)} redeemable "
+            f"({len(redeemable) - n_losers} winners, {n_losers} losers to burn)"
         )
         return redeemable
 

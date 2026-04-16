@@ -50,7 +50,9 @@ def _build_behaviour() -> Any:
     context_mock.params.collateral_tokens_contract = "0xCollateral"
     context_mock.params.realitio_oracle_proxy_contract = "0xRealitioProxy"
     context_mock.params.ct_redeem_tokens_batch_size = 5
+    context_mock.params.ct_redeem_tokens_min_payout = 0
     context_mock.params.multisend_address = "0xMultisend"
+    context_mock.state.ignored_ct_positions = set()
     context_mock.state.round_sequence = MagicMock()
     context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
         1700100000
@@ -364,15 +366,18 @@ class TestCtRedeemTokensBehaviourRedeemableMarkets:
             result = exhaust_gen(gen)
         assert not result
 
-    def test_get_redeemable_markets_no_winning(self) -> None:
-        """Test returns empty when cross-reference yields no winners."""
+    def test_get_redeemable_markets_no_winning_ct_redeem_tokens_min_payout_nonzero(
+        self,
+    ) -> None:
+        """Test losers are added to ignored set when ct_redeem_tokens_min_payout > 0."""
+        self.behaviour.context.params.ct_redeem_tokens_min_payout = 1000
         held = {"0xcond1": {1}}
         markets = [
             {
                 "address": "0xM1",
                 "condition_id": "0xcond1",
                 "outcome_slot_count": 2,
-                "payouts": ["0", "1"],  # index_set=1 -> payout[0]=0 -> no win
+                "payouts": ["0", "1"],
             }
         ]
         with patch.object(
@@ -381,9 +386,31 @@ class TestCtRedeemTokensBehaviourRedeemableMarkets:
             gen = self.behaviour._get_redeemable_markets(held)
             result = exhaust_gen(gen)
         assert not result
+        assert "0xcond1" in self.behaviour.context.state.ignored_ct_positions
 
-    def test_get_redeemable_markets_with_winners(self) -> None:
-        """Test returns winning markets only."""
+    def test_get_redeemable_markets_no_winning_burn_losers(self) -> None:
+        """Test losers are included for burning when ct_redeem_tokens_min_payout == 0."""
+        self.behaviour.context.params.ct_redeem_tokens_min_payout = 0
+        held = {"0xcond1": {1}}
+        markets = [
+            {
+                "address": "0xM1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["0", "1"],
+            }
+        ]
+        with patch.object(
+            self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
+        ):
+            gen = self.behaviour._get_redeemable_markets(held)
+            result = exhaust_gen(gen)
+        assert len(result) == 1
+        assert result[0]["address"] == "0xM1"
+
+    def test_get_redeemable_markets_with_winners_only(self) -> None:
+        """Test returns only winners when min_payout > 0."""
+        self.behaviour.context.params.ct_redeem_tokens_min_payout = 1
         held = {"0xcond1": {1}, "0xcond2": {1}}
         markets = [
             {
@@ -407,6 +434,31 @@ class TestCtRedeemTokensBehaviourRedeemableMarkets:
         assert len(result) == 1
         assert result[0]["address"] == "0xM1"
 
+    def test_get_redeemable_markets_burn_all_when_min_zero(self) -> None:
+        """Test returns both winners and losers when min_payout == 0."""
+        self.behaviour.context.params.ct_redeem_tokens_min_payout = 0
+        held = {"0xcond1": {1}, "0xcond2": {1}}
+        markets = [
+            {
+                "address": "0xM1",
+                "condition_id": "0xcond1",
+                "outcome_slot_count": 2,
+                "payouts": ["1", "0"],  # winning
+            },
+            {
+                "address": "0xM2",
+                "condition_id": "0xcond2",
+                "outcome_slot_count": 2,
+                "payouts": ["0", "1"],  # losing but included for burn
+            },
+        ]
+        with patch.object(
+            self.behaviour, "_get_markets_for_conditions", new=make_gen(markets)
+        ):
+            gen = self.behaviour._get_redeemable_markets(held)
+            result = exhaust_gen(gen)
+        assert len(result) == 2
+
 
 class TestCtRedeemTokensBehaviourPrepareMultisend:
     """Tests for the _prepare_multisend pipeline orchestration."""
@@ -421,6 +473,33 @@ class TestCtRedeemTokensBehaviourPrepareMultisend:
             gen = self.behaviour._prepare_multisend()
             result = exhaust_gen(gen)
         assert result is None
+
+    def test_prepare_multisend_all_ignored(self) -> None:
+        """Test _prepare_multisend returns None when all held positions are ignored."""
+        held = {"0xcond1": {1}, "0xcond2": {2}}
+        self.behaviour.context.state.ignored_ct_positions = {"0xcond1", "0xcond2"}
+        with patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)):
+            gen = self.behaviour._prepare_multisend()
+            result = exhaust_gen(gen)
+        assert result is None
+
+    def test_prepare_multisend_partial_ignored(self) -> None:
+        """Test _prepare_multisend filters out ignored positions."""
+        held = {"0xcond1": {1}, "0xcond2": {2}}
+        self.behaviour.context.state.ignored_ct_positions = {"0xcond1"}
+        markets = [{"address": "0xM2", "condition_id": "0xcond2"}]
+        txs = [{"to": "0xCT", "data": "0xredeem", "value": 0}]
+        with (
+            patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)),
+            patch.object(
+                self.behaviour, "_get_redeemable_markets", new=make_gen(markets)
+            ),
+            patch.object(self.behaviour, "_build_redeem_txs", new=make_gen(txs)),
+            patch.object(self.behaviour, "_to_multisend", new=make_gen("0xhash")),
+        ):
+            gen = self.behaviour._prepare_multisend()
+            result = exhaust_gen(gen)
+        assert result == "0xhash"
 
     def test_prepare_multisend_no_redeemable(self) -> None:
         """Test _prepare_multisend returns None when no markets are redeemable."""
