@@ -146,26 +146,13 @@ EXTRACT_STATE_PROMPT = """You are analysing a news article to find MEASURABLE
       "SEC 10-Q filing", "NWS flood gauge", "official company statement")
     - "framing": one of "measurement" (numeric value check), "continuation"
       (will status-quo persist?), or "announcement" (specific event expected)
-    - "uncertainty": one of "high" (outcome genuinely could go either way),
-      "medium" (one side is more likely but the other is plausible), or
-      "low" (outcome is near-certain, e.g. a stable policy staying unchanged)
 
-    RANKING RULES:
-    1. PREFER "measurement" states with "high" or "medium" uncertainty — these
-       make the best prediction markets because the outcome is genuinely unknown.
-    2. Only use "continuation" framing when the article describes a SPECIFIC
-       THREAT or CHALLENGE to the status quo (a scandal, an active policy
-       debate, an expiring deadline, a legal challenge). Do NOT use
-       "continuation" for stable states that have no reason to change in the
-       near term (e.g. a central bank inflation target, an unchanged coupon
-       rate, an existing moratorium with no expiry pressure).
-    3. Only use "announcement" if the article specifically describes an
-       imminent scheduled event.
-    4. Mark any state where the outcome is near-certain as "low" uncertainty.
+    PREFER "measurement" and "continuation" framings. Only use "announcement"
+    if the article specifically describes an imminent scheduled event.
 
     If the article has no measurable states at all, return an empty list.
 
-    Return at most 5 states, sorted by uncertainty (highest first).
+    Return at most 5 states.
 
     ARTICLE
     {article}
@@ -182,19 +169,14 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     reference dates outside this window or in the past.
 
     RULES:
-    - PRIORITISE states marked "high" or "medium" uncertainty. Skip "low"
-      uncertainty states — they produce trivially predictable questions
-      (e.g. "Will a policy that hasn't changed in years still be the same
-      in 5 days?" is not an interesting market).
     - For "measurement" states: frame as "Will [metric] be above/below [threshold]
       on EVENT_DAY, as confirmed by [source]?"
-    - For "continuation" states: ONLY use this framing when the article describes
-      an active threat to the status quo. Frame as "Will [condition] still hold
-      on EVENT_DAY, as confirmed by [source]?"
+    - For "continuation" states: frame as "Will [condition] still hold on EVENT_DAY,
+      as confirmed by [source]?"
     - For "announcement" states: frame as "Will [entity] [action] on or before
       EVENT_DAY, as confirmed by [source]?"
-    - If MEASURABLE_STATES is empty or all are "low" uncertainty, you may create
-      an announcement-style question, but it must pass ALL the checks below.
+    - If MEASURABLE_STATES is empty, you may create an announcement-style question,
+      but it must pass ALL the checks below.
     - Must be of public interest, semantically different, different from
       EXISTING_QUESTIONS.
     - The answer must be 'yes' or 'no', verifiable, not an opinion, unambiguous,
@@ -290,7 +272,6 @@ class MeasurableState(BaseModel):
     state: str
     source: str
     framing: str  # "measurement", "continuation", or "announcement"
-    uncertainty: str  # "high", "medium", or "low"
 
 
 class LLMExtractStateSchema(BaseModel):
