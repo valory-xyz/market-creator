@@ -113,22 +113,12 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
     questions created are of public interest. The chosen article should ideally
     be used to create questions based on topics different from the EXISTING_QUESTIONS.
 
-    PREFER articles that support MEASUREMENT or CONTINUATION questions, with a
-    particular bias toward continuation-friendly topics. Good signals for
-    continuation-friendly articles:
-    - Economic indicators (interest rates, inflation targets, unemployment,
-      stock indices, commodity prices, exchange rates).
-    - Political incumbencies (leaders, officials, judges currently in position).
-    - Existing moratoriums, sanctions, bans, regulations, policies.
-    - Institutional positions (ratings, league standings, memberships,
-      subscriptions, listings).
-    - Ongoing conflicts, negotiations, strikes, or standoffs.
-    These articles produce questions about status-quo persistence, which
-    balance the pipeline's natural No-bias from short-deadline announcements.
-
-    Also acceptable:
-    - Articles mentioning a measurable quantity that can be checked on a
-      future date (measurement framing).
+    PREFER articles that support MEASUREMENT or CONTINUATION questions over
+    articles that only support pure announcement framings. Good signals:
+    - The article mentions a measurable quantity (price, rate, index, count,
+      percentage, ranking) that can be checked on a future date.
+    - The article describes an ongoing state or trend that can be asked about
+      as a continuation.
 
     AVOID articles whose only angle is "will authority X announce Y?" unless
     a scheduled announcement is specifically anticipated in the article.
@@ -175,7 +165,7 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     based on these states. Use the measurable states to guide your framing.
 
     CRITICAL CONSTRAINT: You have a WINDOW of only {window_days} days
-    (today → EVENT_DAY). Every date, threshold, and authority action in
+    (today -> EVENT_DAY). Every date, threshold, and authority action in
     your question must be achievable within {window_days} days. Do NOT
     reference dates outside this window or in the past.
 
@@ -186,7 +176,7 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
       main counterweight to the No-bias of announcement framings on short
       windows, so they are actively preferred when an article supports them.
 
-    FRAMING TEMPLATES (use exactly these grammatical shapes — they avoid the
+    FRAMING TEMPLATES (use exactly these grammatical shapes -- they avoid the
     past-participle ambiguity of "as confirmed by X" which can be misread as
     "already confirmed by X"):
     - For "measurement" states: frame as
@@ -195,14 +185,14 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     - For "continuation" states: the underlying state is what matters, NOT
       the act of someone confirming it. Phrase directly:
       "Will [condition] still hold on EVENT_DAY, according to [source]?"
-      Do NOT write "Will X confirm that [condition]" — that makes the
+      Do NOT write "Will X confirm that [condition]" -- that makes the
       confirmation itself the outcome, which introduces a No-bias. Phrase
       the state directly and name the source as the verification channel.
     - For "announcement" states: frame as
       "Will [entity] [action] on or before EVENT_DAY, according to [source]?"
     - In all templates, use **"according to [source]"** to name the jury's
       verification channel. Do NOT use "as confirmed by" / "as reported by" /
-      "as announced by" — the past-participle phrasing can be misread as
+      "as announced by" -- the past-participle phrasing can be misread as
       "already confirmed/reported/announced at the time the question is asked".
       "According to [source]" is future-tense relative to EVENT_DAY and
       unambiguously means "the jury will check [source] on that date".
@@ -218,17 +208,17 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
       reference past dates or dates beyond EVENT_DAY.
 
     SPECIFIC FRAMING CHECKS (apply to every question):
-    1. DEADLINE FEASIBILITY — Can the criterion physically/procedurally occur
+    1. DEADLINE FEASIBILITY -- Can the criterion physically/procedurally occur
        within {window_days} days? If not, reframe to something that can.
-    2. PROCESS-STAGE CLARITY — If multi-stage process, name the exact stage.
+    2. PROCESS-STAGE CLARITY -- If multi-stage process, name the exact stage.
        Never use "formal passage" or "official approval" without a stage qualifier.
-    3. DIRECTLY-PUBLISHED FIGURE — Thresholds must be figures a source publishes
+    3. DIRECTLY-PUBLISHED FIGURE -- Thresholds must be figures a source publishes
        directly, not derived by arithmetic on separate figures.
-    4. AUTHORITY RESPONSE TIME — The deadline must be realistic for the named
+    4. AUTHORITY RESPONSE TIME -- The deadline must be realistic for the named
        authority. Government reviews, regulatory investigations take weeks/months.
        If the authority cannot plausibly act within {window_days} days, do NOT
        frame the question around that authority's action.
-    5. RESOLUTION SOURCE — Name WHO confirms and WHAT document/channel.
+    5. RESOLUTION SOURCE -- Name WHO confirms and WHAT document/channel.
 
     MEASURABLE_STATES
     {measurable_states}
@@ -254,28 +244,28 @@ SELF_REVIEW_PROMPT = """You are auditing prediction-market questions for
     B. DEADLINE FEASIBILITY: What specific outcome does the question ask
        for? What is the EARLIEST DATE this could physically/procedurally
        happen? Compare: is earliest_date <= deadline_date?
-       - Example: "BBC to complete 1,000 job cuts" — large-scale layoffs take
+       - Example: "BBC to complete 1,000 job cuts" -- large-scale layoffs take
          weeks/months to execute. Earliest realistic completion: months away.
-         If deadline is 5 days away → REJECT.
-       - Example: "Hurricane landfall in April" — Atlantic hurricane season
-         starts June. Earliest possible: June. April deadline → REJECT.
-       - Example: "FAA suspend laser weapon approval" — regulatory suspensions
-         require review processes taking weeks. 5-day deadline → REJECT.
+         If deadline is 5 days away -> REJECT.
+       - Example: "Hurricane landfall in April" -- Atlantic hurricane season
+         starts June. Earliest possible: June. April deadline -> REJECT.
+       - Example: "FAA suspend laser weapon approval" -- regulatory suspensions
+         require review processes taking weeks. 5-day deadline -> REJECT.
 
     C. PROCESS-STAGE CLARITY: Does the question use ambiguous terms like
-       "formal passage", "official approval", "formal review"? If yes → REJECT
+       "formal passage", "official approval", "formal review"? If yes -> REJECT
        unless a specific stage is named.
 
     D. FIGURE DERIVABILITY: Does the question ask for a figure that requires
-       arithmetic on two separately-published numbers? If yes → REJECT.
+       arithmetic on two separately-published numbers? If yes -> REJECT.
 
     E. AUTHORITY RESPONSE TIME: Does the question require a government agency,
        regulator, court, or large organization to complete an action? How long
        does that type of action typically take? Is the deadline realistic?
-       - Antitrust reviews: weeks to months → 5-day deadline = REJECT
-       - Regulatory investigations (NHTSA, FAA): weeks → 5-day deadline = REJECT
-       - Large-scale layoffs (1000+ jobs): weeks/months → 5-day deadline = REJECT
-       - Company press release about existing decision: days → OK
+       - Antitrust reviews: weeks to months -> 5-day deadline = REJECT
+       - Regulatory investigations (NHTSA, FAA): weeks -> 5-day deadline = REJECT
+       - Large-scale layoffs (1000+ jobs): weeks/months -> 5-day deadline = REJECT
+       - Company press release about existing decision: days -> OK
 
     F. DECISION: Accept ONLY if ALL of B, C, D, E pass.
 
@@ -511,6 +501,11 @@ DEFAULT_OPENAI_SETTINGS = {
     "temperature": 0.7,
 }
 DEFAULT_ENGINES = {"propose-question": "gpt-4.1-2025-04-14"}
+# Cheaper model used for simple classification/extraction steps (story
+# selection, measurable-state extraction). These calls don't need the full
+# model's creative/reasoning capacity -- using mini here cuts cost by ~50%
+# with no observable quality loss on the classification task.
+LIGHT_MODEL = "gpt-4.1-mini-2025-04-14"
 ALLOWED_TOOLS = ["propose-question"]
 
 
@@ -688,14 +683,15 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         topics = kwargs.get("topics", DEFAULT_TOPICS)
         topics_string = ", ".join(topics)
 
-        # First call to LLM
+        # First call to LLM -- story selection. Classification task, uses
+        # the cheaper light model.
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
             assert client is not None
             max_tokens = kwargs.get("max_tokens", DEFAULT_OPENAI_SETTINGS["max_tokens"])
             temperature = kwargs.get(
                 "temperature", DEFAULT_OPENAI_SETTINGS["temperature"]
             )
-            model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
+            model = LIGHT_MODEL
 
             prompt_values = {
                 "articles": articles_string,
@@ -761,11 +757,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
         # Step 2: Extract measurable states from the article (iteration 2).
         # This constrains the LLM to identify what CAN be measured before
-        # framing a question — breaking the default "Will X announce Y?" prior.
+        # framing a question -- breaking the default "Will X announce Y?" prior.
+        # Structured-extraction task, uses the cheaper light model.
         article_text = scrape_result["text"][:6000]  # cap to avoid token limits
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
             assert client is not None
-            model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
+            model = LIGHT_MODEL
             extract_prompt = EXTRACT_STATE_PROMPT.format(article=article_text)
             extract_messages = [
                 {
@@ -803,7 +800,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             print(f"Extracted {len(states)} measurable states:")
             for s in states:
                 print(
-                    f"  [{s.get('framing', '?')}] {s.get('state', '?')} — source: {s.get('source', '?')}"
+                    f"  [{s.get('framing', '?')}] {s.get('state', '?')} -- source: {s.get('source', '?')}"
                 )
 
         # Step 3: Generate questions using the extracted states
@@ -943,7 +940,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                     }
                 )
 
-        # Programmatic date validation — catches past dates and out-of-range
+        # Programmatic date validation -- catches past dates and out-of-range
         # dates that the LLM self-review misses (100% recall on date issues).
         date_validated = []
         for q in accepted_questions:
@@ -960,10 +957,10 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             f"{len(rejected_questions)} rejected out of {len(questions)} proposed"
         )
         for rej in rejected_questions:
-            print(f"  REJECTED: {rej['question'][:80]}... — {rej['reason'][:60]}")
+            print(f"  REJECTED: {rej['question'][:80]}... -- {rej['reason'][:60]}")
 
         # Pick the best num_questions from validated candidates.
-        # Do NOT fall back to rejected questions — return error instead.
+        # Do NOT fall back to rejected questions -- return error instead.
         if date_validated:
             questions = date_validated[:num_questions]
         else:
