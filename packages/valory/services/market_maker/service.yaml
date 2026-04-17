@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeicn4avghuahgxei4gl4jh7jd6yqevw6qr45vp64o67vqvoysb7ipy
+agent: valory/market_maker:0.1.0:bafybeicdkgxjx6u5ajlvka3cgzui3fdtdtrsdfzlgbpvk4avdkmkbsavg4
 number_of_agents: 1
 deployment:
   agent:
@@ -23,24 +23,6 @@ models:
       log_dir: ${LOG_DIR:str:/benchmarks}
   params:
     args:
-      market_identification_prompt: ${MARKET_IDENTIFICATION_PROMPT:str:Based on the
-        following news snippets under INPUT, formulate 5 prediction market questions
-        with clear, objective\noutcomes that can be verified on a specific date and
-        leave no room for interpretation or subjectivity.\nAvoid incorporating questions
-        that could potentially encourage unethical behavior or violence.\nEvery question
-        must be related to an event happening on or by {event_day}. The answer to
-        the question\nmust be unknown until that day, but it must be known after that
-        day.\nYour questions should follow a structure similar to this;\n\"Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION
-        occur on {event_day}\".\nYour output must follow the output format detailed
-        under \"OUTPUT FORMAT\".\n\nINPUT\n{input_news}\n\nOUTPUT_FORMAT\n* Your output
-        response must be only a single JSON array to be parsed by Python \"json.loads()\".\n*
-        All of the date strings should be represented in YYYY-MM-DD format.\n* Each
-        entry of the JSON array must be a JSON object containing the fields;\n - question;
-        The binary question to open a prediction market.\n - answers; The possible
-        answers to the question.\n - resolution_date; The resolution date for the
-        outcome of the market to be verified.\n - topic; One word description of the
-        topic of the news and it should be one of; {topics}.\n* Output only the JSON
-        object. Do not include any other contents in your response.}
       max_proposed_markets: ${MAX_PROPOSED_MARKETS:int:-1}
       max_approved_markets: ${MAX_APPROVED_MARKETS:int:-1}
       markets_to_approve_per_epoch: ${MARKETS_TO_APPROVE_PER_EPOCH:int:1}

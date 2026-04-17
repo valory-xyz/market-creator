@@ -525,13 +525,7 @@ LIGHT_MODEL = "gpt-4.1-mini-2025-04-14"
 
 
 def format_utc_timestamp(utc_timestamp: int) -> str:
-    """Format UTC timestamp as "Month D, YYYY" (US format).
-
-    The downstream ApproveMarketsBehaviour._is_resolution_date_in_question
-    check only accepts this format; other date orderings (e.g.
-    "18 April 2026") cause the market to be silently dropped before
-    reaching the approval server.
-    """
+    """Format UTC timestamp as "Month D, YYYY" (US format)."""
     dt = datetime.fromtimestamp(utc_timestamp, tz=timezone.utc)
     return f"{dt.strftime('%B')} {dt.day}, {dt.year}"
 

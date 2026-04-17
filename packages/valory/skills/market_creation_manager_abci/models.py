@@ -66,9 +66,6 @@ class MarketCreationManagerParams(BaseParams):
         self.newsapi_endpoint = self._ensure(
             key="newsapi_endpoint", kwargs=kwargs, type_=str
         )
-        self.market_identification_prompt = self._ensure(
-            key="market_identification_prompt", kwargs=kwargs, type_=str
-        )
         self.topics = self._ensure(key="topics", kwargs=kwargs, type_=List[str])
         self.news_sources = self._ensure(
             key="news_sources", kwargs=kwargs, type_=List[str]
