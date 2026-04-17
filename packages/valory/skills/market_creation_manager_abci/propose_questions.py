@@ -113,13 +113,24 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
     questions created are of public interest. The chosen article should ideally
     be used to create questions based on topics different from the EXISTING_QUESTIONS.
 
-    PREFER articles that support MEASUREMENT or STATE questions over articles
-    that only support specific-announcement questions. Good signals:
-    - The article mentions a measurable quantity (price, rate, index, count,
-      percentage, ranking) that can be checked on a future date.
-    - The article describes an ongoing state or trend that can be asked about
-      as a continuation ("Will X remain above Y?").
-    Avoid articles whose only angle is "will authority X announce Y?" unless
+    PREFER articles that support MEASUREMENT or CONTINUATION questions, with a
+    particular bias toward continuation-friendly topics. Good signals for
+    continuation-friendly articles:
+    - Economic indicators (interest rates, inflation targets, unemployment,
+      stock indices, commodity prices, exchange rates).
+    - Political incumbencies (leaders, officials, judges currently in position).
+    - Existing moratoriums, sanctions, bans, regulations, policies.
+    - Institutional positions (ratings, league standings, memberships,
+      subscriptions, listings).
+    - Ongoing conflicts, negotiations, strikes, or standoffs.
+    These articles produce questions about status-quo persistence, which
+    balance the pipeline's natural No-bias from short-deadline announcements.
+
+    Also acceptable:
+    - Articles mentioning a measurable quantity that can be checked on a
+      future date (measurement framing).
+
+    AVOID articles whose only angle is "will authority X announce Y?" unless
     a scheduled announcement is specifically anticipated in the article.
 
     You must output the article ID a topic from TOPICS and a brief reasoning.
@@ -169,6 +180,11 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     reference dates outside this window or in the past.
 
     RULES:
+    - TARGET MIX: when multiple candidate framings are possible for the same
+      article, aim for a mix where at least one third of the generated
+      questions use "continuation" framing. Continuation questions are the
+      main counterweight to the No-bias of announcement framings on short
+      windows, so they are actively preferred when an article supports them.
     - For "measurement" states: frame as "Will [metric] be above/below [threshold]
       on EVENT_DAY, as confirmed by [source]?"
     - For "continuation" states: frame as "Will [condition] still hold on EVENT_DAY,
