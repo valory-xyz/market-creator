@@ -26,7 +26,7 @@ import functools
 import json
 import random
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # import anthropic
@@ -212,6 +212,9 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     - Must not include unmeasurable statements like "significant increase".
     - ALL dates in the question must be between today and EVENT_DAY. Never
       reference past dates or dates beyond EVENT_DAY.
+    - DATE FORMAT: every date in the question MUST be written as
+      "Month D, YYYY" (e.g. "April 22, 2026"). Do NOT use "22 April 2026",
+      "April 22 2026" (no comma), or numeric formats. Copy EVENT_DAY verbatim.
 
     SPECIFIC FRAMING CHECKS (apply to every question):
     1. DEADLINE FEASIBILITY -- Can the criterion physically/procedurally occur
@@ -273,7 +276,11 @@ SELF_REVIEW_PROMPT = """You are auditing prediction-market questions for
        - Large-scale layoffs (1000+ jobs): weeks/months -> 5-day deadline = REJECT
        - Company press release about existing decision: days -> OK
 
-    F. DECISION: Accept ONLY if ALL of B, C, D, E pass.
+    F. DATE FORMAT: Every date in the question must be written as
+       "Month D, YYYY" (e.g. "April 22, 2026"). Formats like "22 April 2026",
+       "April 22 2026" (no comma), or numeric dates are INVALID -> REJECT.
+
+    G. DECISION: Accept ONLY if ALL of B, C, D, E, F pass.
 
     Return JSON with your explicit reasoning at each step.
 
@@ -323,6 +330,7 @@ class SelfReviewItem(BaseModel):
     process_stage_named: bool
     figure_is_directly_published: bool
     authority_can_act_in_time: bool
+    date_format_valid: bool
     reasoning: str  # chain-of-thought explanation
     accept: bool
 
@@ -354,25 +362,25 @@ def validate_question_dates(question: str, resolution_ts: int) -> Optional[str]:
     now = datetime.now(tz=timezone.utc)
     deadline = datetime.fromtimestamp(resolution_ts, tz=timezone.utc)
 
-    # Find all date-like patterns: "April 21, 2026", "21 April 2026",
-    # "September 20, 2024", "February 1, 2027", etc.
-    date_patterns = [
-        r"(\w+ \d{1,2},? \d{4})",  # "April 21, 2026"
-        r"(\d{1,2} \w+ \d{4})",  # "21 April 2026"
-    ]
-    for pattern in date_patterns:
-        for match in re.findall(pattern, question):
-            for fmt in ("%B %d, %Y", "%B %d %Y", "%d %B %Y"):
-                try:
-                    d = datetime.strptime(match.replace(",", ""), fmt.replace(",", ""))
-                    d = d.replace(tzinfo=timezone.utc)
-                    if d < now - __import__("datetime").timedelta(days=1):
-                        return f"Date '{match}' is in the past"
-                    if d > deadline + __import__("datetime").timedelta(days=365):
-                        return f"Date '{match}' is too far beyond the deadline"
-                    break
-                except ValueError:
-                    continue
+    # Any date-like token we find must be in the required "Month D, YYYY"
+    # format. Other orderings (e.g. "21 April 2026") cause the downstream
+    # ApproveMarketsBehaviour to silently drop the market.
+    required_fmt_pattern = r"[A-Z][a-z]+ \d{1,2}, \d{4}"
+    any_date_pattern = r"(\w+ \d{1,2},? \d{4}|\d{1,2} \w+ \d{4})"
+    for match in re.findall(any_date_pattern, question):
+        if not re.fullmatch(required_fmt_pattern, match):
+            return (
+                f"Date '{match}' is not in required 'Month D, YYYY' format "
+                "(e.g. 'April 22, 2026')"
+            )
+        try:
+            d = datetime.strptime(match, "%B %d, %Y").replace(tzinfo=timezone.utc)
+        except ValueError:
+            return f"Date '{match}' could not be parsed"
+        if d < now - timedelta(days=1):
+            return f"Date '{match}' is in the past"
+        if d > deadline + timedelta(days=365):
+            return f"Date '{match}' is too far beyond the deadline"
     return None
 
 
@@ -516,10 +524,15 @@ LIGHT_MODEL = "gpt-4.1-mini-2025-04-14"
 
 
 def format_utc_timestamp(utc_timestamp: int) -> str:
-    """Format UTC timestamp to a human-readable date"""
+    """Format UTC timestamp as "Month D, YYYY" (US format).
+
+    The downstream ApproveMarketsBehaviour._is_resolution_date_in_question
+    check only accepts this format; other date orderings (e.g.
+    "18 April 2026") cause the market to be silently dropped before
+    reaching the approval server.
+    """
     dt = datetime.fromtimestamp(utc_timestamp, tz=timezone.utc)
-    formatted_date = dt.strftime("%d %B %Y")
-    return formatted_date
+    return f"{dt.strftime('%B')} {dt.day}, {dt.year}"
 
 
 def gather_articles(
@@ -920,9 +933,10 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             review_data = json.loads(review_response.choices[0].message.content)
             reviews = review_data.get("reviews", [])
 
-        # Filter: accept questions where at least 3 of 4 checks pass.
-        # This is softer than iteration 3's all-4-required, which killed
-        # too many valid continuation/measurement questions.
+        # Filter: accept questions where at least 3 of 4 quality checks pass
+        # AND the date-format check passes. The date-format check is a hard
+        # gate because the downstream ApproveMarketsBehaviour silently drops
+        # questions whose dates are not in "Month D, YYYY" format.
         accepted_questions = []
         rejected_questions = []
         for rev in reviews:
@@ -933,7 +947,8 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 rev.get("authority_can_act_in_time", True),
             ]
             passes = sum(1 for c in checks if c)
-            if passes >= 3:
+            date_ok = rev.get("date_format_valid", True)
+            if passes >= 3 and date_ok:
                 accepted_questions.append(rev["question"])
             else:
                 rejected_questions.append(
