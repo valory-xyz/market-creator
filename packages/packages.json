@@ -3,12 +3,12 @@
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeiht3qssw52ita4hrfop36hcym7oaq2w446oefpkqpwmzckrcwq54u",
         "contract/valory/fpmm/0.1.0": "bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e",
         "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihad2st4xc3czunawjimtoop5scvydq5l75lpjsm5rhvr5uz53eo4",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeidlgkvfxuj75xpfxlnodlkqit6jv7lyd6f76dahcmxmlhajegmsq4",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeiaauep4axjxifb7nbooblpjsosios4vhzwumvhhtrjh7vqo7hggii",
         "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeieff6ju7vumtg4ovr6y2thqxjv5we4mca4ucjxqm7xqyyrekw3uw4",
         "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeibfbtuliclpudh6pjzjoygphb7rbc335fstqw2yzjarbldcoseutq",
         "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeiflqycyzizq4b4gabfxm6re5mfsoqlpfqh5nn67b5lfjz3c7rdimu",
-        "agent/valory/market_maker/0.1.0": "bafybeifdzgpf5z5v7csud7fmbjembihuxfvgrwggre7n42h5cuh6ayoysm",
-        "service/valory/market_maker/0.1.0": "bafybeiehdyx2yrif3jeih5yoafd5ghs63w6ths2crpjdevjvhfb7gmdnou"
+        "agent/valory/market_maker/0.1.0": "bafybeigfgwamlxbzlsyondc45abpso4x3gcfjfbhgnvxx77bozflv5d5fq",
+        "service/valory/market_maker/0.1.0": "bafybeifexd5zv5lwob3iiwmbauyx2sjnmpappdd3e5xhbdefkdmwsil65a"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",

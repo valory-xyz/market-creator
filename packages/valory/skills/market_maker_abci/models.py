@@ -52,6 +52,9 @@ from packages.valory.skills.omen_ct_redeem_tokens_abci.models import (
 from packages.valory.skills.omen_ct_redeem_tokens_abci.models import (
     CtRedeemTokensParams,
 )
+from packages.valory.skills.omen_ct_redeem_tokens_abci.models import (
+    SharedState as CtRedeemTokensSharedState,
+)
 from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import (
     Event as OmenCtRedeemTokensEvent,
 )
@@ -85,8 +88,13 @@ ConditionalTokensSubgraph = BaseConditionalTokensSubgraph
 RealitioSubgraph = BaseRealitioSubgraph
 
 
-class SharedState(BaseSharedState):
-    """Keep the current shared state of the skill."""
+class SharedState(BaseSharedState, CtRedeemTokensSharedState):
+    """Keep the current shared state of the skill.
+
+    Multi-inherits from sub-skill SharedStates so their ``__init__``
+    initializers (e.g. ``ignored_ct_positions`` from the CT redeem skill)
+    are run via MRO when the framework instantiates this composed class.
+    """
 
     abci_app_cls = MarketCreatorAbciApp
 
