@@ -56,6 +56,18 @@ class TestSharedState:
         """Test abci_app_cls is set correctly."""
         assert SharedState.abci_app_cls is OmenCtRedeemTokensAbciApp
 
+    def test_ignored_ct_positions_initialized(self) -> None:
+        """Test ignored_ct_positions is initialized to empty set."""
+        state = SharedState.__new__(SharedState)
+        # Call our __init__ directly, patching the parent so it doesn't
+        # require a full AEA context.
+        with patch(
+            "packages.valory.skills.omen_ct_redeem_tokens_abci.models.BaseSharedState.__init__"
+        ):
+            state.__init__(skill_context=MagicMock())  # type: ignore
+        assert hasattr(state, "ignored_ct_positions")
+        assert state.ignored_ct_positions == set()
+
 
 class TestCtRedeemTokensParams:
     """Test CtRedeemTokensParams."""
@@ -72,6 +84,7 @@ class TestCtRedeemTokensParams:
         )
         kwargs = {
             "ct_redeem_tokens_batch_size": 5,
+            "ct_redeem_tokens_min_payout": 0,
             "conditional_tokens_contract": "0xCT",
             "realitio_oracle_proxy_contract": "0xRealitioProxy",
             "collateral_tokens_contract": "0xCollateral",
@@ -79,6 +92,7 @@ class TestCtRedeemTokensParams:
         with patch.object(BaseParams, "__init__", return_value=None):
             CtRedeemTokensParams.__init__(mock_self, **kwargs)
         assert mock_self.ct_redeem_tokens_batch_size == 5
+        assert mock_self.ct_redeem_tokens_min_payout == 0
         assert mock_self.conditional_tokens_contract == "0xCT"
         assert mock_self.realitio_oracle_proxy_contract == "0xRealitioProxy"
         assert mock_self.collateral_tokens_contract == "0xCollateral"

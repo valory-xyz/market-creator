@@ -96,7 +96,9 @@ def mock_context() -> MagicMock:
     context.params.collateral_tokens_contract = "0xCollateral"
     context.params.realitio_oracle_proxy_contract = "0xRealitioProxy"
     context.params.ct_redeem_tokens_batch_size = 5
+    context.params.ct_redeem_tokens_min_payout = 0
     context.params.multisend_address = "0xMultisend"
+    context.state.ignored_ct_positions = set()
     context.state.round_sequence = MagicMock()
     context.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
         1700100000
