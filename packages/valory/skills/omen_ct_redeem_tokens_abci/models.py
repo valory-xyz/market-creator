@@ -19,7 +19,7 @@
 
 """Shared state and params for the omen_ct_redeem_tokens_abci skill."""
 
-from typing import Any, Type
+from typing import Any, Set, Type
 
 from aea.exceptions import enforce
 
@@ -42,6 +42,11 @@ class SharedState(BaseSharedState):
 
     abci_app_cls: Type[AbciApp] = OmenCtRedeemTokensAbciApp
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize the shared state."""
+        super().__init__(*args, **kwargs)
+        self.ignored_ct_positions: Set[str] = set()
+
 
 class CtRedeemTokensParams(BaseParams):
     """Parameters for the omen_ct_redeem_tokens_abci skill."""
@@ -55,6 +60,9 @@ class CtRedeemTokensParams(BaseParams):
         """Initialize the parameters object."""
         self.ct_redeem_tokens_batch_size = self._ensure(
             "ct_redeem_tokens_batch_size", kwargs, type_=int
+        )
+        self.ct_redeem_tokens_min_payout = self._ensure(
+            "ct_redeem_tokens_min_payout", kwargs, type_=int
         )
         # Contract addresses are read without popping so sibling params
         # classes in a composed MRO can still see them.

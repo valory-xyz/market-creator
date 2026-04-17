@@ -47,7 +47,7 @@ skills:
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
 - valory/identify_service_owner_abci:0.1.0:bafybeihj2q3kf5zfhqvpayvbis4uxpe45smnzdkdvmdwxya2oe4kfc5qam
 - valory/funds_forwarder_abci:0.1.0:bafybeid6yc7ld64oenx3ttbxahno6qcqk6fqffqrnl3d3ftwapkwqqvexq
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeih7cp5kz2phbffw3k45rcxsbyvw6egnitrxwwdlw7ihhkzdjkkvqm
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeieff6ju7vumtg4ovr6y2thqxjv5we4mca4ucjxqm7xqyyrekw3uw4
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibfbtuliclpudh6pjzjoygphb7rbc335fstqw2yzjarbldcoseutq
 - valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiflqycyzizq4b4gabfxm6re5mfsoqlpfqh5nn67b5lfjz3c7rdimu
 default_ledger: ethereum
@@ -222,6 +222,7 @@ models:
       liquidity_removal_lead_time: ${int:86400}
       fpmm_remove_liquidity_batch_size: ${int:1}
       ct_redeem_tokens_batch_size: ${int:5}
+      ct_redeem_tokens_min_payout: ${int:1}
       realitio_withdraw_bonds_batch_size: ${int:10}
       min_realitio_withdraw_balance: ${int:1000000000000000000}
   randomness_api:

@@ -10,24 +10,24 @@ fingerprint:
   __init__.py: bafybeib4kjyui2xe33pltjouup4lstknxxh2xarqxim6jduf7itsgixj2u
   behaviours/__init__.py: bafybeiabhvvnnijguzfh2gzoatyv2bptmgvkphxqzbkj3m6lrmqrbzalsi
   behaviours/base.py: bafybeifmpfclk7jiikqh47cru7tizoajkn3ktof4tosbflsijuys7i6iey
-  behaviours/redeem_tokens.py: bafybeidnzkmknda2yqueldqowmohensyjqjgufz4da6eeafgkwsoatja34
+  behaviours/redeem_tokens.py: bafybeihxj5qrl6cucb35h2fjp4v7hg7cmnjhcillru7zpctihedrjsafjq
   behaviours/round_behaviour.py: bafybeihxsxypivbkuqeghngqfkijcusfiluidjhotzmzrtwu5defaysgfm
   dialogues.py: bafybeia4lfrdzgijfkluh54kxfjxvjovgmbs2j2syf7a22p6yjwcthhd2a
   fsm_specification.yaml: bafybeib4adkbxcznmkzoawvdodoalqj2noz2mbij5sknq75feu6zwfguxi
   handlers.py: bafybeibmlooyoh7qki6l6b5kgxjzslfpck74dhqxyzcnvzc6tksqy4w3n4
-  models.py: bafybeig6gdnrkgigibkwl27igbyjym2jal5gp2hrqvkk64ruefm456bbam
+  models.py: bafybeiaff5knpdot2qxpsju3ccavc7vkjajrjhkwmsh6ylnr6k6veqfo7i
   payloads.py: bafybeih6jcp6wsjebdretznqufaqslzkdjkb6avx2rke3pfaickxpmvmfi
   rounds.py: bafybeifhmxa7ciztxrzt5d6xkyfsrfeszzidsdbp4u5pxnaabpcvnbnkoq
   tests/__init__.py: bafybeidmya2jrj6ehcefthstcr3srlxjbr247eaehhbhocfghvh6eoz5la
   tests/behaviours/__init__.py: bafybeiejomd7worqbqo2jyof3wwzoqqvmsthxguwsucfgzj5gdwyfgcwtq
-  tests/behaviours/conftest.py: bafybeihcpoipg55ck3mveuvsxcyinba5jvv2mzsbbrhahkqp4o3sojqylu
+  tests/behaviours/conftest.py: bafybeidgc7rdhfxo77kp7j2lwsztctjlsm5ge7nbioy5fixcmvsvz4x3fi
   tests/behaviours/test_base.py: bafybeiazfg4lumwm2n3n4ogwu3mijviw3m3lohrmebxishxt24rplq225e
-  tests/behaviours/test_redeem_tokens.py: bafybeicpmobjne33ojh2rsbh3z3o2zvcpinwx7rkkul3un47xzvsuy7lgy
+  tests/behaviours/test_redeem_tokens.py: bafybeieviz3chok7asmmoesbk6ri2axz2cebowopmot2qxvebzai2qdpxu
   tests/behaviours/test_round_behaviour.py: bafybeicmxtsip3fsle7wdyzs2jtw35jr66exag5ecyjvsebrmdcloaza3e
   tests/conftest.py: bafybeia6iqb5jpuztny5iivbcgbcenbfyqotxawkhqel6emrtvwqc4xtiq
   tests/test_dialogues.py: bafybeihw4yf3x2nhbb67n65lel5yejs33j6wk5xkcl5teh5x7u732uk77y
   tests/test_handlers.py: bafybeifiam5jtchbveae4e6o5tz3ctqionx5x4wbp7rjn6fkfxfczbxvmq
-  tests/test_models.py: bafybeifraeit76qixyriaya3daitrzzhxzzphhskgkb762o5x4aavoc7gq
+  tests/test_models.py: bafybeifze3o7jutxohp2nqzw4wcizhul7t6msu5qpwlz3erjqdnyxexree
   tests/test_payloads.py: bafybeigwdtefgckdjed5mmpbtgkgks5delcwlsuffrgtzsrw6ktdwej3b4
   tests/test_rounds.py: bafybeifu53q5fj4lxc6ksqg7xbfrlpieew5twndaa3w2sbutwyzwd3dm5a
 fingerprint_ignore_patterns: []
@@ -91,6 +91,7 @@ models:
   params:
     args:
       ct_redeem_tokens_batch_size: 5
+      ct_redeem_tokens_min_payout: 1
       conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
       collateral_tokens_contract: '0x0000000000000000000000000000000000000000'

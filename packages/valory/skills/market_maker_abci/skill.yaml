@@ -14,7 +14,7 @@ fingerprint:
   dialogues.py: bafybeiafgwadv6kzts6yx5gtjyuvaftnofyn3rrwvczfd5seihpydzukju
   fsm_specification.yaml: bafybeieupgiolp7q6tdsgxwmhgavv42dpaisz5ffqidwtc4jjw4vhcpuim
   handlers.py: bafybeidxnunmyadmbrouiitawmaettqel55i3wl4e4v7wp6gemdbt3d6mu
-  models.py: bafybeiativsow2hpjawy2oceg4csih6cys4t63iptrtdw7yrdtqmlr2z7y
+  models.py: bafybeiesxdaoea5oiaorbl72l75ns2wr3v5vfudzib6azajylwxsagtwlq
   tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
   tests/test_behaviours.py: bafybeiapyvud7fsne3cg2oowm2u7jni5ngixv4p3mudukisluccjzpc5l4
@@ -36,7 +36,7 @@ skills:
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
 - valory/identify_service_owner_abci:0.1.0:bafybeihj2q3kf5zfhqvpayvbis4uxpe45smnzdkdvmdwxya2oe4kfc5qam
 - valory/funds_forwarder_abci:0.1.0:bafybeid6yc7ld64oenx3ttbxahno6qcqk6fqffqrnl3d3ftwapkwqqvexq
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeih7cp5kz2phbffw3k45rcxsbyvw6egnitrxwwdlw7ihhkzdjkkvqm
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeieff6ju7vumtg4ovr6y2thqxjv5we4mca4ucjxqm7xqyyrekw3uw4
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibfbtuliclpudh6pjzjoygphb7rbc335fstqw2yzjarbldcoseutq
 - valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiflqycyzizq4b4gabfxm6re5mfsoqlpfqh5nn67b5lfjz3c7rdimu
 behaviours:
@@ -212,6 +212,7 @@ models:
       liquidity_removal_lead_time: 86400
       fpmm_remove_liquidity_batch_size: 1
       ct_redeem_tokens_batch_size: 5
+      ct_redeem_tokens_min_payout: 1
       realitio_withdraw_bonds_batch_size: 10
       min_realitio_withdraw_balance: 1000000000000000000
     class_name: Params
