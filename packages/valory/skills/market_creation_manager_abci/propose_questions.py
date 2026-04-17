@@ -25,6 +25,7 @@
 import functools
 import json
 import random
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -349,15 +350,15 @@ class LLMStorySelectionSchema(BaseModel):
     reasoning: str
 
 
-import re
-
-
 def validate_question_dates(question: str, resolution_ts: int) -> Optional[str]:
-    """Check that all dates in a question are between today and the deadline.
+    """Check dates in a question: format, not in the past, not too far ahead.
+
+    Dates must be written as "Month D, YYYY" (e.g. "April 22, 2026"). Other
+    orderings cause ApproveMarketsBehaviour to silently drop the market.
 
     :param question: the question text to scan for date references.
     :param resolution_ts: the market resolution timestamp (Unix epoch).
-    :return: None if OK, or a rejection reason string if a date is out of range.
+    :return: None if OK, else a human-readable rejection reason.
     """
     now = datetime.now(tz=timezone.utc)
     deadline = datetime.fromtimestamp(resolution_ts, tz=timezone.utc)
