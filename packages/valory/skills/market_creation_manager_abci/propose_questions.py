@@ -506,13 +506,13 @@ DEFAULT_OPENAI_SETTINGS = {
     "max_tokens": 4096,
     "temperature": 0.7,
 }
-DEFAULT_ENGINES = {"propose-question": "gpt-4.1-2025-04-14"}
+ALLOWED_TOOLS = ["propose-question"]
+TOOL_TO_ENGINE = {tool: "gpt-4.1-2025-04-14" for tool in ALLOWED_TOOLS}
 # Cheaper model used for simple classification/extraction steps (story
 # selection, measurable-state extraction). These calls don't need the full
 # model's creative/reasoning capacity -- using mini here cuts cost by ~50%
 # with no observable quality loss on the classification task.
 LIGHT_MODEL = "gpt-4.1-mini-2025-04-14"
-ALLOWED_TOOLS = ["propose-question"]
 
 
 def format_utc_timestamp(utc_timestamp: int) -> str:
@@ -816,7 +816,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             temperature = kwargs.get(
                 "temperature", DEFAULT_OPENAI_SETTINGS["temperature"]
             )
-            model = kwargs.get("engine", DEFAULT_ENGINES.get(tool))
+            model = kwargs.get("model", TOOL_TO_ENGINE[tool])
 
             # Generate more candidates than needed; self-review + date check
             # will filter down. This makes self-review a selector, not just a gate.
