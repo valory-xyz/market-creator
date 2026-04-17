@@ -8,7 +8,7 @@
         "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeibfbtuliclpudh6pjzjoygphb7rbc335fstqw2yzjarbldcoseutq",
         "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeiflqycyzizq4b4gabfxm6re5mfsoqlpfqh5nn67b5lfjz3c7rdimu",
         "agent/valory/market_maker/0.1.0": "bafybeigfgwamlxbzlsyondc45abpso4x3gcfjfbhgnvxx77bozflv5d5fq",
-        "service/valory/market_maker/0.1.0": "bafybeifexd5zv5lwob3iiwmbauyx2sjnmpappdd3e5xhbdefkdmwsil65a"
+        "service/valory/market_maker/0.1.0": "bafybeidrt5tbyzgzry3rcfjf3fbx7rgdtr5mmsxgwibxsaoe3sfqqdltfm"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
