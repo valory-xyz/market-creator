@@ -113,12 +113,22 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
     questions created are of public interest. The chosen article should ideally
     be used to create questions based on topics different from the EXISTING_QUESTIONS.
 
-    PREFER articles that support MEASUREMENT or CONTINUATION questions over
-    articles that only support pure announcement framings. Good signals:
-    - The article mentions a measurable quantity (price, rate, index, count,
-      percentage, ranking) that can be checked on a future date.
-    - The article describes an ongoing state or trend that can be asked about
-      as a continuation.
+    PREFER articles that support MEASUREMENT or CONTINUATION questions, with a
+    particular bias toward continuation-friendly topics. Good signals for
+    continuation-friendly articles:
+    - Economic indicators (interest rates, inflation targets, unemployment,
+      stock indices, commodity prices, exchange rates).
+    - Political incumbencies (leaders, officials, judges currently in position).
+    - Existing moratoriums, sanctions, bans, regulations, policies.
+    - Institutional positions (ratings, league standings, memberships,
+      subscriptions, listings).
+    - Ongoing conflicts, negotiations, strikes, or standoffs.
+    These articles produce questions about status-quo persistence, which
+    balance the pipeline's natural No-bias from short-deadline announcements.
+
+    Also acceptable:
+    - Articles mentioning a measurable quantity that can be checked on a
+      future date (measurement framing).
 
     AVOID articles whose only angle is "will authority X announce Y?" unless
     a scheduled announcement is specifically anticipated in the article.
@@ -182,15 +192,11 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     - For "measurement" states: frame as
       "Will [metric] be above/below [threshold] on EVENT_DAY, according to
       [source]?"
-    - For "continuation" states: the underlying state is what matters, NOT
-      the act of someone confirming it. Phrase directly:
+    - For "continuation" states: frame as
       "Will [condition] still hold on EVENT_DAY, according to [source]?"
-      Do NOT write "Will X confirm that [condition]" -- that makes the
-      confirmation itself the outcome, which introduces a No-bias. Phrase
-      the state directly and name the source as the verification channel.
     - For "announcement" states: frame as
       "Will [entity] [action] on or before EVENT_DAY, according to [source]?"
-    - In all templates, use **"according to [source]"** to name the jury's
+    - In all templates, use "according to [source]" to name the jury's
       verification channel. Do NOT use "as confirmed by" / "as reported by" /
       "as announced by" -- the past-participle phrasing can be misread as
       "already confirmed/reported/announced at the time the question is asked".
