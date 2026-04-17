@@ -127,7 +127,7 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
             held_positions = {
                 cid: idx_sets
                 for cid, idx_sets in held_positions.items()
-                if cid not in ignored
+                if cid.lower() not in ignored
             }
         if not held_positions:
             self.context.logger.info(

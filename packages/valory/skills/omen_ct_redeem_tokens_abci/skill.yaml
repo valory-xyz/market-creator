@@ -10,7 +10,7 @@ fingerprint:
   __init__.py: bafybeib4kjyui2xe33pltjouup4lstknxxh2xarqxim6jduf7itsgixj2u
   behaviours/__init__.py: bafybeiabhvvnnijguzfh2gzoatyv2bptmgvkphxqzbkj3m6lrmqrbzalsi
   behaviours/base.py: bafybeifmpfclk7jiikqh47cru7tizoajkn3ktof4tosbflsijuys7i6iey
-  behaviours/redeem_tokens.py: bafybeiele37xdwz6qgyqnhcfh4mcgtzm3udlj4g4cqbf4k2zzmib65stta
+  behaviours/redeem_tokens.py: bafybeihxj5qrl6cucb35h2fjp4v7hg7cmnjhcillru7zpctihedrjsafjq
   behaviours/round_behaviour.py: bafybeihxsxypivbkuqeghngqfkijcusfiluidjhotzmzrtwu5defaysgfm
   dialogues.py: bafybeia4lfrdzgijfkluh54kxfjxvjovgmbs2j2syf7a22p6yjwcthhd2a
   fsm_specification.yaml: bafybeib4adkbxcznmkzoawvdodoalqj2noz2mbij5sknq75feu6zwfguxi
