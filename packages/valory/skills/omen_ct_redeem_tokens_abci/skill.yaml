@@ -22,7 +22,7 @@ fingerprint:
   tests/behaviours/__init__.py: bafybeiejomd7worqbqo2jyof3wwzoqqvmsthxguwsucfgzj5gdwyfgcwtq
   tests/behaviours/conftest.py: bafybeidgc7rdhfxo77kp7j2lwsztctjlsm5ge7nbioy5fixcmvsvz4x3fi
   tests/behaviours/test_base.py: bafybeiazfg4lumwm2n3n4ogwu3mijviw3m3lohrmebxishxt24rplq225e
-  tests/behaviours/test_redeem_tokens.py: bafybeifgf3uomqzka76kuftefbewl7bzfonp4x4sxm6dgizhlu3nwfhnku
+  tests/behaviours/test_redeem_tokens.py: bafybeieviz3chok7asmmoesbk6ri2axz2cebowopmot2qxvebzai2qdpxu
   tests/behaviours/test_round_behaviour.py: bafybeicmxtsip3fsle7wdyzs2jtw35jr66exag5ecyjvsebrmdcloaza3e
   tests/conftest.py: bafybeia6iqb5jpuztny5iivbcgbcenbfyqotxawkhqel6emrtvwqc4xtiq
   tests/test_dialogues.py: bafybeihw4yf3x2nhbb67n65lel5yejs33j6wk5xkcl5teh5x7u732uk77y

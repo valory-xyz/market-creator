@@ -484,22 +484,33 @@ class TestCtRedeemTokensBehaviourPrepareMultisend:
         assert result is None
 
     def test_prepare_multisend_partial_ignored(self) -> None:
-        """Test _prepare_multisend filters out ignored positions."""
+        """Test _prepare_multisend filters out ignored positions before passing to _get_redeemable_markets."""
         held = {"0xcond1": {1}, "0xcond2": {2}}
         self.behaviour.context.state.ignored_ct_positions = {"0xcond1"}
         markets = [{"address": "0xM2", "condition_id": "0xcond2"}]
         txs = [{"to": "0xCT", "data": "0xredeem", "value": 0}]
+
+        # Capture the actual argument passed to _get_redeemable_markets to
+        # verify the ignored filter was applied.
+        captured_args: list = []
+
+        def capturing_gen(arg: Any) -> Any:
+            captured_args.append(arg)
+            return markets
+            yield  # noqa: unreachable - makes this a generator function
+
         with (
             patch.object(self.behaviour, "_get_held_positions", new=make_gen(held)),
-            patch.object(
-                self.behaviour, "_get_redeemable_markets", new=make_gen(markets)
-            ),
+            patch.object(self.behaviour, "_get_redeemable_markets", new=capturing_gen),
             patch.object(self.behaviour, "_build_redeem_txs", new=make_gen(txs)),
             patch.object(self.behaviour, "_to_multisend", new=make_gen("0xhash")),
         ):
             gen = self.behaviour._prepare_multisend()
             result = exhaust_gen(gen)
         assert result == "0xhash"
+        # Verify the ignored condition was filtered out before being passed
+        # to _get_redeemable_markets (the whole point of ignored_ct_positions).
+        assert captured_args == [{"0xcond2": {2}}]
 
     def test_prepare_multisend_no_redeemable(self) -> None:
         """Test _prepare_multisend returns None when no markets are redeemable."""
