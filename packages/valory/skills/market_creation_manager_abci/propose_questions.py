@@ -185,12 +185,27 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
       questions use "continuation" framing. Continuation questions are the
       main counterweight to the No-bias of announcement framings on short
       windows, so they are actively preferred when an article supports them.
-    - For "measurement" states: frame as "Will [metric] be above/below [threshold]
-      on EVENT_DAY, as confirmed by [source]?"
-    - For "continuation" states: frame as "Will [condition] still hold on EVENT_DAY,
-      as confirmed by [source]?"
-    - For "announcement" states: frame as "Will [entity] [action] on or before
-      EVENT_DAY, as confirmed by [source]?"
+
+    FRAMING TEMPLATES (use exactly these grammatical shapes — they avoid the
+    past-participle ambiguity of "as confirmed by X" which can be misread as
+    "already confirmed by X"):
+    - For "measurement" states: frame as
+      "Will [metric] be above/below [threshold] on EVENT_DAY, according to
+      [source]?"
+    - For "continuation" states: the underlying state is what matters, NOT
+      the act of someone confirming it. Phrase directly:
+      "Will [condition] still hold on EVENT_DAY, according to [source]?"
+      Do NOT write "Will X confirm that [condition]" — that makes the
+      confirmation itself the outcome, which introduces a No-bias. Phrase
+      the state directly and name the source as the verification channel.
+    - For "announcement" states: frame as
+      "Will [entity] [action] on or before EVENT_DAY, according to [source]?"
+    - In all templates, use **"according to [source]"** to name the jury's
+      verification channel. Do NOT use "as confirmed by" / "as reported by" /
+      "as announced by" — the past-participle phrasing can be misread as
+      "already confirmed/reported/announced at the time the question is asked".
+      "According to [source]" is future-tense relative to EVENT_DAY and
+      unambiguously means "the jury will check [source] on that date".
     - If MEASURABLE_STATES is empty, you may create an announcement-style question,
       but it must pass ALL the checks below.
     - Must be of public interest, semantically different, different from
