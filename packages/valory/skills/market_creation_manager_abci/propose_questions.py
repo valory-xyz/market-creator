@@ -206,7 +206,12 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     - For "continuation" states: frame as
       "Will [condition] still hold on EVENT_DAY, according to [source]?"
     - For "announcement" states: frame as
-      "Will [entity] [action] on or before EVENT_DAY, according to [source]?"
+      "Will [entity] [action] between TODAY ({today}) and EVENT_DAY, according
+      to [source]?"
+      Do NOT use "on or before EVENT_DAY" -- that admits historical events
+      from any point in the past and makes the question trivially true from
+      the moment it's asked. The question must resolve on something that
+      occurs during the market's lifetime (TODAY to EVENT_DAY).
     - In all templates, use "according to [source]" to name the jury's
       verification channel. Do NOT use "as confirmed by" / "as reported by" /
       "as announced by" -- the past-participle phrasing can be misread as
@@ -301,7 +306,15 @@ SELF_REVIEW_PROMPT = """You are auditing prediction-market questions for
        - candidate "Strait of Hormuz remain closed" when an existing has
          "Strait of Hormuz remain under Iranian control"
 
-    H. DECISION: Accept ONLY if ALL of B, C, D, E, F, G pass.
+    H. WINDOW-BOUND EVENT: For announcement questions, check that the event
+       must occur between TODAY and EVENT_DAY -- not "on or before EVENT_DAY"
+       or any phrasing that would be satisfied by a historical instance. A
+       question like "Will OpenAI publicly announce, on or before EVENT_DAY,
+       the signing of a nine-figure enterprise deal?" is INVALID because
+       OpenAI has already done this many times in the past. REJECT if the
+       literal text would be made True by any pre-TODAY event.
+
+    I. DECISION: Accept ONLY if ALL of B, C, D, E, F, G, H pass.
 
     Return JSON with your explicit reasoning at each step.
 
@@ -313,6 +326,9 @@ SELF_REVIEW_PROMPT = """You are auditing prediction-market questions for
 
     SOURCE ARTICLE
     {article}
+
+    TODAY
+    {today}
 
     EVENT_DAY
     {event_day}
@@ -356,6 +372,7 @@ class SelfReviewItem(BaseModel):
     authority_can_act_in_time: bool
     date_format_valid: bool
     not_a_duplicate: bool
+    window_bound_event: bool
     reasoning: str  # chain-of-thought explanation
     accept: bool
 
@@ -377,6 +394,10 @@ class LLMStorySelectionSchema(BaseModel):
 def validate_question_dates(question: str, resolution_ts: int) -> Optional[str]:
     """Check dates in a question: format, not in the past, not too far ahead.
 
+    Also rejects announcement-style phrasings that admit historical instances
+    (e.g. "on or before April 22, 2026") because pre-existing events would
+    then make the question trivially true.
+
     Dates must be written as "Month D, YYYY" (e.g. "April 22, 2026"). Other
     orderings cause ApproveMarketsBehaviour to silently drop the market.
 
@@ -386,6 +407,17 @@ def validate_question_dates(question: str, resolution_ts: int) -> Optional[str]:
     """
     now = datetime.now(tz=timezone.utc)
     deadline = datetime.fromtimestamp(resolution_ts, tz=timezone.utc)
+
+    # Reject "on or before" phrasings: they admit historical instances and
+    # make announcement questions trivially true from the moment they're
+    # asked. Announcement questions must be window-bound to "between TODAY
+    # and EVENT_DAY".
+    if re.search(r"\bon\s+or\s+before\b", question, re.IGNORECASE):
+        return (
+            "Question uses 'on or before' phrasing which admits historical "
+            "instances. Announcement questions must be window-bound "
+            "(e.g. 'between TODAY and EVENT_DAY')."
+        )
 
     # Any date-like token we find must be in the required "Month D, YYYY"
     # format. Other orderings (e.g. "21 April 2026") cause the downstream
@@ -863,6 +895,9 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
             prompt_values = {
                 "article": f"{article_text}",
+                "today": format_utc_timestamp(
+                    int(datetime.now(tz=timezone.utc).timestamp())
+                ),
                 "event_day": format_utc_timestamp(int(resolution_time)),
                 "latest_questions": latest_questions_string,
                 "measurable_states": states_string,
@@ -920,6 +955,9 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 questions=json.dumps(questions, indent=2),
                 latest_questions=latest_questions_string,
                 article=f"{scrape_result['text'][:4000]}",
+                today=format_utc_timestamp(
+                    int(datetime.now(tz=timezone.utc).timestamp())
+                ),
                 event_day=format_utc_timestamp(int(resolution_time)),
             )
             review_messages = [
@@ -971,7 +1009,8 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             passes = sum(1 for c in checks if c)
             date_ok = rev.get("date_format_valid", True)
             not_dup = rev.get("not_a_duplicate", True)
-            if passes >= 3 and date_ok and not_dup:
+            window_ok = rev.get("window_bound_event", True)
+            if passes >= 3 and date_ok and not_dup and window_ok:
                 accepted_questions.append(rev["question"])
             else:
                 rejected_questions.append(
