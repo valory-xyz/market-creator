@@ -62,7 +62,7 @@ NEWSAPI_DEFAULT_NEWS_SOURCES = [
 OMEN_SUBGRAPH_URL = "https://gateway-arbitrum.network.thegraph.com/api/{subgraph_api_key}/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz"
 HTTP_OK = 200
 MAX_ARTICLES = 60
-MAX_LATEST_QUESTIONS = 40
+MAX_LATEST_QUESTIONS = 200
 
 FPMM_CREATORS = [
     "0x89c5cc945dd550bcffb72fe42bff002429f46fec",
@@ -111,8 +111,18 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
     snippets under ARTICLES. You are provided a list of existing questions under
     EXISTING_QUESTIONS. Your task is to choose one article or story which is suitable
     to create questions for prediction markets. The chosen article should be that the
-    questions created are of public interest. The chosen article should ideally
-    be used to create questions based on topics different from the EXISTING_QUESTIONS.
+    questions created are of public interest.
+
+    HARD REJECTION: do NOT choose an article if EXISTING_QUESTIONS already
+    contains a question about the SAME UNDERLYING TOPIC (same metric, same
+    institution, same event, same named entity), even when the wording or
+    numeric threshold is slightly different. Treat these as duplicates:
+    - "2-year mortgage rate below 5.80%" and "2-year mortgage rate below 5.85%"
+    - "S&P 500 above 7,100" and "S&P 500 above 7,200"
+    - "Strait of Hormuz remain closed" and "Strait of Hormuz under Iranian control"
+    - any two questions naming the same institution reporting on the same metric
+    When in doubt, prefer a different article with a NEW topic not present in
+    EXISTING_QUESTIONS.
 
     PREFER articles that support MEASUREMENT or CONTINUATION questions, with a
     particular bias toward continuation-friendly topics. Good signals for
@@ -281,12 +291,25 @@ SELF_REVIEW_PROMPT = """You are auditing prediction-market questions for
        "Month D, YYYY" (e.g. "April 22, 2026"). Formats like "22 April 2026",
        "April 22 2026" (no comma), or numeric dates are INVALID -> REJECT.
 
-    G. DECISION: Accept ONLY if ALL of B, C, D, E, F pass.
+    G. NOT A DUPLICATE: Compare the candidate against EXISTING_QUESTIONS. If
+       any existing question covers the SAME underlying claim -- same metric
+       on the same source, same institution's position, same ongoing event --
+       REJECT even if wording differs or the numeric threshold is slightly
+       different. Examples of duplicates to reject:
+       - candidate "...rate below 5.85%..." when an existing has "...rate below 5.80%..."
+       - candidate "S&P 500 above 7,150" when an existing has "S&P 500 above 7,100"
+       - candidate "Strait of Hormuz remain closed" when an existing has
+         "Strait of Hormuz remain under Iranian control"
+
+    H. DECISION: Accept ONLY if ALL of B, C, D, E, F, G pass.
 
     Return JSON with your explicit reasoning at each step.
 
     QUESTIONS
     {questions}
+
+    EXISTING_QUESTIONS
+    {latest_questions}
 
     SOURCE ARTICLE
     {article}
@@ -332,6 +355,7 @@ class SelfReviewItem(BaseModel):
     figure_is_directly_published: bool
     authority_can_act_in_time: bool
     date_format_valid: bool
+    not_a_duplicate: bool
     reasoning: str  # chain-of-thought explanation
     accept: bool
 
@@ -637,9 +661,11 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 counter_callback,
             )
 
-        latest_questions = random.sample(  # nosec: B311
-            latest_questions, min(MAX_LATEST_QUESTIONS, len(latest_questions))
-        )
+        # Keep the MAX_LATEST_QUESTIONS most recent (subgraph already returns
+        # them newest-first). Random-sampling discarded dedup signal and
+        # caused near-duplicate clusters when the same article dominated news
+        # across multiple cycles.
+        latest_questions = latest_questions[:MAX_LATEST_QUESTIONS]
         latest_questions_string = "\n".join(latest_questions)
 
         # Gather recent news articles from NewsAPI
@@ -892,6 +918,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             assert client is not None
             review_prompt = SELF_REVIEW_PROMPT.format(
                 questions=json.dumps(questions, indent=2),
+                latest_questions=latest_questions_string,
                 article=f"{scrape_result['text'][:4000]}",
                 event_day=format_utc_timestamp(int(resolution_time)),
             )
@@ -943,7 +970,8 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             ]
             passes = sum(1 for c in checks if c)
             date_ok = rev.get("date_format_valid", True)
-            if passes >= 3 and date_ok:
+            not_dup = rev.get("not_a_duplicate", True)
+            if passes >= 3 and date_ok and not_dup:
                 accepted_questions.append(rev["question"])
             else:
                 rejected_questions.append(
