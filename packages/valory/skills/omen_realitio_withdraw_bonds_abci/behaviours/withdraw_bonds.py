@@ -39,7 +39,6 @@ from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
     RealitioWithdrawBondsRound,
 )
 
-
 # The ``historyHash_not`` filter excludes questions already claimed on-chain
 # (their history hash is cleared to zero). Without it, a query bounded by
 # batch_size would keep returning the same already-claimed questions and

@@ -32,9 +32,7 @@ from packages.valory.skills.omen_ct_redeem_tokens_abci.behaviours.redeem_tokens 
     CtRedeemTokensBehaviour,
     SUBGRAPH_PAGE_SIZE,
 )
-from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import (
-    CtRedeemTokensRound,
-)
+from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import CtRedeemTokensRound
 from packages.valory.skills.omen_ct_redeem_tokens_abci.tests.behaviours.conftest import (
     exhaust_gen,
     make_contract_error_response,

@@ -71,7 +71,6 @@ _ACTION_REMOVE_ONLY = "remove_only"
 _ACTION_REMOVE_AND_MERGE = "remove_and_merge"
 
 
-
 class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
     """Behaviour that removes LP funds from FPMM markets (and optionally merges positions)."""
 
