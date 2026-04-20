@@ -55,9 +55,6 @@ from packages.valory.skills.market_creation_manager_abci.dialogues import (
     HttpDialogue,
     HttpDialogues,
 )
-from packages.valory.skills.market_creation_manager_abci.handlers import (
-    LlmHandler as BaseLlmHandler,
-)
 from packages.valory.skills.market_creation_manager_abci.rounds import SynchronizedData
 from packages.valory.skills.market_maker_abci.models import SharedState
 
@@ -67,7 +64,6 @@ LedgerApiHandler = BaseLedgerApiHandler
 ContractApiHandler = BaseContractApiHandler
 TendermintHandler = BaseTendermintHandler
 IpfsHandler = BaseIpfsHandler
-LlmHandler = BaseLlmHandler
 
 
 class HttpCode(Enum):

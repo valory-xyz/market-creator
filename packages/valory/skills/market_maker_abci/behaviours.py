@@ -35,8 +35,14 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.round_behavi
     MarketCreationManagerRoundBehaviour,
 )
 from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
-from packages.valory.skills.mech_interact_abci.behaviours.round_behaviour import (
-    MechInteractRoundBehaviour,
+from packages.valory.skills.omen_ct_redeem_tokens_abci.behaviours.round_behaviour import (
+    CtRedeemTokensRoundBehaviour,
+)
+from packages.valory.skills.omen_fpmm_remove_liquidity_abci.behaviours.round_behaviour import (
+    OmenFpmmRemoveLiquidityRoundBehaviour,
+)
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.round_behaviour import (
+    OmenRealitioWithdrawBondsRoundBehaviour,
 )
 from packages.valory.skills.registration_abci.behaviours import (
     AgentRegistrationRoundBehaviour,
@@ -63,10 +69,12 @@ class MarketCreatorRoundBehaviour(AbstractRoundBehaviour):
         *AgentRegistrationRoundBehaviour.behaviours,
         *IdentifyServiceOwnerRoundBehaviour.behaviours,
         *FundsForwarderRoundBehaviour.behaviours,
+        *OmenFpmmRemoveLiquidityRoundBehaviour.behaviours,
+        *CtRedeemTokensRoundBehaviour.behaviours,
+        *OmenRealitioWithdrawBondsRoundBehaviour.behaviours,
         *MarketCreationManagerRoundBehaviour.behaviours,
         *TransactionSettlementRoundBehaviour.behaviours,
         *ResetPauseABCIConsensusBehaviour.behaviours,
         *TerminationAbciBehaviours.behaviours,
-        *MechInteractRoundBehaviour.behaviours,
     }
     background_behaviours_cls = {BackgroundBehaviour}

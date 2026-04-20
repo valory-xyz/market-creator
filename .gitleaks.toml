@@ -1,0 +1,15 @@
+# Gitleaks configuration for the market-creator repo.
+#
+# Extends the default ruleset and adds an allowlist for IPFS CIDv1 hashes
+# used by Open Autonomy package fingerprints (bafybei... in skill.yaml,
+# aea-config.yaml, service.yaml, packages.json). These are content-addressed
+# integrity hashes, not secrets.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow IPFS CIDv1 hashes (bafybei... base32 CIDs) used by Open Autonomy package fingerprints"
+regexes = [
+  '''bafybei[a-z2-7]{52}''',
+]

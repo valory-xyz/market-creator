@@ -1,0 +1,196 @@
+name: omen_ct_redeem_tokens_abci
+author: valory
+version: 0.1.0
+type: skill
+description: An ABCI skill that redeems winning ConditionalTokens positions on resolved
+  Omen prediction markets, optionally calling RealitioProxy.resolve first.
+license: Apache-2.0
+aea_version: '>=2.0.0, <3.0.0'
+fingerprint:
+  __init__.py: bafybeib4kjyui2xe33pltjouup4lstknxxh2xarqxim6jduf7itsgixj2u
+  behaviours/__init__.py: bafybeiabhvvnnijguzfh2gzoatyv2bptmgvkphxqzbkj3m6lrmqrbzalsi
+  behaviours/base.py: bafybeifmpfclk7jiikqh47cru7tizoajkn3ktof4tosbflsijuys7i6iey
+  behaviours/redeem_tokens.py: bafybeihxj5qrl6cucb35h2fjp4v7hg7cmnjhcillru7zpctihedrjsafjq
+  behaviours/round_behaviour.py: bafybeihxsxypivbkuqeghngqfkijcusfiluidjhotzmzrtwu5defaysgfm
+  dialogues.py: bafybeia4lfrdzgijfkluh54kxfjxvjovgmbs2j2syf7a22p6yjwcthhd2a
+  fsm_specification.yaml: bafybeib4adkbxcznmkzoawvdodoalqj2noz2mbij5sknq75feu6zwfguxi
+  handlers.py: bafybeibmlooyoh7qki6l6b5kgxjzslfpck74dhqxyzcnvzc6tksqy4w3n4
+  models.py: bafybeiaff5knpdot2qxpsju3ccavc7vkjajrjhkwmsh6ylnr6k6veqfo7i
+  payloads.py: bafybeih6jcp6wsjebdretznqufaqslzkdjkb6avx2rke3pfaickxpmvmfi
+  rounds.py: bafybeifhmxa7ciztxrzt5d6xkyfsrfeszzidsdbp4u5pxnaabpcvnbnkoq
+  tests/__init__.py: bafybeidmya2jrj6ehcefthstcr3srlxjbr247eaehhbhocfghvh6eoz5la
+  tests/behaviours/__init__.py: bafybeiejomd7worqbqo2jyof3wwzoqqvmsthxguwsucfgzj5gdwyfgcwtq
+  tests/behaviours/conftest.py: bafybeidgc7rdhfxo77kp7j2lwsztctjlsm5ge7nbioy5fixcmvsvz4x3fi
+  tests/behaviours/test_base.py: bafybeiazfg4lumwm2n3n4ogwu3mijviw3m3lohrmebxishxt24rplq225e
+  tests/behaviours/test_redeem_tokens.py: bafybeieviz3chok7asmmoesbk6ri2axz2cebowopmot2qxvebzai2qdpxu
+  tests/behaviours/test_round_behaviour.py: bafybeicmxtsip3fsle7wdyzs2jtw35jr66exag5ecyjvsebrmdcloaza3e
+  tests/conftest.py: bafybeia6iqb5jpuztny5iivbcgbcenbfyqotxawkhqel6emrtvwqc4xtiq
+  tests/test_dialogues.py: bafybeihw4yf3x2nhbb67n65lel5yejs33j6wk5xkcl5teh5x7u732uk77y
+  tests/test_handlers.py: bafybeifiam5jtchbveae4e6o5tz3ctqionx5x4wbp7rjn6fkfxfczbxvmq
+  tests/test_models.py: bafybeifze3o7jutxohp2nqzw4wcizhul7t6msu5qpwlz3erjqdnyxexree
+  tests/test_payloads.py: bafybeigwdtefgckdjed5mmpbtgkgks5delcwlsuffrgtzsrw6ktdwej3b4
+  tests/test_rounds.py: bafybeifu53q5fj4lxc6ksqg7xbfrlpieew5twndaa3w2sbutwyzwd3dm5a
+fingerprint_ignore_patterns: []
+connections: []
+contracts:
+- valory/gnosis_safe:0.1.0:bafybeice337zvg3ol4cwpw2iikxcukmthwmw32ytwtdnkcju222qfc323y
+- valory/multisend:0.1.0:bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq
+- valory/conditional_tokens:0.1.0:bafybeieumljzqj6dw3aifiza4msx6m4etyqhsthvcgw3s26kn73oktxdk4
+- valory/realitio_proxy:0.1.0:bafybeiehe26tllwbni57zomdyxtwipmdvmrirgc54fp5gwtg324lbfl7im
+protocols:
+- valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
+skills:
+- valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
+- valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
+behaviours:
+  main:
+    args: {}
+    class_name: CtRedeemTokensRoundBehaviour
+handlers:
+  abci:
+    args: {}
+    class_name: ABCIHandler
+  http:
+    args: {}
+    class_name: HttpHandler
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  ipfs:
+    args: {}
+    class_name: IpfsHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+  tendermint:
+    args: {}
+    class_name: TendermintHandler
+models:
+  abci_dialogues:
+    args: {}
+    class_name: AbciDialogues
+  benchmark_tool:
+    args:
+      log_dir: /logs
+    class_name: BenchmarkTool
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+  ipfs_dialogues:
+    args: {}
+    class_name: IpfsDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  params:
+    args:
+      ct_redeem_tokens_batch_size: 5
+      ct_redeem_tokens_min_payout: 1
+      conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
+      realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
+      collateral_tokens_contract: '0x0000000000000000000000000000000000000000'
+      cleanup_history_depth: 1
+      cleanup_history_depth_current: null
+      drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
+      finalize_timeout: 60.0
+      genesis_config:
+        chain_id: chain-c4daS1
+        consensus_params:
+          block:
+            max_bytes: '22020096'
+            max_gas: '-1'
+            time_iota_ms: '1000'
+          evidence:
+            max_age_duration: '172800000000000'
+            max_age_num_blocks: '100000'
+            max_bytes: '1048576'
+          validator:
+            pub_key_types:
+            - ed25519
+          version: {}
+        genesis_time: '2022-05-20T16:00:21.735122717Z'
+        voting_power: '10'
+      history_check_timeout: 1205
+      ipfs_domain_name: null
+      keeper_allowed_retries: 3
+      keeper_timeout: 30.0
+      max_attempts: 10
+      max_healthcheck: 120
+      multisend_address: '0x0000000000000000000000000000000000000000'
+      multisend_batch_size: 5
+      ipfs_address: https://gateway.autonolas.tech/ipfs/
+      on_chain_service_id: null
+      request_retry_delay: 1.0
+      request_timeout: 10.0
+      reset_pause_duration: 1800
+      reset_tendermint_after: 1
+      retry_attempts: 400
+      retry_timeout: 3
+      round_timeout_seconds: 120.0
+      service_id: omen_ct_redeem_tokens
+      service_registry_address: null
+      setup:
+        all_participants:
+        - '0x0000000000000000000000000000000000000000'
+        consensus_threshold: null
+        safe_contract_address: '0x0000000000000000000000000000000000000000'
+      share_tm_config_on_startup: false
+      sleep_time: 1
+      tendermint_check_sleep_delay: 3
+      tendermint_com_url: http://localhost:8080
+      tendermint_max_retries: 5
+      tendermint_p2p_url: localhost:26656
+      tendermint_url: http://localhost:26657
+      tx_timeout: 10.0
+      validate_timeout: 1205
+      use_termination: false
+      use_slashing: false
+      slash_cooldown_hours: 3
+      slash_threshold_amount: 10000000000000000
+      light_slash_unit_amount: 5000000000000000
+      serious_slash_unit_amount: 8000000000000000
+    class_name: CtRedeemTokensParams
+  conditional_tokens_subgraph:
+    args:
+      api_id: conditional_tokens
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://conditional-tokens.subgraph.autonolas.tech
+    class_name: ConditionalTokensSubgraph
+  omen_subgraph:
+    args:
+      api_id: omen
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz
+    class_name: OmenSubgraph
+  requests:
+    args: {}
+    class_name: Requests
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  state:
+    args: {}
+    class_name: SharedState
+  tendermint_dialogues:
+    args: {}
+    class_name: TendermintDialogues
+dependencies: {}
+is_abstract: true

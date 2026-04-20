@@ -1,0 +1,184 @@
+name: omen_fpmm_remove_liquidity_abci
+author: valory
+version: 0.1.0
+type: skill
+description: An ABCI skill that removes LP shares from closing or closed Omen FPMM
+  markets. Handles four market states (open-far, approaching-close, closed-unresolved,
+  closed-resolved) and issues removeFunding plus optional mergePositions transactions.
+license: Apache-2.0
+aea_version: '>=2.0.0, <3.0.0'
+fingerprint:
+  __init__.py: bafybeicagt3c65byayg2uujdy4c33jrcjhudk6a3oifo7yh2lqkewf2qru
+  behaviours/__init__.py: bafybeiafknyckew2sq4ren7oxkrc5ue44pawfp5k55zzwdeuqxb6ssysuq
+  behaviours/base.py: bafybeihf25zhqon7ymgg2wboifdery7774tcd4yzm2jfq3kyx7tfbj2nue
+  behaviours/remove_liquidity.py: bafybeihykeoqapnsyufij2ctvpiinzza3xgbrzjkziyinvmqqa3hip3i5e
+  behaviours/round_behaviour.py: bafybeidsp47omyxst7dmlltfzqj7r7asldv7tsysej67w2xlrgoit5ugmu
+  dialogues.py: bafybeigknfckhgdzg6pxb5fj67274n7iahytivecg33v7le2pe2qa3u63q
+  fsm_specification.yaml: bafybeib552xusfbnqaytgxcyuvty4jsdabzgofjj74t7sgok6y5qcaqdva
+  handlers.py: bafybeicbwd5fjeszpuf3qtepovchj4ue6btzbholz2x7bn5dqwcihqlwc4
+  models.py: bafybeiclpy2txps2ssv26vzll46pruemekrzawjrzbh6idonylyajv6mxy
+  payloads.py: bafybeih7f6g4as7nfgbqztmnv336ogf7uq4fdefxn6ls3rpzlfobsd7cp4
+  rounds.py: bafybeihadjyfsazfbwmzkvdg3rkurnoyfcfz75l2mv762lctzt7rzm5bsy
+  tests/__init__.py: bafybeic6c4nszwxmswhzhbgotxzj23iguozil42lscw2hifyy6ink75qzi
+  tests/behaviours/__init__.py: bafybeiff5ylxqu4yjdnbvdlfxm55qho6bhljc3bxjos3u7wrn4qptxbzia
+  tests/behaviours/conftest.py: bafybeiexauytp73lwapqiofncxm6pr2cu5iqbxc2djd3uibhbbtsgloceu
+  tests/behaviours/test_base.py: bafybeiekltkwudznlv6ejbbj5t44smdze4lmy7gjsxotgxr6sxlbicjwou
+  tests/behaviours/test_remove_liquidity.py: bafybeie4ir75hyt5jnvsivwwfp2gequhv4mc7ehwa6fmblghe7hisuwstq
+  tests/behaviours/test_round_behaviour.py: bafybeieo2mq7ylafnkktdro4q3rnrcem25evfnf57xnvfl76cotjlkxyw4
+  tests/conftest.py: bafybeiht62ubpiu2l4jsryb5lxbzvxavro2p6yj6xk3o3ikjkyhdd2gln4
+  tests/test_dialogues.py: bafybeiclggcr4ccrytnphxiyox6zbjay6ve37jrhxw2pifvr7oytapii7e
+  tests/test_handlers.py: bafybeid3cvk6paowrfufl7vccjljw7jvdu66scghtgfsg76y5lxulpui2q
+  tests/test_models.py: bafybeidckp3vioztqvjrhtvcciheje3xq5kxjebbtwdvjmjmiaaxbx6pqi
+  tests/test_payloads.py: bafybeib76anve5flkkdnmr2hfpgo2cyodd5qshqz2xlpdqb77hljpzq7ba
+  tests/test_rounds.py: bafybeiebr4xcfa74ujenggx7d6mxcpco6fyjrvudnfius777yuypyzxdge
+fingerprint_ignore_patterns: []
+connections: []
+is_abstract: true
+dependencies: {}
+contracts:
+- valory/gnosis_safe:0.1.0:bafybeice337zvg3ol4cwpw2iikxcukmthwmw32ytwtdnkcju222qfc323y
+- valory/multisend:0.1.0:bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq
+- valory/fpmm:0.1.0:bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e
+- valory/conditional_tokens:0.1.0:bafybeieumljzqj6dw3aifiza4msx6m4etyqhsthvcgw3s26kn73oktxdk4
+protocols:
+- valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
+skills:
+- valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
+- valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
+behaviours:
+  main:
+    args: {}
+    class_name: OmenFpmmRemoveLiquidityRoundBehaviour
+handlers:
+  abci:
+    args: {}
+    class_name: ABCIHandler
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  http:
+    args: {}
+    class_name: HttpHandler
+  ipfs:
+    args: {}
+    class_name: IpfsHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+  tendermint:
+    args: {}
+    class_name: TendermintHandler
+models:
+  abci_dialogues:
+    args: {}
+    class_name: AbciDialogues
+  benchmark_tool:
+    args:
+      log_dir: /logs
+    class_name: BenchmarkTool
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+  ipfs_dialogues:
+    args: {}
+    class_name: IpfsDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  omen_subgraph:
+    args:
+      api_id: omen
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz
+    class_name: OmenSubgraph
+  params:
+    args:
+      cleanup_history_depth: 1
+      cleanup_history_depth_current: null
+      collateral_tokens_contract: '0x0000000000000000000000000000000000000000'
+      conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
+      drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
+      finalize_timeout: 60.0
+      fpmm_remove_liquidity_batch_size: 1
+      genesis_config:
+        chain_id: chain-c4daS1
+        consensus_params:
+          block:
+            max_bytes: '22020096'
+            max_gas: '-1'
+            time_iota_ms: '1000'
+          evidence:
+            max_age_duration: '172800000000000'
+            max_age_num_blocks: '100000'
+            max_bytes: '1048576'
+          validator:
+            pub_key_types:
+            - ed25519
+          version: {}
+        genesis_time: '2022-05-20T16:00:21.735122717Z'
+        voting_power: '10'
+      history_check_timeout: 1205
+      ipfs_address: https://gateway.autonolas.tech/ipfs/
+      ipfs_domain_name: null
+      keeper_allowed_retries: 3
+      keeper_timeout: 30.0
+      light_slash_unit_amount: 5000000000000000
+      liquidity_removal_lead_time: 86400
+      max_attempts: 10
+      max_healthcheck: 120
+      multisend_address: '0x0000000000000000000000000000000000000000'
+      multisend_batch_size: 5
+      on_chain_service_id: null
+      request_retry_delay: 1.0
+      request_timeout: 10.0
+      reset_pause_duration: 1800
+      reset_tendermint_after: 1
+      retry_attempts: 400
+      retry_timeout: 3
+      round_timeout_seconds: 120.0
+      serious_slash_unit_amount: 8000000000000000
+      service_id: omen_fpmm_remove_liquidity
+      service_registry_address: null
+      setup:
+        all_participants:
+        - '0x0000000000000000000000000000000000000000'
+        consensus_threshold: null
+        safe_contract_address: '0x0000000000000000000000000000000000000000'
+      share_tm_config_on_startup: false
+      slash_cooldown_hours: 3
+      slash_threshold_amount: 10000000000000000
+      sleep_time: 1
+      tendermint_check_sleep_delay: 3
+      tendermint_com_url: http://localhost:8080
+      tendermint_max_retries: 5
+      tendermint_p2p_url: localhost:26656
+      tendermint_url: http://localhost:26657
+      tx_timeout: 10.0
+      use_slashing: false
+      use_termination: false
+      validate_timeout: 1205
+    class_name: FpmmRemoveLiquidityParams
+  requests:
+    args: {}
+    class_name: Requests
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  state:
+    args: {}
+    class_name: SharedState
+  tendermint_dialogues:
+    args: {}
+    class_name: TendermintDialogues

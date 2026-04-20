@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeigbt6alwz5ylenxeflp2jty65smrl2ezzicbvl2xcduybj526vs74
+agent: valory/market_maker:0.1.0:bafybeigfgwamlxbzlsyondc45abpso4x3gcfjfbhgnvxx77bozflv5d5fq
 number_of_agents: 1
 deployment:
   agent:
@@ -20,7 +20,7 @@ type: skill
 models:
   benchmark_tool:
     args:
-      log_dir: /logs
+      log_dir: ${LOG_DIR:str:/benchmarks}
   params:
     args:
       market_identification_prompt: ${MARKET_IDENTIFICATION_PROMPT:str:Based on the
@@ -51,7 +51,7 @@ models:
       market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
       newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2}
       newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
-      topics: ${TOPICS:list:["business","curiosities","entertainment","finance","health","international","pets","politics","science","sustainability","technology","travel","weather"]}
+      topics: ${TOPICS:list:["business","curiosities","entertainment","finance","health","international","pets","politics","science","sustainability","technology","weather"]}
       market_fee: ${MARKET_FEE:float:2.0}
       initial_funds: ${INITIAL_FUNDS:float:1.0}
       market_timeout: ${MARKET_TIMEOUT:int:1}
@@ -70,32 +70,21 @@ models:
       multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
       multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:1}
       ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
-      mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x601024E27f1C67B28209E24272CED8A31fc8151F}
-      mech_tool_resolve_market: ${MECH_TOOL_RESOLVE_MARKET:str:resolve-market-reasoning-gpt-4.1}
-      answer_retry_intervals: ${ANSWER_RETRY_INTERVALS:list:[0, 86400, 259200, 604800,
-        1209600]}
       on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
+      default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
       reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
       reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
-      mech_interact_round_timeout_seconds: ${MECH_INTERACT_ROUND_TIMEOUT_SECONDS:int:1200}
-      mech_interaction_sleep_time: ${MECH_INTERACTION_SLEEP_TIME:int:10}
-      use_mech_marketplace: ${USE_MECH_MARKETPLACE:bool:true}
-      mech_marketplace_config: ${MECH_MARKETPLACE_CONFIG:dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","use_dynamic_mech_selection":false,"response_timeout":300}}
-      service_id: market_maker
-      agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
+      service_id: ${SERVICE_ID:str:market_maker}
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x9338b5153AE39BB89f50468E608eD9d764B755fD}
       setup:
         all_participants: ${ALL_PARTICIPANTS:list:["0x0000000000000000000000000000000000000000"]}
         safe_contract_address: ${SAFE_CONTRACT_ADDRESS:str:0x0000000000000000000000000000000000000000}
         consensus_threshold: ${CONSENSUS_THRESHOLD:int:null}
-      use_acn_for_delivers: ${USE_ACN_FOR_DELIVERS:bool:false}
       share_tm_config_on_startup: ${SHARE_TM_CONFIG_ON_STARTUP:bool:false}
       tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
       tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
       tendermint_max_retries: ${TENDERMINT_MAX_RETRIES:int:5}
-      realitio_answer_question_bond: ${REALITIO_ANSWER_QUESTION_BOND:int:1000000000000000}
       realitio_answer_question_bounty: ${REALITIO_ANSWER_QUESTION_BOUNTY:int:0}
-      questions_to_close_batch_size: ${QUESTIONS_TO_CLOSE_BATCH_SIZE:int:1}
       tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
       tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
       termination_sleep: ${TERMINATION_SLEEP:int:900}
@@ -115,22 +104,15 @@ models:
       google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
       openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
       service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
-      redeem_winnings_batch_size: ${REDEEM_WINNINGS_BATCH_SIZE:int:5}
       expected_service_owner_address: ${EXPECTED_SERVICE_OWNER_ADDRESS:str:0x0000000000000000000000000000000000000000}
       funds_forwarder_token_config: ${FUNDS_FORWARDER_TOKEN_CONFIG:dict:{"0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d":{"retain_balance":300000000000000000000,"max_transfer":1000000000000000000000,
         "min_transfer":100000000000000000000}}}
-      irrelevant_tools:
-      - openai-text-davinci-002
-      - openai-text-davinci-003
-      - openai-gpt-3.5-turbo
-      - openai-gpt-4
-      - stabilityai-stable-diffusion-v1-5
-      - stabilityai-stable-diffusion-xl-beta-v2-2-2
-      - stabilityai-stable-diffusion-512-v2-1
-      - stabilityai-stable-diffusion-768-v2-1
-      ignored_mechs: []
-      penalize_mech_time_window: 1800
-      deliveries_lookback_days: ${DELIVERIES_LOOKBACK_DAYS:int:30}
+      liquidity_removal_lead_time: ${LIQUIDITY_REMOVAL_LEAD_TIME:int:86400}
+      fpmm_remove_liquidity_batch_size: ${FPMM_REMOVE_LIQUIDITY_BATCH_SIZE:int:1}
+      ct_redeem_tokens_batch_size: ${CT_REDEEM_TOKENS_BATCH_SIZE:int:5}
+      ct_redeem_tokens_min_payout: ${CT_REDEEM_TOKENS_MIN_PAYOUT:int:1}
+      realitio_withdraw_bonds_batch_size: ${REALITIO_WITHDRAW_BONDS_BATCH_SIZE:int:10}
+      min_realitio_withdraw_balance: ${MIN_REALITIO_WITHDRAW_BALANCE:int:1000000000000000000}
   randomness_api:
     args:
       method: ${RANDOMNESS_API_METHOD:str:GET}
@@ -138,15 +120,6 @@ models:
       response_type: ${RANDOMNESS_API_RESPONSE_TYPE:str:dict}
       retries: ${RANDOMNESS_API_RETRIES:int:5}
       url: ${RANDOMNESS_API_URL:str:https://drand.cloudflare.com/public/latest}
-  mech_response:
-    args:
-      headers:
-        Content-Type: ${MECH_RESPONSE_API_CONTENT_TYPE:str:application/json}
-      method: ${MECH_RESPONSE_API_METHOD:str:GET}
-      response_key: ${MECH_RESPONSE_API_RESPONSE_KEY:str:result}
-      response_type: ${MECH_RESPONSE_API_RESPONSE_TYPE:str:str}
-      retries: ${MECH_RESPONSE_API_RETRIES:int:5}
-      url: ${MECH_RESPONSE_API_URL:str:''}
   conditional_tokens_subgraph:
     args:
       headers:
@@ -155,7 +128,7 @@ models:
       response_key: ${CT_SUBGRAPH_RESPONSE_KEY:str:data}
       response_type: ${CT_SUBGRAPH_RESPONSE_TYPE:str:list}
       retries: ${CT_SUBGRAPH_RETRIES:int:5}
-      url: ${CT_SUBGRAPH_URL:str:https://conditional-tokens.subgraph.autonolas.tech}
+      url: ${CT_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/7s9rGBffUTL8kDZuxvvpuc46v44iuDarbrADBFw5uVp2}
   omen_subgraph:
     args:
       headers:
@@ -165,24 +138,25 @@ models:
       response_type: ${OMEN_SUBGRAPH_RESPONSE_TYPE:str:list}
       retries: ${OMEN_SUBGRAPH_RETRIES:int:5}
       url: ${OMEN_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz}
+  realitio_subgraph:
+    args:
+      headers:
+        Content-Type: ${REALITIO_SUBGRAPH_CONTENT_TYPE:str:application/json}
+      method: ${REALITIO_SUBGRAPH_METHOD:str:POST}
+      response_key: ${REALITIO_SUBGRAPH_RESPONSE_KEY:str:data}
+      response_type: ${REALITIO_SUBGRAPH_RESPONSE_TYPE:str:list}
+      retries: ${REALITIO_SUBGRAPH_RETRIES:int:5}
+      url: ${REALITIO_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh}
 ---
 public_id: valory/ledger:0.19.0
 type: connection
 config:
   ledger_apis:
-    ethereum:
-      address: ${ETHEREUM_LEDGER_RPC:str:https://rpc.gnosischain.com}
-      chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:100}
-      poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
-      default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
----
-public_id: valory/openai:0.1.0
-type: connection
-config:
-  engine: ${ENGINE:str:gpt-4}
-  max_tokens: ${MAX_TOKENS:int:700}
-  openai_api_key: ${OPENAI_API_KEY:str:null}
-  temperature: ${TEMPERATURE:float:0.7}
+    gnosis:
+      address: ${GNOSIS_LEDGER_RPC:str:https://rpc.gnosischain.com}
+      chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
+      poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
+      default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
 ---
 public_id: valory/p2p_libp2p_client:0.1.0
 type: connection
@@ -199,3 +173,11 @@ cert_requests:
   public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
   save_path: .certs/acn_cosmos_11000.txt
 is_abstract: true
+---
+public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfeztlgrlcoxhr7kf6nbq
+type: connection
+config:
+  host: ${HTTP_SERVER_HOST:str:0.0.0.0}
+  port: ${HTTP_SERVER_PORT:int:8000}
+  timeout: ${HTTP_SERVER_TIMEOUT:float:30.0}
+  target_skill_id: valory/market_maker_abci:0.1.0

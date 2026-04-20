@@ -27,9 +27,6 @@ from packages.valory.skills.market_maker_abci.behaviours import (
     MarketCreatorRoundBehaviour,
 )
 from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
-from packages.valory.skills.mech_interact_abci.behaviours.round_behaviour import (
-    MechInteractRoundBehaviour,
-)
 from packages.valory.skills.registration_abci.behaviours import (
     AgentRegistrationRoundBehaviour,
     RegistrationStartupBehaviour,
@@ -91,12 +88,6 @@ class TestMarketCreatorRoundBehaviour:
     def test_behaviours_contains_termination(self) -> None:
         """Test behaviours set contains termination."""
         assert TerminationAbciBehaviours.behaviours.issubset(
-            MarketCreatorRoundBehaviour.behaviours
-        )
-
-    def test_behaviours_contains_mech_interact(self) -> None:
-        """Test behaviours set contains mech interact."""
-        assert MechInteractRoundBehaviour.behaviours.issubset(
             MarketCreatorRoundBehaviour.behaviours
         )
 

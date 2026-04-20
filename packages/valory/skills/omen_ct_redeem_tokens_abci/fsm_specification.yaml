@@ -1,0 +1,21 @@
+alphabet_in:
+- DONE
+- NONE
+- NO_MAJORITY
+- ROUND_TIMEOUT
+default_start_state: CtRedeemTokensRound
+final_states:
+- FinishedWithCtRedeemTokensTxRound
+- FinishedWithoutCtRedeemTokensTxRound
+label: OmenCtRedeemTokensAbciApp
+start_states:
+- CtRedeemTokensRound
+states:
+- CtRedeemTokensRound
+- FinishedWithCtRedeemTokensTxRound
+- FinishedWithoutCtRedeemTokensTxRound
+transition_func:
+    (CtRedeemTokensRound, DONE): FinishedWithCtRedeemTokensTxRound
+    (CtRedeemTokensRound, NONE): FinishedWithoutCtRedeemTokensTxRound
+    (CtRedeemTokensRound, NO_MAJORITY): FinishedWithoutCtRedeemTokensTxRound
+    (CtRedeemTokensRound, ROUND_TIMEOUT): FinishedWithoutCtRedeemTokensTxRound

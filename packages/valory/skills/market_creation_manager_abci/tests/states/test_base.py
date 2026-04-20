@@ -85,34 +85,6 @@ class TestSynchronizedData:
         mocked_db.get.return_value = mock_val
         assert sync_data.collected_proposed_markets_data == mock_val
 
-    def test_mech_requests_empty(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test mech_requests with empty list."""
-        mocked_db.get.return_value = "[]"
-        assert sync_data.mech_requests == []
-
-    def test_mech_requests_none_fallback(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test mech_requests with None serialized value."""
-        mocked_db.get.return_value = None
-        assert sync_data.mech_requests == []
-
-    def test_mech_responses_empty(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test mech_responses with empty list."""
-        mocked_db.get.return_value = "[]"
-        assert sync_data.mech_responses == []
-
-    def test_mech_responses_none_fallback(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test mech_responses with None serialized value."""
-        mocked_db.get.return_value = None
-        assert sync_data.mech_responses == []
-
     def test_approved_markets_data(
         self, sync_data: SynchronizedData, mocked_db: MagicMock
     ) -> None:
@@ -156,21 +128,6 @@ class TestSynchronizedData:
         """Test most_voted_keeper_address property."""
         mocked_db.get_strict.return_value = "0xkeeper"
         assert sync_data.most_voted_keeper_address == "0xkeeper"
-
-    def test_markets_to_remove_liquidity(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test markets_to_remove_liquidity property."""
-        markets = [{"address": "0x1"}, {"address": "0x2"}]
-        mocked_db.get.return_value = markets
-        assert sync_data.markets_to_remove_liquidity == markets
-
-    def test_market_from_block(
-        self, sync_data: SynchronizedData, mocked_db: MagicMock
-    ) -> None:
-        """Test market_from_block property."""
-        mocked_db.get.return_value = 12345
-        assert sync_data.market_from_block == 12345
 
     def test_settled_tx_hash(
         self, sync_data: SynchronizedData, mocked_db: MagicMock

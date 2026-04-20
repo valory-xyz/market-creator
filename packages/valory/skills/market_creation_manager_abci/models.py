@@ -19,9 +19,9 @@
 
 """This module contains the shared state for the abci skill of MarketCreationManagerAbciApp."""
 
-from typing import Any, Dict, List, Set, Type
+from typing import Any, List, Type
 
-from aea.skills.base import SkillContext
+from aea.exceptions import enforce
 
 from packages.valory.skills.abstract_round_abci.base import AbciApp
 from packages.valory.skills.abstract_round_abci.models import ApiSpecs, BaseParams
@@ -35,23 +35,12 @@ from packages.valory.skills.abstract_round_abci.models import (
 from packages.valory.skills.market_creation_manager_abci.rounds import (
     MarketCreationManagerAbciApp,
 )
-from packages.valory.skills.mech_interact_abci.models import (
-    MechResponseSpecs as BaseMechResponseSpecs,
-)
-
-MechResponseSpecs = BaseMechResponseSpecs
 
 
 class SharedState(BaseSharedState):
     """Keep the current shared state of the skill."""
 
     abci_app_cls: Type[AbciApp] = MarketCreationManagerAbciApp
-
-    def __init__(self, *args: Any, skill_context: SkillContext, **kwargs: Any) -> None:
-        """Initialize the shared state object."""
-        self.questions_requested_mech: Dict[str, Any] = {}
-        self.questions_responded: Set[str] = set()
-        super().__init__(*args, skill_context=skill_context, **kwargs)
 
 
 class MarketCreationManagerParams(BaseParams):
@@ -96,12 +85,6 @@ class MarketCreationManagerParams(BaseParams):
         self.markets_to_approve_per_epoch = self._ensure(
             "markets_to_approve_per_epoch", kwargs, type_=int
         )
-        self.questions_to_close_batch_size = self._ensure(
-            "questions_to_close_batch_size", kwargs, type_=int
-        )
-        self.realitio_answer_question_bond = self._ensure(
-            "realitio_answer_question_bond", kwargs, type_=int
-        )
         self.realitio_answer_question_bounty = self._ensure(
             "realitio_answer_question_bounty", kwargs, type_=int
         )
@@ -111,38 +94,43 @@ class MarketCreationManagerParams(BaseParams):
         self.approve_market_event_days_offset = self._ensure(
             "approve_market_event_days_offset", kwargs, type_=int
         )
-        self.realitio_contract = self._ensure(
-            key="realitio_contract",
-            kwargs=kwargs,
-            type_=str,
+        # Do not pop these contract addresses — they are also required by
+        # sibling Params classes in the composed MRO.
+        self.realitio_contract: str = kwargs.get(
+            "realitio_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.realitio_contract is not None,
+            "`realitio_contract` is required",
         )
-        self.realitio_oracle_proxy_contract = self._ensure(
-            key="realitio_oracle_proxy_contract",
-            kwargs=kwargs,
-            type_=str,
+        self.realitio_oracle_proxy_contract: str = kwargs.get(
+            "realitio_oracle_proxy_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.realitio_oracle_proxy_contract is not None,
+            "`realitio_oracle_proxy_contract` is required",
         )
-        self.conditional_tokens_contract = self._ensure(
-            key="conditional_tokens_contract",
-            kwargs=kwargs,
-            type_=str,
+        self.conditional_tokens_contract: str = kwargs.get(
+            "conditional_tokens_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.conditional_tokens_contract is not None,
+            "`conditional_tokens_contract` is required",
         )
         self.fpmm_deterministic_factory_contract = self._ensure(
             key="fpmm_deterministic_factory_contract",
             kwargs=kwargs,
             type_=str,
         )
-        self.collateral_tokens_contract = self._ensure(
-            key="collateral_tokens_contract",
-            kwargs=kwargs,
-            type_=str,
+        self.collateral_tokens_contract: str = kwargs.get(
+            "collateral_tokens_contract"
+        )  # type: ignore[assignment]
+        enforce(
+            self.collateral_tokens_contract is not None,
+            "`collateral_tokens_contract` is required",
         )
         self.arbitrator_contract = self._ensure(
             key="arbitrator_contract",
-            kwargs=kwargs,
-            type_=str,
-        )
-        self.mech_tool_resolve_market = self._ensure(
-            key="mech_tool_resolve_market",
             kwargs=kwargs,
             type_=str,
         )
@@ -170,16 +158,7 @@ class MarketCreationManagerParams(BaseParams):
         self.openai_api_key = self._ensure("openai_api_key", kwargs, type_=str)
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
-        self.mech_interact_round_timeout_seconds = self._ensure(
-            "mech_interact_round_timeout_seconds", kwargs, type_=int
-        )
-        self.answer_retry_intervals = self._ensure(
-            key="answer_retry_intervals", kwargs=kwargs, type_=List[int]
-        )
         self.service_endpoint_base = self._ensure("service_endpoint_base", kwargs, str)
-        self.redeem_winnings_batch_size = self._ensure(
-            "redeem_winnings_batch_size", kwargs, type_=int
-        )
         super().__init__(*args, **kwargs)
 
 
@@ -189,10 +168,6 @@ class RandomnessApi(ApiSpecs):
 
 class OmenSubgraph(ApiSpecs):
     """A model that wraps ApiSpecs for the OMEN's subgraph specifications."""
-
-
-class ConditionalTokensSubgraph(ApiSpecs):
-    """A model that wraps ApiSpecs for the ConditionalTokens subgraph."""
 
 
 Requests = BaseRequests

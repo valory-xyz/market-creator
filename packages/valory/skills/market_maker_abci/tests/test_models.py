@@ -38,18 +38,11 @@ from packages.valory.skills.market_maker_abci.models import (
     BenchmarkTool,
     MARGIN,
     MULTIPLIER,
-    MechResponseSpecs,
     OmenSubgraph,
     Params,
     RandomnessApi,
     Requests,
     SharedState,
-)
-from packages.valory.skills.mech_interact_abci.models import (
-    MechResponseSpecs as BaseMechResponseSpecs,
-)
-from packages.valory.skills.mech_interact_abci.models import (
-    Params as MechInteractAbciParams,
 )
 from packages.valory.skills.termination_abci.models import TerminationParams
 
@@ -72,10 +65,6 @@ class TestModelAliases:
     def test_omen_subgraph_alias(self) -> None:
         """Test OmenSubgraph alias."""
         assert OmenSubgraph is BaseOmenSubgraph
-
-    def test_mech_response_specs_alias(self) -> None:
-        """Test MechResponseSpecs alias."""
-        assert MechResponseSpecs is BaseMechResponseSpecs
 
 
 class TestConstants:
@@ -107,14 +96,17 @@ class TestSharedState:
 
     def test_setup_populates_event_to_timeout(self) -> None:
         """Test that setup populates event_to_timeout with the right keys."""
+        from packages.valory.skills.funds_forwarder_abci.rounds import (
+            Event as FundsForwarderEvent,
+        )
+        from packages.valory.skills.identify_service_owner_abci.rounds import (
+            Event as IdentifyServiceOwnerEvent,
+        )
         from packages.valory.skills.market_creation_manager_abci.rounds import (
             Event as MarketCreationManagerEvent,
         )
         from packages.valory.skills.market_maker_abci.composition import (
             MarketCreatorAbciApp,
-        )
-        from packages.valory.skills.mech_interact_abci.rounds import (
-            Event as MechInteractEvent,
         )
         from packages.valory.skills.reset_pause_abci.rounds import (
             Event as ResetPauseEvent,
@@ -125,14 +117,10 @@ class TestSharedState:
 
         context = MagicMock()
         context.params.round_timeout_seconds = 30
-        context.params.market_proposal_round_timeout_seconds_per_day = 45
-        context.params.event_offset_end_days = 5
-        context.params.event_offset_start_days = 1
         context.params.reset_pause_duration = 10
         context.params.validate_timeout = 60
         context.params.finalize_timeout = 90
         context.params.history_check_timeout = 120
-        context.params.mech_interact_round_timeout_seconds = 60
 
         state = SharedState.__new__(SharedState)
         state._context = context  # type: ignore[attr-defined]
@@ -165,7 +153,14 @@ class TestSharedState:
             == 10 + MARGIN
         )
         assert (
-            MarketCreatorAbciApp.event_to_timeout[MechInteractEvent.ROUND_TIMEOUT] == 60
+            MarketCreatorAbciApp.event_to_timeout[
+                IdentifyServiceOwnerEvent.ROUND_TIMEOUT
+            ]
+            == 30
+        )
+        assert (
+            MarketCreatorAbciApp.event_to_timeout[FundsForwarderEvent.ROUND_TIMEOUT]
+            == 30
         )
 
 
@@ -179,5 +174,4 @@ class TestParams:
         )
 
         assert issubclass(Params, MarketCreationManagerParams)
-        assert issubclass(Params, MechInteractAbciParams)
         assert issubclass(Params, TerminationParams)

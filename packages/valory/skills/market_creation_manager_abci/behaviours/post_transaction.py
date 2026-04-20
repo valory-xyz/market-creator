@@ -22,7 +22,6 @@
 import json
 from typing import Any, Dict, Generator, Optional, Type, cast
 
-import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.contracts.fpmm_deterministic_factory.contract import (
     FPMMDeterministicFactory,
 )
@@ -35,13 +34,16 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import PostTxPayload
 from packages.valory.skills.market_creation_manager_abci.rounds import (
-    AnswerQuestionsRound,
     DepositDaiRound,
     PostTransactionRound,
     PrepareTransactionRound,
-    RedeemBondRound,
-    RedeemWinningsRound,
-    RemoveFundingRound,
+)
+from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import CtRedeemTokensRound
+from packages.valory.skills.omen_fpmm_remove_liquidity_abci.rounds import (
+    FpmmRemoveLiquidityRound,
+)
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
+    RealitioWithdrawBondsRound,
 )
 
 
@@ -68,30 +70,27 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.info("No settled tx hash.")
             return PostTransactionRound.DONE_PAYLOAD
 
-        if (
-            self.synchronized_data.tx_submitter
-            == MechRequestStates.MechRequestRound.auto_round_id()
-        ):
-            return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
-
-        if self.synchronized_data.tx_submitter == RedeemBondRound.auto_round_id():
-            return PostTransactionRound.REDEEM_BOND_DONE_PAYLOAD
-
         if self.synchronized_data.tx_submitter == DepositDaiRound.auto_round_id():
             return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_submitter == AnswerQuestionsRound.auto_round_id():
-            return PostTransactionRound.ANSWER_QUESTION_DONE_PAYLOAD
+        if (
+            self.synchronized_data.tx_submitter
+            == FpmmRemoveLiquidityRound.auto_round_id()
+        ):
+            return PostTransactionRound.FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_submitter == RemoveFundingRound.auto_round_id():
-            return PostTransactionRound.REMOVE_FUNDING_DONE_PAYLOAD
+        if self.synchronized_data.tx_submitter == CtRedeemTokensRound.auto_round_id():
+            return PostTransactionRound.CT_REDEEM_TOKENS_TX_DONE_PAYLOAD
 
-        if self.synchronized_data.tx_submitter == RedeemWinningsRound.auto_round_id():
-            return PostTransactionRound.REDEEM_WINNINGS_DONE_PAYLOAD
+        if (
+            self.synchronized_data.tx_submitter
+            == RealitioWithdrawBondsRound.auto_round_id()
+        ):
+            return PostTransactionRound.REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD
 
         # Funds forwarder round from funds_forwarder_abci skill (string to avoid cross-skill import)
         if self.synchronized_data.tx_submitter == "funds_forwarder_round":
-            return PostTransactionRound.FUND_SWEEP_DONE_PAYLOAD
+            return PostTransactionRound.FUNDS_FORWARDER_TX_DONE_PAYLOAD
 
         is_approved_question_data_set = (
             self.synchronized_data.is_approved_question_data_set
@@ -155,6 +154,7 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             contract_callable=get_callable_name(
                 FPMMDeterministicFactory.parse_market_creation_event
             ),
+            chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(

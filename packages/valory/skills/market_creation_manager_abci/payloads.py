@@ -48,20 +48,6 @@ class RetrieveApprovedMarketPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
-class SyncMarketsPayload(BaseTxPayload):
-    """Represent a transaction payload for the PrepareTransactionRound."""
-
-    content: str
-
-
-@dataclass(frozen=True)
-class RemoveFundingPayload(BaseTxPayload):
-    """Represent a transaction payload for the PrepareTransactionRound."""
-
-    content: str
-
-
-@dataclass(frozen=True)
 class PostTxPayload(BaseTxPayload):
     """Represent a transaction payload for the PrepareTransactionRound."""
 
@@ -82,13 +68,6 @@ class ApproveMarketsPayload(BaseTxPayload):
     content: str
     approved_markets_count: int
     timestamp: int
-
-
-@dataclass(frozen=True)
-class GetPendingQuestionsPayload(BaseTxPayload):
-    """Represent a transaction payload for the GetPendingQuestionsRound."""
-
-    content: str
 
 
 @dataclass(frozen=True)

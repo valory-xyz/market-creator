@@ -43,6 +43,9 @@ class TestApproveMarketsBehaviour(FSMBehaviourBaseCase):
     path_to_skill = PACKAGE_DIR
     _skill = MagicMock()
 
+    def teardown_method(self, **kwargs: Any) -> None:
+        """No-op teardown to avoid FSMBehaviourBaseCase.teardown_method bug."""
+
     def setup_method(self, **kwargs: Any) -> None:
         """Setup."""
         self.round_sequence_mock = MagicMock()
