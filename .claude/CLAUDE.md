@@ -185,7 +185,7 @@ CI workflow: `.github/workflows/common_checks.yml`
 
 - Cross-platform matrix: Ubuntu, macOS, Windows
 - Python versions: 3.10–3.14
-- Uses `tomte[tox]==0.6.2` for test orchestration
+- Uses `tomte[tox]==0.6.5` for test orchestration
 
 ## Key Gotchas
 

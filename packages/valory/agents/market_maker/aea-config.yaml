@@ -83,11 +83,11 @@ skill_exception_policy: stop_and_exit
 connection_exception_policy: just_log
 dependencies:
   open-aea-ledger-cosmos:
-    version: ==2.1.0
+    version: ==2.2.1
   open-aea-ledger-ethereum:
-    version: ==2.1.0
+    version: ==2.2.1
   open-aea-test-autonomy:
-    version: ==0.21.16
+    version: ==0.21.18
   gql:
     version: ==3.5.0
   requests-toolbelt:
