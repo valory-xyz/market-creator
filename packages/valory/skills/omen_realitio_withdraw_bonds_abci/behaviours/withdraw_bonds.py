@@ -39,7 +39,6 @@ from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
     RealitioWithdrawBondsRound,
 )
 
-TX_SUBMITTER = "omen_realitio_withdraw_bonds"
 
 # The ``historyHash_not`` filter excludes questions already claimed on-chain
 # (their history hash is cleared to zero). Without it, a query bounded by
@@ -92,7 +91,9 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
         """Single-round act: query → build → wrap → settle-or-skip."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             tx_hash = yield from self._prepare_multisend()
-            tx_submitter: Optional[str] = TX_SUBMITTER if tx_hash is not None else None
+            tx_submitter: Optional[str] = (
+                self.matching_round.auto_round_id() if tx_hash is not None else None
+            )
             payload = RealitioWithdrawBondsPayload(
                 sender=self.context.agent_address,
                 tx_submitter=tx_submitter,

@@ -41,7 +41,6 @@ from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import CtRedeemTok
 
 SUBGRAPH_PAGE_SIZE = 1000
 CONDITION_ID_BATCH_SIZE = 100
-CT_REDEEM_TX_SUBMITTER = "omen_ct_redeem_tokens"
 
 USER_POSITIONS_QUERY = Template("""{
     user(id: "$safe") {
@@ -107,7 +106,9 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
         """Single-round act: query → build → wrap → settle-or-skip."""
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             tx_hash = yield from self._prepare_multisend()
-            tx_submitter = CT_REDEEM_TX_SUBMITTER if tx_hash is not None else None
+            tx_submitter = (
+                self.matching_round.auto_round_id() if tx_hash is not None else None
+            )
             payload = CtRedeemTokensPayload(
                 sender=self.context.agent_address,
                 tx_submitter=tx_submitter,
