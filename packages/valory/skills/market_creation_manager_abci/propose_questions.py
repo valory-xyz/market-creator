@@ -62,7 +62,11 @@ NEWSAPI_DEFAULT_NEWS_SOURCES = [
 OMEN_SUBGRAPH_URL = "https://gateway-arbitrum.network.thegraph.com/api/{subgraph_api_key}/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz"
 HTTP_OK = 200
 MAX_ARTICLES = 60
-MAX_LATEST_QUESTIONS = 200
+MAX_LATEST_QUESTIONS = 100
+# Max chars of scraped article body passed to the LLM. Used in BOTH the
+# question-generation prompt and the self-review prompt so the reviewer
+# scores against the same text the generator saw.
+ARTICLE_TEXT_MAX_CHARS = 6000
 
 FPMM_CREATORS = [
     "0x89c5cc945dd550bcffb72fe42bff002429f46fec",
@@ -119,7 +123,7 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
     numeric threshold is slightly different. Treat these as duplicates:
     - "2-year mortgage rate below 5.80%" and "2-year mortgage rate below 5.85%"
     - "S&P 500 above 7,100" and "S&P 500 above 7,200"
-    - "Strait of Hormuz remain closed" and "Strait of Hormuz under Iranian control"
+    - "Bank of England rate above X%" and "Bank of England rate at or above Y%"
     - any two questions naming the same institution reporting on the same metric
     When in doubt, prefer a different article with a NEW topic not present in
     EXISTING_QUESTIONS.
@@ -251,6 +255,9 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     EXISTING_QUESTIONS
     {latest_questions}
 
+    TODAY
+    {today}
+
     EVENT_DAY
     {event_day}
 
@@ -303,8 +310,8 @@ SELF_REVIEW_PROMPT = """You are auditing prediction-market questions for
        different. Examples of duplicates to reject:
        - candidate "...rate below 5.85%..." when an existing has "...rate below 5.80%..."
        - candidate "S&P 500 above 7,150" when an existing has "S&P 500 above 7,100"
-       - candidate "Strait of Hormuz remain closed" when an existing has
-         "Strait of Hormuz remain under Iranian control"
+       - candidate on the same institution's report with a slightly different
+         numeric threshold than an existing question
 
     H. WINDOW-BOUND EVENT: For announcement questions, check that the event
        must occur between TODAY and EVENT_DAY -- not "on or before EVENT_DAY"
@@ -831,7 +838,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         # This constrains the LLM to identify what CAN be measured before
         # framing a question -- breaking the default "Will X announce Y?" prior.
         # Structured-extraction task, uses the cheaper light model.
-        article_text = scrape_result["text"][:6000]  # cap to avoid token limits
+        article_text = scrape_result["text"][:ARTICLE_TEXT_MAX_CHARS]
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
             assert client is not None
             model = LIGHT_MODEL
@@ -886,7 +893,11 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
             # Generate more candidates than needed; self-review + date check
             # will filter down. This makes self-review a selector, not just a gate.
-            n_candidates = max(num_questions * 5, 5)
+            # Generate 3x candidates (min 3) so self-review can act as a
+            # selector. Previously 5x, reduced to 3x to keep self-review
+            # token cost proportional -- review prompt scales linearly with
+            # the number of candidates being audited.
+            n_candidates = max(num_questions * 3, 3)
             window_days = max(
                 1,
                 (int(resolution_time) - int(datetime.now(tz=timezone.utc).timestamp()))
@@ -947,14 +958,21 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
         # Self-review pass: audit proposed questions against the four trap checks.
         # Questions that fail any check are rejected before they reach the output.
-        questions = response["questions"][:num_questions]
+        # Keep ALL candidates the LLM returned -- self-review needs to see
+        # them all to act as a selector. Final output is bounded later via
+        # `date_validated[:num_questions]`.
+        questions = response["questions"]
+
+        # Self-review uses the primary (stronger) model explicitly so the
+        # choice can't silently drift if the generation block rebinds `model`.
+        review_model = TOOL_TO_ENGINE[tool]
 
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
             assert client is not None
             review_prompt = SELF_REVIEW_PROMPT.format(
                 questions=json.dumps(questions, indent=2),
                 latest_questions=latest_questions_string,
-                article=f"{scrape_result['text'][:4000]}",
+                article=f"{scrape_result['text'][:ARTICLE_TEXT_MAX_CHARS]}",
                 today=format_utc_timestamp(
                     int(datetime.now(tz=timezone.utc).timestamp())
                 ),
@@ -968,7 +986,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 {"role": "user", "content": review_prompt},
             ]
             review_response = client.chat.completions.create(
-                model=model,
+                model=review_model,
                 messages=review_messages,
                 temperature=0.0,
                 max_tokens=2048,
@@ -987,7 +1005,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 counter_callback(
                     input_tokens=review_response.usage.prompt_tokens,
                     output_tokens=review_response.usage.completion_tokens,
-                    model=model,
+                    model=review_model,
                     token_counter=count_tokens,
                 )
             review_data = json.loads(review_response.choices[0].message.content)
@@ -1037,7 +1055,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
         print(
             f"Self-review: {len(accepted_questions)} accepted, "
-            f"{len(rejected_questions)} rejected out of {len(questions)} proposed"
+            f"{len(rejected_questions)} rejected out of {n_candidates} proposed"
         )
         for rej in rejected_questions:
             print(f"  REJECTED: {rej['question'][:80]}... -- {rej['reason'][:60]}")
@@ -1048,7 +1066,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             questions = date_validated[:num_questions]
         else:
             return (
-                f'{{"error": "All {len(questions)} proposed questions were rejected by self-review or date validation.", "tool": {tool}}}',
+                f'{{"error": "All {n_candidates} proposed questions were rejected by self-review or date validation.", "tool": {tool}}}',
                 None,
                 None,
                 counter_callback,
