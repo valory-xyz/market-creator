@@ -13,7 +13,7 @@ fingerprint:
   behaviours/__init__.py: bafybeifgomj4ofs2ukuh4n7kfy632cbaocnyleijcnc6hju55a4yufj3se
   behaviours/base.py: bafybeibmjmizjcu2bzesc75suytyuyekaxwfbebow52v7zj77o4zy3tfue
   behaviours/round_behaviour.py: bafybeiaodlrwrwlwpvgrtd3exutkyubkdjcv4oi42afbfpiy5qljflpxrq
-  behaviours/withdraw_bonds.py: bafybeidqtrul4zmw7bn72eaevxlce6ffx2ykzmyiyh4ndzpdznvkitkzuq
+  behaviours/withdraw_bonds.py: bafybeid27yxlssnjujzthqau4jplps3xkfaokdzlf7x7avgswiyvafscfu
   dialogues.py: bafybeigbqeyz4nfnbz7z56p5zdsdsesaxylerrj3zt56sf56a4ruxnppdu
   fsm_specification.yaml: bafybeihj45kamwsf4wfh7xaysomvad6xrf47xrc57mrjoslbbpzl2d5e5i
   handlers.py: bafybeibb3sx4mhtxl24k354j3sjyl7hlgua7ltxkeni2saq3mjndahpqjm
@@ -25,7 +25,7 @@ fingerprint:
   tests/behaviours/conftest.py: bafybeifs7ndup6ljnzu75f4mki6uowdelbrl7zd75723kzyj4l5hskh7ke
   tests/behaviours/test_base.py: bafybeicpwcmrpmeacfxsjdza7i6rhgulzut5bjhsyxnleub27ihjkxymdu
   tests/behaviours/test_round_behaviour.py: bafybeiggrxud3ntgm2d575bippzxooglnk2bfjr25xqp6xk4vqayfg2vg4
-  tests/behaviours/test_withdraw_bonds.py: bafybeiesb2sywkylvfjyxd2onzgrtp6tvwfyytugyuxyelyre2tskwqizy
+  tests/behaviours/test_withdraw_bonds.py: bafybeia2frpq5kdkska6ndygemtedaicjuvwezytxfsj5hkmcbeyqa3ehe
   tests/conftest.py: bafybeifdrl7gcdyccpvrklbuya4mzusblsxryebhl6d4o6oeanzbiorhoy
   tests/test_dialogues.py: bafybeiaeezyc4h2bahxub6oy7htxvhhlioxspcxvfq5hoy3jvkvxa4jyfm
   tests/test_handlers.py: bafybeic7y6tyvrd5cdv7argfe5ccbb5qjlefunnoxbsjafiy6q4upq3ln4

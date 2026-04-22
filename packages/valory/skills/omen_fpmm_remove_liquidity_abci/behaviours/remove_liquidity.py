@@ -70,8 +70,6 @@ _ACTION_SKIP = "skip"
 _ACTION_REMOVE_ONLY = "remove_only"
 _ACTION_REMOVE_AND_MERGE = "remove_and_merge"
 
-TX_SUBMITTER_NAME = "omen_fpmm_remove_liquidity"
-
 
 class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
     """Behaviour that removes LP funds from FPMM markets (and optionally merges positions)."""
@@ -83,7 +81,9 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
             sender = self.context.agent_address
             tx_hash = yield from self._prepare_multisend()
-            tx_submitter = TX_SUBMITTER_NAME if tx_hash is not None else None
+            tx_submitter = (
+                self.matching_round.auto_round_id() if tx_hash is not None else None
+            )
             payload = FpmmRemoveLiquidityPayload(
                 sender=sender, tx_submitter=tx_submitter, tx_hash=tx_hash
             )

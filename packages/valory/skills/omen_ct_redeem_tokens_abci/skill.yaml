@@ -10,7 +10,7 @@ fingerprint:
   __init__.py: bafybeib4kjyui2xe33pltjouup4lstknxxh2xarqxim6jduf7itsgixj2u
   behaviours/__init__.py: bafybeiabhvvnnijguzfh2gzoatyv2bptmgvkphxqzbkj3m6lrmqrbzalsi
   behaviours/base.py: bafybeifmpfclk7jiikqh47cru7tizoajkn3ktof4tosbflsijuys7i6iey
-  behaviours/redeem_tokens.py: bafybeihxj5qrl6cucb35h2fjp4v7hg7cmnjhcillru7zpctihedrjsafjq
+  behaviours/redeem_tokens.py: bafybeiatobufwi4it6wzflamldbcfz6rsbnhmlxg3x7befs2ecztti7hdq
   behaviours/round_behaviour.py: bafybeihxsxypivbkuqeghngqfkijcusfiluidjhotzmzrtwu5defaysgfm
   dialogues.py: bafybeia4lfrdzgijfkluh54kxfjxvjovgmbs2j2syf7a22p6yjwcthhd2a
   fsm_specification.yaml: bafybeib4adkbxcznmkzoawvdodoalqj2noz2mbij5sknq75feu6zwfguxi
@@ -22,7 +22,7 @@ fingerprint:
   tests/behaviours/__init__.py: bafybeiejomd7worqbqo2jyof3wwzoqqvmsthxguwsucfgzj5gdwyfgcwtq
   tests/behaviours/conftest.py: bafybeidgc7rdhfxo77kp7j2lwsztctjlsm5ge7nbioy5fixcmvsvz4x3fi
   tests/behaviours/test_base.py: bafybeiazfg4lumwm2n3n4ogwu3mijviw3m3lohrmebxishxt24rplq225e
-  tests/behaviours/test_redeem_tokens.py: bafybeieviz3chok7asmmoesbk6ri2axz2cebowopmot2qxvebzai2qdpxu
+  tests/behaviours/test_redeem_tokens.py: bafybeiczaoonjhck62in5qozgw2gv66n4w6wwmadw6x6ua363hwzhqk63y
   tests/behaviours/test_round_behaviour.py: bafybeicmxtsip3fsle7wdyzs2jtw35jr66exag5ecyjvsebrmdcloaza3e
   tests/conftest.py: bafybeia6iqb5jpuztny5iivbcgbcenbfyqotxawkhqel6emrtvwqc4xtiq
   tests/test_dialogues.py: bafybeihw4yf3x2nhbb67n65lel5yejs33j6wk5xkcl5teh5x7u732uk77y

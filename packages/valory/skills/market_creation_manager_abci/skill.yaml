@@ -76,9 +76,9 @@ protocols:
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
 - valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeieff6ju7vumtg4ovr6y2thqxjv5we4mca4ucjxqm7xqyyrekw3uw4
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibfbtuliclpudh6pjzjoygphb7rbc335fstqw2yzjarbldcoseutq
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiflqycyzizq4b4gabfxm6re5mfsoqlpfqh5nn67b5lfjz3c7rdimu
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeidgprbwav2ry4nkyadda3e2qjdotpgrlacihevhqb6xvk357kvc7q
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeifpecbnemklo7hreul4ecakevzcz3v4xdgqg27bacan2fjrez5omy
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeid5krli6yaaesbnhg43u3hvob4me2as5jf2c3ooxavhjbov2w3c3m
 behaviours:
   main:
     args: {}

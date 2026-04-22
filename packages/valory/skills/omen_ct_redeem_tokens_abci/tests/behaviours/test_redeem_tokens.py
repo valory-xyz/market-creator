@@ -29,10 +29,10 @@ from packages.valory.skills.omen_ct_redeem_tokens_abci.behaviours.base import (
 )
 from packages.valory.skills.omen_ct_redeem_tokens_abci.behaviours.redeem_tokens import (
     CONDITION_ID_BATCH_SIZE,
-    CT_REDEEM_TX_SUBMITTER,
     CtRedeemTokensBehaviour,
     SUBGRAPH_PAGE_SIZE,
 )
+from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import CtRedeemTokensRound
 from packages.valory.skills.omen_ct_redeem_tokens_abci.tests.behaviours.conftest import (
     exhaust_gen,
     make_contract_error_response,
@@ -602,7 +602,7 @@ class TestCtRedeemTokensBehaviourAsyncAct:
             mock_set_done.assert_called_once()
         assert len(sent_payloads) == 1
         assert sent_payloads[0].tx_hash == "0xtxhash"
-        assert sent_payloads[0].tx_submitter == CT_REDEEM_TX_SUBMITTER
+        assert sent_payloads[0].tx_submitter == CtRedeemTokensRound.auto_round_id()
 
     def test_async_act_without_tx(self) -> None:
         """Test async_act sets None tx_submitter when no tx is built."""
