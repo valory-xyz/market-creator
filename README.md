@@ -21,27 +21,30 @@ Each cycle, the agent runs an ABCI FSM that goes through these phases:
 
 ## Prepare the environment
 
-System requirements:
-- Python `>= 3.10, < 3.15`
-- [Tendermint](https://docs.tendermint.com/v0.34/introduction/install.html) `== 0.34.19`
-- [uv](https://docs.astral.sh/uv/) (preferred) or [Poetry](https://python-poetry.org/) `>= 1.4.0`
-- [Docker](https://docs.docker.com/engine/install/) + [Docker Compose](https://docs.docker.com/compose/install/)
+- System requirements:
+
+  - Python `>=3.10, <3.15`
+  - [Tendermint](https://docs.tendermint.com/v0.34/introduction/install.html) `==0.34.19`
+  - [uv](https://docs.astral.sh/uv/)
+  - [Docker Engine](https://docs.docker.com/engine/install/)
+  - [Docker Compose](https://docs.docker.com/compose/install/)
 
 Clone and install:
 
-```bash
-git clone https://github.com/valory-xyz/market-creator.git
-cd market-creator
-uv sync              # or: poetry install
-```
+      git clone https://github.com/valory-xyz/market-creator.git
 
-Sync third-party packages from IPFS:
+- Create development environment:
 
-```bash
-autonomy init --reset --author valory --remote --ipfs \
-  --ipfs-node "/dns/registry.autonolas.tech/tcp/443/https"
-autonomy packages sync --update-packages
-```
+      uv sync --all-groups
+      source .venv/bin/activate
+  
+- Configure the Open Autonomy framework:
+
+      autonomy init --reset --author valory --remote --ipfs --ipfs-node "/dns/registry.autonolas.tech/tcp/443/https"
+
+- Pull packages required to run the service:
+
+      autonomy packages sync --update-packages
 
 ## Prepare the keys and the Safe
 
@@ -154,9 +157,7 @@ autonomy deploy run --build-dir abci_build/
 The repo provides a Make target that wraps `aea-helpers run-agent`:
 
 ```bash
-# .env at repo root with the vars above
-# ethereum_private_key.txt at repo root
-make run-agent
+pip install open-aea-helpers
 ```
 
 ### Run as a local agent (development)
@@ -168,8 +169,6 @@ make run-agent
 ```bash
 aea-helpers run-agent \
   --name valory/market_maker \
-  --config-replace \
-  --config-mapping config-mapping.json \
   --connection-key
 ```
 
