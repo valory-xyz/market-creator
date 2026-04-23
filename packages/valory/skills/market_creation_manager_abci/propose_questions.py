@@ -24,11 +24,30 @@
 
 import functools
 import json
+import os
 import random
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple
+
+# TODO: remove this flag and every `# [DEBUG: remove later]` line in this
+# file before shipping to production for good. Kept so the simulation /
+# local-agent runs can enable verbose tracing via PROPOSE_DEBUG=1 without
+# polluting production Propel logs.
+_PROPOSE_DEBUG: bool = os.environ.get("PROPOSE_DEBUG", "").lower() in (
+    "1",
+    "true",
+    "yes",
+    "on",
+)
+
+
+def _dprint(*args: Any, **kwargs: Any) -> None:  # [DEBUG: remove later]
+    """No-op print unless PROPOSE_DEBUG is set in the environment."""
+    if _PROPOSE_DEBUG:
+        print(*args, **kwargs)
+
 
 # import anthropic
 # import googleapiclient
@@ -150,11 +169,19 @@ SELECT_STORY_PROMPT = """You are provided a numbered list of recent news article
 
     You must output the article ID a topic from TOPICS and a brief reasoning.
 
-    EXISTING_QUESTIONS
-    {latest_questions}
-
     ARTICLES
     {articles}
+
+    EXISTING_QUESTIONS (these topics are ALREADY COVERED -- do NOT pick an
+    article about any of these topics, even with a different threshold or
+    phrasing. Read every line carefully before selecting.)
+    {latest_questions}
+
+    FINAL CHECK before you output:
+    - Does any existing question mention the same institution/metric/event
+      as your chosen article?
+    - If YES, pick a DIFFERENT article. Do not output an article_id for a
+      topic that already appears above.
 
     TOPICS
     {topics}
@@ -639,6 +666,126 @@ def gather_latest_questions(subgraph_api_key: str) -> Optional[List[str]]:
     return output
 
 
+DEDUP_STOPWORDS = frozenset(
+    "a an and any are as at be been being between by did do does for from had "
+    "has have if in into is it its of on once or over per still such than that "
+    "the their them there these they this to up was were what when where which "
+    "who will with would according announce announced announcement confirm "
+    "confirmed confirms continue continues hold holds major news occur occurs "
+    "official outlet outlets publish published report reports reported "
+    "reporting remain remains statement statements yes no maintain maintains "
+    "through above below exceed exceeds please".split()
+)
+
+# Jaccard similarity at or above this threshold counts as a near-duplicate
+# and the candidate question is dropped. Tuned against real pool data:
+# 0.64 on the classic "retail sales / retail sales excluding gas prices" pair
+# ~0.30 on genuinely different questions that share boilerplate tokens.
+QUESTION_NEAR_DUP_THRESHOLD = 0.55
+
+
+def _dedup_tokens(text: str) -> set:
+    """Normalise text to a content-token set for dedup Jaccard comparisons."""
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9% ]", " ", text)
+    return {
+        t
+        for t in re.sub(r"\s+", " ", text).strip().split()
+        if t and t not in DEDUP_STOPWORDS and len(t) > 2
+    }
+
+
+def filter_duplicate_articles(
+    articles: List[Dict[str, Any]],
+    existing: List[str],
+    threshold: float = 0.40,
+    min_keep_fraction: float = 0.50,
+) -> List[Dict[str, Any]]:
+    """Drop articles whose title+description overlap too much with existing questions.
+
+    Cheap first-stage filter that runs before any LLM call. Moderate
+    threshold (0.40) so articles with a distinct sub-angle survive; the
+    stricter question-level filter (0.55) at the end catches what slips
+    through. Safety valve keeps at least `min_keep_fraction` of the pool to
+    prevent empty-pool errors when news is extremely topic-concentrated.
+
+    :param articles: raw article dicts from gather_articles.
+    :param existing: list of recent question titles (EXISTING_QUESTIONS pool).
+    :param threshold: Jaccard cutoff for dropping an article.
+    :param min_keep_fraction: minimum fraction of input to keep regardless.
+    :return: filtered article list (length >= min_keep_fraction * len(articles)).
+    """
+    if not articles or not existing:
+        return articles
+    existing_token_sets = [t for t in (_dedup_tokens(q) for q in existing) if t]
+    if not existing_token_sets:
+        return articles
+    scored = []
+    for a in articles:
+        text = f"{a.get('title', '')} {a.get('description', '')}"
+        atok = _dedup_tokens(text)
+        if not atok:
+            scored.append((0.0, a))
+            continue
+        max_sim = 0.0
+        for qtok in existing_token_sets:
+            denom = len(atok | qtok)
+            if denom == 0:
+                continue
+            sim = len(atok & qtok) / denom
+            if sim > max_sim:
+                max_sim = sim
+        scored.append((max_sim, a))
+    kept = [a for sim, a in scored if sim < threshold]
+    n_in = len(articles)
+    min_keep = max(1, int(n_in * min_keep_fraction))
+    if len(kept) < min_keep:
+        scored.sort(key=lambda t: t[0])
+        kept = [a for _, a in scored[:min_keep]]
+        print(
+            f"Article dedup: safety valve triggered, keeping "
+            f"{len(kept)}/{n_in} least-similar articles"
+        )
+    else:
+        print(
+            f"Article dedup: dropped {n_in - len(kept)}/{n_in} articles "
+            f"(jaccard >= {threshold})"
+        )
+    return kept
+
+
+def find_near_duplicate(
+    question: str,
+    existing: List[str],
+    threshold: float = QUESTION_NEAR_DUP_THRESHOLD,
+) -> Optional[Tuple[str, float]]:
+    """Return (matching_existing_question, jaccard) if `question` is a near-duplicate.
+
+    Computes Jaccard similarity between content-token sets. The LLM-based
+    `not_a_duplicate` self-review misses paraphrases like "retail sales %
+    change" vs "monthly retail sales % change excluding gas prices" -- both
+    test the same metric from the same source, Jaccard ~0.64. This
+    programmatic filter catches them deterministically.
+
+    :param question: candidate question text.
+    :param existing: list of already-accepted question titles.
+    :param threshold: Jaccard cutoff; defaults to QUESTION_NEAR_DUP_THRESHOLD.
+    :return: (matched_existing, jaccard_score) if a duplicate is found, else None.
+    """
+    new_tok = _dedup_tokens(question)
+    if not new_tok:
+        return None
+    for old in existing:
+        old_tok = _dedup_tokens(old)
+        denom = len(new_tok | old_tok)
+        if denom == 0:
+            continue
+        score = len(new_tok & old_tok) / denom
+        if score >= threshold:
+            return old, score
+    return None
+
+
 def scrape_url(serper_api_key: str, url: str) -> Optional[dict]:
     """Scrape the contents of a URL"""
     serper_url = "https://scrape.serper.dev"
@@ -707,6 +854,15 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         latest_questions = latest_questions[:MAX_LATEST_QUESTIONS]
         latest_questions_string = "\n".join(latest_questions)
 
+        # [DEBUG: remove later] step 2 -- existing questions from subgraph
+        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+        _dprint(
+            f"[DEBUG] STEP 2 -- EXISTING QUESTIONS ({len(latest_questions)}):"
+        )  # [DEBUG: remove later]
+        _dprint("=" * 80)  # [DEBUG: remove later]
+        for i, q in enumerate(latest_questions, 1):  # [DEBUG: remove later]
+            _dprint(f"  {i:>3}. {q}")  # [DEBUG: remove later]
+
         # Gather recent news articles from NewsAPI
         news_sources = kwargs.get("news_sources", NEWSAPI_DEFAULT_NEWS_SOURCES)
         articles = gather_articles(news_sources, kwargs["api_keys"]["newsapi"])
@@ -723,9 +879,37 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             f"{len(articles)} articles collected from {len(news_sources)} news sources\n"
         )
 
+        # [DEBUG: remove later] step 1 -- articles from NewsAPI (before sampling)
+        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+        _dprint(
+            f"[DEBUG] STEP 1 -- NEWS FROM NEWSAPI ({len(articles)} articles, pre-sample):"
+        )  # [DEBUG: remove later]
+        _dprint("=" * 80)  # [DEBUG: remove later]
+        for i, a in enumerate(articles, 1):  # [DEBUG: remove later]
+            _dprint(
+                f"  {i:>3}. [{a.get('source', {}).get('name', '?')}] {a.get('title', '?')}"
+            )  # [DEBUG: remove later]
+
         articles = random.sample(
             articles, min(MAX_ARTICLES, len(articles))
         )  # nosec: B311
+
+        # Early article-level dedup: drop articles whose topic already
+        # appears in EXISTING_QUESTIONS. Saves a full pipeline run (~$0.07)
+        # when news is topic-concentrated. Moderate threshold (0.40) to
+        # keep articles with distinct sub-angles; safety valve prevents
+        # empty-pool errors. The stricter question-level check (0.55) at
+        # the end is the final backstop.
+        articles = filter_duplicate_articles(articles, latest_questions)
+
+        # [DEBUG: remove later] step 3.5 -- articles after dedup filter
+        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+        _dprint(
+            f"[DEBUG] STEP 3.5 -- ARTICLES AFTER EARLY DEDUP ({len(articles)}):"
+        )  # [DEBUG: remove later]
+        _dprint("=" * 80)  # [DEBUG: remove later]
+        for i, a in enumerate(articles, 1):  # [DEBUG: remove later]
+            _dprint(f"  {i:>3}. {a.get('title', '?')}")  # [DEBUG: remove later]
 
         # Pre-filter: drop articles that individually trigger content
         # moderation before building the selection prompt.  Without this,
@@ -745,6 +929,15 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             if n_dropped > 0:
                 print(f"Moderation pre-filter: dropped {n_dropped} flagged article(s)")
             articles = clean_articles
+
+        # [DEBUG: remove later] step 3-4 -- articles after sampling+moderation
+        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+        _dprint(
+            f"[DEBUG] STEP 3-4 -- ARTICLES AFTER SAMPLE+MODERATION ({len(articles)}):"
+        )  # [DEBUG: remove later]
+        _dprint("=" * 80)  # [DEBUG: remove later]
+        for i, a in enumerate(articles, 1):  # [DEBUG: remove later]
+            _dprint(f"  {i:>3}. {a.get('title', '?')}")  # [DEBUG: remove later]
 
         if not articles:
             return (
@@ -779,6 +972,14 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             }
 
             prompt = SELECT_STORY_PROMPT.format(**prompt_values)
+
+            # [DEBUG: remove later] step 5 -- SELECT_STORY prompt
+            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+            _dprint(
+                f"[DEBUG] STEP 5 -- SELECT_STORY PROMPT (model={model}):"
+            )  # [DEBUG: remove later]
+            _dprint("=" * 80)  # [DEBUG: remove later]
+            _dprint(prompt)  # [DEBUG: remove later]
 
             moderation_result = client.moderations.create(input=prompt)
             if moderation_result.results[0].flagged:
@@ -823,6 +1024,20 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             article = articles[article_id]
             reasoning = f"The article {article['title']!r} ({article.get('author', '')!r}) has been selected to generate prediction market questions because: {response['reasoning']}"
 
+            # [DEBUG: remove later] step 5 -- SELECT_STORY response
+            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+            _dprint("[DEBUG] STEP 5 -- SELECT_STORY RESPONSE:")  # [DEBUG: remove later]
+            _dprint("=" * 80)  # [DEBUG: remove later]
+            _dprint(f"  article_id: {article_id}")  # [DEBUG: remove later]
+            _dprint(f"  topic:      {topic}")  # [DEBUG: remove later]
+            _dprint(
+                f"  title:      {article.get('title', '?')}"
+            )  # [DEBUG: remove later]
+            _dprint(f"  url:        {article.get('url', '?')}")  # [DEBUG: remove later]
+            _dprint(
+                f"  reasoning:  {response.get('reasoning', '?')}"
+            )  # [DEBUG: remove later]
+
         # Scrape selected article
         scrape_result = scrape_url(kwargs["api_keys"]["serper"], article["url"])
 
@@ -834,6 +1049,17 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 counter_callback,
             )
 
+        # [DEBUG: remove later] step 6 -- scraped article text (first 800 chars)
+        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+        _dprint(
+            f"[DEBUG] STEP 6 -- SCRAPED ARTICLE TEXT ({len(scrape_result.get('text', ''))} chars):"
+        )  # [DEBUG: remove later]
+        _dprint("=" * 80)  # [DEBUG: remove later]
+        _dprint(
+            scrape_result.get("text", "")[:800]
+            + ("... [truncated]" if len(scrape_result.get("text", "")) > 800 else "")
+        )  # [DEBUG: remove later]
+
         # Step 2: Extract measurable states from the article (iteration 2).
         # This constrains the LLM to identify what CAN be measured before
         # framing a question -- breaking the default "Will X announce Y?" prior.
@@ -843,6 +1069,15 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             assert client is not None
             model = LIGHT_MODEL
             extract_prompt = EXTRACT_STATE_PROMPT.format(article=article_text)
+
+            # [DEBUG: remove later] step 7 -- EXTRACT_STATE prompt
+            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+            _dprint(
+                f"[DEBUG] STEP 7 -- EXTRACT_STATE PROMPT (model={model}):"
+            )  # [DEBUG: remove later]
+            _dprint("=" * 80)  # [DEBUG: remove later]
+            _dprint(extract_prompt)  # [DEBUG: remove later]
+
             extract_messages = [
                 {
                     "role": "system",
@@ -918,6 +1153,14 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
             prompt = PROPOSE_QUESTION_PROMPT.format(**prompt_values)
 
+            # [DEBUG: remove later] step 8 -- PROPOSE_QUESTION prompt
+            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+            _dprint(
+                f"[DEBUG] STEP 8 -- PROPOSE_QUESTION PROMPT (model={model}, n_candidates={n_candidates}):"
+            )  # [DEBUG: remove later]
+            _dprint("=" * 80)  # [DEBUG: remove later]
+            _dprint(prompt)  # [DEBUG: remove later]
+
             moderation_result = client.moderations.create(input=prompt)
             if moderation_result.results[0].flagged:
                 return (
@@ -956,6 +1199,17 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 )
             response = json.loads(response.choices[0].message.content)
 
+            # [DEBUG: remove later] step 8 -- PROPOSE_QUESTION response (candidate questions)
+            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+            _dprint(
+                f"[DEBUG] STEP 8 -- PROPOSE_QUESTION RESPONSE ({len(response.get('questions', []))} candidates):"
+            )  # [DEBUG: remove later]
+            _dprint("=" * 80)  # [DEBUG: remove later]
+            for i, q in enumerate(
+                response.get("questions", []), 1
+            ):  # [DEBUG: remove later]
+                _dprint(f"  {i}. {q}")  # [DEBUG: remove later]
+
         # Self-review pass: audit proposed questions against the four trap checks.
         # Questions that fail any check are rejected before they reach the output.
         # Keep ALL candidates the LLM returned -- self-review needs to see
@@ -978,6 +1232,15 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 ),
                 event_day=format_utc_timestamp(int(resolution_time)),
             )
+
+            # [DEBUG: remove later] step 9 -- SELF_REVIEW prompt
+            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+            _dprint(
+                f"[DEBUG] STEP 9 -- SELF_REVIEW PROMPT (model={review_model}):"
+            )  # [DEBUG: remove later]
+            _dprint("=" * 80)  # [DEBUG: remove later]
+            _dprint(review_prompt)  # [DEBUG: remove later]
+
             review_messages = [
                 {
                     "role": "system",
@@ -1010,6 +1273,37 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 )
             review_data = json.loads(review_response.choices[0].message.content)
             reviews = review_data.get("reviews", [])
+
+            # [DEBUG: remove later] step 9 -- SELF_REVIEW response (per-candidate verdicts)
+            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+            _dprint(
+                f"[DEBUG] STEP 9 -- SELF_REVIEW RESPONSE ({len(reviews)} reviews):"
+            )  # [DEBUG: remove later]
+            _dprint("=" * 80)  # [DEBUG: remove later]
+            for i, rev in enumerate(reviews, 1):  # [DEBUG: remove later]
+                flags = {  # [DEBUG: remove later]
+                    "dfeas": rev.get(
+                        "deadline_is_feasible", "?"
+                    ),  # [DEBUG: remove later]
+                    "stage": rev.get(
+                        "process_stage_named", "?"
+                    ),  # [DEBUG: remove later]
+                    "pub": rev.get(
+                        "figure_is_directly_published", "?"
+                    ),  # [DEBUG: remove later]
+                    "auth": rev.get(
+                        "authority_can_act_in_time", "?"
+                    ),  # [DEBUG: remove later]
+                    "date": rev.get("date_format_valid", "?"),  # [DEBUG: remove later]
+                    "ndup": rev.get("not_a_duplicate", "?"),  # [DEBUG: remove later]
+                    "wbnd": rev.get("window_bound_event", "?"),  # [DEBUG: remove later]
+                    "acc": rev.get("accept", "?"),  # [DEBUG: remove later]
+                }  # [DEBUG: remove later]
+                _dprint(f"  {i}. {rev.get('question', '?')}")  # [DEBUG: remove later]
+                _dprint(f"     flags: {flags}")  # [DEBUG: remove later]
+                _dprint(
+                    f"     reasoning: {rev.get('reasoning', '')[:200]}"
+                )  # [DEBUG: remove later]
 
         # Filter: accept questions where at least 3 of 4 quality checks pass
         # AND the date-format check passes. The date-format check is a hard
@@ -1060,13 +1354,39 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         for rej in rejected_questions:
             print(f"  REJECTED: {rej['question'][:80]}... -- {rej['reason'][:60]}")
 
+        # [DEBUG: remove later] steps 10-12 -- final accepted/validated questions
+        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
+        _dprint(
+            f"[DEBUG] STEPS 10-12 -- FINAL QUESTIONS AFTER FILTER + DATE VALIDATION ({len(date_validated)}):"
+        )  # [DEBUG: remove later]
+        _dprint("=" * 80)  # [DEBUG: remove later]
+        for i, q in enumerate(date_validated, 1):  # [DEBUG: remove later]
+            _dprint(f"  {i}. {q}")  # [DEBUG: remove later]
+
+        # Programmatic near-duplicate filter: last-stage deterministic check
+        # against the EXISTING_QUESTIONS pool. The LLM-based `not_a_duplicate`
+        # self-review misses paraphrases like "retail sales %" vs "retail
+        # sales % excluding gas prices" that share the same metric and source.
+        # Jaccard on content tokens catches those.
+        nondup_validated = []
+        for q in date_validated:
+            hit = find_near_duplicate(q, latest_questions)
+            if hit is None:
+                nondup_validated.append(q)
+            else:
+                match, score = hit
+                print(
+                    f"  PROGRAMMATIC DEDUP REJECT (jaccard {score:.2f}): {q[:80]}...\n"
+                    f"    matches existing: {match[:80]}..."
+                )
+
         # Pick the best num_questions from validated candidates.
         # Do NOT fall back to rejected questions -- return error instead.
-        if date_validated:
-            questions = date_validated[:num_questions]
+        if nondup_validated:
+            questions = nondup_validated[:num_questions]
         else:
             return (
-                f'{{"error": "All {n_candidates} proposed questions were rejected by self-review or date validation.", "tool": {tool}}}',
+                f'{{"error": "All {n_candidates} proposed questions were rejected by self-review, date validation, or programmatic dedup.", "tool": {tool}}}',
                 None,
                 None,
                 counter_callback,
