@@ -7,8 +7,8 @@
         "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeidptqakpe5ylvfs7ckxqix4jc7lsh45fitg7re7sgwhjabyfugew4",
         "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeieoy7o2oyqd23ugoprvwxc6ja3wfsmx7suoumjqomxzvhfw2p5ffa",
         "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeibth4mcfxjasbdbn7jkha62jwfpjuzlw7oe6js2yj3tpevcovr2ii",
-        "agent/valory/market_maker/0.1.0": "bafybeiam6lo5c2yjrctoxd5fsf3ftjvvrcgi7ay3yewxqk33akb4khm2gm",
-        "service/valory/market_maker/0.1.0": "bafybeidvgtzcus42o62wnkdyl7so5agti7okgttfiy4b6a6ygczw2ee2lq"
+        "agent/valory/market_maker/0.1.0": "bafybeig5tneuz4hc23wc7wzzrmxhaw4ancgeqpahv4vwo7bexyqszu6rve",
+        "service/valory/market_maker/0.1.0": "bafybeigolmyhmsi572yisg6vs2hjal33yorvtzge6f3t2zlgtqv5wnknce"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
