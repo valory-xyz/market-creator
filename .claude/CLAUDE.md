@@ -82,14 +82,15 @@ Package ownership is defined in `packages/packages.json`:
 ### Prerequisites
 
 - Python 3.10–3.14
-- [Poetry](https://python-poetry.org/)
+- [uv](https://docs.astral.sh/uv/)
 - [tox](https://tox.wiki/)
 - [tomte](https://github.com/valory-xyz/tomte) (installed via tox deps)
 
 ### Setup
 
 ```bash
-poetry install --no-root
+uv sync --all-groups
+source .venv/bin/activate
 ```
 
 ### Syncing third-party packages
@@ -185,7 +186,7 @@ CI workflow: `.github/workflows/common_checks.yml`
 
 - Cross-platform matrix: Ubuntu, macOS, Windows
 - Python versions: 3.10–3.14
-- Uses `tomte[tox]==0.6.2` for test orchestration
+- Uses `tomte[tox]==0.6.5` for test orchestration
 
 ## Key Gotchas
 

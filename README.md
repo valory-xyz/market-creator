@@ -16,9 +16,9 @@ The Market Creator service is an [agent service](https://stack.olas.network/open
 
 - System requirements:
 
-  - Python `== 3.10`
+  - Python `>=3.10, <3.15`
   - [Tendermint](https://docs.tendermint.com/v0.34/introduction/install.html) `==0.34.19`
-  - [Poetry](https://python-poetry.org/docs/) `>=1.4.0`
+  - [uv](https://docs.astral.sh/uv/)
   - [Docker Engine](https://docs.docker.com/engine/install/)
   - [Docker Compose](https://docs.docker.com/compose/install/)
 
@@ -28,7 +28,8 @@ The Market Creator service is an [agent service](https://stack.olas.network/open
 
 - Create development environment:
 
-      poetry install && poetry shell
+      uv sync --all-groups
+      source .venv/bin/activate
   
 - Configure the Open Autonomy framework:
 
@@ -174,7 +175,7 @@ You can access the root address http://server_ip:5000 and examine the different 
 ### Prerequisites
 
 ```bash
-pip install aea-helpers
+pip install open-aea-helpers
 ```
 
 ### Run as a local agent (development)
@@ -186,8 +187,6 @@ pip install aea-helpers
 ```bash
 aea-helpers run-agent \
   --name valory/market_maker \
-  --config-replace \
-  --config-mapping config-mapping.json \
   --connection-key
 ```
 

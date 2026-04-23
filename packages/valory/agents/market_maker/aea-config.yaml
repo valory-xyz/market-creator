@@ -9,23 +9,23 @@ fingerprint:
   __init__.py: bafybeifamf4vln3qgmifksv5icmhnkelqirbaauehuv5hpsu2twesb2vni
 fingerprint_ignore_patterns: []
 connections:
-- valory/abci:0.1.0:bafybeigjmetusztbj3ikgsimj55rc3nn6m2j6ns6ciew5twjtgip2axdme
+- valory/abci:0.1.0:bafybeihgtguy5ljj2rwgwoxeor5d565alwfggnuevss7malhzdats6nfqi
 - valory/http_client:0.23.0:bafybeihel6sg2yayxu7lqygaswdgciaxpqrgsbl5rwx74c6znu5qz2edd4
-- valory/http_server:0.22.0:bafybeid4oqsfkqo36lryoecymjnq4whme3tgupqfq6m4l7lbr5r4yxtswu
-- valory/ledger:0.19.0:bafybeid5uwx4uqxkiibw6kazr7my5mk5kcqg2dx2owtcf7kcpbs2jrns2e
+- valory/http_server:0.22.0:bafybeihs6dufyaa5l4uorplzx3wiyna5qlq2x43tmyl3yonkl265vspdle
+- valory/ledger:0.19.0:bafybeidqf5dmueqm655z3bkw36mviobpcpuek4bhha7iq2nnz6sfu32kva
 - valory/p2p_libp2p_client:0.1.0:bafybeielj3jso3wvrarp5n5rq7llpw4vgxybqiyensgjalb5ubfiawwhhu
-- valory/ipfs:0.1.0:bafybeib44s5rdz5xwzwuncm2gwo6zvqsy6yefvbf5znmjc4mw3goql23ha
+- valory/ipfs:0.1.0:bafybeiddxbjccmzkknny5pbfupxgexp4w4pwiu2rny4a6vnlxwqs3mmfo4
 contracts:
-- valory/gnosis_safe:0.1.0:bafybeice337zvg3ol4cwpw2iikxcukmthwmw32ytwtdnkcju222qfc323y
-- valory/gnosis_safe_proxy_factory:0.1.0:bafybeieonbkuskzg2rwgbqwmouusnfdd4npow2pzasimetiebo3jhwjh7m
+- valory/gnosis_safe:0.1.0:bafybeicm3rxjpqc4kcjmxoj5ixqfzu6jn4alalyn3xuqxa5y2g22kpp72m
+- valory/gnosis_safe_proxy_factory:0.1.0:bafybeihif56mb6ulfhdq7mjkftcjzg2xhk63isptumakp2b46azridsmzu
 - valory/multisend:0.1.0:bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq
 - valory/realitio:0.1.0:bafybeibthnl5gmuxehkwwseevyuier4iewcx2qd5wk4p7besvhea2kducy
 - valory/conditional_tokens:0.1.0:bafybeieumljzqj6dw3aifiza4msx6m4etyqhsthvcgw3s26kn73oktxdk4
-- valory/fpmm_deterministic_factory:0.1.0:bafybeiht3qssw52ita4hrfop36hcym7oaq2w446oefpkqpwmzckrcwq54u
-- valory/service_registry:0.1.0:bafybeigefenwg3lj4nvwc3cs5zxyhv4nvwnwbw5x7afwyijkjbbgbf2l7e
-- valory/staking_token:0.1.0:bafybeicze2hv5vybey2mtvw65dkshgpofxxcfphqya2euemhho36hbqa7q
+- valory/fpmm_deterministic_factory:0.1.0:bafybeidvhwogxli5lj4a36xqu3hvujfvavbkmfa2wiohexfy3vq4b4pvqq
+- valory/service_registry:0.1.0:bafybeib6lrxpbhsrg32bueif53vnb3xecyjxzk6rhd2t2xot27qtbeyvjm
+- valory/staking_token:0.1.0:bafybeid7uy64tzowfhl3dvcwphyfvb7fozwnmk4fg4ny3tndqubbsedmvi
 - valory/fpmm:0.1.0:bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e
-- valory/erc20:0.1.0:bafybeifq6zn2p5nafi6bmtf4xo3ctgymazr2udtlwyiwjf5g5mpndsthfy
+- valory/erc20:0.1.0:bafybeic3epzrwrcqgrtj7vom5kdldugnuvk6lvh437ped4ciktqbtdy5em
 protocols:
 - open_aea/signing:1.0.0:bafybeifsjmldwyki3beqyvdt5lzenrg6wyrqaar5plc5rpnvtc4zlentye
 - valory/abci:0.1.0:bafybeiak4pwac3pwjtd7weskxdhkrcopckr32vtazfbuteu6yqjkwarpte
@@ -37,19 +37,19 @@ protocols:
 - valory/tendermint:0.1.0:bafybeihzb7e32f7jcrzvubilqaxzmyk7ea6ss3pg3tliatdlrr76qeknyq
 - valory/acn_data_share:0.1.0:bafybeieqisfr6lhaaesq37lk7vyaxza2h6nucshksgyo2djqfyf2saqo4i
 skills:
-- valory/abstract_abci:0.1.0:bafybeict6h3wfmddpvam5gmmanqzuokup6ppoev3t4j5uyl7xxahjaols4
-- valory/abstract_round_abci:0.1.0:bafybeihygetmlgnhawrbyswvpvv3wpztr2hlhxkljmohp4r7qcmvglpwdq
-- valory/market_maker_abci:0.1.0:bafybeiaauep4axjxifb7nbooblpjsosios4vhzwumvhhtrjh7vqo7hggii
-- valory/registration_abci:0.1.0:bafybeif3gpewppz5wr5mmgyvaowsamjufyons3oif7cb4x5ubvvfb6rtda
-- valory/market_creation_manager_abci:0.1.0:bafybeihad2st4xc3czunawjimtoop5scvydq5l75lpjsm5rhvr5uz53eo4
-- valory/reset_pause_abci:0.1.0:bafybeidcnf77bc3o7pssa5zesilpbm4ley2k45taii5j5rrvvty7uhu3lq
-- valory/termination_abci:0.1.0:bafybeia33hlouukdpwaxctunauudv5gpfdxndimra7yqiof4a3skcwdqkq
-- valory/transaction_settlement_abci:0.1.0:bafybeiajyrszyyo6z4lxogutv4ougiaeoxak6xkq5gtrbey32gbgnirznq
-- valory/identify_service_owner_abci:0.1.0:bafybeihj2q3kf5zfhqvpayvbis4uxpe45smnzdkdvmdwxya2oe4kfc5qam
-- valory/funds_forwarder_abci:0.1.0:bafybeid6yc7ld64oenx3ttbxahno6qcqk6fqffqrnl3d3ftwapkwqqvexq
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeieff6ju7vumtg4ovr6y2thqxjv5we4mca4ucjxqm7xqyyrekw3uw4
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibfbtuliclpudh6pjzjoygphb7rbc335fstqw2yzjarbldcoseutq
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiflqycyzizq4b4gabfxm6re5mfsoqlpfqh5nn67b5lfjz3c7rdimu
+- valory/abstract_abci:0.1.0:bafybeif4jcv22xrmkwiaecyyli7iknmdhtkg6dmzqmwpqekmvxyr7ba3xy
+- valory/abstract_round_abci:0.1.0:bafybeihgbc5geup3ljdfgyontr2p5e4myxjkthaplm5ei727uw2pawstcy
+- valory/market_maker_abci:0.1.0:bafybeihiiqfwt2u4ipwk4rtsmmkp2oiy2khewwc72z7msfiszomvah354u
+- valory/registration_abci:0.1.0:bafybeib7midws7obgz34tqsebowa73z46pm34hhsssa3rjet2npp5ekvwm
+- valory/market_creation_manager_abci:0.1.0:bafybeih7lmhjlf6bxh2loewpbov7fkqbr6nkb43k53rwnhooy63zfmodgi
+- valory/reset_pause_abci:0.1.0:bafybeiezqq76bdcrlgshyo2e544sm3u57amerpwla3sacosle5zivaij24
+- valory/termination_abci:0.1.0:bafybeigp6mrueymod7a7arxn2p5mvvz2klvhhda3pls32z4fyxibqjisqu
+- valory/transaction_settlement_abci:0.1.0:bafybeic6f4ujckiutqxueagohb5iv7kgzpamhuhiq7shn6fmiwbkt3cqny
+- valory/identify_service_owner_abci:0.1.0:bafybeihxay6znh4ztrr3o2jy4vubffx3do4pv5zzs7sn7aenawoio5gwre
+- valory/funds_forwarder_abci:0.1.0:bafybeid7aqeqxzhipd4nqwk63ahscdp2shiixqyqsk3po7dmdmt5lxfizi
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeidptqakpe5ylvfs7ckxqix4jc7lsh45fitg7re7sgwhjabyfugew4
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeieoy7o2oyqd23ugoprvwxc6ja3wfsmx7suoumjqomxzvhfw2p5ffa
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeibth4mcfxjasbdbn7jkha62jwfpjuzlw7oe6js2yj3tpevcovr2ii
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -83,11 +83,11 @@ skill_exception_policy: stop_and_exit
 connection_exception_policy: just_log
 dependencies:
   open-aea-ledger-cosmos:
-    version: ==2.1.0
+    version: ==2.2.1
   open-aea-ledger-ethereum:
-    version: ==2.1.0
+    version: ==2.2.1
   open-aea-test-autonomy:
-    version: ==0.21.16
+    version: ==0.21.18
   gql:
     version: ==3.5.0
   requests-toolbelt:
@@ -107,24 +107,24 @@ type: connection
 config:
   ledger_apis:
     gnosis:
-      address: ${str:https://rpc.gnosischain.com}
-      chain_id: ${int:100}
-      poa_chain: ${bool:false}
-      default_gas_price_strategy: ${str:eip1559}
+      address: ${GNOSIS_LEDGER_RPC:str:https://rpc.gnosischain.com}
+      chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
+      poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
+      default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
 ---
 public_id: valory/p2p_libp2p_client:0.1.0
 type: connection
 config:
   nodes:
-  - uri: ${str:acn.autonolas.tech:9005}
-    public_key: ${str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
+  - uri: ${ACN_URI:str:acn.autonolas.tech:9005}
+    public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
 cert_requests:
 - identifier: acn
   ledger_id: ethereum
   message_format: '{public_key}'
   not_after: '2023-01-01'
   not_before: '2022-01-01'
-  public_key: ${str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
+  public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
   save_path: .certs/acn_cosmos_11000.txt
 is_abstract: true
 ---
@@ -133,17 +133,17 @@ type: skill
 models:
   benchmark_tool:
     args:
-      log_dir: ${str:/logs}
+      log_dir: ${LOG_DIR:str:/logs}
   params:
     args:
-      market_identification_prompt: ${str:Based on the following news snippets under
-        INPUT, formulate 5 prediction market questions with clear, objective\noutcomes
-        that can be verified on a specific date and leave no room for interpretation
-        or subjectivity.\nAvoid incorporating questions that could potentially encourage
-        unethical behavior or violence.\nEvery question must be related to an event
-        happening on or by {event_day}. The answer to the question\nmust be unknown
-        until that day, but it must be known after that day.\nYour questions should
-        follow a structure similar to this;\n\"Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION
+      market_identification_prompt: ${MARKET_IDENTIFICATION_PROMPT:str:Based on the
+        following news snippets under INPUT, formulate 5 prediction market questions
+        with clear, objective\noutcomes that can be verified on a specific date and
+        leave no room for interpretation or subjectivity.\nAvoid incorporating questions
+        that could potentially encourage unethical behavior or violence.\nEvery question
+        must be related to an event happening on or by {event_day}. The answer to
+        the question\nmust be unknown until that day, but it must be known after that
+        day.\nYour questions should follow a structure similar to this;\n\"Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION
         occur on {event_day}\".\nYour output must follow the output format detailed
         under \"OUTPUT FORMAT\".\n\nINPUT\n{input_news}\n\nOUTPUT_FORMAT\n* Your output
         response must be only a single JSON array to be parsed by Python \"json.loads()\".\n*
@@ -154,84 +154,84 @@ models:
         outcome of the market to be verified.\n - topic; One word description of the
         topic of the news and it should be one of; {topics}.\n* Output only the JSON
         object. Do not include any other contents in your response.}
-      max_proposed_markets: ${int:-1}
-      max_approved_markets: ${int:-1}
-      markets_to_approve_per_epoch: ${int:1}
-      markets_to_approve_per_day: ${int:10}
-      min_approve_markets_epoch_seconds: ${int:43200}
-      approve_market_event_days_offset: ${int:5}
-      market_approval_server_url: ${str:http://127.0.0.1:5000}
-      market_approval_server_api_key: ${str:api_key}
-      newsapi_endpoint: ${str:https://newsapi.org/v2}
-      newsapi_api_key: ${str:f1ea36ae6175474bbcbae11eca64d0b9}
-      topics: ${list:["business","curiosities","entertainment","finance","health","international","pets","politics","science","sustainability","technology","weather"]}
-      market_fee: ${float:2.0}
-      initial_funds: ${float:1.0}
-      market_timeout: ${int:1}
-      min_market_proposal_interval_seconds: ${int:7200}
-      news_sources: ${list:["bbc-news","bbc-sport","abc-news","cnn","reuters","usa-today","breitbart-news","the-verge","techradar"]}
-      event_offset_start_days: ${int:4}
-      event_offset_end_days: ${int:8}
-      market_proposal_round_timeout_seconds_per_day: ${int:45}
-      max_markets_per_story: ${int:1}
-      realitio_contract: ${str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
-      realitio_oracle_proxy_contract: ${str:0xab16d643ba051c11962da645f74632d3130c81e2}
-      conditional_tokens_contract: ${str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
-      fpmm_deterministic_factory_contract: ${str:0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0}
-      collateral_tokens_contract: ${str:0xe91d153e0b41518a2ce8dd3d7944fa863463a97d}
-      arbitrator_contract: ${str:0x5562Ac605764DC4039fb6aB56a74f7321396Cdf2}
-      multisend_address: ${str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
-      multisend_batch_size: ${int:5}
-      ipfs_address: ${str:https://gateway.autonolas.tech/ipfs/}
-      on_chain_service_id: ${int:null}
-      default_chain_id: ${str:gnosis}
-      reset_tendermint_after: ${int:1}
-      reset_pause_duration: ${int:1800}
-      service_id: ${str:market_maker}
-      service_registry_address: ${str:0x9338b5153AE39BB89f50468E608eD9d764B755fD}
+      max_proposed_markets: ${MAX_PROPOSED_MARKETS:int:-1}
+      max_approved_markets: ${MAX_APPROVED_MARKETS:int:-1}
+      markets_to_approve_per_epoch: ${MARKETS_TO_APPROVE_PER_EPOCH:int:1}
+      markets_to_approve_per_day: ${MARKETS_TO_APPROVE_PER_DAY:int:10}
+      min_approve_markets_epoch_seconds: ${MIN_APPROVE_MARKETS_EPOCH_SECONDS:int:43200}
+      approve_market_event_days_offset: ${APPROVE_MARKET_EVENT_DAYS_OFFSET:int:5}
+      market_approval_server_url: ${MARKET_APPROVAL_SERVER_URL:str:http://127.0.0.1:5000}
+      market_approval_server_api_key: ${MARKET_APPROVAL_SERVER_API_KEY:str:api_key}
+      newsapi_endpoint: ${NEWSAPI_ENDPOINT:str:https://newsapi.org/v2}
+      newsapi_api_key: ${NEWSAPI_API_KEY:str:f1ea36ae6175474bbcbae11eca64d0b9}
+      topics: ${TOPICS:list:["business","curiosities","entertainment","finance","health","international","pets","politics","science","sustainability","technology","weather"]}
+      market_fee: ${MARKET_FEE:float:2.0}
+      initial_funds: ${INITIAL_FUNDS:float:1.0}
+      market_timeout: ${MARKET_TIMEOUT:int:1}
+      min_market_proposal_interval_seconds: ${MIN_MARKET_PROPOSAL_INTERVAL_SECONDS:int:7200}
+      news_sources: ${NEWS_SOURCES:list:["bbc-news","bbc-sport","abc-news","cnn","reuters","usa-today","breitbart-news","the-verge","techradar"]}
+      event_offset_start_days: ${EVENT_OFFSET_START_DAYS:int:4}
+      event_offset_end_days: ${EVENT_OFFSET_END_DAYS:int:8}
+      market_proposal_round_timeout_seconds_per_day: ${MARKET_PROPOSAL_ROUND_TIMEOUT_SECONDS_PER_DAY:int:45}
+      max_markets_per_story: ${MAX_MARKETS_PER_STORY:int:1}
+      realitio_contract: ${REALITIO_CONTRACT:str:0x79e32aE03fb27B07C89c0c568F80287C01ca2E57}
+      realitio_oracle_proxy_contract: ${REALITIO_ORACLE_PROXY_CONTRACT:str:0xab16d643ba051c11962da645f74632d3130c81e2}
+      conditional_tokens_contract: ${CONDITIONAL_TOKENS_CONTRACT:str:0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce}
+      fpmm_deterministic_factory_contract: ${FPMM_DETERMINISTIC_FACTORY_CONTRACT:str:0x9083A2B699c0a4AD06F63580BDE2635d26a3eeF0}
+      collateral_tokens_contract: ${COLLATERAL_TOKENS_CONTRACT:str:0xe91d153e0b41518a2ce8dd3d7944fa863463a97d}
+      arbitrator_contract: ${ARBITRATOR_CONTRACT:str:0x5562Ac605764DC4039fb6aB56a74f7321396Cdf2}
+      multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
+      multisend_batch_size: ${MULTISEND_BATCH_SIZE:int:5}
+      ipfs_address: ${IPFS_ADDRESS:str:https://gateway.autonolas.tech/ipfs/}
+      on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
+      default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
+      reset_tendermint_after: ${RESET_TENDERMINT_AFTER:int:1}
+      reset_pause_duration: ${RESET_PAUSE_DURATION:int:1800}
+      service_id: ${SERVICE_ID:str:market_maker}
+      service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x9338b5153AE39BB89f50468E608eD9d764B755fD}
       setup:
-        all_participants: ${list:["0x0000000000000000000000000000000000000000"]}
-        safe_contract_address: ${str:0x0000000000000000000000000000000000000000}
-        consensus_threshold: ${int:null}
-      share_tm_config_on_startup: ${bool:false}
-      tendermint_check_sleep_delay: ${int:3}
-      tendermint_com_url: ${str:http://localhost:8080}
-      tendermint_max_retries: ${int:5}
-      tendermint_url: ${str:http://localhost:26657}
-      tendermint_p2p_url: ${str:localhost:26656}
-      termination_sleep: ${int:900}
-      termination_from_block: ${int:0}
-      tx_timeout: ${float:10.0}
-      round_timeout_seconds: ${float:120}
-      use_termination: ${bool:false}
-      use_slashing: ${bool:false}
-      slash_cooldown_hours: ${int:3}
-      realitio_answer_question_bounty: ${int:0}
-      slash_threshold_amount: ${int:10000000000000000}
-      light_slash_unit_amount: ${int:5000000000000000}
-      serious_slash_unit_amount: ${int:8000000000000000}
-      xdai_threshold: ${int:3000000000000000000}
-      serper_api_key: ${str:serper_api_key}
-      subgraph_api_key: ${str:subgraph_api_key}
-      google_api_key: ${str:google_api_key}
-      google_engine_id: ${str:google_engine_id}
-      openai_api_key: ${str:openai_api_key}
-      service_endpoint_base: ${str:https://dummy_service.autonolas.tech/}
-      expected_service_owner_address: ${str:0x0000000000000000000000000000000000000000}
+        all_participants: ${ALL_PARTICIPANTS:list:["0x0000000000000000000000000000000000000000"]}
+        safe_contract_address: ${SAFE_CONTRACT_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        consensus_threshold: ${CONSENSUS_THRESHOLD:int:null}
+      share_tm_config_on_startup: ${SHARE_TM_CONFIG_ON_STARTUP:bool:false}
+      tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
+      tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
+      tendermint_max_retries: ${TENDERMINT_MAX_RETRIES:int:5}
+      tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
+      tendermint_p2p_url: ${TENDERMINT_P2P_URL:str:localhost:26656}
+      termination_sleep: ${TERMINATION_SLEEP:int:900}
+      termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
+      tx_timeout: ${TX_TIMEOUT:float:10.0}
+      round_timeout_seconds: ${ROUND_TIMEOUT_SECONDS:float:120}
+      use_termination: ${USE_TERMINATION:bool:false}
+      use_slashing: ${USE_SLASHING:bool:false}
+      slash_cooldown_hours: ${SLASH_COOLDOWN_HOURS:int:3}
+      realitio_answer_question_bounty: ${REALITIO_ANSWER_QUESTION_BOUNTY:int:0}
+      slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
+      light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
+      serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
+      xdai_threshold: ${XDAI_THRESHOLD:int:3000000000000000000}
+      serper_api_key: ${SERPER_API_KEY:str:serper_api_key}
+      subgraph_api_key: ${SUBGRAPH_API_KEY:str:subgraph_api_key}
+      google_api_key: ${GOOGLE_API_KEY:str:google_api_key}
+      google_engine_id: ${GOOGLE_ENGINE_ID:str:google_engine_id}
+      openai_api_key: ${OPENAI_API_KEY:str:openai_api_key}
+      service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
+      expected_service_owner_address: ${EXPECTED_SERVICE_OWNER_ADDRESS:str:0x0000000000000000000000000000000000000000}
       funds_forwarder_token_config: ${dict:{}}
-      liquidity_removal_lead_time: ${int:86400}
-      fpmm_remove_liquidity_batch_size: ${int:1}
-      ct_redeem_tokens_batch_size: ${int:5}
-      ct_redeem_tokens_min_payout: ${int:1}
-      realitio_withdraw_bonds_batch_size: ${int:10}
-      min_realitio_withdraw_balance: ${int:1000000000000000000}
+      liquidity_removal_lead_time: ${LIQUIDITY_REMOVAL_LEAD_TIME:int:86400}
+      fpmm_remove_liquidity_batch_size: ${FPMM_REMOVE_LIQUIDITY_BATCH_SIZE:int:1}
+      ct_redeem_tokens_batch_size: ${CT_REDEEM_TOKENS_BATCH_SIZE:int:5}
+      ct_redeem_tokens_min_payout: ${CT_REDEEM_TOKENS_MIN_PAYOUT:int:1}
+      realitio_withdraw_bonds_batch_size: ${REALITIO_WITHDRAW_BONDS_BATCH_SIZE:int:10}
+      min_realitio_withdraw_balance: ${MIN_REALITIO_WITHDRAW_BALANCE:int:1000000000000000000}
   randomness_api:
     args:
       method: ${str:GET}
       response_key: ${str:null}
       response_type: ${str:dict}
       retries: ${int:5}
-      url: ${str:https://drand.cloudflare.com/public/latest}
+      url: ${RANDOMNESS_API_URL:str:https://drand.cloudflare.com/public/latest}
   conditional_tokens_subgraph:
     args:
       headers:
@@ -240,7 +240,7 @@ models:
       response_key: ${str:data}
       response_type: ${str:list}
       retries: ${int:5}
-      url: ${str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/7s9rGBffUTL8kDZuxvvpuc46v44iuDarbrADBFw5uVp2}
+      url: ${CT_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/7s9rGBffUTL8kDZuxvvpuc46v44iuDarbrADBFw5uVp2}
   omen_subgraph:
     args:
       headers:
@@ -249,7 +249,7 @@ models:
       response_key: ${str:data:fixedProductMarketMakers}
       response_type: ${str:list}
       retries: ${int:5}
-      url: ${str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz}
+      url: ${OMEN_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz}
   realitio_subgraph:
     args:
       headers:
@@ -258,13 +258,13 @@ models:
       response_key: ${str:data}
       response_type: ${str:list}
       retries: ${int:5}
-      url: ${str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh}
+      url: ${REALITIO_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh}
 is_abstract: false
 ---
 public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfeztlgrlcoxhr7kf6nbq
 type: connection
 config:
   host: ${str:0.0.0.0}
-  port: ${int:8000}
+  port: ${int:8716}
   timeout: ${float:30.0}
   target_skill_id: valory/market_maker_abci:0.1.0

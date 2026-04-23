@@ -10,7 +10,6 @@ clean-build:
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -fr {} +
 	find . -type d -name __pycache__ -exec rm -rv {} +
-	rm -fr Pipfile.lock
 	rm -rf plugins/*/build
 	rm -rf plugins/*/dist
 
@@ -78,8 +77,6 @@ common-checks-1:
 	tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git --url-skips https://newsapi.org/v2/everything --url-skips https://newsapi.org/v2/top-headlines --http-skips http://host.docker.internal:8545 --http-skips http://host.docker.internal:5000 --url-skips http://host.docker.internal:5000 --url-skips http://server_ip:5000 --url-skips https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md --url-skips https://github.com/valory-xyz/market-creator/blob/0bab9ff6b41c2f024cc1f0d2aa149347fd0f47a9/packages/valory/agents/market_maker/aea-config.yaml#L149
 	tox -qq -p -e check-hash -e check-packages -e check-doc-hashes
 
-v := $(shell pip -V | grep virtualenvs)
-
 .PHONY: run-agent
 run-agent:
 	mkdir -p ./logs && \
@@ -87,4 +84,4 @@ run-agent:
 	LOG_FILE="./logs/agent_log_$$TIMESTAMP.log"; \
 	LATEST_LOG_FILE="./logs/agent_log_latest.log"; \
 	echo "Running agent and logging to $$LOG_FILE"; \
-	aea-helpers run-agent --name valory/market_maker --config-replace --config-mapping config-mapping.json --connection-key 2>&1 | tee $$LOG_FILE $$LATEST_LOG_FILE'
+	aea-helpers run-agent --name valory/market_maker --connection-key 2>&1 | tee $$LOG_FILE $$LATEST_LOG_FILE'
