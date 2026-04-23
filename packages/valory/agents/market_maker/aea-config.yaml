@@ -227,38 +227,38 @@ models:
       min_realitio_withdraw_balance: ${MIN_REALITIO_WITHDRAW_BALANCE:int:1000000000000000000}
   randomness_api:
     args:
-      method: ${RANDOMNESS_API_METHOD:str:GET}
-      response_key: ${RANDOMNESS_API_RESPONSE_KEY:str:null}
-      response_type: ${RANDOMNESS_API_RESPONSE_TYPE:str:dict}
-      retries: ${RANDOMNESS_API_RETRIES:int:5}
+      method: ${str:GET}
+      response_key: ${str:null}
+      response_type: ${str:dict}
+      retries: ${int:5}
       url: ${RANDOMNESS_API_URL:str:https://drand.cloudflare.com/public/latest}
   conditional_tokens_subgraph:
     args:
       headers:
         Content-Type: ${str:application/json}
-      method: ${RANDOMNESS_API_METHOD:str:POST}
-      response_key: ${RANDOMNESS_API_RESPONSE_KEY:str:data}
-      response_type: ${RANDOMNESS_API_RESPONSE_TYPE:str:list}
-      retries: ${RANDOMNESS_API_RETRIES:int:5}
-      url: ${RANDOMNESS_API_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/7s9rGBffUTL8kDZuxvvpuc46v44iuDarbrADBFw5uVp2}
+      method: ${str:POST}
+      response_key: ${str:data}
+      response_type: ${str:list}
+      retries: ${int:5}
+      url: ${CT_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/7s9rGBffUTL8kDZuxvvpuc46v44iuDarbrADBFw5uVp2}
   omen_subgraph:
     args:
       headers:
         Content-Type: ${str:application/json}
-      method: ${RANDOMNESS_API_METHOD:str:POST}
-      response_key: ${RANDOMNESS_API_RESPONSE_KEY:str:data:fixedProductMarketMakers}
-      response_type: ${RANDOMNESS_API_RESPONSE_TYPE:str:list}
-      retries: ${RANDOMNESS_API_RETRIES:int:5}
-      url: ${RANDOMNESS_API_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz}
+      method: ${str:POST}
+      response_key: ${str:data:fixedProductMarketMakers}
+      response_type: ${str:list}
+      retries: ${int:5}
+      url: ${OMEN_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz}
   realitio_subgraph:
     args:
       headers:
         Content-Type: ${str:application/json}
-      method: ${RANDOMNESS_API_METHOD:str:POST}
-      response_key: ${RANDOMNESS_API_RESPONSE_KEY:str:data}
-      response_type: ${RANDOMNESS_API_RESPONSE_TYPE:str:list}
-      retries: ${RANDOMNESS_API_RETRIES:int:5}
-      url: ${RANDOMNESS_API_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh}
+      method: ${str:POST}
+      response_key: ${str:data}
+      response_type: ${str:list}
+      retries: ${int:5}
+      url: ${REALITIO_SUBGRAPH_URL:str:https://gateway.thegraph.com/api/[api-key]/subgraphs/id/E7ymrCnNcQdAAgLbdFWzGE5mvr5Mb5T9VfT43FqA7bNh}
 is_abstract: false
 ---
 public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfeztlgrlcoxhr7kf6nbq
