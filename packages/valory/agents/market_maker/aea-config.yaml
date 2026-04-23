@@ -98,8 +98,8 @@ public_id: valory/abci:0.1.0
 type: connection
 config:
   target_skill_id: valory/market_maker_abci:0.1.0
-  host: ${HTTP_SERVER_HOST:str:localhost}
-  port: ${HTTP_SERVER_PORT:int:26658}
+  host: ${str:localhost}
+  port: ${int:26658}
   use_tendermint: ${bool:false}
 ---
 public_id: valory/ledger:0.19.0
@@ -264,7 +264,7 @@ is_abstract: false
 public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfeztlgrlcoxhr7kf6nbq
 type: connection
 config:
-  host: ${HTTP_SERVER_HOST:str:0.0.0.0}
-  port: ${HTTP_SERVER_PORT:int:8000}
-  timeout: ${HTTP_SERVER_TIMEOUT:float:30.0}
+  host: ${str:0.0.0.0}
+  port: ${int:8716}
+  timeout: ${float:30.0}
   target_skill_id: valory/market_maker_abci:0.1.0
