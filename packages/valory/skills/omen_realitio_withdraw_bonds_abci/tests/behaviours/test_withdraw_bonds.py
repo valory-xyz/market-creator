@@ -30,7 +30,9 @@ from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.base im
 )
 from packages.valory.skills.omen_realitio_withdraw_bonds_abci.behaviours.withdraw_bonds import (
     RealitioWithdrawBondsBehaviour,
-    TX_SUBMITTER,
+)
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
+    RealitioWithdrawBondsRound,
 )
 from packages.valory.skills.omen_realitio_withdraw_bonds_abci.tests.behaviours.conftest import (
     exhaust_gen,
@@ -321,7 +323,7 @@ class TestRealitioWithdrawBondsBehaviour:
 
         payload = captured_payload["payload"]
         assert payload.tx_hash == "0xdeadbeef"
-        assert payload.tx_submitter == TX_SUBMITTER
+        assert payload.tx_submitter == RealitioWithdrawBondsRound.auto_round_id()
 
     def test_async_act_without_tx(self) -> None:
         """async_act produces a payload with both fields None when nothing to do."""

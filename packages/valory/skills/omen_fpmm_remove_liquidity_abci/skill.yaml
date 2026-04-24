@@ -11,7 +11,7 @@ fingerprint:
   __init__.py: bafybeicagt3c65byayg2uujdy4c33jrcjhudk6a3oifo7yh2lqkewf2qru
   behaviours/__init__.py: bafybeiafknyckew2sq4ren7oxkrc5ue44pawfp5k55zzwdeuqxb6ssysuq
   behaviours/base.py: bafybeihf25zhqon7ymgg2wboifdery7774tcd4yzm2jfq3kyx7tfbj2nue
-  behaviours/remove_liquidity.py: bafybeihykeoqapnsyufij2ctvpiinzza3xgbrzjkziyinvmqqa3hip3i5e
+  behaviours/remove_liquidity.py: bafybeiayzxj4zqobzyuk7hj3db2nrcuyqenfemiiv7pxwrtq27clgl6cq4
   behaviours/round_behaviour.py: bafybeidsp47omyxst7dmlltfzqj7r7asldv7tsysej67w2xlrgoit5ugmu
   dialogues.py: bafybeigknfckhgdzg6pxb5fj67274n7iahytivecg33v7le2pe2qa3u63q
   fsm_specification.yaml: bafybeib552xusfbnqaytgxcyuvty4jsdabzgofjj74t7sgok6y5qcaqdva
@@ -23,7 +23,7 @@ fingerprint:
   tests/behaviours/__init__.py: bafybeiff5ylxqu4yjdnbvdlfxm55qho6bhljc3bxjos3u7wrn4qptxbzia
   tests/behaviours/conftest.py: bafybeiexauytp73lwapqiofncxm6pr2cu5iqbxc2djd3uibhbbtsgloceu
   tests/behaviours/test_base.py: bafybeiekltkwudznlv6ejbbj5t44smdze4lmy7gjsxotgxr6sxlbicjwou
-  tests/behaviours/test_remove_liquidity.py: bafybeie4ir75hyt5jnvsivwwfp2gequhv4mc7ehwa6fmblghe7hisuwstq
+  tests/behaviours/test_remove_liquidity.py: bafybeihvioh4l73paami3mvilhkr4z6ipnh2vlppfjjiqik4yrzi44w2ii
   tests/behaviours/test_round_behaviour.py: bafybeieo2mq7ylafnkktdro4q3rnrcem25evfnf57xnvfl76cotjlkxyw4
   tests/conftest.py: bafybeiht62ubpiu2l4jsryb5lxbzvxavro2p6yj6xk3o3ikjkyhdd2gln4
   tests/test_dialogues.py: bafybeiclggcr4ccrytnphxiyox6zbjay6ve37jrhxw2pifvr7oytapii7e

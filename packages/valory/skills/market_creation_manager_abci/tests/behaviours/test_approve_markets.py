@@ -321,6 +321,48 @@ class TestApproveMarketsBehaviourGenerators:
                 _exhaust_gen(gen)
                 mock_set_done.assert_called_once()
 
+    def test_sender_act_with_top_level_mech_error(self) -> None:
+        """Test _sender_act when mech tool returns a top-level error."""
+        mock_synced = MagicMock()
+        mock_synced.most_voted_randomness = "seed123"
+        mock_synced.collected_proposed_markets_data = json.dumps(
+            {"required_markets_to_approve_per_opening_ts": {"1700000000": 3}}
+        )
+        mock_synced.approved_markets_count = 0
+
+        mech_output = json.dumps({"error": "mech tool failed"})
+
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1000),
+            ),
+            patch(
+                "packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets.mech_tool_propose_questions"
+            ) as mock_mech,
+        ):
+            mock_mech.KeyChain = MagicMock()
+            mock_mech.run.return_value = [mech_output]
+
+            with (
+                patch.object(
+                    self.behaviour, "send_a2a_transaction", new=_make_gen(None)
+                ),
+                patch.object(
+                    self.behaviour, "wait_until_round_end", new=_make_gen(None)
+                ),
+                patch.object(self.behaviour, "set_done") as mock_set_done,
+            ):
+                gen = self.behaviour._sender_act()
+                _exhaust_gen(gen)
+                mock_set_done.assert_called_once()
+
     def test_propose_and_approve_market_success(self) -> None:
         """Test _propose_and_approve_market when all 3 HTTP calls return 200."""
         mock_resp = MagicMock()

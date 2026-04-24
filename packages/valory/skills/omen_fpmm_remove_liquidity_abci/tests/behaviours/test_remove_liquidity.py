@@ -790,7 +790,7 @@ class TestFpmmRemoveLiquidityBehaviour:
     # -----------------------------------------------------------------------
 
     def test_tx_submitter_set_when_hash_present(self) -> None:
-        """tx_submitter is TX_SUBMITTER_NAME when tx_hash is not None."""
+        """tx_submitter is the round's auto_round_id when tx_hash is not None."""
         with (
             patch.object(self.behaviour, "_prepare_multisend", make_gen("0xhash")),
             patch.object(self.behaviour, "send_a2a_transaction", make_gen(None)),
