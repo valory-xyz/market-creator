@@ -180,6 +180,8 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         self.set_done()
 
     def _is_resolution_date_in_question(self, market: Dict) -> bool:
+        if not isinstance(market, dict) or "resolution_time" not in market:
+            return False
         dt = datetime.fromtimestamp(market["resolution_time"], tz=timezone.utc)
         date_formats = [
             f"{dt.strftime('%B')} {dt.day}, {dt.year}",  # e.g., "September 8, 2024"

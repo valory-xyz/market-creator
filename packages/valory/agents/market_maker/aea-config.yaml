@@ -39,9 +39,9 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeif4jcv22xrmkwiaecyyli7iknmdhtkg6dmzqmwpqekmvxyr7ba3xy
 - valory/abstract_round_abci:0.1.0:bafybeihgbc5geup3ljdfgyontr2p5e4myxjkthaplm5ei727uw2pawstcy
-- valory/market_maker_abci:0.1.0:bafybeigsvsk4mmdtsmgvitzzk3ibqf3542tzgoo47o6dybd6l5ritwg5ra
+- valory/market_maker_abci:0.1.0:bafybeihkc5hpuhst5ruae3cqo5r5wo5lxsfbrjbivvw6txkzi6vwzroynm
 - valory/registration_abci:0.1.0:bafybeib7midws7obgz34tqsebowa73z46pm34hhsssa3rjet2npp5ekvwm
-- valory/market_creation_manager_abci:0.1.0:bafybeicoujg5wgsukzwei7ecajljzzndwctcsv5k47c5dpasm75nbdb5hu
+- valory/market_creation_manager_abci:0.1.0:bafybeig5ls575r2gyt2zny4liou6axfxvtdqgd3qv43qfzji64ijofym5i
 - valory/reset_pause_abci:0.1.0:bafybeiezqq76bdcrlgshyo2e544sm3u57amerpwla3sacosle5zivaij24
 - valory/termination_abci:0.1.0:bafybeigp6mrueymod7a7arxn2p5mvvz2klvhhda3pls32z4fyxibqjisqu
 - valory/transaction_settlement_abci:0.1.0:bafybeic6f4ujckiutqxueagohb5iv7kgzpamhuhiq7shn6fmiwbkt3cqny
@@ -136,24 +136,6 @@ models:
       log_dir: ${LOG_DIR:str:/logs}
   params:
     args:
-      market_identification_prompt: ${MARKET_IDENTIFICATION_PROMPT:str:Based on the
-        following news snippets under INPUT, formulate 5 prediction market questions
-        with clear, objective\noutcomes that can be verified on a specific date and
-        leave no room for interpretation or subjectivity.\nAvoid incorporating questions
-        that could potentially encourage unethical behavior or violence.\nEvery question
-        must be related to an event happening on or by {event_day}. The answer to
-        the question\nmust be unknown until that day, but it must be known after that
-        day.\nYour questions should follow a structure similar to this;\n\"Will VERIFIABLE_BINARY_OUTCOME_OR_PREDICTION
-        occur on {event_day}\".\nYour output must follow the output format detailed
-        under \"OUTPUT FORMAT\".\n\nINPUT\n{input_news}\n\nOUTPUT_FORMAT\n* Your output
-        response must be only a single JSON array to be parsed by Python \"json.loads()\".\n*
-        All of the date strings should be represented in YYYY-MM-DD format.\n* Each
-        entry of the JSON array must be a JSON object containing the fields;\n - question;
-        The binary question to open a prediction market.\n - answers; The possible
-        answers to the question.\n - resolution_date; The resolution date for the
-        outcome of the market to be verified.\n - topic; One word description of the
-        topic of the news and it should be one of; {topics}.\n* Output only the JSON
-        object. Do not include any other contents in your response.}
       max_proposed_markets: ${MAX_PROPOSED_MARKETS:int:-1}
       max_approved_markets: ${MAX_APPROVED_MARKETS:int:-1}
       markets_to_approve_per_epoch: ${MARKETS_TO_APPROVE_PER_EPOCH:int:1}

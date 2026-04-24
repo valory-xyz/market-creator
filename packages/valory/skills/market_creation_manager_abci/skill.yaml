@@ -11,7 +11,7 @@ fingerprint:
   .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeihiyq6pmvff63y34vwsvawazkh3lw5io3lpsl5ihksvjs5thgylbm
   behaviours/__init__.py: bafybeifp3hykazw2qx32t2lg2mwehcyjdekq3tywde26pm77imco45xz3a
-  behaviours/approve_markets.py: bafybeiceygqy7xm67oaskan2uins3f7xqelt4dcimzu424m3ukbablcfo4
+  behaviours/approve_markets.py: bafybeihgs2lork6zc2nvushgr5caendzfc4ziciiihyndbzo6wz42nzdli
   behaviours/base.py: bafybeihfr7mmeigisld4gpymiexhkfszuqgj6ddjsctrf3huz6jtgkdyma
   behaviours/collect_proposed_markets.py: bafybeibjhkningmccsdet7lnpnnmf77fgvcumflbfcfeikji3ytechlxc4
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
