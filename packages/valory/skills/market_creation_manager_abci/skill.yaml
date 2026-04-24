@@ -42,7 +42,7 @@ fingerprint:
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
   tests/behaviours/__init__.py: bafybeifngz2wcqbk7sior2um2gh4j55i7ugi7mjhz3tak7zezplkccfovi
   tests/behaviours/conftest.py: bafybeidezlbfk2r2632ohq6wnwx34dlpqw5siigsx47fwvfdc5d6taj4xa
-  tests/behaviours/test_approve_markets.py: bafybeigk6qzldtpb3cazu4nziu7ufxvnkixozag4wnyaedmafofe6qvvsq
+  tests/behaviours/test_approve_markets.py: bafybeigijdelmhe3akbgdrqamggjxxung6abndpqcq3lpddigi2evuu5ky
   tests/behaviours/test_approve_markets_behaviour.py: bafybeiandmz47phcwjabwrpb25xmqskv62pkvls7ypjeotqm22ivw3zzf4
   tests/behaviours/test_base.py: bafybeibiddu5gldclwzlnl6aenkbphz5oltortg52ye5nmwqrikz3ifmn4
   tests/behaviours/test_collect_proposed_markets.py: bafybeibknuchv6ueexfr77ktqpayac4ewybhzq2dj3z3d2tcqinja4wr4y
