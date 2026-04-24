@@ -787,7 +787,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         tool = kwargs.get("tool")
         if not tool or tool not in ALLOWED_TOOLS:
             return (
-                f'{{"error": "Tool {tool} is not in the list of supported tools.", "tool": {tool}}}',
+                json.dumps(
+                    {
+                        "error": f"Tool {tool} is not in the list of supported tools.",
+                        "tool": tool,
+                    }
+                ),
                 None,
                 None,
                 counter_callback,
@@ -796,7 +801,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         resolution_time = kwargs.get("resolution_time")
         if resolution_time is None:
             return (
-                f'{{"error": "\'resolution_time\' is not defined.", "tool": {tool}}}',
+                json.dumps(
+                    {
+                        "error": "'resolution_time' is not defined.",
+                        "tool": tool,
+                    }
+                ),
                 None,
                 None,
                 counter_callback,
@@ -813,7 +823,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
         if latest_questions is None:
             return (
-                f'{{"error": "Failed to retrieve latest questions.", "tool": {tool}}}',
+                json.dumps(
+                    {
+                        "error": "Failed to retrieve latest questions.",
+                        "tool": tool,
+                    }
+                ),
                 None,
                 None,
                 counter_callback,
@@ -832,7 +847,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
         if articles is None:
             return (
-                f'{{"error": "Failed to retrieve articles from NewsAPI.", "tool": {tool}}}',
+                json.dumps(
+                    {
+                        "error": "Failed to retrieve articles from NewsAPI.",
+                        "tool": tool,
+                    }
+                ),
                 None,
                 None,
                 counter_callback,
@@ -875,7 +895,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
         if not articles:
             return (
-                f'{{"error": "All articles were flagged by content moderation.", "tool": {tool}}}',
+                json.dumps(
+                    {
+                        "error": "All articles were flagged by content moderation.",
+                        "tool": tool,
+                    }
+                ),
                 None,
                 None,
                 counter_callback,
@@ -910,7 +935,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             moderation_result = client.moderations.create(input=prompt)
             if moderation_result.results[0].flagged:
                 return (
-                    f'{{"error": "Moderation flagged the prompt as in violation of terms.", "tool": {tool}}}',
+                    json.dumps(
+                        {
+                            "error": "Moderation flagged the prompt as in violation of terms.",
+                            "tool": tool,
+                        }
+                    ),
                     None,
                     None,
                     counter_callback,
@@ -955,7 +985,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
         if scrape_result is None:
             return (
-                f'{{"error": "Failed to scrape url {article["url"]}", "tool": {tool}}}',
+                json.dumps(
+                    {
+                        "error": f"Failed to scrape url {article['url']}",
+                        "tool": tool,
+                    }
+                ),
                 None,
                 None,
                 counter_callback,
@@ -1049,7 +1084,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             moderation_result = client.moderations.create(input=prompt)
             if moderation_result.results[0].flagged:
                 return (
-                    f'{{"error": "Moderation flagged the prompt as in violation of terms.", "tool": {tool}}}',
+                    json.dumps(
+                        {
+                            "error": "Moderation flagged the prompt as in violation of terms.",
+                            "tool": tool,
+                        }
+                    ),
                     None,
                     None,
                     counter_callback,
@@ -1245,7 +1285,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         return json.dumps(output, sort_keys=True), None, None, None
     except Exception as e:
         return (
-            f'{{"error": "An exception has occurred: {e}.", "tool": {tool}}}',
+            json.dumps(
+                {
+                    "error": f"An exception has occurred: {e}.",
+                    "tool": tool,
+                }
+            ),
             None,
             None,
             counter_callback,

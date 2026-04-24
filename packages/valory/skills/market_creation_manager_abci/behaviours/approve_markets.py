@@ -144,7 +144,6 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 mech_tool_output_json = json.loads(mech_tool_output)
                 # END MECH INTERACT EMULATION
 
-                approved_markets_count = 0
                 if "error" in mech_tool_output_json:
                     self.context.logger.error(
                         f"An error occurred interacting with the Mech tool {mech_tool_output_json=}"
