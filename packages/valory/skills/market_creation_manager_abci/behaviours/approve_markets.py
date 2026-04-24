@@ -108,7 +108,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 None,
             )
             self.context.logger.info(f"{opening_ts=}")
-            proposed_markets = {}
+            proposed_markets: Dict[str, Any] = {}
             approved_markets_count = 0
 
             if opening_ts:
@@ -144,16 +144,19 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 mech_tool_output_json = json.loads(mech_tool_output)
                 # END MECH INTERACT EMULATION
 
-                self.context.logger.info(f"{mech_tool_output_json['reasoning']=}")
-
-                proposed_markets = mech_tool_output_json["questions"]  # type: ignore
-
                 approved_markets_count = 0
-                if "error" in proposed_markets:
+                if "error" in mech_tool_output_json:
                     self.context.logger.error(
-                        f"An error occurred interacting with the Mech tool {proposed_markets=}"
+                        f"An error occurred interacting with the Mech tool {mech_tool_output_json=}"
                     )
+                    proposed_markets = {}
                 else:
+                    self.context.logger.info(
+                        f"{mech_tool_output_json.get('reasoning')=}"
+                    )
+                    proposed_markets = mech_tool_output_json.get(
+                        "questions", {}
+                    )
                     for market in proposed_markets.values():
                         if not self._is_resolution_date_in_question(market):
                             self.context.logger.error(
