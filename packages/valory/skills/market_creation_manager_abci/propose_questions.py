@@ -243,6 +243,16 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
     - DATE FORMAT: every date in the question MUST be written as
       "Month D, YYYY" (e.g. "April 22, 2026"). Do NOT use "22 April 2026",
       "April 22 2026" (no comma), or numeric formats. Copy EVENT_DAY verbatim.
+    - SOURCE PUBLICATION CADENCE: for continuation/measurement questions
+      whose source publishes weekly, monthly, quarterly, or irregularly
+      (e.g. OECD economic outlooks, Moneyfacts rate tables, Nikkei Asia
+      special reports, IMF projections), do NOT require the source to
+      publish "on EVENT_DAY" / "published on that date". Frame as
+      "as of EVENT_DAY, according to the most recent [source]" or
+      "still at/above/below X on EVENT_DAY, per the latest [source]"
+      instead. A question that demands a publication action on a specific
+      day from a non-daily publisher resolves No by default, regardless of
+      the underlying state.
 
     SPECIFIC FRAMING CHECKS (apply to every question):
     1. DEADLINE FEASIBILITY -- Can the criterion physically/procedurally occur
