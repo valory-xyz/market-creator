@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Contains the job definitions"""
+"""This module implements a Mech tool that proposes prediction-market questions."""
 
 # IMPORTANT: remove this when ported to the mech repository.
 # Remove also mypy skip at the top of the file
@@ -24,40 +24,18 @@
 
 import functools
 import json
-import os
 import random
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-# TODO: remove this flag and every `# [DEBUG: remove later]` line in this
-# file before shipping to production for good. Kept so the simulation /
-# local-agent runs can enable verbose tracing via PROPOSE_DEBUG=1 without
-# polluting production Propel logs.
-_PROPOSE_DEBUG: bool = os.environ.get("PROPOSE_DEBUG", "").lower() in (
-    "1",
-    "true",
-    "yes",
-    "on",
-)
-
-
-def _dprint(*args: Any, **kwargs: Any) -> None:  # [DEBUG: remove later]
-    """No-op print unless PROPOSE_DEBUG is set in the environment."""
-    if _PROPOSE_DEBUG:
-        print(*args, **kwargs)
-
-
-# import anthropic
-# import googleapiclient
 import openai
 import requests
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from openai import OpenAI
 from pydantic import BaseModel
-from tiktoken import encoding_for_model, get_encoding
 
 NEWSAPI_TOP_HEADLINES_URL = "https://newsapi.org/v2/top-headlines"
 NEWSAPI_DEFAULT_NEWS_SOURCES = [
@@ -82,6 +60,9 @@ OMEN_SUBGRAPH_URL = "https://gateway-arbitrum.network.thegraph.com/api/{subgraph
 HTTP_OK = 200
 MAX_ARTICLES = 60
 MAX_LATEST_QUESTIONS = 100
+# NewsAPI top-headlines endpoint caps a single request at 100 results; we
+# request the max and downsample to MAX_ARTICLES later.
+NEWSAPI_MAX_PAGE_SIZE = 100
 # Max chars of scraped article body passed to the LLM. Used in BOTH the
 # question-generation prompt and the self-review prompt so the reviewer
 # scores against the same text the generator saw.
@@ -550,17 +531,6 @@ def with_key_rotation(func: Callable) -> Callable:  # noqa
                 api_keys.rotate("openai")
                 api_keys.rotate("openrouter")
                 return execute()
-            # except googleapiclient.errors.HttpError as e:
-            #     # try with a new key again
-            #     rate_limit_exceeded_code = 429
-            #     if e.status_code != rate_limit_exceeded_code:
-            #         raise e
-            #     service = "google_api_key"
-            #     if retries_left[service] <= 0:
-            #         raise e
-            #     retries_left[service] -= 1
-            #     api_keys.rotate(service)
-            #     return execute()
             except Exception as e:
                 return str(e), "", None, None, api_keys
 
@@ -589,16 +559,15 @@ class OpenAIClientManager:
             client = None
 
 
-def count_tokens(text: str, model: str) -> int:
-    """Count the number of tokens in a text."""
-    # TODO address
-    # Workaround since tiktoken does not have support yet for gpt4.1
-    # https://github.com/openai/tiktoken/issues/395
-    if model == "gpt-4.1-2025-04-14":
-        return len(get_encoding("o200k_base").encode(text))
+def _noop_token_counter(*_args: Any, **_kwargs: Any) -> int:
+    """No-op token counter passed to the mech ``TokenCounterCallback``.
 
-    enc = encoding_for_model(model)
-    return len(enc.encode(text))
+    The callback only invokes ``token_counter`` when ``input_tokens`` /
+    ``output_tokens`` are absent from kwargs; since we always forward the
+    exact counts from ``response.usage``, this fallback is never called
+    and a no-op keeps the interface satisfied without a tiktoken dep.
+    """
+    return 0
 
 
 DEFAULT_OPENAI_SETTINGS = {
@@ -627,7 +596,7 @@ def gather_articles(
     headers = {"X-Api-Key": newsapi_api_key}
     parameters = {
         "sources": ",".join(news_sources),
-        "pageSize": "100",  # TODO: pagination
+        "pageSize": str(NEWSAPI_MAX_PAGE_SIZE),
     }
     url = NEWSAPI_TOP_HEADLINES_URL
     response = requests.get(
@@ -804,7 +773,6 @@ def scrape_url(serper_api_key: str, url: str) -> Optional[dict]:
         return None
 
 
-# TODO
 @with_key_rotation
 def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
     """Run the task"""
@@ -854,15 +822,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         latest_questions = latest_questions[:MAX_LATEST_QUESTIONS]
         latest_questions_string = "\n".join(latest_questions)
 
-        # [DEBUG: remove later] step 2 -- existing questions from subgraph
-        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-        _dprint(
-            f"[DEBUG] STEP 2 -- EXISTING QUESTIONS ({len(latest_questions)}):"
-        )  # [DEBUG: remove later]
-        _dprint("=" * 80)  # [DEBUG: remove later]
-        for i, q in enumerate(latest_questions, 1):  # [DEBUG: remove later]
-            _dprint(f"  {i:>3}. {q}")  # [DEBUG: remove later]
-
         # Gather recent news articles from NewsAPI
         news_sources = kwargs.get("news_sources", NEWSAPI_DEFAULT_NEWS_SOURCES)
         articles = gather_articles(news_sources, kwargs["api_keys"]["newsapi"])
@@ -879,17 +838,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             f"{len(articles)} articles collected from {len(news_sources)} news sources\n"
         )
 
-        # [DEBUG: remove later] step 1 -- articles from NewsAPI (before sampling)
-        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-        _dprint(
-            f"[DEBUG] STEP 1 -- NEWS FROM NEWSAPI ({len(articles)} articles, pre-sample):"
-        )  # [DEBUG: remove later]
-        _dprint("=" * 80)  # [DEBUG: remove later]
-        for i, a in enumerate(articles, 1):  # [DEBUG: remove later]
-            _dprint(
-                f"  {i:>3}. [{a.get('source', {}).get('name', '?')}] {a.get('title', '?')}"
-            )  # [DEBUG: remove later]
-
         articles = random.sample(
             articles, min(MAX_ARTICLES, len(articles))
         )  # nosec: B311
@@ -901,15 +849,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         # empty-pool errors. The stricter question-level check (0.55) at
         # the end is the final backstop.
         articles = filter_duplicate_articles(articles, latest_questions)
-
-        # [DEBUG: remove later] step 3.5 -- articles after dedup filter
-        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-        _dprint(
-            f"[DEBUG] STEP 3.5 -- ARTICLES AFTER EARLY DEDUP ({len(articles)}):"
-        )  # [DEBUG: remove later]
-        _dprint("=" * 80)  # [DEBUG: remove later]
-        for i, a in enumerate(articles, 1):  # [DEBUG: remove later]
-            _dprint(f"  {i:>3}. {a.get('title', '?')}")  # [DEBUG: remove later]
 
         # Pre-filter: drop articles that individually trigger content
         # moderation before building the selection prompt.  Without this,
@@ -929,15 +868,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             if n_dropped > 0:
                 print(f"Moderation pre-filter: dropped {n_dropped} flagged article(s)")
             articles = clean_articles
-
-        # [DEBUG: remove later] step 3-4 -- articles after sampling+moderation
-        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-        _dprint(
-            f"[DEBUG] STEP 3-4 -- ARTICLES AFTER SAMPLE+MODERATION ({len(articles)}):"
-        )  # [DEBUG: remove later]
-        _dprint("=" * 80)  # [DEBUG: remove later]
-        for i, a in enumerate(articles, 1):  # [DEBUG: remove later]
-            _dprint(f"  {i:>3}. {a.get('title', '?')}")  # [DEBUG: remove later]
 
         if not articles:
             return (
@@ -973,14 +903,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
             prompt = SELECT_STORY_PROMPT.format(**prompt_values)
 
-            # [DEBUG: remove later] step 5 -- SELECT_STORY prompt
-            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-            _dprint(
-                f"[DEBUG] STEP 5 -- SELECT_STORY PROMPT (model={model}):"
-            )  # [DEBUG: remove later]
-            _dprint("=" * 80)  # [DEBUG: remove later]
-            _dprint(prompt)  # [DEBUG: remove later]
-
             moderation_result = client.moderations.create(input=prompt)
             if moderation_result.results[0].flagged:
                 return (
@@ -1015,7 +937,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                     input_tokens=response.usage.prompt_tokens,
                     output_tokens=response.usage.completion_tokens,
                     model=model,
-                    token_counter=count_tokens,
+                    token_counter=_noop_token_counter,
                 )
 
             response = json.loads(response.choices[0].message.content)
@@ -1023,20 +945,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             topic = response["topic"]
             article = articles[article_id]
             reasoning = f"The article {article['title']!r} ({article.get('author', '')!r}) has been selected to generate prediction market questions because: {response['reasoning']}"
-
-            # [DEBUG: remove later] step 5 -- SELECT_STORY response
-            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-            _dprint("[DEBUG] STEP 5 -- SELECT_STORY RESPONSE:")  # [DEBUG: remove later]
-            _dprint("=" * 80)  # [DEBUG: remove later]
-            _dprint(f"  article_id: {article_id}")  # [DEBUG: remove later]
-            _dprint(f"  topic:      {topic}")  # [DEBUG: remove later]
-            _dprint(
-                f"  title:      {article.get('title', '?')}"
-            )  # [DEBUG: remove later]
-            _dprint(f"  url:        {article.get('url', '?')}")  # [DEBUG: remove later]
-            _dprint(
-                f"  reasoning:  {response.get('reasoning', '?')}"
-            )  # [DEBUG: remove later]
 
         # Scrape selected article
         scrape_result = scrape_url(kwargs["api_keys"]["serper"], article["url"])
@@ -1049,17 +957,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 counter_callback,
             )
 
-        # [DEBUG: remove later] step 6 -- scraped article text (first 800 chars)
-        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-        _dprint(
-            f"[DEBUG] STEP 6 -- SCRAPED ARTICLE TEXT ({len(scrape_result.get('text', ''))} chars):"
-        )  # [DEBUG: remove later]
-        _dprint("=" * 80)  # [DEBUG: remove later]
-        _dprint(
-            scrape_result.get("text", "")[:800]
-            + ("... [truncated]" if len(scrape_result.get("text", "")) > 800 else "")
-        )  # [DEBUG: remove later]
-
         # Step 2: Extract measurable states from the article (iteration 2).
         # This constrains the LLM to identify what CAN be measured before
         # framing a question -- breaking the default "Will X announce Y?" prior.
@@ -1069,14 +966,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             assert client is not None
             model = LIGHT_MODEL
             extract_prompt = EXTRACT_STATE_PROMPT.format(article=article_text)
-
-            # [DEBUG: remove later] step 7 -- EXTRACT_STATE prompt
-            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-            _dprint(
-                f"[DEBUG] STEP 7 -- EXTRACT_STATE PROMPT (model={model}):"
-            )  # [DEBUG: remove later]
-            _dprint("=" * 80)  # [DEBUG: remove later]
-            _dprint(extract_prompt)  # [DEBUG: remove later]
 
             extract_messages = [
                 {
@@ -1106,7 +995,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                     input_tokens=extract_response.usage.prompt_tokens,
                     output_tokens=extract_response.usage.completion_tokens,
                     model=model,
-                    token_counter=count_tokens,
+                    token_counter=_noop_token_counter,
                 )
             extract_data = json.loads(extract_response.choices[0].message.content)
             states = extract_data.get("states", [])
@@ -1153,14 +1042,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
 
             prompt = PROPOSE_QUESTION_PROMPT.format(**prompt_values)
 
-            # [DEBUG: remove later] step 8 -- PROPOSE_QUESTION prompt
-            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-            _dprint(
-                f"[DEBUG] STEP 8 -- PROPOSE_QUESTION PROMPT (model={model}, n_candidates={n_candidates}):"
-            )  # [DEBUG: remove later]
-            _dprint("=" * 80)  # [DEBUG: remove later]
-            _dprint(prompt)  # [DEBUG: remove later]
-
             moderation_result = client.moderations.create(input=prompt)
             if moderation_result.results[0].flagged:
                 return (
@@ -1195,20 +1076,9 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                     input_tokens=response.usage.prompt_tokens,
                     output_tokens=response.usage.completion_tokens,
                     model=model,
-                    token_counter=count_tokens,
+                    token_counter=_noop_token_counter,
                 )
             response = json.loads(response.choices[0].message.content)
-
-            # [DEBUG: remove later] step 8 -- PROPOSE_QUESTION response (candidate questions)
-            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-            _dprint(
-                f"[DEBUG] STEP 8 -- PROPOSE_QUESTION RESPONSE ({len(response.get('questions', []))} candidates):"
-            )  # [DEBUG: remove later]
-            _dprint("=" * 80)  # [DEBUG: remove later]
-            for i, q in enumerate(
-                response.get("questions", []), 1
-            ):  # [DEBUG: remove later]
-                _dprint(f"  {i}. {q}")  # [DEBUG: remove later]
 
         # Self-review pass: audit proposed questions against the four trap checks.
         # Questions that fail any check are rejected before they reach the output.
@@ -1232,14 +1102,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 ),
                 event_day=format_utc_timestamp(int(resolution_time)),
             )
-
-            # [DEBUG: remove later] step 9 -- SELF_REVIEW prompt
-            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-            _dprint(
-                f"[DEBUG] STEP 9 -- SELF_REVIEW PROMPT (model={review_model}):"
-            )  # [DEBUG: remove later]
-            _dprint("=" * 80)  # [DEBUG: remove later]
-            _dprint(review_prompt)  # [DEBUG: remove later]
 
             review_messages = [
                 {
@@ -1269,41 +1131,10 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                     input_tokens=review_response.usage.prompt_tokens,
                     output_tokens=review_response.usage.completion_tokens,
                     model=review_model,
-                    token_counter=count_tokens,
+                    token_counter=_noop_token_counter,
                 )
             review_data = json.loads(review_response.choices[0].message.content)
             reviews = review_data.get("reviews", [])
-
-            # [DEBUG: remove later] step 9 -- SELF_REVIEW response (per-candidate verdicts)
-            _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-            _dprint(
-                f"[DEBUG] STEP 9 -- SELF_REVIEW RESPONSE ({len(reviews)} reviews):"
-            )  # [DEBUG: remove later]
-            _dprint("=" * 80)  # [DEBUG: remove later]
-            for i, rev in enumerate(reviews, 1):  # [DEBUG: remove later]
-                flags = {  # [DEBUG: remove later]
-                    "dfeas": rev.get(
-                        "deadline_is_feasible", "?"
-                    ),  # [DEBUG: remove later]
-                    "stage": rev.get(
-                        "process_stage_named", "?"
-                    ),  # [DEBUG: remove later]
-                    "pub": rev.get(
-                        "figure_is_directly_published", "?"
-                    ),  # [DEBUG: remove later]
-                    "auth": rev.get(
-                        "authority_can_act_in_time", "?"
-                    ),  # [DEBUG: remove later]
-                    "date": rev.get("date_format_valid", "?"),  # [DEBUG: remove later]
-                    "ndup": rev.get("not_a_duplicate", "?"),  # [DEBUG: remove later]
-                    "wbnd": rev.get("window_bound_event", "?"),  # [DEBUG: remove later]
-                    "acc": rev.get("accept", "?"),  # [DEBUG: remove later]
-                }  # [DEBUG: remove later]
-                _dprint(f"  {i}. {rev.get('question', '?')}")  # [DEBUG: remove later]
-                _dprint(f"     flags: {flags}")  # [DEBUG: remove later]
-                _dprint(
-                    f"     reasoning: {rev.get('reasoning', '')[:200]}"
-                )  # [DEBUG: remove later]
 
         # Filter: accept questions where at least 3 of 4 quality checks pass
         # AND the date-format check passes. The date-format check is a hard
@@ -1354,15 +1185,6 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         for rej in rejected_questions:
             print(f"  REJECTED: {rej['question'][:80]}... -- {rej['reason'][:60]}")
 
-        # [DEBUG: remove later] steps 10-12 -- final accepted/validated questions
-        _dprint("\n" + "=" * 80)  # [DEBUG: remove later]
-        _dprint(
-            f"[DEBUG] STEPS 10-12 -- FINAL QUESTIONS AFTER FILTER + DATE VALIDATION ({len(date_validated)}):"
-        )  # [DEBUG: remove later]
-        _dprint("=" * 80)  # [DEBUG: remove later]
-        for i, q in enumerate(date_validated, 1):  # [DEBUG: remove later]
-            _dprint(f"  {i}. {q}")  # [DEBUG: remove later]
-
         # Programmatic near-duplicate filter: last-stage deterministic check
         # against the EXISTING_QUESTIONS pool. The LLM-based `not_a_duplicate`
         # self-review misses paraphrases like "retail sales %" vs "retail
@@ -1385,12 +1207,14 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
         if nondup_validated:
             questions = nondup_validated[:num_questions]
         else:
-            return (
-                f'{{"error": "All {n_candidates} proposed questions were rejected by self-review, date validation, or programmatic dedup.", "tool": {tool}}}',
-                None,
-                None,
-                counter_callback,
-            )
+            err_payload = {
+                "error": (
+                    f"All {n_candidates} proposed questions were rejected by "
+                    "self-review, date validation, or programmatic dedup."
+                ),
+                "tool": tool,
+            }
+            return json.dumps(err_payload), None, None, counter_callback
 
         # Generate output
         answers = ["Yes", "No"]
