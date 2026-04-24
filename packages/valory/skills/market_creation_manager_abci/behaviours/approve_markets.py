@@ -154,9 +154,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     self.context.logger.info(
                         f"{mech_tool_output_json.get('reasoning')=}"
                     )
-                    proposed_markets = mech_tool_output_json.get(
-                        "questions", {}
-                    )
+                    proposed_markets = mech_tool_output_json.get("questions", {})
                     for market in proposed_markets.values():
                         if not self._is_resolution_date_in_question(market):
                             self.context.logger.error(

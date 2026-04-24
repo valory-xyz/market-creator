@@ -570,13 +570,7 @@ class OpenAIClientManager:
 
 
 def _noop_token_counter(*_args: Any, **_kwargs: Any) -> int:
-    """No-op token counter passed to the mech ``TokenCounterCallback``.
-
-    The callback only invokes ``token_counter`` when ``input_tokens`` /
-    ``output_tokens`` are absent from kwargs; since we always forward the
-    exact counts from ``response.usage``, this fallback is never called
-    and a no-op keeps the interface satisfied without a tiktoken dep.
-    """
+    """No-op token counter; exact counts are always forwarded from ``response.usage``."""
     return 0
 
 
