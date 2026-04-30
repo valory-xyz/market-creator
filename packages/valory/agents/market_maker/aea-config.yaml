@@ -21,7 +21,7 @@ contracts:
 - valory/multisend:0.1.0:bafybeihx7c3xj6c5v4tgvu3ipnj7seyc4dkmovoyzu4isgbwdrhj2oo6uq
 - valory/realitio:0.1.0:bafybeibthnl5gmuxehkwwseevyuier4iewcx2qd5wk4p7besvhea2kducy
 - valory/conditional_tokens:0.1.0:bafybeieumljzqj6dw3aifiza4msx6m4etyqhsthvcgw3s26kn73oktxdk4
-- valory/fpmm_deterministic_factory:0.1.0:bafybeidvhwogxli5lj4a36xqu3hvujfvavbkmfa2wiohexfy3vq4b4pvqq
+- valory/fpmm_deterministic_factory:0.1.0:bafybeidfhanvwg62ntzbifuo6anmyhkaecguum4maanmgfkoajindwfnke
 - valory/service_registry:0.1.0:bafybeib6lrxpbhsrg32bueif53vnb3xecyjxzk6rhd2t2xot27qtbeyvjm
 - valory/staking_token:0.1.0:bafybeid7uy64tzowfhl3dvcwphyfvb7fozwnmk4fg4ny3tndqubbsedmvi
 - valory/fpmm:0.1.0:bafybeifyhnyhypzjrhopen4uid77cmxpnzapzrwdmuwexidsbefg7oyw3e
@@ -39,17 +39,17 @@ protocols:
 skills:
 - valory/abstract_abci:0.1.0:bafybeif4jcv22xrmkwiaecyyli7iknmdhtkg6dmzqmwpqekmvxyr7ba3xy
 - valory/abstract_round_abci:0.1.0:bafybeihgbc5geup3ljdfgyontr2p5e4myxjkthaplm5ei727uw2pawstcy
-- valory/market_maker_abci:0.1.0:bafybeid3wlwyucpcsdkwzhpi7qt4yawhbmldk3m3u7rvtmipoj6sbm3go4
+- valory/market_maker_abci:0.1.0:bafybeiatp6vytmabpqwz6gimvfnhno3mdlnuyh5i4s2jsvberkcqyv37x4
 - valory/registration_abci:0.1.0:bafybeib7midws7obgz34tqsebowa73z46pm34hhsssa3rjet2npp5ekvwm
-- valory/market_creation_manager_abci:0.1.0:bafybeid67h6e7f6grj2vwy2mmnvq3fzvu4ghpeqrstnggzy4y5dahehe24
+- valory/market_creation_manager_abci:0.1.0:bafybeifv3hrjevisiriptm62jd4lu5kjjm4lyoqf4r6mr4mn7p27ilfhlq
 - valory/reset_pause_abci:0.1.0:bafybeiezqq76bdcrlgshyo2e544sm3u57amerpwla3sacosle5zivaij24
 - valory/termination_abci:0.1.0:bafybeigp6mrueymod7a7arxn2p5mvvz2klvhhda3pls32z4fyxibqjisqu
 - valory/transaction_settlement_abci:0.1.0:bafybeic6f4ujckiutqxueagohb5iv7kgzpamhuhiq7shn6fmiwbkt3cqny
 - valory/identify_service_owner_abci:0.1.0:bafybeihxay6znh4ztrr3o2jy4vubffx3do4pv5zzs7sn7aenawoio5gwre
 - valory/funds_forwarder_abci:0.1.0:bafybeid7aqeqxzhipd4nqwk63ahscdp2shiixqyqsk3po7dmdmt5lxfizi
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeibidqspdprqy4mfvjgsuynt3ni4fi37oea2eeu2jacfogbip4t5sy
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeiegqqqigg4yrme6uteb226irdpresoubwriukllx5da56pfvidwpi
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiaksjsb7yhzbhp5nyzjbi4ebua5nfnmcluus45tjidmh6kv5y2dea
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeigz5dl624skfrcv4ytmgqius4ivd7rbwreefuyiazizvxen3ulzgu
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeifzkc25fjldmkty73uf6ab7ussjwfb2ee7saznnj25xo2iufv2bou
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiedniw2yqnsgxig3dxv6upuce3cywcvehhnun5uhshfegwcbclfuy
 default_ledger: ethereum
 required_ledgers:
 - ethereum

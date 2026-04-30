@@ -58,12 +58,48 @@ dev = [
     "ipykernel>=7.2.0",
     "matplotlib>=3.10.8",
     "pandas>=2.3.3",
-    "tomte[cli, tests]>=0.6.5",
+    "tomte[cli, tests] @ git+https://github.com/valory-xyz/tomte.git@058d5ceae140ad966eadb413d4e02f23930b9739",
 ]
 
 [tool.uv]
 default-groups = "all"
 prerelease = "allow"
+
+[tool.tomte]
+# Third-party packages on disk are synced from open-autonomy + open-aea
+# upstreams (auto-prepended) plus mech-interact / trader / genai for the
+# Realitio / FPMM contract wrappers and the mech_interact_abci skill.
+upstream_pins = [
+    "valory-xyz/mech-interact@v0.27.0",
+    "valory-xyz/trader@v0.34.1",
+    "valory-xyz/genai@v6.0.0",
+]
+# IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package
+# fingerprints look like generic API keys to gitleaks; allowlist them.
+# Source files containing constant-name strings (CT_REDEEM_TOKENS_*,
+# collection_key field names, fpmm_deterministic_factory_contract key)
+# trip the same generic-secret rule — these are public API surface
+# identifiers, not credentials.
+gitleaks_extra_regexes = ["bafybei[a-z2-7]{52}"]
+gitleaks_extra_paths = [
+    "packages/valory/skills/.*",
+    "notebooks/.*",
+    "market_approval_server/.*",
+    "\\.claude/.*",
+]
+tomte_dep_pin = " @ git+https://github.com/valory-xyz/tomte.git@058d5ceae140ad966eadb413d4e02f23930b9739"
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+asyncio_mode = "strict"
+markers = [
+    "integration: marks integration tests which require other network services",
+    "e2e: marks end-to-end agent tests",
+]
+filterwarnings = ["ignore::DeprecationWarning:aea.*:"]
 
 [tool.uv.build-backend]
 module-name = ["packages"]
