@@ -28,17 +28,17 @@ contracts: []
 protocols:
 - valory/http:1.0.0:bafybeidxkp3vga7t6x2pbt2tpkgyaxa5bgpdgryao54py7w3yxyzr7neoy
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeihgbc5geup3ljdfgyontr2p5e4myxjkthaplm5ei727uw2pawstcy
-- valory/registration_abci:0.1.0:bafybeib7midws7obgz34tqsebowa73z46pm34hhsssa3rjet2npp5ekvwm
-- valory/reset_pause_abci:0.1.0:bafybeiezqq76bdcrlgshyo2e544sm3u57amerpwla3sacosle5zivaij24
-- valory/market_creation_manager_abci:0.1.0:bafybeifv3hrjevisiriptm62jd4lu5kjjm4lyoqf4r6mr4mn7p27ilfhlq
-- valory/termination_abci:0.1.0:bafybeigp6mrueymod7a7arxn2p5mvvz2klvhhda3pls32z4fyxibqjisqu
-- valory/transaction_settlement_abci:0.1.0:bafybeic6f4ujckiutqxueagohb5iv7kgzpamhuhiq7shn6fmiwbkt3cqny
-- valory/identify_service_owner_abci:0.1.0:bafybeihxay6znh4ztrr3o2jy4vubffx3do4pv5zzs7sn7aenawoio5gwre
-- valory/funds_forwarder_abci:0.1.0:bafybeid7aqeqxzhipd4nqwk63ahscdp2shiixqyqsk3po7dmdmt5lxfizi
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeigz5dl624skfrcv4ytmgqius4ivd7rbwreefuyiazizvxen3ulzgu
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeifzkc25fjldmkty73uf6ab7ussjwfb2ee7saznnj25xo2iufv2bou
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiedniw2yqnsgxig3dxv6upuce3cywcvehhnun5uhshfegwcbclfuy
+- valory/abstract_round_abci:0.1.0:bafybeidpod4inivvvgzenx46whshq4mzmxgwsxinv6ibdvyemkstam2yz4
+- valory/registration_abci:0.1.0:bafybeietlh4pq5wjsb6srpsqehcq3gwsod5c6gs4jdiwpzkgrwyxhbbbvq
+- valory/reset_pause_abci:0.1.0:bafybeifdzwzz5byan3ytsi46n4n2svtqme6475hk5z77sopymyzqszcpoa
+- valory/market_creation_manager_abci:0.1.0:bafybeiheqxxeun3jqwuiop5j4vbwpqdojug5k2qtzeaxumyzyui7lbsb6u
+- valory/termination_abci:0.1.0:bafybeiadbtzcvzkwbrosshlsubilj7mwzdqfni6dr75wsd3vawhslpwqeu
+- valory/transaction_settlement_abci:0.1.0:bafybeigiojqgbi54jhree3sqrzaudbmjxb7y2ete74bbliryi3t7ztwi5q
+- valory/identify_service_owner_abci:0.1.0:bafybeiaqjoocj56smwuntvcekbbxpb6au2x7rixmbypbjezojyvio67g3q
+- valory/funds_forwarder_abci:0.1.0:bafybeihinrqecswpwjmba4dtpvvepmz7uqzkgmywanbdl4pahki3crdg3m
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeidrwolj5ys2lj3rlv3w4kmwyxip5wruow2t7tyq6kqgzygglfg7w4
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeid2tll7aawmttzgn5e5shtk3f7z4cqv5n53wofjhrr22pkvn3za6u
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiehmk5qz7hlu2vcv257wpknari4ivdnfnmwhlstxugy6cuhsblyvq
 behaviours:
   main:
     args: {}
@@ -276,5 +276,5 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.21.18
+    version: ==0.21.20
 is_abstract: false
