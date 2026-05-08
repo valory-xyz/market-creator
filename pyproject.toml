@@ -73,14 +73,23 @@ upstream_pins = [
 ]
 # IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package
 # fingerprints look like generic API keys to gitleaks; allowlist them.
-# Source files containing constant-name strings (CT_REDEEM_TOKENS_*,
-# collection_key field names, fpmm_deterministic_factory_contract key)
-# trip the same generic-secret rule — these are public API surface
-# identifiers, not credentials.
-gitleaks_extra_regexes = ["bafybei[a-z2-7]{52}"]
+# Content-based regex allowlist is preferred over a path allowlist so
+# gitleaks still inspects skill source for genuine secrets (private keys,
+# API tokens) but lets known false-positive identifiers pass.
+gitleaks_extra_regexes = [
+    # IPFS CIDv1 hashes used by Open Autonomy package fingerprints.
+    "bafybei[a-z2-7]{52}",
+    # ABCI consensus payload constants are SCREAMING_SNAKE_CASE strings
+    # ending in _PAYLOAD; high entropy trips gitleaks' generic-api-key rule.
+    "[A-Z][A-Z0-9_]+_PAYLOAD",
+    # ABCI synchronized_data attributes use the framework-mandated
+    # `participant_to_<name>` namespace; high-entropy snake_case identifier.
+    "participant_to_[a-z][a-z0-9_]+",
+    # Service config keys for on-chain identifiers follow OA convention
+    # `<name>_(contract|address|proxy|factory|tracker|oracle)`. Same shape.
+    "[a-z][a-z0-9_]*_(?:contract|address|proxy|factory|tracker|oracle)",
+]
 gitleaks_extra_paths = [
-    "packages/valory/skills/.*",
-    "notebooks/.*",
     "market_approval_server/.*",
     "\\.claude/.*",
 ]

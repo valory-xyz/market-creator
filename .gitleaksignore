@@ -101,3 +101,4 @@ af3ad88dcaf7e697b495907910077afe8f75fc4d:packages/valory/skills/omen_ct_redeem_t
 b08de3e5c00b59181a0c8bbd35cdc50155aaf036:packages/valory/skills/omen_ct_redeem_tokens_abci/skill.yaml:generic-api-key:13
 b08de3e5c00b59181a0c8bbd35cdc50155aaf036:packages/valory/skills/omen_ct_redeem_tokens_abci/skill.yaml:generic-api-key:25
 5857df957d4288974bf82664d09a232d33cd89f0:packages/valory/skills/omen_ct_redeem_tokens_abci/skill.yaml:generic-api-key:13
+01c3bda1229644f5a47555be92e1290c9a7b97f4:notebooks/fpmm_audits.py:generic-api-key:406
