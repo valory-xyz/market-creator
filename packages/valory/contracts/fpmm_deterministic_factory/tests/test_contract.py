@@ -181,11 +181,14 @@ class TestGetMarketCreationEvents:
         }
         mock_instance.events.FixedProductMarketMakerCreation.return_value = mock_event
 
-        with patch.object(
-            FPMMDeterministicFactory, "get_instance", return_value=mock_instance
-        ), patch(
-            "packages.valory.contracts.fpmm_deterministic_factory.contract.get_logs",
-            return_value=[],
+        with (
+            patch.object(
+                FPMMDeterministicFactory, "get_instance", return_value=mock_instance
+            ),
+            patch(
+                "packages.valory.contracts.fpmm_deterministic_factory.contract.get_logs",
+                return_value=[],
+            ),
         ):
             result = FPMMDeterministicFactory.get_market_creation_events(
                 ledger_api=mock_ledger_api,

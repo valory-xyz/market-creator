@@ -65,3 +65,6 @@ market_approval_server/server_config.json
 creator_service
 .idea
 notebooks/.cache/
+.tomte-tox.ini
+.darglint
+.gitleaks-merged.toml

@@ -26,7 +26,9 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-from packages.valory.skills.abstract_round_abci.handlers import ABCIRoundHandler
+from packages.valory.skills.abstract_round_abci.handlers import (
+    ABCIRoundHandler,
+)
 from packages.valory.skills.abstract_round_abci.handlers import (
     ContractApiHandler as BaseContractApiHandler,
 )

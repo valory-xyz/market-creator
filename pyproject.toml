@@ -10,24 +10,25 @@ requires-python = ">=3.10,<3.15"
 readme = "README.md"
 license = "Apache-2.0"
 dependencies = [
-    "open-autonomy[cli]==0.21.18",
+    "open-autonomy[cli]==0.21.20",
     "toml==0.10.2",
     "hypothesis==6.21.6",
     "grpcio==1.78.0",
     "aiohttp<4.0.0,>=3.8.5",
     "asn1crypto<1.5.0,>=1.4.0",
-    "open-aea-ledger-ethereum==2.2.1",
+    "open-aea-ledger-ethereum==2.2.3",
     "openai==1.93.0",
     "protobuf>=5,<6",
-    "open-aea-helpers==0.21.18",
-    "open-aea-test-autonomy==0.21.18",
+    "open-aea-helpers==0.21.20",
+    "open-aea-test-autonomy==0.21.20",
     "ipfshttpclient==0.8.0a2",
-    "open-aea-cli-ipfs==2.2.1",
+    "open-aea-cli-ipfs==2.2.3",
     "requests==2.32.5",
+    "requests-toolbelt==1.0.0",
     "pytest>=8.2,<10",
     "pytest-asyncio==1.3.0",
     "ecdsa>=0.15",
-    "open-aea-ledger-cosmos==2.2.1",
+    "open-aea-ledger-cosmos==2.2.3",
     "certifi==2026.2.25",
     "multidict==6.7.1",
     "py-eth-sig-utils==0.4.0",
@@ -54,16 +55,45 @@ Repository = "https://github.com/valory-xyz/market-creator"
 
 [dependency-groups]
 dev = [
-    "google-genai>=1.70.0",
-    "ipykernel>=7.2.0",
-    "matplotlib>=3.10.8",
-    "pandas>=2.3.3",
-    "tomte[cli, tests]>=0.6.5",
+    "tomte[cli, tests] @ git+https://github.com/valory-xyz/tomte.git@0819eea387c622cc53b398a2d3ea86e94a55cf82",
 ]
 
 [tool.uv]
 default-groups = "all"
 prerelease = "allow"
+
+[tool.tomte]
+# Third-party packages on disk are synced from open-autonomy + open-aea
+# upstreams (auto-prepended) plus mech-interact / trader / genai for the
+# Realitio / FPMM contract wrappers and the mech_interact_abci skill.
+upstream_pins = [
+    "valory-xyz/mech-interact@v0.30.0",
+    "valory-xyz/trader@v0.35.5",
+    "valory-xyz/genai@v7.0.0",
+]
+# IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package
+# fingerprints look like generic API keys to gitleaks; allowlist them.
+# Content-based regex allowlist is preferred over a path allowlist so
+# gitleaks still inspects skill source for genuine secrets (private keys,
+# API tokens) but lets known false-positive identifiers pass.
+gitleaks_extra_regexes = [
+    # IPFS CIDv1 hashes used by Open Autonomy package fingerprints.
+    "bafybei[a-z2-7]{52}",
+    # ABCI consensus payload constants are SCREAMING_SNAKE_CASE strings
+    # ending in _PAYLOAD; high entropy trips gitleaks' generic-api-key rule.
+    "[A-Z][A-Z0-9_]+_PAYLOAD",
+    # ABCI synchronized_data attributes use the framework-mandated
+    # `participant_to_<name>` namespace; high-entropy snake_case identifier.
+    "participant_to_[a-z][a-z0-9_]+",
+    # Service config keys for on-chain identifiers follow OA convention
+    # `<name>_(contract|address|proxy|factory|tracker|oracle)`. Same shape.
+    "[a-z][a-z0-9_]*_(?:contract|address|proxy|factory|tracker|oracle)",
+]
+gitleaks_extra_paths = [
+    "market_approval_server/.*",
+    "\\.claude/.*",
+]
+tomte_dep_pin = " @ git+https://github.com/valory-xyz/tomte.git@0819eea387c622cc53b398a2d3ea86e94a55cf82"
 
 [tool.uv.build-backend]
 module-name = ["packages"]

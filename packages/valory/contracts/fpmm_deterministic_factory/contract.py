@@ -246,9 +246,7 @@ class FPMMDeterministicFactory(Contract):
         )
         receipt = ledger_api.api.eth.get_transaction_receipt(tx_hash)
         if receipt is None:
-            raise ValueError(
-                f"Transaction receipt not found for tx_hash: {tx_hash}"
-            )
+            raise ValueError(f"Transaction receipt not found for tx_hash: {tx_hash}")
         logs = contract.events.FixedProductMarketMakerCreation().process_receipt(
             receipt
         )
