@@ -175,15 +175,8 @@ class RealitioWithdrawBondsBaseBehaviour(BaseBehaviour, ABC):
         """Bundle transactions into a MultiSend and return the safe payload hash."""
 
         def _calldata_to_bytes(data: Any) -> bytes:
-            """Coerce calldata to bytes.
-
-            Web3 ``Contract.encode_abi`` returns hex strings; multisend
-            builders that expect raw bytes (e.g. ``cast(bytes, ...)`` +
-            byte-concat) crash on hex strings. Accept bytes or hex str
-            and always return bytes so the skill works against any
-            multisend implementation.
-            """
-            if data is None or data == "":
+            """Coerce calldata (bytes / hex str / None) to bytes."""
+            if data is None:
                 return b""
             if isinstance(data, bytes):
                 return data

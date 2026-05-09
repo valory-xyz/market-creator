@@ -11,7 +11,7 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   __init__.py: bafybeidlkvzfji4l2c3llk2a6flvtdyfrcip57wud6oryadkqxrerz7ixy
   behaviours/__init__.py: bafybeifgomj4ofs2ukuh4n7kfy632cbaocnyleijcnc6hju55a4yufj3se
-  behaviours/base.py: bafybeihmugoe3s55vt4j3xv67jrqcfyxbq7yon2lsg6ohy7qmt2dmhrblu
+  behaviours/base.py: bafybeicwq7jct62ecfrugx4bymeqdomqkrivcp5c3ruebp72r763gdcx2m
   behaviours/round_behaviour.py: bafybeiaodlrwrwlwpvgrtd3exutkyubkdjcv4oi42afbfpiy5qljflpxrq
   behaviours/withdraw_bonds.py: bafybeib6b45hrjfkxbqdzfb46oopqew6pdxmu5asz33ixvulmyazaux2l4
   dialogues.py: bafybeigbqeyz4nfnbz7z56p5zdsdsesaxylerrj3zt56sf56a4ruxnppdu

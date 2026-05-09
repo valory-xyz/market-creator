@@ -10,7 +10,7 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   __init__.py: bafybeicagt3c65byayg2uujdy4c33jrcjhudk6a3oifo7yh2lqkewf2qru
   behaviours/__init__.py: bafybeiafknyckew2sq4ren7oxkrc5ue44pawfp5k55zzwdeuqxb6ssysuq
-  behaviours/base.py: bafybeia7lmz4i53ymbswvodhfiwccgrgijet24rwgrqnv2jq3p2bukttte
+  behaviours/base.py: bafybeieb6dbzevfj3lgrsirqdvpnnpzl73xa4j4lh5ydx7eaeo6bzj2fru
   behaviours/remove_liquidity.py: bafybeiayzxj4zqobzyuk7hj3db2nrcuyqenfemiiv7pxwrtq27clgl6cq4
   behaviours/round_behaviour.py: bafybeidsp47omyxst7dmlltfzqj7r7asldv7tsysej67w2xlrgoit5ugmu
   dialogues.py: bafybeigknfckhgdzg6pxb5fj67274n7iahytivecg33v7le2pe2qa3u63q
