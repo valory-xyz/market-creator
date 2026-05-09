@@ -95,6 +95,7 @@ def mock_context() -> MagicMock:
     context.params.realitio_contract = "0xRealitio"
     context.params.realitio_withdraw_bonds_batch_size = 10
     context.params.min_realitio_withdraw_balance = 10000000000000000000
+    context.params.event_filtering_batch_size = 1000
     context.params.multisend_address = "0xMultisend"
     context.state.round_sequence = MagicMock()
     context.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (

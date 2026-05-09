@@ -60,6 +60,13 @@ class RealitioWithdrawBondsParams(BaseParams):
         self.min_realitio_withdraw_balance = self._ensure(
             "min_realitio_withdraw_balance", kwargs, type_=int
         )
+        # Cap on the eth_getLogs window when scanning LogNewAnswer events.
+        # Public Gnosis RPCs disagree on the maximum: BlockPI caps at 1000
+        # blocks, others accept much wider ranges. Default tuned to 1000
+        # so the lowest common denominator works without env overrides.
+        self.event_filtering_batch_size = self._ensure(
+            "event_filtering_batch_size", kwargs, type_=int
+        )
         # Contract address is read without popping so sibling params
         # classes in a composed MRO can still see it.
         self.realitio_contract: str = kwargs.get(

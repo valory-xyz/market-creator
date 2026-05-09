@@ -9,7 +9,7 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   __init__.py: bafybeib4kjyui2xe33pltjouup4lstknxxh2xarqxim6jduf7itsgixj2u
   behaviours/__init__.py: bafybeiabhvvnnijguzfh2gzoatyv2bptmgvkphxqzbkj3m6lrmqrbzalsi
-  behaviours/base.py: bafybeifmpfclk7jiikqh47cru7tizoajkn3ktof4tosbflsijuys7i6iey
+  behaviours/base.py: bafybeie7ondo7jebyplt4escq7hx5yaqlf34xmx3ejuv2mnaw6il7erxhy
   behaviours/redeem_tokens.py: bafybeiatobufwi4it6wzflamldbcfz6rsbnhmlxg3x7befs2ecztti7hdq
   behaviours/round_behaviour.py: bafybeihxsxypivbkuqeghngqfkijcusfiluidjhotzmzrtwu5defaysgfm
   dialogues.py: bafybeia4lfrdzgijfkluh54kxfjxvjovgmbs2j2syf7a22p6yjwcthhd2a

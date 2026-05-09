@@ -298,12 +298,13 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             from_block=from_block,
             to_block=to_block,
             question_id=question_id,
+            chunk_size=self.params.event_filtering_batch_size,
             chain_id=self.params.default_chain_id,
         )
         if response.performative != ContractApiMessage.Performative.STATE:
             self.context.logger.warning(
                 f"{SKILL_LOG_PREFIX} RealitioContract.get_claim_params failed "
-                f"for 0x{question_id.hex()}"
+                f"for 0x{question_id.hex()}: performative={response.performative}"
             )
             return None
 
@@ -311,7 +312,7 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
         if "error" in body:
             self.context.logger.warning(
                 f"{SKILL_LOG_PREFIX} RealitioContract.get_claim_params failed "
-                f"for 0x{question_id.hex()}"
+                f"for 0x{question_id.hex()}: {body['error']}"
             )
             return None
 
@@ -319,7 +320,8 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
         if answered is None or len(answered) == 0:
             self.context.logger.warning(
                 f"{SKILL_LOG_PREFIX} RealitioContract.get_claim_params failed "
-                f"for 0x{question_id.hex()}"
+                f"for 0x{question_id.hex()}: no LogNewAnswer events in window "
+                f"[{from_block}, {to_block}]"
             )
             return None
 

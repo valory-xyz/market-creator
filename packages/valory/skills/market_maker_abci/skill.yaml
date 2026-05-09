@@ -31,14 +31,14 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeidpod4inivvvgzenx46whshq4mzmxgwsxinv6ibdvyemkstam2yz4
 - valory/registration_abci:0.1.0:bafybeietlh4pq5wjsb6srpsqehcq3gwsod5c6gs4jdiwpzkgrwyxhbbbvq
 - valory/reset_pause_abci:0.1.0:bafybeifdzwzz5byan3ytsi46n4n2svtqme6475hk5z77sopymyzqszcpoa
-- valory/market_creation_manager_abci:0.1.0:bafybeiheqxxeun3jqwuiop5j4vbwpqdojug5k2qtzeaxumyzyui7lbsb6u
+- valory/market_creation_manager_abci:0.1.0:bafybeicbkw2r5dseoqlyhvlzxrh7gp53ahuqdx7isbt7d4hh5qxc67ooei
 - valory/termination_abci:0.1.0:bafybeiadbtzcvzkwbrosshlsubilj7mwzdqfni6dr75wsd3vawhslpwqeu
 - valory/transaction_settlement_abci:0.1.0:bafybeigiojqgbi54jhree3sqrzaudbmjxb7y2ete74bbliryi3t7ztwi5q
 - valory/identify_service_owner_abci:0.1.0:bafybeiaqjoocj56smwuntvcekbbxpb6au2x7rixmbypbjezojyvio67g3q
 - valory/funds_forwarder_abci:0.1.0:bafybeihinrqecswpwjmba4dtpvvepmz7uqzkgmywanbdl4pahki3crdg3m
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeidrwolj5ys2lj3rlv3w4kmwyxip5wruow2t7tyq6kqgzygglfg7w4
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeid2tll7aawmttzgn5e5shtk3f7z4cqv5n53wofjhrr22pkvn3za6u
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiehmk5qz7hlu2vcv257wpknari4ivdnfnmwhlstxugy6cuhsblyvq
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeidpzflkbm6p35kkp7cli6zyzbk4xmhlc27qmqkd5tthx2qqnlwvpm
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeihlyuv4rllgkverb6xvc77f4wycjjaeleajgccz3k6wrxx2b7frua
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeia4tqsmnrl4t2e3p553d7t6dn74l3y2gpzdfem4ifmeuaaldcazou
 behaviours:
   main:
     args: {}
@@ -214,6 +214,7 @@ models:
       ct_redeem_tokens_min_payout: 1
       realitio_withdraw_bonds_batch_size: 10
       min_realitio_withdraw_balance: 1000000000000000000
+      event_filtering_batch_size: 1000
     class_name: Params
   randomness_api:
     args:

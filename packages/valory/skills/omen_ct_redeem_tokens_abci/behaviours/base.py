@@ -127,13 +127,34 @@ class CtRedeemTokensBaseBehaviour(BaseBehaviour, ABC):
         self, transactions: List[Dict]
     ) -> Generator[None, None, Optional[str]]:
         """Bundle transactions into a MultiSend and return the safe payload hash."""
+
+        def _calldata_to_bytes(data: Any) -> bytes:
+            """Coerce calldata to bytes.
+
+            Web3 ``Contract.encode_abi`` returns hex strings; multisend
+            builders that expect raw bytes (e.g. ``cast(bytes, ...)`` +
+            byte-concat) crash on hex strings. Accept bytes or hex str
+            and always return bytes so the skill works against any
+            multisend implementation.
+            """
+            if data is None or data == "":
+                return b""
+            if isinstance(data, bytes):
+                return data
+            if isinstance(data, str):
+                s = data[2:] if data.startswith(("0x", "0X")) else data
+                return bytes.fromhex(s)
+            raise TypeError(
+                f"calldata must be bytes or hex str, got {type(data).__name__}"
+            )
+
         multi_send_txs = []
         for transaction in transactions:
             transaction = {
                 "operation": transaction.get("operation", MultiSendOperation.CALL),
                 "to": transaction["to"],
                 "value": transaction["value"],
-                "data": transaction.get("data", b""),
+                "data": _calldata_to_bytes(transaction.get("data", b"")),
             }
             multi_send_txs.append(transaction)
 
