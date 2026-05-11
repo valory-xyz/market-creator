@@ -196,7 +196,12 @@ class TestRealitioWithdrawBondsBehaviour:
         assert result["value"] == ETHER_VALUE
 
     def test_build_claim_tx_with_bytes_data(self) -> None:
-        """Test _build_claim_tx when contract returns bytes data."""
+        """Test _build_claim_tx passes bytes data through unchanged.
+
+        Post-trader-PR #950 the contract returns ``data`` as ``bytes``
+        by construction; the skill passes it through. The previous
+        defensive ``str``-fallback branch was removed.
+        """
         resp = make_contract_state_response({"data": b"\xef\x01"})
         with patch.object(
             self.behaviour,
@@ -206,7 +211,7 @@ class TestRealitioWithdrawBondsBehaviour:
             gen = self.behaviour._build_claim_tx(b"\x01" * 32, [{"p": "v"}])
             result = exhaust_gen(gen)
         assert result is not None
-        assert result["data"] == "ef01"
+        assert result["data"] == b"\xef\x01"
 
     def test_build_claim_tx_error(self) -> None:
         """Test _build_claim_tx returns None on error."""

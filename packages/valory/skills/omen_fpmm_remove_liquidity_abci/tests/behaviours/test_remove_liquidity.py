@@ -549,8 +549,14 @@ class TestFpmmRemoveLiquidityBehaviour:
             result = exhaust_gen(gen)
         assert result is None
 
-    def test_get_remove_funding_tx_success_bytes(self) -> None:
-        """Returns tx dict when contract call succeeds (data as bytes)."""
+    def test_get_remove_funding_tx_success(self) -> None:
+        """Returns tx dict when contract call succeeds.
+
+        The contract method returns ``data`` as ``bytes`` by construction
+        (post trader PR #950 + fpmm bytes fix), so the skill passes it
+        through unchanged. The earlier defensive str-fallback branch is
+        gone.
+        """
         resp = make_contract_state_response({"data": b"\xde\xad\xbe\xef"})
         with patch.object(self.behaviour, "get_contract_api_response", make_gen(resp)):
             gen = self.behaviour._get_remove_funding_tx("0xFPMM", 100)
@@ -558,16 +564,7 @@ class TestFpmmRemoveLiquidityBehaviour:
         assert result is not None
         assert result["to"] == "0xFPMM"
         assert result["value"] == 0
-        assert result["data"] == "deadbeef"
-
-    def test_get_remove_funding_tx_success_str(self) -> None:
-        """Returns tx dict when contract call succeeds (data as str)."""
-        resp = make_contract_state_response({"data": "0xdeadbeef"})
-        with patch.object(self.behaviour, "get_contract_api_response", make_gen(resp)):
-            gen = self.behaviour._get_remove_funding_tx("0xFPMM", 100)
-            result = exhaust_gen(gen)
-        assert result is not None
-        assert result["data"] == "0xdeadbeef"
+        assert result["data"] == b"\xde\xad\xbe\xef"
 
     # -----------------------------------------------------------------------
     # _get_merge_positions_tx

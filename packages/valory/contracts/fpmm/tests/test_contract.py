@@ -94,7 +94,9 @@ class TestFPMMContractBuildRemoveFundingTx:
     def test_build_remove_funding_tx(self) -> None:
         """Test build_remove_funding_tx returns data dict."""
         mock_instance = MagicMock()
-        mock_instance.encode_abi.return_value = b"\x01\x02\x03"
+        # ``encode_abi`` returns a ``0x``-prefixed hex string; the contract
+        # method strips the prefix and converts to bytes for multisend.
+        mock_instance.encode_abi.return_value = "0x010203"
 
         with patch.object(FPMMContract, "get_instance", return_value=mock_instance):
             result = FPMMContract.build_remove_funding_tx(

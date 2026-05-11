@@ -383,7 +383,6 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             return None
 
         data = response.state.body["data"]
-        data = data.hex() if isinstance(data, bytes) else data
         return {
             "to": self.params.realitio_contract,
             "data": data,
@@ -429,7 +428,6 @@ class RealitioWithdrawBondsBehaviour(RealitioWithdrawBondsBaseBehaviour):
             return None
 
         data = response.state.body["data"]
-        data = data.hex() if isinstance(data, bytes) else data
         self.context.logger.info(
             f"{SKILL_LOG_PREFIX} Realitio balance {wei_to_str(balance)}, "
             f"appending withdraw"
