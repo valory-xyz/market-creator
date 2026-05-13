@@ -68,7 +68,7 @@ prerelease = "allow"
 # Realitio / FPMM contract wrappers and the mech_interact_abci skill.
 upstream_pins = [
     "valory-xyz/mech-interact@v0.30.0",
-    "valory-xyz/trader@v0.35.5",
+    "valory-xyz/trader@v0.37.0",
     "valory-xyz/genai@v7.0.0",
 ]
 # IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package

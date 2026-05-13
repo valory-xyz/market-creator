@@ -22,6 +22,7 @@ fingerprint:
   behaviours/round_behaviour.py: bafybeibtp6gydtpqh2iyqam6hibuvw4kn5bc5o3qb34zhhvriuk2cd3vwm
   behaviours/select_keeper.py: bafybeiadkoyybfqxc2wsrkjk3hta5yrmp5cf6h44cru3k6pchmmuiwr3by
   dialogues.py: bafybeic6fb46t3c6uti6qbg2fwxuhcbqhzhx5bennahq7wp74atfibdkk4
+  fsm_specification.md: bafybeibvbnc3wa2accci6q7xh7zrggtclqrsweqe7ajm53ic5eykwwdwiu
   fsm_specification.yaml: bafybeidyuywhpx7my27gvycumdtwvfxxzq4f7wxta2qx3vtxakqtbraj6y
   handlers.py: bafybeie634p6j3vwo72nis5jr3mhdd7nunsewevh44lo7vsjneyboellgu
   models.py: bafybeibjcwxfwk7ettrim7vukcpta7243qeqsuoiuk4j3swodv3a5ryi3u
@@ -67,7 +68,7 @@ contracts:
 - valory/gnosis_safe:0.1.0:bafybeihfmmoyk7tfh6xg5ylqnxpsxqgzgwklablc3zonp55sz6b2vzuzue
 - valory/multisend:0.1.0:bafybeidwr3l2t564gle533l7elroxr77wvmqogdmwz4e6mmqxnbqsk37tm
 - valory/realitio:0.1.0:bafybeiggqylznbawbfdh6bknhz7uzh67e4duwpbkd6ah35v2dzc3pjx3u4
-- valory/conditional_tokens:0.1.0:bafybeice334nadqn7pky63tp2kda5bazafjsfpv3uoly4q2sipjtqwwcgq
+- valory/conditional_tokens:0.1.0:bafybeieub4do6tw6k6qjotkca46fk2j7f7al5fush73ai6atqz5e47k2by
 - valory/fpmm_deterministic_factory:0.1.0:bafybeiazpb54qw23ce5rpd2obgb2wart44hdn2xnvfieva76vkv463ilzq
 - valory/erc20:0.1.0:bafybeihs6u6diy5iy5tnvgdgtgu4phb2niqze6kpmknmfvqio44zyozog4
 protocols:
@@ -76,8 +77,8 @@ protocols:
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeidpod4inivvvgzenx46whshq4mzmxgwsxinv6ibdvyemkstam2yz4
 - valory/transaction_settlement_abci:0.1.0:bafybeigiojqgbi54jhree3sqrzaudbmjxb7y2ete74bbliryi3t7ztwi5q
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeib6tc36wxjr3xbcotrgv3tvqq54bwedbak64dudz45ei3xakfxeb4
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeig33nweqe6fogfktt7g5b7lnfjnylejqrdfwse63wrrnsudvdvihm
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeifqvjl42y6zjb5diabfu76kedyrkvravszjav6gdsmihqrdrk75yq
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibn7gla57eakwfal4lvyj7prqnjwfycbsecwobkzx7z777kbghapy
 - valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiabugho5b62pnr6uudeierj77ha3k2izouz5uhvwcckjalk5fayra
 behaviours:
   main:
