@@ -281,6 +281,8 @@ models:
 dependencies:
   gql:
     version: ==3.5.0
+  graphql-core:
+    version: <3.3,>=3.2
   openai:
     version: ==1.93.0
   requests:
