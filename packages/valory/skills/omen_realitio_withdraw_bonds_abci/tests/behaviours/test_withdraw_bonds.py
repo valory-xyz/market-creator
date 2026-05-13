@@ -53,6 +53,7 @@ class TestRealitioWithdrawBondsBehaviour:
         context_mock.params.realitio_contract = "0xRealitio"
         context_mock.params.realitio_withdraw_bonds_batch_size = 10
         context_mock.params.min_realitio_withdraw_balance = 10000000000000000000
+        context_mock.params.event_filtering_batch_size = 1000
         context_mock.params.multisend_address = "0xMultisend"
         context_mock.state.round_sequence = MagicMock()
         context_mock.state.round_sequence.last_round_transition_timestamp.timestamp.return_value = (
@@ -95,10 +96,11 @@ class TestRealitioWithdrawBondsBehaviour:
             },
         ]
         resp = make_contract_state_response({"answered": answered})
+        mock_get = MagicMock(side_effect=make_gen(resp))
         with patch.object(
             self.behaviour,
             "get_contract_api_response",
-            new=make_gen(resp),
+            new=mock_get,
         ):
             gen = self.behaviour._get_claim_params(
                 b"\x01" * 32, from_block=12345, to_block=12400
@@ -111,6 +113,10 @@ class TestRealitioWithdrawBondsBehaviour:
         # The newest entry's prior hash is the older entry's stored
         # hash; the oldest entry's prior hash is ZERO_BYTES32.
         assert history_hashes == [b"\xaa" * 32, b"\x00" * 32]
+        # Param-forwarding contract: chunk_size must reach the contract API
+        # so a future rename in the upstream realitio method signature
+        # surfaces as a test failure rather than a silent chunking regression.
+        assert mock_get.call_args.kwargs.get("chunk_size") == 1000
 
     @pytest.mark.parametrize(
         "description,response_body",
