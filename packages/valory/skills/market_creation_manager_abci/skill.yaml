@@ -22,7 +22,6 @@ fingerprint:
   behaviours/round_behaviour.py: bafybeibtp6gydtpqh2iyqam6hibuvw4kn5bc5o3qb34zhhvriuk2cd3vwm
   behaviours/select_keeper.py: bafybeiadkoyybfqxc2wsrkjk3hta5yrmp5cf6h44cru3k6pchmmuiwr3by
   dialogues.py: bafybeic6fb46t3c6uti6qbg2fwxuhcbqhzhx5bennahq7wp74atfibdkk4
-  fsm_specification.md: bafybeibvbnc3wa2accci6q7xh7zrggtclqrsweqe7ajm53ic5eykwwdwiu
   fsm_specification.yaml: bafybeidyuywhpx7my27gvycumdtwvfxxzq4f7wxta2qx3vtxakqtbraj6y
   handlers.py: bafybeie634p6j3vwo72nis5jr3mhdd7nunsewevh44lo7vsjneyboellgu
   models.py: bafybeibjcwxfwk7ettrim7vukcpta7243qeqsuoiuk4j3swodv3a5ryi3u
