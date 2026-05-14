@@ -46,6 +46,7 @@ def test_params_init_carries_required_params() -> None:
     kwargs: dict = {
         "realitio_withdraw_bonds_batch_size": 10,
         "min_realitio_withdraw_balance": 10**19,
+        "event_filtering_batch_size": 1000,
         "realitio_contract": "0xRealitio",
     }
     instance = RealitioWithdrawBondsParams.__new__(RealitioWithdrawBondsParams)
@@ -56,6 +57,7 @@ def test_params_init_carries_required_params() -> None:
         RealitioWithdrawBondsParams.__init__(instance, **kwargs)
     assert instance.realitio_withdraw_bonds_batch_size == 10
     assert instance.min_realitio_withdraw_balance == 10**19
+    assert instance.event_filtering_batch_size == 1000
     assert instance.realitio_contract == "0xRealitio"
     # realitio_start_block was deleted from the design.
     assert not hasattr(instance, "realitio_start_block")

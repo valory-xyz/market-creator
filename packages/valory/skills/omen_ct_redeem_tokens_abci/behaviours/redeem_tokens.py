@@ -399,7 +399,6 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
             return None
 
         data = response.state.body["data"]
-        data = data.hex() if isinstance(data, bytes) else data
         return {
             "to": self.params.realitio_oracle_proxy_contract,
             "data": data,
@@ -433,7 +432,6 @@ class CtRedeemTokensBehaviour(CtRedeemTokensBaseBehaviour):
             return None
 
         data = response.state.body["data"]
-        data = data.hex() if isinstance(data, bytes) else data
         return {
             "to": self.params.conditional_tokens_contract,
             "data": data,

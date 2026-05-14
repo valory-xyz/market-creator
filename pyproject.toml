@@ -41,7 +41,8 @@ dependencies = [
     "openapi-core==0.22.0",
     "openapi-spec-validator>=0.7.0,<0.8.0",
     "flask-cors>=5.0.0,<6",
-    "gql>=3.5.0,<4",
+    "gql>=3.5.0,<3.6",
+    "graphql-core>=3.2.0,<3.3",
     "pydantic>=2.11.9,<3",
     "py-multibase==1.0.3",
     "py-multicodec==0.2.1",
@@ -68,7 +69,7 @@ prerelease = "allow"
 # Realitio / FPMM contract wrappers and the mech_interact_abci skill.
 upstream_pins = [
     "valory-xyz/mech-interact@v0.30.0",
-    "valory-xyz/trader@v0.35.5",
+    "valory-xyz/trader@v0.37.0",
     "valory-xyz/genai@v7.0.0",
 ]
 # IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package

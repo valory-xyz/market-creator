@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeielh2kguo2gmojegomxgsk2n4lhrn7yzsrysbvzo7rd3ny3x3fwje
+agent: valory/market_maker:0.1.0:bafybeiaku4fdb2274pxoddzi7dc7fedgjdwjtt5au7uswaab2khas74pdy
 number_of_agents: 1
 deployment:
   agent:
@@ -95,6 +95,7 @@ models:
       ct_redeem_tokens_min_payout: ${CT_REDEEM_TOKENS_MIN_PAYOUT:int:1}
       realitio_withdraw_bonds_batch_size: ${REALITIO_WITHDRAW_BONDS_BATCH_SIZE:int:10}
       min_realitio_withdraw_balance: ${MIN_REALITIO_WITHDRAW_BALANCE:int:1000000000000000000}
+      event_filtering_batch_size: ${EVENT_FILTERING_BATCH_SIZE:int:1000}
   randomness_api:
     args:
       method: ${RANDOMNESS_API_METHOD:str:GET}
@@ -160,6 +161,6 @@ public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfezt
 type: connection
 config:
   host: ${HTTP_SERVER_HOST:str:0.0.0.0}
-  port: ${HTTP_SERVER_PORT:int:8716}
+  port: ${HTTP_SERVER_PORT:int:8000}
   timeout: ${HTTP_SERVER_TIMEOUT:float:30.0}
   target_skill_id: valory/market_maker_abci:0.1.0

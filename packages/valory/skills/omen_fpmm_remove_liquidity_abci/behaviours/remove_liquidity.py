@@ -365,7 +365,6 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
             return None
 
         data = response.state.body["data"]
-        data = data.hex() if isinstance(data, bytes) else data
         return {"to": address, "data": data, "value": ETHER_VALUE}
 
     def _get_merge_positions_tx(
@@ -398,7 +397,6 @@ class FpmmRemoveLiquidityBehaviour(FpmmRemoveLiquidityBaseBehaviour):
             return None
 
         data = response.state.body["data"]
-        data = data.hex() if isinstance(data, bytes) else data
         return {
             "to": self.params.conditional_tokens_contract,
             "data": data,

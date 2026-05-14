@@ -152,7 +152,7 @@ class FPMMContract(Contract):
             ],
         )
         return dict(
-            data=data,
+            data=bytes.fromhex(data[2:]),
         )
 
     @classmethod
