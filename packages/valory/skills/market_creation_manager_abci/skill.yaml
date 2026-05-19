@@ -64,21 +64,21 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
-- valory/conditional_tokens:0.1.0:bafybeifasamchei5gyu6ejknis4fjv74suyowysapbao2z7pug5yxb2pxu
+- valory/conditional_tokens:0.1.0:bafybeifkrnpjm3a7lupjn2w3widfei4to2xk6tt2dhalllgso52vmeaayy
 - valory/erc20:0.1.0:bafybeidhafsjqsj7umr5mgb3v4t52sbcnwhlfk7hqgulbdvui4yhfrgrjy
 - valory/fpmm_deterministic_factory:0.1.0:bafybeiayg3tdr2l6za5545mwcivoh6y7grwpoftlboksu7rs62htgc7ixm
 - valory/gnosis_safe:0.1.0:bafybeieaxcd3wrjxgw7yzmlbxr6tcwj3u7kiixb6fzu2shwy5hthzzyxuq
 - valory/multisend:0.1.0:bafybeih73g7nltnmfqfa75qurljjk7xu7cvd3d2uzt4bqogcw5rgrrmu2m
-- valory/realitio:0.1.0:bafybeie3zlgprjbuomaznyc7ax6pjqulhni3raj6lde4oogan7qmykmyy4
+- valory/realitio:0.1.0:bafybeidva2wdv2vuswrrkjoanccysuhcsmq3ojvn2kf5ufonxbvfgvhvsm
 protocols:
 - valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
 - valory/ledger_api:1.0.0:bafybeiecq56phjfws36rgrefw6niyo4ezesloodsfis647mpm5ygqo4ysi
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeidjnpeieym3fn6g4v4djbf44srpy6i2rky7yp2th7lrbw23kn53dq
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeibymf3crxww56dufqofsklysz5caw5mey6m57kj2wmztw2upm5yj4
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeify327gyj7eaxxea5v2ynyvj6q32kadbf52eo4exgpmwmi6444kaq
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeifde4pggghatebhrtyizfq2idft6jadinsyc2vw4k274plw4oz674
-- valory/transaction_settlement_abci:0.1.0:bafybeibavkk53owdx47kqtyef6nhdyiwvj5b3g62eeai7baf2o34d34d7i
+- valory/abstract_round_abci:0.1.0:bafybeibvbfkmkqjidukhkzzz7nd33gna64hjhcn3blon5xcleilbt63zn4
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeiaejs4ol2jti2wqsjcrtqkkiiquyr7jdvi3uyfw2nztnxybnf4m54
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeidvphcps6qfx6odrgtslims2olvszdxngmjuyery5bg5djimawfhe
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeieiiouhfaky3lvy6bquvtb4doj6n55xlkng6dt7dahvjblti3mnu4
+- valory/transaction_settlement_abci:0.1.0:bafybeiceijjjlvbq2tnadeqdrm7nka7gqgwzvmlgjuzbacgnkljry5h72a
 behaviours:
   main:
     args: {}
