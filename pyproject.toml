@@ -10,25 +10,25 @@ requires-python = ">=3.10,<3.15"
 readme = "README.md"
 license = "Apache-2.0"
 dependencies = [
-    "open-autonomy[cli]==0.21.20",
+    "open-autonomy[cli]==0.21.22",
     "toml==0.10.2",
     "hypothesis==6.21.6",
     "grpcio==1.78.0",
     "aiohttp<4.0.0,>=3.8.5",
     "asn1crypto<1.5.0,>=1.4.0",
-    "open-aea-ledger-ethereum==2.2.3",
+    "open-aea-ledger-ethereum==2.2.6",
     "openai==1.93.0",
     "protobuf>=5,<6",
-    "open-aea-helpers==0.21.20",
-    "open-aea-test-autonomy==0.21.20",
+    "open-aea-helpers==0.21.22",
+    "open-aea-test-autonomy==0.21.22",
     "ipfshttpclient==0.8.0a2",
-    "open-aea-cli-ipfs==2.2.3",
+    "open-aea-cli-ipfs==2.2.6",
     "requests==2.32.5",
     "requests-toolbelt==1.0.0",
     "pytest>=8.2,<10",
     "pytest-asyncio==1.3.0",
     "ecdsa>=0.15",
-    "open-aea-ledger-cosmos==2.2.3",
+    "open-aea-ledger-cosmos==2.2.6",
     "certifi==2026.2.25",
     "multidict==6.7.1",
     "py-eth-sig-utils==0.4.0",
@@ -68,9 +68,9 @@ prerelease = "allow"
 # upstreams (auto-prepended) plus mech-interact / trader / genai for the
 # Realitio / FPMM contract wrappers and the mech_interact_abci skill.
 upstream_pins = [
-    "valory-xyz/mech-interact@v0.30.0",
-    "valory-xyz/trader@v0.37.0",
-    "valory-xyz/genai@v7.0.0",
+    "valory-xyz/mech-interact@v0.32.0",
+    "valory-xyz/trader@v0.38.4",
+    "valory-xyz/genai@v7.2.0",
 ]
 # IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package
 # fingerprints look like generic API keys to gitleaks; allowlist them.

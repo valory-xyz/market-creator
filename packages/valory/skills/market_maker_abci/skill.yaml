@@ -28,17 +28,17 @@ contracts: []
 protocols:
 - valory/http:1.0.0:bafybeidxkp3vga7t6x2pbt2tpkgyaxa5bgpdgryao54py7w3yxyzr7neoy
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeidpod4inivvvgzenx46whshq4mzmxgwsxinv6ibdvyemkstam2yz4
-- valory/registration_abci:0.1.0:bafybeietlh4pq5wjsb6srpsqehcq3gwsod5c6gs4jdiwpzkgrwyxhbbbvq
-- valory/reset_pause_abci:0.1.0:bafybeifdzwzz5byan3ytsi46n4n2svtqme6475hk5z77sopymyzqszcpoa
-- valory/market_creation_manager_abci:0.1.0:bafybeicboogxzae4xxjdhxitpfioblzs2ywkkgj46eo2iir6lj3pan3hje
-- valory/termination_abci:0.1.0:bafybeiadbtzcvzkwbrosshlsubilj7mwzdqfni6dr75wsd3vawhslpwqeu
-- valory/transaction_settlement_abci:0.1.0:bafybeigiojqgbi54jhree3sqrzaudbmjxb7y2ete74bbliryi3t7ztwi5q
-- valory/identify_service_owner_abci:0.1.0:bafybeiaqjoocj56smwuntvcekbbxpb6au2x7rixmbypbjezojyvio67g3q
-- valory/funds_forwarder_abci:0.1.0:bafybeihinrqecswpwjmba4dtpvvepmz7uqzkgmywanbdl4pahki3crdg3m
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeifqvjl42y6zjb5diabfu76kedyrkvravszjav6gdsmihqrdrk75yq
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibn7gla57eakwfal4lvyj7prqnjwfycbsecwobkzx7z777kbghapy
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeig34ypstbynxjwayyjtn3qmnr4vrxgaxoqyvpgm5lff7i2ksrgm4m
+- valory/abstract_round_abci:0.1.0:bafybeibvbfkmkqjidukhkzzz7nd33gna64hjhcn3blon5xcleilbt63zn4
+- valory/funds_forwarder_abci:0.1.0:bafybeicwc7pz7cwy6leqzsh47labscds5cwpnpfa3naejhf6xh5vyxq37q
+- valory/identify_service_owner_abci:0.1.0:bafybeif3gx5r2dfv43cljmmtgie73yfad7wwhrutusljhcgtx4kutcndpa
+- valory/market_creation_manager_abci:0.1.0:bafybeiefgcctktfn7rvlcj3k3rb2yynlp5wdetflzct6avj6hxivpmz4my
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeiaejs4ol2jti2wqsjcrtqkkiiquyr7jdvi3uyfw2nztnxybnf4m54
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeidvphcps6qfx6odrgtslims2olvszdxngmjuyery5bg5djimawfhe
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeieiiouhfaky3lvy6bquvtb4doj6n55xlkng6dt7dahvjblti3mnu4
+- valory/registration_abci:0.1.0:bafybeihkfla7hppssqk2dojuxjuy233jrilablud4avtazagt2javcihya
+- valory/reset_pause_abci:0.1.0:bafybeiakhczviqep47o5txatkdbzui6bk5o554cnspdkauapvmdykk2tkm
+- valory/termination_abci:0.1.0:bafybeibduc7hdi3xu7ahpumgew6es33jcadbrbipboyc7sbuyzds45fmve
+- valory/transaction_settlement_abci:0.1.0:bafybeiceijjjlvbq2tnadeqdrm7nka7gqgwzvmlgjuzbacgnkljry5h72a
 behaviours:
   main:
     args: {}
@@ -73,6 +73,18 @@ models:
     args:
       log_dir: /logs
     class_name: BenchmarkTool
+  conditional_tokens_subgraph:
+    args:
+      api_id: conditional_tokens
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://gateway.thegraph.com/api/api-key/subgraphs/id/7s9rGBffUTL8kDZuxvvpuc46v44iuDarbrADBFw5uVp2
+    class_name: ConditionalTokensSubgraph
   contract_api_dialogues:
     args: {}
     class_name: ContractApiDialogues
@@ -85,60 +97,39 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
+  omen_subgraph:
+    args:
+      api_id: omen
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data
+      response_type: list
+      retries: 5
+      url: https://gateway.thegraph.com/api/api-key/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz
+    class_name: OmenSubgraph
   params:
     args:
-      max_proposed_markets: -1
-      max_approved_markets: -1
-      markets_to_approve_per_epoch: 1
-      markets_to_approve_per_day: 10
-      min_approve_markets_epoch_seconds: 43200
+      agent_registry_address: null
       approve_market_event_days_offset: 5
-      market_approval_server_url: http://127.0.0.1:5000
-      market_approval_server_api_key: api_key
-      newsapi_endpoint: https://newsapi.org/v2
-      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
-      topics:
-      - business
-      - curiosities
-      - entertainment
-      - finance
-      - health
-      - international
-      - pets
-      - politics
-      - science
-      - sustainability
-      - technology
-      - weather
-      market_fee: 2.0
-      initial_funds: 1.0
-      market_timeout: 1
-      min_market_proposal_interval_seconds: 7200
-      news_sources:
-      - bbc-news
-      - bbc-sport
-      - abc-news
-      - cnn
-      - reuters
-      - usa-today
-      - breitbart-news
-      - the-verge
-      - techradar
-      event_offset_start_days: 4
-      event_offset_end_days: 8
-      market_proposal_round_timeout_seconds_per_day: 45
-      max_markets_per_story: 1
-      realitio_contract: '0x0000000000000000000000000000000000000000'
-      realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
-      conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
-      fpmm_deterministic_factory_contract: '0x0000000000000000000000000000000000000000'
-      collateral_tokens_contract: '0x0000000000000000000000000000000000000000'
       arbitrator_contract: '0x0000000000000000000000000000000000000000'
       cleanup_history_depth: 1
       cleanup_history_depth_current: null
+      collateral_tokens_contract: '0x0000000000000000000000000000000000000000'
+      conditional_tokens_contract: '0x0000000000000000000000000000000000000000'
+      ct_redeem_tokens_batch_size: 5
+      ct_redeem_tokens_min_payout: 1
       default_chain_id: gnosis
       drand_public_key: 868f005eb8e6e4ca0a47c8a77ceaa5309a47978a7c71bc5cce96366b5d7a569937c529eeda66c7293784a9402801af31
+      event_filtering_batch_size: 1000
+      event_offset_end_days: 8
+      event_offset_start_days: 4
+      expected_service_owner_address: '0x0000000000000000000000000000000000000000'
       finalize_timeout: 60.0
+      fpmm_deterministic_factory_contract: '0x0000000000000000000000000000000000000000'
+      fpmm_remove_liquidity_batch_size: 1
+      funds_forwarder_token_config: {}
       genesis_config:
         genesis_time: '2022-05-20T16:00:21.735122717Z'
         chain_id: chain-c4daS1
@@ -156,16 +147,51 @@ models:
             - ed25519
           version: {}
         voting_power: '10'
+      google_api_key: google_api_key
+      google_engine_id: google_engine_id
       history_check_timeout: 1205
       init_fallback_gas: 270000
+      initial_funds: 1.0
+      ipfs_address: https://gateway.autonolas.tech/ipfs/
       keeper_allowed_retries: 3
       keeper_timeout: 30.0
+      light_slash_unit_amount: 5000000000000000
+      liquidity_removal_lead_time: 86400
+      market_approval_server_api_key: api_key
+      market_approval_server_url: http://127.0.0.1:5000
+      market_fee: 2.0
+      market_proposal_round_timeout_seconds_per_day: 45
+      market_timeout: 1
+      markets_to_approve_per_day: 10
+      markets_to_approve_per_epoch: 1
+      max_approved_markets: -1
       max_attempts: 10
       max_healthcheck: 120
+      max_markets_per_story: 1
+      max_proposed_markets: -1
+      min_approve_markets_epoch_seconds: 43200
+      min_market_proposal_interval_seconds: 7200
+      min_realitio_withdraw_balance: 1000000000000000000
       multisend_address: '0x0000000000000000000000000000000000000000'
       multisend_batch_size: 5
-      ipfs_address: https://gateway.autonolas.tech/ipfs/
+      news_sources:
+      - bbc-news
+      - bbc-sport
+      - abc-news
+      - cnn
+      - reuters
+      - usa-today
+      - breitbart-news
+      - the-verge
+      - techradar
+      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
+      newsapi_endpoint: https://newsapi.org/v2
       on_chain_service_id: null
+      openai_api_key: openai_api_key
+      realitio_answer_question_bounty: 0
+      realitio_contract: '0x0000000000000000000000000000000000000000'
+      realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
+      realitio_withdraw_bonds_batch_size: 10
       request_retry_delay: 1.0
       request_timeout: 10.0
       reset_pause_duration: 1800
@@ -173,8 +199,10 @@ models:
       retry_attempts: 400
       retry_timeout: 3
       round_timeout_seconds: 120.0
+      serious_slash_unit_amount: 8000000000000000
+      serper_api_key: serper_api_key
+      service_endpoint_base: https://dummy_service.autonolas.tech/
       service_id: market_creator
-      agent_registry_address: null
       service_registry_address: null
       setup:
         all_participants:
@@ -182,39 +210,35 @@ models:
         safe_contract_address: '0x0000000000000000000000000000000000000000'
         consensus_threshold: null
       share_tm_config_on_startup: false
+      slash_cooldown_hours: 3
+      slash_threshold_amount: 10000000000000000
       sleep_time: 1
+      subgraph_api_key: subgraph_api_key
       tendermint_check_sleep_delay: 3
       tendermint_com_url: http://localhost:8080
       tendermint_max_retries: 5
       tendermint_p2p_url: localhost:26656
       tendermint_url: http://localhost:26657
-      termination_sleep: 900
       termination_from_block: 0
+      termination_sleep: 900
+      topics:
+      - business
+      - curiosities
+      - entertainment
+      - finance
+      - health
+      - international
+      - pets
+      - politics
+      - science
+      - sustainability
+      - technology
+      - weather
       tx_timeout: 10.0
-      validate_timeout: 1205
-      use_termination: false
       use_slashing: false
-      slash_cooldown_hours: 3
-      serper_api_key: serper_api_key
-      subgraph_api_key: subgraph_api_key
-      google_api_key: google_api_key
-      google_engine_id: google_engine_id
-      openai_api_key: openai_api_key
+      use_termination: false
+      validate_timeout: 1205
       xdai_threshold: 3000000000000000000
-      realitio_answer_question_bounty: 0
-      slash_threshold_amount: 10000000000000000
-      light_slash_unit_amount: 5000000000000000
-      serious_slash_unit_amount: 8000000000000000
-      service_endpoint_base: https://dummy_service.autonolas.tech/
-      expected_service_owner_address: '0x0000000000000000000000000000000000000000'
-      funds_forwarder_token_config: {}
-      liquidity_removal_lead_time: 86400
-      fpmm_remove_liquidity_batch_size: 1
-      ct_redeem_tokens_batch_size: 5
-      ct_redeem_tokens_min_payout: 1
-      realitio_withdraw_bonds_batch_size: 10
-      min_realitio_withdraw_balance: 1000000000000000000
-      event_filtering_batch_size: 1000
     class_name: Params
   randomness_api:
     args:
@@ -227,30 +251,6 @@ models:
       retries: 5
       url: https://drand.cloudflare.com/public/latest
     class_name: RandomnessApi
-  conditional_tokens_subgraph:
-    args:
-      api_id: conditional_tokens
-      headers:
-        Content-Type: application/json
-      method: POST
-      parameters: {}
-      response_key: data
-      response_type: list
-      retries: 5
-      url: https://gateway.thegraph.com/api/api-key/subgraphs/id/7s9rGBffUTL8kDZuxvvpuc46v44iuDarbrADBFw5uVp2
-    class_name: ConditionalTokensSubgraph
-  omen_subgraph:
-    args:
-      api_id: omen
-      headers:
-        Content-Type: application/json
-      method: POST
-      parameters: {}
-      response_key: data
-      response_type: list
-      retries: 5
-      url: https://gateway.thegraph.com/api/api-key/subgraphs/id/9fUVQpFwzpdWS9bq5WkAnmKbNNcoBwatMR4yZq81pbbz
-    class_name: OmenSubgraph
   realitio_subgraph:
     args:
       api_id: realitio
@@ -277,5 +277,6 @@ models:
     class_name: TendermintDialogues
 dependencies:
   open-aea-test-autonomy:
-    version: ==0.21.20
+    version: ==0.21.22
 is_abstract: false
+customs: []
