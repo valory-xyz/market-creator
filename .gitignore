@@ -46,6 +46,10 @@ packages/valory/skills/transaction_settlement_abci
 packages/valory/skills/funds_forwarder_abci
 packages/valory/skills/identify_service_owner_abci
 packages/valory/contracts/staking_token
+packages/valory/contracts/fpmm
+packages/valory/skills/omen_ct_redeem_tokens_abci
+packages/valory/skills/omen_fpmm_remove_liquidity_abci
+packages/valory/skills/omen_realitio_withdraw_bonds_abci
 
 leak_report
 __pycache__
