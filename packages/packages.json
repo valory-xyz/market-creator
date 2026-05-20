@@ -1,14 +1,10 @@
 {
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeiayg3tdr2l6za5545mwcivoh6y7grwpoftlboksu7rs62htgc7ixm",
-        "contract/valory/fpmm/0.1.0": "bafybeiceekyspyvqkzint67psqumphhmiiwkcy5satkm4kzo62i56mbkcm",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiefgcctktfn7rvlcj3k3rb2yynlp5wdetflzct6avj6hxivpmz4my",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeibh2qaok7eaxaec542kayagenuggqfvjbwmaaim5rlshjtosy5s3q",
-        "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeiaejs4ol2jti2wqsjcrtqkkiiquyr7jdvi3uyfw2nztnxybnf4m54",
-        "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeidvphcps6qfx6odrgtslims2olvszdxngmjuyery5bg5djimawfhe",
-        "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeieiiouhfaky3lvy6bquvtb4doj6n55xlkng6dt7dahvjblti3mnu4",
-        "agent/valory/market_maker/0.1.0": "bafybeif27uxnpywfcqz7ao4zhajho5xfus6zqddbvt5l4orioltueneppq",
-        "service/valory/market_maker/0.1.0": "bafybeicyvfb4zvxc26oysj27l5gn4x6v2xggponk4odibwypnsczop5jh4"
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeie6gyv2sw2pxgva5bkfp5agymdrfmothxykt3qliinz37swybd57q",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeicy7dsnbr4sb7dazcrtkdgydw6ol4nczllfzpgva4gfhzjeysg64i",
+        "agent/valory/market_maker/0.1.0": "bafybeiewuxf6l7nv36yl5alnrvyoobq6upuxehhbookr2asoxshowiyrqa",
+        "service/valory/market_maker/0.1.0": "bafybeifyy32khrfj4nzsso6rbaocwnu2oax32klm2mrsyqn2rt2llrnlri"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
@@ -22,9 +18,10 @@
         "protocol/valory/acn_data_share/0.1.0": "bafybeieqisfr6lhaaesq37lk7vyaxza2h6nucshksgyo2djqfyf2saqo4i",
         "protocol/valory/llm/1.0.0": "bafybeia5vtojmw2mbc2uyukv3lciwm5gdyp4drrh4bkazqs3dlbk3u6hoa",
         "contract/valory/multisend/0.1.0": "bafybeih73g7nltnmfqfa75qurljjk7xu7cvd3d2uzt4bqogcw5rgrrmu2m",
-        "contract/valory/realitio/0.1.0": "bafybeidva2wdv2vuswrrkjoanccysuhcsmq3ojvn2kf5ufonxbvfgvhvsm",
-        "contract/valory/realitio_proxy/0.1.0": "bafybeiagm5qkgcmkhpyxvhptxcysvtu2pwgg4gcjt3yplczcqev3kt3zzy",
-        "contract/valory/conditional_tokens/0.1.0": "bafybeifkrnpjm3a7lupjn2w3widfei4to2xk6tt2dhalllgso52vmeaayy",
+        "contract/valory/realitio/0.1.0": "bafybeibfy6dqkwsz4xersouotswcug27awkvtsmjlo3r7b476qgeujn3eu",
+        "contract/valory/realitio_proxy/0.1.0": "bafybeibutej7uzucill5ohb3xxu245vo32kg5vchpqondwdfomixx2psba",
+        "contract/valory/conditional_tokens/0.1.0": "bafybeifqpw3hnllwy3s2ktcsfup3usgaykh5gbhieyf2wb2s4iwemykn2i",
+        "contract/valory/fpmm/0.1.0": "bafybeiceekyspyvqkzint67psqumphhmiiwkcy5satkm4kzo62i56mbkcm",
         "contract/valory/gnosis_safe_proxy_factory/0.1.0": "bafybeib63lr7rsd77nyo5iz4et2ali6z2y5lekfjg3za7lk4fnf4b2j2ue",
         "contract/valory/service_registry/0.1.0": "bafybeiccha6qwov4pqsnnhnprldppaqlb7djcujcqqlmtgbukq4a5fmvvq",
         "contract/valory/gnosis_safe/0.1.0": "bafybeieaxcd3wrjxgw7yzmlbxr6tcwj3u7kiixb6fzu2shwy5hthzzyxuq",
@@ -60,6 +57,9 @@
         "skill/valory/termination_abci/0.1.0": "bafybeibduc7hdi3xu7ahpumgew6es33jcadbrbipboyc7sbuyzds45fmve",
         "skill/valory/identify_service_owner_abci/0.1.0": "bafybeif3gx5r2dfv43cljmmtgie73yfad7wwhrutusljhcgtx4kutcndpa",
         "skill/valory/funds_forwarder_abci/0.1.0": "bafybeicwc7pz7cwy6leqzsh47labscds5cwpnpfa3naejhf6xh5vyxq37q",
-        "skill/valory/mech_interact_abci/0.1.0": "bafybeiexvtbft2iupqojaeodfr6cdn3kmhzbrqa4exeb7vhjs2m7j43hfm"
+        "skill/valory/mech_interact_abci/0.1.0": "bafybeiexvtbft2iupqojaeodfr6cdn3kmhzbrqa4exeb7vhjs2m7j43hfm",
+        "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeicg23fvxgai2h22latt45kaj5sep72xqu64jxg5mqxunx6lxany74",
+        "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeia7h7mgiwvtux2atinztydwfcby5rgsobqqwc56mgp72qozyj5iam",
+        "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeidiqaev5tkejapof4dt7v6g5oktyxruxy5xkeyemeefgvqu6m7y4i"
     }
 }

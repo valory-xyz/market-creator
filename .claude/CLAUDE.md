@@ -23,8 +23,8 @@ The service autonomously creates and manages prediction markets on Gnosis Chain.
 
 ### Contracts
 
-- **FPMM** (`fpmm/`): Fixed Product Market Maker — the prediction market AMM contract. Methods: `buy`, `sell`, `add_funding`, `remove_funding`, `merge_positions`, `split_position`
 - **FPMM Deterministic Factory** (`fpmm_deterministic_factory/`): Deploys FPMM instances deterministically. Also handles Conditional Tokens condition creation and ERC20 approvals
+- The **FPMM** contract wrapper is sourced from the [omen-protocol](https://github.com/valory-xyz/omen-protocol) upstream (third-party).
 
 ### Skill architecture
 
@@ -44,9 +44,8 @@ The service autonomously creates and manages prediction markets on Gnosis Chain.
 ```text
 packages/valory/
 ├── contracts/
-│   ├── fpmm/                            # Fixed Product Market Maker contract wrapper
 │   ├── fpmm_deterministic_factory/      # Factory contract for deterministic FPMM creation
-│   └── ... (third-party synced contracts)
+│   └── ... (third-party synced contracts, incl. fpmm from omen-protocol)
 ├── skills/
 │   ├── market_creation_manager_abci/    # Core skill: market lifecycle FSM
 │   │   ├── behaviours/                  # Round behaviours (one per FSM state)
@@ -68,7 +67,6 @@ packages/valory/
 Package ownership is defined in `packages/packages.json`:
 
 - **`dev`** section: project-specific packages (owned by this repo, committed to git). These may change over time. Currently:
-  - `contract/valory/fpmm/0.1.0`
   - `contract/valory/fpmm_deterministic_factory/0.1.0`
   - `skill/valory/market_creation_manager_abci/0.1.0`
   - `skill/valory/market_maker_abci/0.1.0`
@@ -161,12 +159,11 @@ tox -e check-abciapp-specs  # Validate FSM specifications
 
 All test environments enforce **100% statement + branch coverage** via `--cov-fail-under=100`. Coverage is configured in `.coveragerc`.
 
-Coverage is measured per-package (4 separate pytest invocations in CI) with `--cov-append` to accumulate results:
+Coverage is measured per-package (3 separate pytest invocations in CI) with `--cov-append` to accumulate results:
 
 1. `market_creation_manager_abci` (first, no append)
 2. `market_maker_abci` (append)
 3. `fpmm_deterministic_factory` (append)
-4. `fpmm` (append)
 
 ### Test conventions
 
@@ -273,7 +270,7 @@ This repo depends on third-party AEA packages sourced from these upstream reposi
 | [open-aea](https://github.com/valory-xyz/open-aea) | AEA framework: protocols (contract_api, ledger_api, http, signing, etc.), connections, base contracts (gnosis_safe, multisend, service_registry) |
 | [mech-interact](https://github.com/valory-xyz/mech-interact) | mech_interact_abci skill, mech/mech_mm/ierc1155 contracts |
 | [genai](https://github.com/valory-xyz/genai) | GenAI-related packages (NVM contracts, subscription, etc.) |
-| [trader](https://github.com/valory-xyz/trader) | realitio, realitio_proxy, conditional_tokens contracts |
+| [omen-protocol](https://github.com/valory-xyz/omen-protocol) | realitio, realitio_proxy, conditional_tokens, fpmm contracts; omen_ct_redeem_tokens_abci, omen_fpmm_remove_liquidity_abci, omen_realitio_withdraw_bonds_abci skills |
 
 ## Commit Conventions
 

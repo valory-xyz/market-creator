@@ -65,12 +65,13 @@ prerelease = "allow"
 
 [tool.tomte]
 # Third-party packages on disk are synced from open-autonomy + open-aea
-# upstreams (auto-prepended) plus mech-interact / trader / genai for the
-# Realitio / FPMM contract wrappers and the mech_interact_abci skill.
+# upstreams (auto-prepended) plus mech-interact / genai / omen-protocol
+# for the mech_interact_abci skill and the Omen contract / recovery
+# skill packages.
 upstream_pins = [
     "valory-xyz/mech-interact@v0.32.0",
-    "valory-xyz/trader@v0.38.4",
     "valory-xyz/genai@v7.2.0",
+    "valory-xyz/omen-protocol@v0.1.0",
 ]
 # IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package
 # fingerprints look like generic API keys to gitleaks; allowlist them.
