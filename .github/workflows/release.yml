@@ -79,8 +79,8 @@ jobs:
               autonomy init --reset --author $AUTHOR --ipfs --remote
               autonomy fetch $AUTHOR/$SERVICE --service --local || exit 1
               cd $SERVICE || exit 1
-              autonomy build-image -e open-autonomy==0.21.22 || exit 1
-              autonomy build-image -e open-autonomy==0.21.22 --version $VERSION || exit 1
+              autonomy build-image -e open-autonomy==0.21.23 || exit 1
+              autonomy build-image -e open-autonomy==0.21.23 --version $VERSION || exit 1
 
       - name: Docker login
         run: |
