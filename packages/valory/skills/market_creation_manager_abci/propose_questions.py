@@ -777,6 +777,114 @@ def scrape_url(serper_api_key: str, url: str) -> Optional[dict]:
         return None
 
 
+SOURCE_VERIFY_JUDGE_PROMPT = """You are auditing whether a prediction-market
+question can be objectively resolved.
+
+SOURCE: {source}
+METRIC: {metric}
+
+GOOGLE EVIDENCE (top organic results querying ``{query}``):
+{snippets}
+
+Question: Based on these snippets, does this source publish this specific
+metric publicly so a researcher could look up its current value within a
+few days?
+
+Reply JSON: {{"answer": "YES" | "NO", "reason": "<one sentence>"}}.
+
+Rules:
+- YES only if a snippet clearly shows the source publishing this figure
+  (or a strongly equivalent figure on the same cadence).
+- NO if snippets are only news commentary, speculation, expert opinion,
+  or about a related-but-different topic.
+- NO if no snippet contains a specific number / value / measurement tied
+  to this metric.
+"""
+
+
+def verify_state_is_resolvable(
+    serper_api_key: str, source: str, metric: str
+) -> Tuple[bool, str]:
+    """Decide whether a (source, metric) tuple is publicly resolvable.
+
+    Counts of Serper hits do not discriminate real sources from confidently
+    confabulated ones because Google fuzzy-matches on constituent words.
+    Instead we issue one Google search and pass the top organic snippets
+    to a cheap LLM judge, which decides whether the source publishes the
+    specific metric on a checkable cadence. Addresses the dominant
+    ``is_determinable=False`` failure mode on the pending market pile
+    (e.g. "Tesla customer service repair records",
+    "Silicon Ranch operational records").
+
+    Fail-open: Serper HTTP/JSON errors and OpenAI errors return
+    ``(True, ...)`` so a transient outage cannot starve generation. Only
+    a clean Serper 200 with zero organic hits returns ``(False, ...)``.
+
+    :param serper_api_key: Serper API key used for the Google query.
+    :param source: source-of-truth name from the extracted measurable state.
+    :param metric: metric/state name being asked about.
+    :return: ``(is_resolvable, reason)`` -- ``is_resolvable=True`` keeps the
+        state, ``False`` drops it; ``reason`` is a short audit string.
+    """
+    query = f"{source} {metric}".strip()
+    if not query:
+        return True, "empty_query"
+    payload = json.dumps({"q": query})
+    headers = {"X-API-KEY": serper_api_key, "Content-Type": "application/json"}
+    try:
+        response = requests.post(
+            "https://google.serper.dev/search",
+            headers=headers,
+            data=payload,
+            timeout=30,
+        )
+        if response.status_code != 200:
+            return True, f"fail_open_serper_status_{response.status_code}"
+        organic = response.json().get("organic", [])[:5]
+    except (requests.RequestException, json.JSONDecodeError):
+        return True, "fail_open_serper_error"
+
+    if not organic:
+        return False, "no_hits"
+
+    snippets = "\n".join(
+        f"- TITLE: {o.get('title', '')}\n  SNIPPET: {o.get('snippet', '')}"
+        for o in organic
+    )
+    if client is None:
+        return True, "fail_open_no_client"
+    try:
+        judge_response = client.chat.completions.create(
+            model=LIGHT_MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": SOURCE_VERIFY_JUDGE_PROMPT.format(
+                        source=source,
+                        metric=metric,
+                        query=query,
+                        snippets=snippets,
+                    ),
+                }
+            ],
+            temperature=0,
+            max_tokens=128,
+            response_format={"type": "json_object"},
+            timeout=30,
+        )
+        content = judge_response.choices[0].message.content or ""
+        out = json.loads(content)
+    except (
+        openai.OpenAIError,
+        json.JSONDecodeError,
+        AttributeError,
+        KeyError,
+        TypeError,
+    ):
+        return True, "fail_open_llm_error"
+    return out.get("answer") == "YES", out.get("reason", "")[:120]
+
+
 @with_key_rotation
 def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
     """Run the task"""
@@ -1038,12 +1146,65 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 )
             extract_data = json.loads(extract_response.choices[0].message.content)
             states = extract_data.get("states", [])
-            states_string = json.dumps(states, indent=2) if states else "(none found)"
             print(f"Extracted {len(states)} measurable states:")
             for s in states:
                 print(
                     f"  [{s.get('framing', '?')}] {s.get('state', '?')} -- source: {s.get('source', '?')}"
                 )
+
+        # Step 2b: Verify each extracted (source, metric) tuple is actually
+        # resolvable: a real source publishing this specific metric on a
+        # checkable cadence. The model can confidently invent source names
+        # (e.g. "Tesla customer service repair records") and mark them
+        # publishable in self-review; a count of Serper hits does not
+        # discriminate (Google fuzzy-matches). One Serper query + one cheap
+        # LLM-judge call on the top snippets does. Filters fictional sources
+        # before they reach question generation.
+        with OpenAIClientManager(kwargs["api_keys"]["openai"]):
+            verified_states = []
+            for s in states:
+                src = s.get("source", "") or ""
+                metric = s.get("state", "") or ""
+                is_verified, reason = verify_state_is_resolvable(
+                    kwargs["api_keys"]["serper"], src, metric
+                )
+                if is_verified:
+                    verified_states.append(s)
+                else:
+                    print(
+                        f"  DROPPED unverifiable state ({reason}): "
+                        f"[{s.get('framing', '?')}] {metric} -- source: {src}"
+                    )
+            print(
+                f"Source verification: kept {len(verified_states)}/{len(states)} states"
+            )
+            if not verified_states:
+                # Hard veto: with zero verified sources the generator falls
+                # back to "(none found)" and tends to re-emit a question
+                # referencing the same source the verifier just rejected,
+                # propagating the "is_determinable=False" failure mode this
+                # filter exists to prevent. Skip the cycle instead; the
+                # service will retry on the next news rotation.
+                return (
+                    json.dumps(
+                        {
+                            "error": (
+                                "All extracted measurable states failed "
+                                "source verification (LLM-judge on Serper "
+                                "snippets). Skipping article to avoid "
+                                "generating an unresolvable question."
+                            ),
+                            "tool": tool,
+                            "article_title": article.get("title", ""),
+                            "states_proposed": len(states),
+                        }
+                    ),
+                    None,
+                    None,
+                    counter_callback,
+                )
+            states = verified_states
+            states_string = json.dumps(states, indent=2)
 
         # Step 3: Generate questions using the extracted states
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
@@ -1180,10 +1341,12 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             review_data = json.loads(review_response.choices[0].message.content)
             reviews = review_data.get("reviews", [])
 
-        # Filter: accept questions where at least 3 of 4 quality checks pass
-        # AND the date-format check passes. The date-format check is a hard
-        # gate because the downstream ApproveMarketsBehaviour silently drops
-        # questions whose dates are not in "Month D, YYYY" format.
+        # Filter: accept questions only when ALL seven self-review checks
+        # pass. Matches the prompt's stated decision rule at step I ("Accept
+        # ONLY if ALL of B, C, D, E, F, G, H pass"). The previous "3 of 4"
+        # soft gate let questions through whose ``figure_is_directly_published``
+        # was False, which produced un-resolvable markets that the jury kept
+        # marking undeterminable and the resolver kept retrying.
         accepted_questions = []
         rejected_questions = []
         for rev in reviews:
@@ -1197,7 +1360,7 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             date_ok = rev.get("date_format_valid", True)
             not_dup = rev.get("not_a_duplicate", True)
             window_ok = rev.get("window_bound_event", True)
-            if passes >= 3 and date_ok and not_dup and window_ok:
+            if passes == len(checks) and date_ok and not_dup and window_ok:
                 accepted_questions.append(rev["question"])
             else:
                 rejected_questions.append(
