@@ -66,7 +66,7 @@ connections: []
 contracts:
 - valory/conditional_tokens:0.1.0:bafybeifqpw3hnllwy3s2ktcsfup3usgaykh5gbhieyf2wb2s4iwemykn2i
 - valory/erc20:0.1.0:bafybeidhafsjqsj7umr5mgb3v4t52sbcnwhlfk7hqgulbdvui4yhfrgrjy
-- valory/fpmm_deterministic_factory:0.1.0:bafybeiayg3tdr2l6za5545mwcivoh6y7grwpoftlboksu7rs62htgc7ixm
+- valory/fpmm_deterministic_factory:0.1.0:bafybeiazddwzm6dc6625dkynx4devvfy5rq3fbh3vrpj4h66r7lusj6vua
 - valory/gnosis_safe:0.1.0:bafybeieaxcd3wrjxgw7yzmlbxr6tcwj3u7kiixb6fzu2shwy5hthzzyxuq
 - valory/multisend:0.1.0:bafybeih73g7nltnmfqfa75qurljjk7xu7cvd3d2uzt4bqogcw5rgrrmu2m
 - valory/realitio:0.1.0:bafybeibfy6dqkwsz4xersouotswcug27awkvtsmjlo3r7b476qgeujn3eu

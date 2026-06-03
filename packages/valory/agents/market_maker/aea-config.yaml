@@ -19,7 +19,7 @@ contracts:
 - valory/conditional_tokens:0.1.0:bafybeifqpw3hnllwy3s2ktcsfup3usgaykh5gbhieyf2wb2s4iwemykn2i
 - valory/erc20:0.1.0:bafybeidhafsjqsj7umr5mgb3v4t52sbcnwhlfk7hqgulbdvui4yhfrgrjy
 - valory/fpmm:0.1.0:bafybeiceekyspyvqkzint67psqumphhmiiwkcy5satkm4kzo62i56mbkcm
-- valory/fpmm_deterministic_factory:0.1.0:bafybeiayg3tdr2l6za5545mwcivoh6y7grwpoftlboksu7rs62htgc7ixm
+- valory/fpmm_deterministic_factory:0.1.0:bafybeiazddwzm6dc6625dkynx4devvfy5rq3fbh3vrpj4h66r7lusj6vua
 - valory/gnosis_safe:0.1.0:bafybeieaxcd3wrjxgw7yzmlbxr6tcwj3u7kiixb6fzu2shwy5hthzzyxuq
 - valory/gnosis_safe_proxy_factory:0.1.0:bafybeib63lr7rsd77nyo5iz4et2ali6z2y5lekfjg3za7lk4fnf4b2j2ue
 - valory/multisend:0.1.0:bafybeih73g7nltnmfqfa75qurljjk7xu7cvd3d2uzt4bqogcw5rgrrmu2m
@@ -41,8 +41,8 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeibvbfkmkqjidukhkzzz7nd33gna64hjhcn3blon5xcleilbt63zn4
 - valory/funds_forwarder_abci:0.1.0:bafybeicwc7pz7cwy6leqzsh47labscds5cwpnpfa3naejhf6xh5vyxq37q
 - valory/identify_service_owner_abci:0.1.0:bafybeif3gx5r2dfv43cljmmtgie73yfad7wwhrutusljhcgtx4kutcndpa
-- valory/market_creation_manager_abci:0.1.0:bafybeigtkscsechdow7sxwl4orlgxkprqjrvmumxuhxt4rsdqyzbhaol7y
-- valory/market_maker_abci:0.1.0:bafybeicbk4bgbv646z4amqvzx6f4bwtcp26gvxt34hr35mo3m52v7qvldm
+- valory/market_creation_manager_abci:0.1.0:bafybeidzy7k6u5gptn2iic7cokl6po2x4ov3iebxl7v63sn7dprslsszpy
+- valory/market_maker_abci:0.1.0:bafybeic6horidkztmhfx37dwod5dox3sjatmnbuh25kbqr7kuddpmryjkm
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeicg23fvxgai2h22latt45kaj5sep72xqu64jxg5mqxunx6lxany74
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeia7h7mgiwvtux2atinztydwfcby5rgsobqqwc56mgp72qozyj5iam
 - valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeidiqaev5tkejapof4dt7v6g5oktyxruxy5xkeyemeefgvqu6m7y4i
@@ -89,11 +89,11 @@ dependencies:
   hypothesis:
     version: ==6.21.6
   open-aea-ledger-cosmos:
-    version: ==2.2.6
+    version: ==2.2.7
   open-aea-ledger-ethereum:
-    version: ==2.2.6
+    version: ==2.2.7
   open-aea-test-autonomy:
-    version: ==0.21.22
+    version: ==0.21.23
   requests-toolbelt:
     version: ==1.0.0
 customs: []
