@@ -65,20 +65,20 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts:
 - valory/conditional_tokens:0.1.0:bafybeifqpw3hnllwy3s2ktcsfup3usgaykh5gbhieyf2wb2s4iwemykn2i
-- valory/erc20:0.1.0:bafybeidhafsjqsj7umr5mgb3v4t52sbcnwhlfk7hqgulbdvui4yhfrgrjy
+- valory/erc20:0.1.0:bafybeig4tin5v5ahiiz4fysocl7gjhpjtgzko3w6cr2iz3q5a4bxutwewu
 - valory/fpmm_deterministic_factory:0.1.0:bafybeiazddwzm6dc6625dkynx4devvfy5rq3fbh3vrpj4h66r7lusj6vua
-- valory/gnosis_safe:0.1.0:bafybeieaxcd3wrjxgw7yzmlbxr6tcwj3u7kiixb6fzu2shwy5hthzzyxuq
-- valory/multisend:0.1.0:bafybeih73g7nltnmfqfa75qurljjk7xu7cvd3d2uzt4bqogcw5rgrrmu2m
+- valory/gnosis_safe:0.1.0:bafybeif6cfjeruji2ovns6dhc5qivvjr7t7rh5mmudgh5gvumezin26qne
+- valory/multisend:0.1.0:bafybeidl74hh6g34kgxay3fzapz26dhfmc6s2kjnt6edmaxgrklhge3omy
 - valory/realitio:0.1.0:bafybeibfy6dqkwsz4xersouotswcug27awkvtsmjlo3r7b476qgeujn3eu
 protocols:
 - valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
 - valory/ledger_api:1.0.0:bafybeiecq56phjfws36rgrefw6niyo4ezesloodsfis647mpm5ygqo4ysi
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeibvbfkmkqjidukhkzzz7nd33gna64hjhcn3blon5xcleilbt63zn4
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeicg23fvxgai2h22latt45kaj5sep72xqu64jxg5mqxunx6lxany74
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeia7h7mgiwvtux2atinztydwfcby5rgsobqqwc56mgp72qozyj5iam
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeidiqaev5tkejapof4dt7v6g5oktyxruxy5xkeyemeefgvqu6m7y4i
-- valory/transaction_settlement_abci:0.1.0:bafybeiceijjjlvbq2tnadeqdrm7nka7gqgwzvmlgjuzbacgnkljry5h72a
+- valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeicj3pgdx7q5chbms3pxrb6pcv7lbqhkigwnmjuo54p63ub7mkqe5i
+- valory/transaction_settlement_abci:0.1.0:bafybeibv3tycpdhphlblu62zpcbjsj7hnwkutexxqagorkelhjlt4t4fii
 behaviours:
   main:
     args: {}
