@@ -840,7 +840,10 @@ def verify_state_is_resolvable(
         )
         if response.status_code != 200:
             return True, f"fail_open_serper_status_{response.status_code}"
-        organic = response.json().get("organic", [])[:5]
+        body = response.json()
+        if "organic" not in body:
+            return True, "fail_open_serper_unexpected_shape"
+        organic = body["organic"][:5]
     except (requests.RequestException, json.JSONDecodeError):
         return True, "fail_open_serper_error"
 
@@ -882,7 +885,7 @@ def verify_state_is_resolvable(
         TypeError,
     ):
         return True, "fail_open_llm_error"
-    return out.get("answer") == "YES", out.get("reason", "")[:120]
+    return out.get("answer") == "YES", str(out.get("reason") or "")[:120]
 
 
 @with_key_rotation

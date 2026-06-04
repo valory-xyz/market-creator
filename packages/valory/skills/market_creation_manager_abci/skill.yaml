@@ -26,7 +26,7 @@ fingerprint:
   handlers.py: bafybeie634p6j3vwo72nis5jr3mhdd7nunsewevh44lo7vsjneyboellgu
   models.py: bafybeibjcwxfwk7ettrim7vukcpta7243qeqsuoiuk4j3swodv3a5ryi3u
   payloads.py: bafybeiaq53apvacfjrujlkuebjlka6fk5s4t6shao3f2sik4rlanedwuw4
-  propose_questions.py: bafybeibky4xdz4oijwluf6w33ilgqbey4vslxypfjmbkdotpayil7fs5va
+  propose_questions.py: bafybeihvjckmswgh2y4lpsphcstadmlkfh7lbkfvh4dxduenrygn2bls4e
   rounds.py: bafybeieormajhn5cqufools6qionvie4c75ppiiygvbnizn76nsmsqk5wq
   states/__init__.py: bafybeibogw3ljdly5zf2zesfdltrxc4ncw67imtys6srp7w5by2u5ajhhu
   states/approve_markets.py: bafybeierwnnm2tejqprnx4kfoaxmaajog7jt7lnexzgbycryhmkw62jn2u
@@ -41,7 +41,7 @@ fingerprint:
   states/select_keeper.py: bafybeicag5feasxynp65toviurqfx62lklmfky7cln5sv6onubesppsd5e
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
   tests/behaviours/__init__.py: bafybeifngz2wcqbk7sior2um2gh4j55i7ugi7mjhz3tak7zezplkccfovi
-  tests/behaviours/conftest.py: bafybeidezlbfk2r2632ohq6wnwx34dlpqw5siigsx47fwvfdc5d6taj4xa
+  tests/behaviours/conftest.py: bafybeicgh54uhm74ohcvmzt4xpinx6z64kpcabhihbdlmedx3hoox6j5za
   tests/behaviours/test_approve_markets.py: bafybeigijdelmhe3akbgdrqamggjxxung6abndpqcq3lpddigi2evuu5ky
   tests/behaviours/test_approve_markets_behaviour.py: bafybeiandmz47phcwjabwrpb25xmqskv62pkvls7ypjeotqm22ivw3zzf4
   tests/behaviours/test_base.py: bafybeibiddu5gldclwzlnl6aenkbphz5oltortg52ye5nmwqrikz3ifmn4
@@ -50,7 +50,7 @@ fingerprint:
   tests/behaviours/test_post_transaction.py: bafybeicq3fwqjllwmtekxmbompxfbnzqr7ftfba2uw3i5jesamfxwtcby4
   tests/behaviours/test_prepare_transaction.py: bafybeicej35dlvw7jgb3ro4mioreygn7ms37zqhtzzmbahbnkuqhvh6iwi
   tests/behaviours/test_retrieve_approved_market.py: bafybeig2yo7mc5nghmihttws5lzd4hqnmkpqqb6tqxmgnymbvkpqhwjfqa
-  tests/conftest.py: bafybeiawchmkylfcavckf73slvfqnyrz73owyubjua3k2e3txvsrkqs7hm
+  tests/conftest.py: bafybeicvfro4xvjpm5gfl44ulc5hbsf2tbxpd5hufi6umwh2umtvbmpsju
   tests/states/__init__.py: bafybeia5upph3nlp3opku7erao46kkvbsddderrgmwfrcustzobnq2h44e
   tests/states/test_approve_markets.py: bafybeih4v3ml2gizo356a6z4tqwrdmfnxkqgs6tmhlzzvpb45fypoedhlu
   tests/states/test_base.py: bafybeiec6qizlqf72yq55mm6nu2rwqtlrdyj47srn5g22wrz3bo3625muq
@@ -61,6 +61,7 @@ fingerprint:
   tests/test_dialogues.py: bafybeihlhfzepbrtx74qf6375v3onnx3aydpagpgt3gatycxj7qkfq7hdy
   tests/test_handlers.py: bafybeicjrrjj4utmbslhpaquvxkdsbfjasv2t2vf233yr6bu2rimfvamxa
   tests/test_payloads.py: bafybeiae4qpw5zq7vlg3d4wqtifgvrbip7nzhi63levjvhljga64g7r6rm
+  tests/test_propose_questions.py: bafybeid7biavl7wsd54zka2gp54sb7bh4tusaatq4ukmdrzi5dwkhgi334
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
