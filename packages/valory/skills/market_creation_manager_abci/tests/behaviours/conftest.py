@@ -19,18 +19,13 @@
 
 """Shared fixtures for behaviour tests."""
 
-import sys
 from unittest.mock import MagicMock
 
 import pytest
 from hypothesis import HealthCheck, settings  # type: ignore[import-not-found]
 
-# Mock openai module to allow importing propose_questions.py
-sys.modules["openai"] = MagicMock()
-sys.modules["tiktoken"] = MagicMock()
-sys.modules["anthropic"] = MagicMock()
-sys.modules["google"] = MagicMock()
-sys.modules["google.generativeai"] = MagicMock()
+# openai/tiktoken/anthropic/google mocks are in the parent
+# tests/conftest.py (shared across all test subdirs).
 
 # Configure Hypothesis for CI/dev environments
 settings.register_profile(

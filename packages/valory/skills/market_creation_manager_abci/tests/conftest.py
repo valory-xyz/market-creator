@@ -20,9 +20,20 @@
 """Conftest for market_creation_manager_abci tests."""
 
 import os
+import sys
 from pathlib import Path
+from unittest.mock import MagicMock
 
 from hypothesis import settings  # type: ignore[import-not-found]
+
+_mock_openai = MagicMock()
+_mock_openai.OpenAIError = type("OpenAIError", (Exception,), {})
+_mock_openai.RateLimitError = type("RateLimitError", (_mock_openai.OpenAIError,), {})
+sys.modules["openai"] = _mock_openai
+sys.modules["tiktoken"] = MagicMock()
+sys.modules["anthropic"] = MagicMock()
+sys.modules["google"] = MagicMock()
+sys.modules["google.generativeai"] = MagicMock()
 
 CI = "CI"
 PACKAGE_DIR = Path(__file__).parent.parent
