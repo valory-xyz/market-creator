@@ -19,7 +19,6 @@
 
 """Shared fixtures for behaviour tests."""
 
-import sys
 from unittest.mock import MagicMock
 
 import pytest

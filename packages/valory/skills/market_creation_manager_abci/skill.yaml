@@ -41,7 +41,7 @@ fingerprint:
   states/select_keeper.py: bafybeicag5feasxynp65toviurqfx62lklmfky7cln5sv6onubesppsd5e
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
   tests/behaviours/__init__.py: bafybeifngz2wcqbk7sior2um2gh4j55i7ugi7mjhz3tak7zezplkccfovi
-  tests/behaviours/conftest.py: bafybeicgh54uhm74ohcvmzt4xpinx6z64kpcabhihbdlmedx3hoox6j5za
+  tests/behaviours/conftest.py: bafybeiai4oxmqtharmvmmbobtvdhalsxe5dv5jr7wi3qlrfyyocy7o7b7y
   tests/behaviours/test_approve_markets.py: bafybeigijdelmhe3akbgdrqamggjxxung6abndpqcq3lpddigi2evuu5ky
   tests/behaviours/test_approve_markets_behaviour.py: bafybeiandmz47phcwjabwrpb25xmqskv62pkvls7ypjeotqm22ivw3zzf4
   tests/behaviours/test_base.py: bafybeibiddu5gldclwzlnl6aenkbphz5oltortg52ye5nmwqrikz3ifmn4
