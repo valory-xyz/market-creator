@@ -177,9 +177,9 @@ models:
       service_id: ${SERVICE_ID:str:market_maker}
       service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x9338b5153AE39BB89f50468E608eD9d764B755fD}
       setup:
-        all_participants: ${ALL_PARTICIPANTS:list:["0x0000000000000000000000000000000000000000"]}
-        safe_contract_address: ${SAFE_CONTRACT_ADDRESS:str:0x0000000000000000000000000000000000000000}
-        consensus_threshold: ${CONSENSUS_THRESHOLD:int:null}
+        all_participants: ${list:["0x0000000000000000000000000000000000000000"]}
+        safe_contract_address: ${str:0x0000000000000000000000000000000000000000}
+        consensus_threshold: ${int:null}
       share_tm_config_on_startup: ${SHARE_TM_CONFIG_ON_STARTUP:bool:false}
       tendermint_check_sleep_delay: ${TENDERMINT_CHECK_SLEEP_DELAY:int:3}
       tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
