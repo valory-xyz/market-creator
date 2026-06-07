@@ -24,6 +24,7 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import pytest
 from hypothesis import settings  # type: ignore[import-not-found]
 
 _mock_openai = MagicMock()
@@ -41,3 +42,13 @@ PACKAGE_DIR = Path(__file__).parent.parent
 settings.register_profile(CI, deadline=5000)
 profile_name = ("default", CI)[bool(os.getenv(CI))]
 settings.load_profile(profile_name)
+
+
+@pytest.fixture(autouse=True)
+def _clear_verify_cache() -> None:
+    """Clear the verify_state_is_resolvable module-level cache before each test."""
+    from packages.valory.skills.market_creation_manager_abci.propose_questions import (
+        _VERIFY_CACHE,
+    )
+
+    _VERIFY_CACHE.clear()
