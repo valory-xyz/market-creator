@@ -230,8 +230,9 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
       "already confirmed/reported/announced at the time the question is asked".
       "According to [source]" is future-tense relative to EVENT_DAY and
       unambiguously means "the jury will check [source] on that date".
-    - If MEASURABLE_STATES is empty, you may create an announcement-style question,
-      but it must pass ALL the checks below.
+    - If MEASURABLE_STATES is empty or shows the sentinel "(none found)",
+      you may create an announcement-style question, but it must pass ALL
+      the checks below.
     - Must be of public interest, semantically different, different from
       EXISTING_QUESTIONS.
     - The answer must be 'yes' or 'no', verifiable, not an opinion, unambiguous,
@@ -806,6 +807,23 @@ _VERIFY_CACHE: Dict[Tuple[str, str], Tuple[bool, str]] = {}
 _VERIFY_CACHE_MAX = 1024
 
 
+def _cache_put(key: Tuple[str, str], result: Tuple[bool, str]) -> None:
+    """Insert a deterministic verifier result, evicting oldest on overflow.
+
+    Single-threaded eviction policy (the Mech tool runs single-threaded in
+    the agent process). ``pop(..., None)`` defends against the
+    eviction-after-clear race during tests.
+
+    :param key: ``(source, metric)`` tuple identifying the verified claim.
+    :param result: ``(is_resolvable, reason)`` tuple to cache.
+    """
+    if len(_VERIFY_CACHE) >= _VERIFY_CACHE_MAX:
+        oldest = next(iter(_VERIFY_CACHE), None)
+        if oldest is not None:
+            _VERIFY_CACHE.pop(oldest, None)
+    _VERIFY_CACHE[key] = result
+
+
 def verify_state_is_resolvable(
     serper_api_key: str, source: str, metric: str
 ) -> Tuple[bool, str]:
@@ -862,9 +880,7 @@ def verify_state_is_resolvable(
 
     if not organic:
         result = (False, "no_hits")
-        if len(_VERIFY_CACHE) >= _VERIFY_CACHE_MAX:
-            _VERIFY_CACHE.pop(next(iter(_VERIFY_CACHE)))
-        _VERIFY_CACHE[cache_key] = result
+        _cache_put(cache_key, result)
         return result
 
     snippets = "\n".join(
@@ -903,9 +919,7 @@ def verify_state_is_resolvable(
     ):
         return True, "fail_open_llm_error"
     result = (out.get("answer") == "YES", str(out.get("reason") or "")[:120])
-    if len(_VERIFY_CACHE) >= _VERIFY_CACHE_MAX:
-        _VERIFY_CACHE.pop(next(iter(_VERIFY_CACHE)))
-    _VERIFY_CACHE[cache_key] = result
+    _cache_put(cache_key, result)
     return result
 
 

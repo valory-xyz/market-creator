@@ -175,17 +175,24 @@ class TestVerifyStateIsResolvable:
         ok1, reason1 = verify_state_is_resolvable("k", "Freddie Mac", "mortgage rate")
         ok2, reason2 = verify_state_is_resolvable("k", "Freddie Mac", "mortgage rate")
         assert ok1 is True and ok2 is True
+        # First call must NOT be cached (cleared by autouse fixture)
+        assert "[cached]" not in reason1
+        # Second call must hit cache
         assert "[cached]" in reason2
         # Cache hit must NOT re-issue Serper or LLM call
         assert mock_post.call_count == 1
         assert mock_client.chat.completions.create.call_count == 1
 
-    @patch(f"{_MODULE}.client")
     @patch(f"{_MODULE}.requests.post")
-    def test_fail_open_not_cached(
-        self, mock_post: MagicMock, mock_client: MagicMock
-    ) -> None:
-        """Fail-open paths (transient errors) must NOT be cached."""
+    def test_fail_open_not_cached(self, mock_post: MagicMock) -> None:
+        """Fail-open paths (transient errors) must NOT be cached.
+
+        Test only patches ``requests.post`` because the fail-open path
+        short-circuits before reaching the LLM client; no client mock is
+        needed.
+
+        :param mock_post: patched ``requests.post`` raising RequestException.
+        """
         import requests as _requests
 
         mock_post.side_effect = _requests.RequestException("timeout")
