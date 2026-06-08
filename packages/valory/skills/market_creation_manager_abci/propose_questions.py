@@ -230,15 +230,8 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
       "already confirmed/reported/announced at the time the question is asked".
       "According to [source]" is future-tense relative to EVENT_DAY and
       unambiguously means "the jury will check [source] on that date".
-    - If MEASURABLE_STATES is empty or marked "(none verified)", a source-
-      verifier rejected the article's extracted source candidates as
-      un-checkable. In that case: PREFER measurement or continuation framings
-      over announcement framings (announcement framings on a short window
-      tend to be No-biased and unresolvable). Only emit a question if you
-      can name a source you are CONFIDENT publishes the figure DIRECTLY on
-      a regular cadence (daily / weekly / monthly). If MEASURABLE_STATES
-      lists BLOCKED SOURCES, do NOT cite any (source, metric) pair listed
-      there -- they were judged as un-publishable.
+    - If MEASURABLE_STATES is empty, you may create an announcement-style question,
+      but it must pass ALL the checks below.
     - Must be of public interest, semantically different, different from
       EXISTING_QUESTIONS.
     - The answer must be 'yes' or 'no', verifiable, not an opinion, unambiguous,
@@ -1216,32 +1209,14 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
                 # speculative geopolitical topics where no measurable
                 # state's source publishes on a checkable cadence. Instead,
                 # let the question-generator work from the article body
-                # alone, BUT explicitly list the verifier-rejected
-                # (source, metric) pairs as BLOCKED SOURCES so the generator
-                # doesn't reuse them. Self-review downstream is the final
+                # alone -- the self-review pass downstream is the next
                 # gate that still rejects un-resolvable framings.
                 print(
                     f"WARN: 0/{len(states)} states verified; falling back to "
-                    f"article-only generation with BLOCKED SOURCES annotation."
+                    f"article-only generation (no measurable_states context)."
                 )
-                blocked_lines = "\n".join(
-                    f"  - source: {s.get('source', '?')!r}, "
-                    f"metric: {s.get('state', '?')!r}"
-                    for s in states[:5]
-                )
-                states = verified_states
-                states_string = (
-                    "(none verified)\n\n"
-                    "BLOCKED SOURCES (a source-verifier judged these as "
-                    "un-publishable / un-checkable on a regular cadence -- "
-                    "do NOT reuse any of these source/metric pairs):\n"
-                    f"{blocked_lines}"
-                )
-            else:
-                states = verified_states
-                states_string = (
-                    json.dumps(states, indent=2) if states else "(none found)"
-                )
+            states = verified_states
+            states_string = json.dumps(states, indent=2) if states else "(none found)"
 
         # Step 3: Generate questions using the extracted states
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):
