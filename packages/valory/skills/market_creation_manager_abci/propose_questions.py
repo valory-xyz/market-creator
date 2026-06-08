@@ -230,8 +230,9 @@ PROPOSE_QUESTION_PROMPT = """You are provided a recent news article
       "already confirmed/reported/announced at the time the question is asked".
       "According to [source]" is future-tense relative to EVENT_DAY and
       unambiguously means "the jury will check [source] on that date".
-    - If MEASURABLE_STATES is empty, you may create an announcement-style question,
-      but it must pass ALL the checks below.
+    - If MEASURABLE_STATES is empty or shows the sentinel "(none found)",
+      you may create an announcement-style question, but it must pass ALL
+      the checks below.
     - Must be of public interest, semantically different, different from
       EXISTING_QUESTIONS.
     - The answer must be 'yes' or 'no', verifiable, not an opinion, unambiguous,
@@ -802,6 +803,27 @@ Rules:
 """
 
 
+_VERIFY_CACHE: Dict[Tuple[str, str], Tuple[bool, str]] = {}
+_VERIFY_CACHE_MAX = 1024
+
+
+def _cache_put(key: Tuple[str, str], result: Tuple[bool, str]) -> None:
+    """Insert a deterministic verifier result, evicting oldest on overflow.
+
+    Single-threaded eviction policy (the Mech tool runs single-threaded in
+    the agent process). ``pop(..., None)`` defends against the
+    eviction-after-clear race during tests.
+
+    :param key: ``(source, metric)`` tuple identifying the verified claim.
+    :param result: ``(is_resolvable, reason)`` tuple to cache.
+    """
+    if len(_VERIFY_CACHE) >= _VERIFY_CACHE_MAX:
+        oldest = next(iter(_VERIFY_CACHE), None)
+        if oldest is not None:
+            _VERIFY_CACHE.pop(oldest, None)
+    _VERIFY_CACHE[key] = result
+
+
 def verify_state_is_resolvable(
     serper_api_key: str, source: str, metric: str
 ) -> Tuple[bool, str]:
@@ -816,6 +838,11 @@ def verify_state_is_resolvable(
     (e.g. "Tesla customer service repair records",
     "Silicon Ranch operational records").
 
+    Results are cached in a process-local dict keyed by ``(source, metric)``
+    so the same article re-picked across cycles does not re-burn Serper +
+    LLM-judge calls. Fail-open outcomes are NOT cached (transient errors
+    must not poison the cache).
+
     Fail-open: Serper HTTP/JSON errors and OpenAI errors return
     ``(True, ...)`` so a transient outage cannot starve generation. Only
     a clean Serper 200 with zero organic hits returns ``(False, ...)``.
@@ -826,6 +853,10 @@ def verify_state_is_resolvable(
     :return: ``(is_resolvable, reason)`` -- ``is_resolvable=True`` keeps the
         state, ``False`` drops it; ``reason`` is a short audit string.
     """
+    cache_key = (source, metric)
+    cached = _VERIFY_CACHE.get(cache_key)
+    if cached is not None:
+        return cached[0], f"{cached[1]} [cached]"
     query = f"{source} {metric}".strip()
     if not query:
         return True, "empty_query"
@@ -848,7 +879,9 @@ def verify_state_is_resolvable(
         return True, "fail_open_serper_error"
 
     if not organic:
-        return False, "no_hits"
+        result = (False, "no_hits")
+        _cache_put(cache_key, result)
+        return result
 
     snippets = "\n".join(
         f"- TITLE: {o.get('title', '')}\n  SNIPPET: {o.get('snippet', '')}"
@@ -885,7 +918,9 @@ def verify_state_is_resolvable(
         TypeError,
     ):
         return True, "fail_open_llm_error"
-    return out.get("answer") == "YES", str(out.get("reason") or "")[:120]
+    result = (out.get("answer") == "YES", str(out.get("reason") or "")[:120])
+    _cache_put(cache_key, result)
+    return result
 
 
 @with_key_rotation
@@ -1181,33 +1216,21 @@ def run(**kwargs: Any) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, An
             print(
                 f"Source verification: kept {len(verified_states)}/{len(states)} states"
             )
-            if not verified_states:
-                # Hard veto: with zero verified sources the generator falls
-                # back to "(none found)" and tends to re-emit a question
-                # referencing the same source the verifier just rejected,
-                # propagating the "is_determinable=False" failure mode this
-                # filter exists to prevent. Skip the cycle instead; the
-                # service will retry on the next news rotation.
-                return (
-                    json.dumps(
-                        {
-                            "error": (
-                                "All extracted measurable states failed "
-                                "source verification (LLM-judge on Serper "
-                                "snippets). Skipping article to avoid "
-                                "generating an unresolvable question."
-                            ),
-                            "tool": tool,
-                            "article_title": article.get("title", ""),
-                            "states_proposed": len(states),
-                        }
-                    ),
-                    None,
-                    None,
-                    counter_callback,
+            if not verified_states and states:
+                # Soft fall-through: every extracted state failed source
+                # verification. Previously this hard-vetoed the cycle, but
+                # that strangles throughput on news days dominated by
+                # speculative geopolitical topics where no measurable
+                # state's source publishes on a checkable cadence. Instead,
+                # let the question-generator work from the article body
+                # alone -- the self-review pass downstream is the next
+                # gate that still rejects un-resolvable framings.
+                print(
+                    f"WARN: 0/{len(states)} states verified; falling back to "
+                    f"article-only generation (no measurable_states context)."
                 )
             states = verified_states
-            states_string = json.dumps(states, indent=2)
+            states_string = json.dumps(states, indent=2) if states else "(none found)"
 
         # Step 3: Generate questions using the extracted states
         with OpenAIClientManager(kwargs["api_keys"]["openai"]):

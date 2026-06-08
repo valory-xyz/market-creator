@@ -157,3 +157,50 @@ class TestVerifyStateIsResolvable:
         ok, reason = verify_state_is_resolvable("key", "Freddie Mac", "rate")
         assert ok is True
         assert reason == "fail_open_llm_error"
+
+    @patch(f"{_MODULE}.client")
+    @patch(f"{_MODULE}.requests.post")
+    def test_cache_hit_skips_serper_and_llm(
+        self, mock_post: MagicMock, mock_client: MagicMock
+    ) -> None:
+        """Second call with same (source, metric) should hit cache; not re-issue Serper / LLM."""
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {
+            "organic": [{"title": "PMMS", "snippet": "6.5%"}]
+        }
+        body = {"answer": "YES", "reason": "publishes weekly"}
+        choice = MagicMock()
+        choice.message.content = json.dumps(body)
+        mock_client.chat.completions.create.return_value.choices = [choice]
+        ok1, reason1 = verify_state_is_resolvable("k", "Freddie Mac", "mortgage rate")
+        ok2, reason2 = verify_state_is_resolvable("k", "Freddie Mac", "mortgage rate")
+        assert ok1 is True and ok2 is True
+        # First call must NOT be cached (cleared by autouse fixture)
+        assert "[cached]" not in reason1
+        # Second call must hit cache
+        assert "[cached]" in reason2
+        # Cache hit must NOT re-issue Serper or LLM call
+        assert mock_post.call_count == 1
+        assert mock_client.chat.completions.create.call_count == 1
+
+    @patch(f"{_MODULE}.requests.post")
+    def test_fail_open_not_cached(self, mock_post: MagicMock) -> None:
+        """Fail-open paths (transient errors) must NOT be cached.
+
+        Test only patches ``requests.post`` because the fail-open path
+        short-circuits before reaching the LLM client; no client mock is
+        needed.
+
+        :param mock_post: patched ``requests.post`` raising RequestException.
+        """
+        import requests as _requests
+
+        mock_post.side_effect = _requests.RequestException("timeout")
+        ok1, reason1 = verify_state_is_resolvable("k", "Freddie Mac", "rate")
+        # Second call should re-issue (not cached)
+        ok2, reason2 = verify_state_is_resolvable("k", "Freddie Mac", "rate")
+        assert ok1 is True and ok2 is True
+        assert reason1 == "fail_open_serper_error"
+        assert reason2 == "fail_open_serper_error"
+        assert "[cached]" not in reason2
+        assert mock_post.call_count == 2
