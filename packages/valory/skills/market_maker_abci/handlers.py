@@ -67,6 +67,12 @@ ContractApiHandler = BaseContractApiHandler
 TendermintHandler = BaseTendermintHandler
 IpfsHandler = BaseIpfsHandler
 
+# Health thresholds (mirrored from the mech service for cross-service parity).
+LIVENESS_STALL_FACTOR = 3.0  # > 3x the expected pause means the FSM is "stuck"
+TRANSITION_TOLERANCE_FACTOR = 2.0  # < 2x the expected pause means "transitioning fast"
+DEFAULT_GRACE = 120.0  # readiness/progress grace floor, kept for mech parity
+HEALTH_VERSION = 2
+
 
 class HttpCode(Enum):
     """Http codes"""
@@ -257,19 +263,37 @@ class HttpHandler(BaseHttpHandler):
         self, http_msg: HttpMessage, http_dialogue: HttpDialogue
     ) -> None:
         """
-        Handle a Http request of verb GET.
+        Handle GET /healthcheck and compute the agent's health metrics.
+
+        The health is assessed across three dimensions (mech-service parity):
+
+        - **Liveness**: whether the FSM is actively transitioning and Tendermint
+          is not in a stalled state. This is the dimension that catches a frozen
+          FSM: a missing last-transition timestamp is reported as not-live
+          (reason ``no-fsm-data``) instead of being silently treated as healthy.
+        - **Readiness**: whether the agent can accept new work.
+        - **Progress**: whether the agent is advancing through its backlog.
+
+        market-creator is an FSM-only service with no task backlog or dependency
+        read metric (unlike mech), so readiness and progress are always-ok
+        placeholders (reason ``idle-ok``) kept for shape parity with mech.
+
+        The endpoint always responds with HTTP 200; a wedge is signalled solely
+        via ``is_healthy: false`` in the JSON body.
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
         """
-        seconds_since_last_transition = None
-        is_tm_unhealthy = None
-        is_transitioning_fast = None
-        current_round = None
-        rounds = None
+        seconds_since_last_transition: Optional[float] = None
+        is_tm_unhealthy: Optional[bool] = None
+        is_transitioning_fast: Optional[bool] = None
+        current_round: Optional[str] = None
+        rounds: Optional[List[str]] = None
 
         round_sequence = cast(SharedState, self.context.state).round_sequence
+        reset_pause = float(self.context.params.reset_pause_duration)
 
+        # Guard A: FSM liveness data is only available once we have transitioned.
         if round_sequence._last_round_transition_timestamp:
             is_tm_unhealthy = cast(
                 SharedState, self.context.state
@@ -280,12 +304,12 @@ class HttpHandler(BaseHttpHandler):
                 round_sequence._last_round_transition_timestamp
             )
 
-            is_transitioning_fast = (
-                not is_tm_unhealthy
-                and seconds_since_last_transition
-                < 2 * self.context.params.reset_pause_duration
+            is_transitioning_fast = (not is_tm_unhealthy) and (
+                seconds_since_last_transition
+                < TRANSITION_TOLERANCE_FACTOR * reset_pause
             )
 
+        # Guard B: round identifiers for observability.
         if round_sequence._abci_app:
             current_round = round_sequence._abci_app.current_round.round_id
             rounds = [
@@ -293,13 +317,40 @@ class HttpHandler(BaseHttpHandler):
             ]
             rounds.append(current_round)
 
+        # Liveness: catches the wedge. No FSM data or unknown tm state -> not live.
+        if seconds_since_last_transition is None or is_tm_unhealthy is None:
+            liveness_ok, live_reason = False, "no-fsm-data"
+        else:
+            liveness_ok = (not is_tm_unhealthy) and (
+                seconds_since_last_transition <= LIVENESS_STALL_FACTOR * reset_pause
+            )
+            live_reason = (
+                "ok"
+                if liveness_ok
+                else ("tm-unhealthy" if is_tm_unhealthy else "stuck-no-transition")
+            )
+
+        # Readiness/progress: market-creator has no backlog metric, so these are
+        # always-ok placeholders kept for mech parity.
+        readiness_ok, ready_reason = True, "idle-ok"
+        progress_ok, prog_reason = True, "idle-ok"
+
+        is_healthy = bool(liveness_ok and readiness_ok and progress_ok)
+
         data = {
+            "is_healthy": is_healthy,
+            "liveness": {"ok": liveness_ok, "reason": live_reason},
+            "readiness": {"ok": readiness_ok, "reason": ready_reason},
+            "progress": {"ok": progress_ok, "reason": prog_reason},
             "seconds_since_last_transition": seconds_since_last_transition,
-            "is_tm_healthy": not is_tm_unhealthy,
+            # Three-state: True (healthy), False (unhealthy), None (unknown).
+            "is_tm_healthy": (None if is_tm_unhealthy is None else not is_tm_unhealthy),
             "period": self.synchronized_data.period_count,
-            "reset_pause_duration": self.context.params.reset_pause_duration,
+            "reset_pause_duration": reset_pause,
+            "current_round": current_round,
             "rounds": rounds,
             "is_transitioning_fast": is_transitioning_fast,
+            "health_version": HEALTH_VERSION,
         }
 
         self._send_ok_response(http_msg, http_dialogue, data)
