@@ -146,13 +146,23 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                 # stream; once the block-stall deadline expires the FSM wedges
                 # permanently. Offload to a worker thread and yield control back
                 # to the loop while it runs so consensus keeps progressing.
-                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                    future = executor.submit(
-                        mech_tool_propose_questions.run, **tool_kwargs
-                    )
+                executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+                future = executor.submit(mech_tool_propose_questions.run, **tool_kwargs)
+                try:
                     yield from self.wait_for_condition(future.done)
                     mech_tool_output = future.result()[0]  # type: ignore
-                mech_tool_output_json = json.loads(mech_tool_output)
+                    mech_tool_output_json = json.loads(mech_tool_output)
+                except Exception as e:  # noqa  pylint: disable=broad-except
+                    # Degrade a raw tool exception to the existing tool-error
+                    # path instead of letting it propagate and stall the skill.
+                    self.context.logger.error(f"Mech tool raised an exception: {e}")
+                    mech_tool_output_json = {"error": str(e)}
+                finally:
+                    # Never shutdown(wait=True): on GeneratorExit (service
+                    # shutdown mid-run) that would block the event loop until
+                    # the long tool call finished -- the very thing this fix
+                    # avoids. Detach the worker instead.
+                    executor.shutdown(wait=False)
                 # END MECH INTERACT EMULATION
 
                 if "error" in mech_tool_output_json:
