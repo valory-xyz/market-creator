@@ -407,6 +407,7 @@ class TestHttpHandlerGetHealth:
         assert body["liveness"]["ok"] is True
         assert body["liveness"]["reason"] == "ok"
         assert body["is_tm_healthy"] is True
+        assert body["is_transitioning_fast"] is True
         assert isinstance(body["seconds_since_last_transition"], float)
         assert body["period"] == 10
         assert body["current_round"] == "CurrentRound"
@@ -441,6 +442,7 @@ class TestHttpHandlerGetHealth:
         assert body["liveness"]["ok"] is False
         assert body["liveness"]["reason"] == "tm-unhealthy"
         assert body["is_tm_healthy"] is False
+        assert body["is_transitioning_fast"] is False
         assert body["health_version"] == 2
 
     def test_health_stale_but_has_timestamp(self) -> None:
@@ -471,6 +473,7 @@ class TestHttpHandlerGetHealth:
         assert body["liveness"]["ok"] is False
         assert body["liveness"]["reason"] == "stuck-no-transition"
         assert body["is_tm_healthy"] is True
+        assert body["is_transitioning_fast"] is False
         assert body["seconds_since_last_transition"] > 60 * 3
         assert body["health_version"] == 2
 

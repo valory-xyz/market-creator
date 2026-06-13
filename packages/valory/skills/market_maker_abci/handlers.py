@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'price_estimation_abci' skill."""
+"""This module contains the handler for the 'market_maker_abci' skill."""
 
 import json
 import re
@@ -70,7 +70,6 @@ IpfsHandler = BaseIpfsHandler
 # Health thresholds (mirrored from the mech service for cross-service parity).
 LIVENESS_STALL_FACTOR = 3.0  # > 3x the expected pause means the FSM is "stuck"
 TRANSITION_TOLERANCE_FACTOR = 2.0  # < 2x the expected pause means "transitioning fast"
-DEFAULT_GRACE = 120.0  # readiness/progress grace floor, kept for mech parity
 HEALTH_VERSION = 2
 
 
