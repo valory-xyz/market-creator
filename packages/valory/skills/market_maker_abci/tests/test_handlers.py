@@ -322,64 +322,75 @@ class TestHttpHandlerSendOkResponse:
 class TestHttpHandlerGetHealth:
     """Test HttpHandler._handle_get_health."""
 
-    def test_health_no_last_transition(self) -> None:
-        """Test health response when no last transition timestamp."""
+    @staticmethod
+    def _invoke_health(handler: HttpHandler) -> dict:
+        """Invoke _handle_get_health and return the decoded JSON body and status."""
+        http_msg = MagicMock()
+        http_dialogue = MagicMock()
+        http_dialogue.reply.return_value = MagicMock()
+
+        handler._handle_get_health(http_msg, http_dialogue)
+
+        http_dialogue.reply.assert_called_once()
+        call_kwargs = http_dialogue.reply.call_args
+        body = json.loads(call_kwargs.kwargs["body"].decode("utf-8"))
+        return {
+            "body": body,
+            "status_code": call_kwargs.kwargs["status_code"],
+        }
+
+    def test_health_no_last_transition_is_unhealthy(self) -> None:
+        """Test a frozen FSM (no last transition) reports is_healthy=False."""
         handler = _make_http_handler()
         context = handler.context
         context.params.reset_pause_duration = 60
 
-        # Mock state
+        # Wedged FSM: no last-transition timestamp, no abci_app.
         round_sequence = MagicMock()
         round_sequence._last_round_transition_timestamp = None
         round_sequence._abci_app = None
         context.state.round_sequence = round_sequence
 
-        # Mock synchronized_data
         with patch.object(
             HttpHandler,
             "synchronized_data",
             new_callable=PropertyMock,
         ) as mock_sync:
             mock_sync.return_value = MagicMock(period_count=5)
+            result = self._invoke_health(handler)
 
-            http_msg = MagicMock()
-            http_dialogue = MagicMock()
-            http_response = MagicMock()
-            http_dialogue.reply.return_value = http_response
+        body = result["body"]
+        # HTTP must always be 200; the wedge is signalled only via is_healthy.
+        assert result["status_code"] == HttpCode.OK_CODE.value
+        assert body["is_healthy"] is False
+        assert body["liveness"]["ok"] is False
+        assert body["liveness"]["reason"] == "no-fsm-data"
+        # Three-state is_tm_healthy must stay None (not coerced to True).
+        assert body["is_tm_healthy"] is None
+        assert body["seconds_since_last_transition"] is None
+        assert body["period"] == 5
+        assert body["rounds"] is None
+        assert body["is_transitioning_fast"] is None
+        assert body["readiness"] == {"ok": True, "reason": "idle-ok"}
+        assert body["progress"] == {"ok": True, "reason": "idle-ok"}
+        assert body["health_version"] == 2
 
-            handler._handle_get_health(http_msg, http_dialogue)
-
-            # Should call _send_ok_response
-            http_dialogue.reply.assert_called_once()
-            call_kwargs = http_dialogue.reply.call_args
-            body = json.loads(call_kwargs.kwargs["body"].decode("utf-8"))
-
-            assert body["seconds_since_last_transition"] is None
-            assert body["is_tm_healthy"] is True  # not is_tm_unhealthy (None)
-            assert body["period"] == 5
-            assert body["rounds"] is None
-            assert body["is_transitioning_fast"] is None
-
-    def test_health_with_last_transition(self) -> None:
-        """Test health response when last transition exists."""
+    def test_health_recent_transition_is_healthy(self) -> None:
+        """Test a live, recently-transitioned FSM reports is_healthy=True."""
         handler = _make_http_handler()
         context = handler.context
         context.params.reset_pause_duration = 60
 
-        # Mock state
         round_sequence = MagicMock()
-        timestamp = datetime.now()
-        round_sequence._last_round_transition_timestamp = timestamp
+        round_sequence._last_round_transition_timestamp = datetime.now()
         round_sequence.block_stall_deadline_expired = False
 
-        # Mock abci_app
         current_round = MagicMock()
         current_round.round_id = "CurrentRound"
         prev_round_1 = MagicMock()
         prev_round_1.round_id = "PrevRound1"
         round_sequence._abci_app.current_round = current_round
         round_sequence._abci_app._previous_rounds = [prev_round_1]
-
         context.state.round_sequence = round_sequence
 
         with patch.object(
@@ -388,23 +399,80 @@ class TestHttpHandlerGetHealth:
             new_callable=PropertyMock,
         ) as mock_sync:
             mock_sync.return_value = MagicMock(period_count=10)
+            result = self._invoke_health(handler)
 
-            http_msg = MagicMock()
-            http_dialogue = MagicMock()
-            http_response = MagicMock()
-            http_dialogue.reply.return_value = http_response
+        body = result["body"]
+        assert result["status_code"] == HttpCode.OK_CODE.value
+        assert body["is_healthy"] is True
+        assert body["liveness"]["ok"] is True
+        assert body["liveness"]["reason"] == "ok"
+        assert body["is_tm_healthy"] is True
+        assert isinstance(body["seconds_since_last_transition"], float)
+        assert body["period"] == 10
+        assert body["current_round"] == "CurrentRound"
+        assert "CurrentRound" in body["rounds"]
+        assert body["readiness"] == {"ok": True, "reason": "idle-ok"}
+        assert body["progress"] == {"ok": True, "reason": "idle-ok"}
+        assert body["health_version"] == 2
 
-            handler._handle_get_health(http_msg, http_dialogue)
+    def test_health_tm_unhealthy(self) -> None:
+        """Test a stalled Tendermint node reports liveness reason tm-unhealthy."""
+        handler = _make_http_handler()
+        context = handler.context
+        context.params.reset_pause_duration = 60
 
-            http_dialogue.reply.assert_called_once()
-            call_kwargs = http_dialogue.reply.call_args
-            body = json.loads(call_kwargs.kwargs["body"].decode("utf-8"))
+        round_sequence = MagicMock()
+        round_sequence._last_round_transition_timestamp = datetime.now()
+        round_sequence.block_stall_deadline_expired = True
+        round_sequence._abci_app = None
+        context.state.round_sequence = round_sequence
 
-            assert body["seconds_since_last_transition"] is not None
-            assert isinstance(body["seconds_since_last_transition"], float)
-            assert body["period"] == 10
-            assert body["rounds"] is not None
-            assert "CurrentRound" in body["rounds"]
+        with patch.object(
+            HttpHandler,
+            "synchronized_data",
+            new_callable=PropertyMock,
+        ) as mock_sync:
+            mock_sync.return_value = MagicMock(period_count=3)
+            result = self._invoke_health(handler)
+
+        body = result["body"]
+        assert result["status_code"] == HttpCode.OK_CODE.value
+        assert body["is_healthy"] is False
+        assert body["liveness"]["ok"] is False
+        assert body["liveness"]["reason"] == "tm-unhealthy"
+        assert body["is_tm_healthy"] is False
+        assert body["health_version"] == 2
+
+    def test_health_stale_but_has_timestamp(self) -> None:
+        """Test a stale (but timestamped) FSM reports stuck-no-transition."""
+        handler = _make_http_handler()
+        context = handler.context
+        context.params.reset_pause_duration = 60
+
+        # Last transition is far in the past (> LIVENESS_STALL_FACTOR * reset_pause).
+        stale_ts = datetime.fromtimestamp(datetime.now().timestamp() - 10_000)
+        round_sequence = MagicMock()
+        round_sequence._last_round_transition_timestamp = stale_ts
+        round_sequence.block_stall_deadline_expired = False
+        round_sequence._abci_app = None
+        context.state.round_sequence = round_sequence
+
+        with patch.object(
+            HttpHandler,
+            "synchronized_data",
+            new_callable=PropertyMock,
+        ) as mock_sync:
+            mock_sync.return_value = MagicMock(period_count=2)
+            result = self._invoke_health(handler)
+
+        body = result["body"]
+        assert result["status_code"] == HttpCode.OK_CODE.value
+        assert body["is_healthy"] is False
+        assert body["liveness"]["ok"] is False
+        assert body["liveness"]["reason"] == "stuck-no-transition"
+        assert body["is_tm_healthy"] is True
+        assert body["seconds_since_last_transition"] > 60 * 3
+        assert body["health_version"] == 2
 
 
 class TestHttpHandlerSynchronizedData:
