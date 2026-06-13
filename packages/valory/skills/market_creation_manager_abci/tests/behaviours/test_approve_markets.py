@@ -371,7 +371,7 @@ class TestApproveMarketsBehaviourGenerators:
 
         with (
             patch.object(self.behaviour, "get_http_response", new=_make_gen(mock_resp)),
-            patch("time.sleep"),
+            patch.object(self.behaviour, "sleep", new=_make_gen(None)),
         ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
@@ -425,7 +425,7 @@ class TestApproveMarketsBehaviourGenerators:
 
         with (
             patch.object(self.behaviour, "get_http_response", new=multi_gen),
-            patch("time.sleep"),
+            patch.object(self.behaviour, "sleep", new=_make_gen(None)),
         ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
@@ -459,7 +459,7 @@ class TestApproveMarketsBehaviourGenerators:
 
         with (
             patch.object(self.behaviour, "get_http_response", new=multi_gen),
-            patch("time.sleep"),
+            patch.object(self.behaviour, "sleep", new=_make_gen(None)),
         ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}

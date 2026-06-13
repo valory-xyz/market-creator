@@ -19,9 +19,9 @@
 
 """This module contains the ApproveMarketsBehaviour of the 'market_creation_manager_abci' skill."""
 
+import concurrent.futures
 import json
 import random
-import time
 from datetime import datetime, timezone
 from typing import Any, Dict, Generator, Type
 
@@ -140,7 +140,18 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     num_questions=num_questions,
                     resolution_time=resolution_time,
                 )
-                mech_tool_output = mech_tool_propose_questions.run(**tool_kwargs)[0]  # type: ignore
+                # The mech tool runs a long (~60-90s) synchronous LLM/HTTP
+                # pipeline. Running it inline blocks the single AEA event loop,
+                # which then stops servicing the local Tendermint `begin_block`
+                # stream; once the block-stall deadline expires the FSM wedges
+                # permanently. Offload to a worker thread and yield control back
+                # to the loop while it runs so consensus keeps progressing.
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(
+                        mech_tool_propose_questions.run, **tool_kwargs
+                    )
+                    yield from self.wait_for_condition(future.done)
+                    mech_tool_output = future.result()[0]  # type: ignore
                 mech_tool_output_json = json.loads(mech_tool_output)
                 # END MECH INTERACT EMULATION
 
@@ -220,7 +231,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return ApproveMarketsRound.ERROR_PAYLOAD
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully proposed market, received body {body}")
-        time.sleep(3)
+        yield from self.sleep(3)
 
         # Step 2: Approve market
         self.context.logger.info(f"Approving market {market_id=}")
@@ -239,7 +250,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return ApproveMarketsRound.ERROR_PAYLOAD
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully approved market, received body {body}")
-        time.sleep(3)
+        yield from self.sleep(3)
 
         # Step 3: Update market data
         self.context.logger.info(f"Updating market {market_id=}")
@@ -262,6 +273,6 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully updated market, received body {body}")
-        time.sleep(3)
+        yield from self.sleep(3)
 
         return json.dumps(body, sort_keys=True)
