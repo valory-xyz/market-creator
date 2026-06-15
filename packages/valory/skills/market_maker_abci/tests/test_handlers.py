@@ -368,7 +368,7 @@ class TestHttpHandlerGetHealth:
         # Three-state is_tm_healthy must stay None (not coerced to True).
         assert body["is_tm_healthy"] is None
         assert body["seconds_since_last_transition"] is None
-        assert body["period"] == 5
+        assert body["period"] is None
         assert body["rounds"] is None
         assert body["is_transitioning_fast"] is None
         assert body["readiness"] == {"ok": True, "reason": "idle-ok"}

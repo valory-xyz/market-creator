@@ -69,7 +69,9 @@ IpfsHandler = BaseIpfsHandler
 
 # Health thresholds (mirrored from the mech service for cross-service parity).
 LIVENESS_STALL_FACTOR = 3.0  # > 3x the expected pause means the FSM is "stuck"
-TRANSITION_TOLERANCE_FACTOR = 2.0  # < 2x the expected pause means "transitioning fast"
+TRANSITION_TOLERANCE_FACTOR = (
+    2.0  # < 2x the expected pause (and tm healthy) means "transitioning fast"
+)
 HEALTH_VERSION = 2
 
 
@@ -264,18 +266,16 @@ class HttpHandler(BaseHttpHandler):
         """
         Handle GET /healthcheck and compute the agent's health metrics.
 
-        The health is assessed across three dimensions (mech-service parity):
+        Only **liveness** is actually measured: whether the FSM is transitioning
+        and Tendermint is not stalled. A missing last-transition timestamp is
+        reported as not-live (reason ``no-fsm-data``) so a frozen FSM cannot
+        read as healthy. ``readiness`` and ``progress`` are always-ok
+        placeholders kept for shape parity with the mech service -- market-creator
+        is FSM-only with no task backlog or dependency-read metric.
 
-        - **Liveness**: whether the FSM is actively transitioning and Tendermint
-          is not in a stalled state. This is the dimension that catches a frozen
-          FSM: a missing last-transition timestamp is reported as not-live
-          (reason ``no-fsm-data``) instead of being silently treated as healthy.
-        - **Readiness**: whether the agent can accept new work.
-        - **Progress**: whether the agent is advancing through its backlog.
-
-        market-creator is an FSM-only service with no task backlog or dependency
-        read metric (unlike mech), so readiness and progress are always-ok
-        placeholders (reason ``idle-ok``) kept for shape parity with mech.
+        TODO: if this service later gains external I/O that can stall a
+        behaviour while the FSM still ticks via timeout transitions, compute
+        readiness/progress for real instead of these placeholders.
 
         The endpoint always responds with HTTP 200; a wedge is signalled solely
         via ``is_healthy: false`` in the JSON body.
@@ -288,46 +288,49 @@ class HttpHandler(BaseHttpHandler):
         is_transitioning_fast: Optional[bool] = None
         current_round: Optional[str] = None
         rounds: Optional[List[str]] = None
+        period: Optional[int] = None
 
         round_sequence = cast(SharedState, self.context.state).round_sequence
         reset_pause = float(self.context.params.reset_pause_duration)
 
         # Guard A: FSM liveness data is only available once we have transitioned.
-        if round_sequence._last_round_transition_timestamp:
-            is_tm_unhealthy = cast(
-                SharedState, self.context.state
-            ).round_sequence.block_stall_deadline_expired
-
+        if round_sequence._last_round_transition_timestamp is not None:
+            is_tm_unhealthy = round_sequence.block_stall_deadline_expired
             current_time = datetime.now().timestamp()
             seconds_since_last_transition = current_time - datetime.timestamp(
                 round_sequence._last_round_transition_timestamp
             )
-
             is_transitioning_fast = (not is_tm_unhealthy) and (
                 seconds_since_last_transition
                 < TRANSITION_TOLERANCE_FACTOR * reset_pause
             )
 
-        # Guard B: round identifiers for observability.
+        # Guard B: round identifiers + period require an initialised AbciApp.
+        # Reading synchronized_data before that raises ABCIAppInternalError, so
+        # keep it guarded to honour the always-HTTP-200 contract at boot.
         if round_sequence._abci_app:
             current_round = round_sequence._abci_app.current_round.round_id
             rounds = [
                 r.round_id for r in round_sequence._abci_app._previous_rounds[-25:]
             ]
             rounds.append(current_round)
+            period = self.synchronized_data.period_count
 
-        # Liveness: catches the wedge. No FSM data or unknown tm state -> not live.
-        if seconds_since_last_transition is None or is_tm_unhealthy is None:
+        # Liveness catches a frozen FSM. seconds_since_last_transition and
+        # is_tm_unhealthy are set together in Guard A, so a None timestamp is
+        # the single "no transition yet" trigger.
+        if seconds_since_last_transition is None:
             liveness_ok, live_reason = False, "no-fsm-data"
         else:
             liveness_ok = (not is_tm_unhealthy) and (
                 seconds_since_last_transition <= LIVENESS_STALL_FACTOR * reset_pause
             )
-            live_reason = (
-                "ok"
-                if liveness_ok
-                else ("tm-unhealthy" if is_tm_unhealthy else "stuck-no-transition")
-            )
+            if liveness_ok:
+                live_reason = "ok"
+            elif is_tm_unhealthy:
+                live_reason = "tm-unhealthy"
+            else:
+                live_reason = "stuck-no-transition"
 
         # Readiness/progress: market-creator has no backlog metric, so these are
         # always-ok placeholders kept for mech parity.
@@ -344,7 +347,7 @@ class HttpHandler(BaseHttpHandler):
             "seconds_since_last_transition": seconds_since_last_transition,
             # Three-state: True (healthy), False (unhealthy), None (unknown).
             "is_tm_healthy": (None if is_tm_unhealthy is None else not is_tm_unhealthy),
-            "period": self.synchronized_data.period_count,
+            "period": period,
             "reset_pause_duration": reset_pause,
             "current_round": current_round,
             "rounds": rounds,
