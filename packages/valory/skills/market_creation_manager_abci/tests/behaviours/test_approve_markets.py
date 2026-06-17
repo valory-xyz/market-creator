@@ -363,6 +363,51 @@ class TestApproveMarketsBehaviourGenerators:
                 _exhaust_gen(gen)
                 mock_set_done.assert_called_once()
 
+    def test_sender_act_mech_tool_raises_exception(self) -> None:
+        """Test _sender_act degrades gracefully when the mech tool raises.
+
+        The tool runs in a worker thread; if run() raises, future.result()
+        re-raises it. The behaviour must catch it, log, and fall through to
+        the empty-markets path rather than propagating and stalling.
+        """
+        mock_synced = MagicMock()
+        mock_synced.most_voted_randomness = "seed123"
+        mock_synced.collected_proposed_markets_data = json.dumps(
+            {"required_markets_to_approve_per_opening_ts": {"1700000000": 3}}
+        )
+        mock_synced.approved_markets_count = 0
+
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1000),
+            ),
+            patch(
+                "packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets.mech_tool_propose_questions"
+            ) as mock_mech,
+        ):
+            mock_mech.KeyChain = MagicMock()
+            mock_mech.run.side_effect = RuntimeError("boom")
+
+            with (
+                patch.object(
+                    self.behaviour, "send_a2a_transaction", new=_make_gen(None)
+                ),
+                patch.object(
+                    self.behaviour, "wait_until_round_end", new=_make_gen(None)
+                ),
+                patch.object(self.behaviour, "set_done") as mock_set_done,
+            ):
+                gen = self.behaviour._sender_act()
+                _exhaust_gen(gen)
+                mock_set_done.assert_called_once()
+
     def test_propose_and_approve_market_success(self) -> None:
         """Test _propose_and_approve_market when all 3 HTTP calls return 200."""
         mock_resp = MagicMock()
@@ -371,7 +416,7 @@ class TestApproveMarketsBehaviourGenerators:
 
         with (
             patch.object(self.behaviour, "get_http_response", new=_make_gen(mock_resp)),
-            patch("time.sleep"),
+            patch.object(self.behaviour, "sleep", new=_make_gen(None)),
         ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
@@ -425,7 +470,7 @@ class TestApproveMarketsBehaviourGenerators:
 
         with (
             patch.object(self.behaviour, "get_http_response", new=multi_gen),
-            patch("time.sleep"),
+            patch.object(self.behaviour, "sleep", new=_make_gen(None)),
         ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}
@@ -459,7 +504,7 @@ class TestApproveMarketsBehaviourGenerators:
 
         with (
             patch.object(self.behaviour, "get_http_response", new=multi_gen),
-            patch("time.sleep"),
+            patch.object(self.behaviour, "sleep", new=_make_gen(None)),
         ):
             gen = self.behaviour._propose_and_approve_market(
                 {"id": "market_1", "question": "Test?"}

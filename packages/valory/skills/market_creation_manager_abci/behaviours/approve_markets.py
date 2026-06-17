@@ -19,9 +19,9 @@
 
 """This module contains the ApproveMarketsBehaviour of the 'market_creation_manager_abci' skill."""
 
+import concurrent.futures
 import json
 import random
-import time
 from datetime import datetime, timezone
 from typing import Any, Dict, Generator, Type
 
@@ -140,8 +140,29 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
                     num_questions=num_questions,
                     resolution_time=resolution_time,
                 )
-                mech_tool_output = mech_tool_propose_questions.run(**tool_kwargs)[0]  # type: ignore
-                mech_tool_output_json = json.loads(mech_tool_output)
+                # The mech tool runs a long (~60-90s) synchronous LLM/HTTP
+                # pipeline. Running it inline blocks the single AEA event loop,
+                # which then stops servicing the local Tendermint `begin_block`
+                # stream; once the block-stall deadline expires the FSM wedges
+                # permanently. Offload to a worker thread and yield control back
+                # to the loop while it runs so consensus keeps progressing.
+                executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+                future = executor.submit(mech_tool_propose_questions.run, **tool_kwargs)
+                try:
+                    yield from self.wait_for_condition(future.done)
+                    mech_tool_output = future.result()[0]  # type: ignore
+                    mech_tool_output_json = json.loads(mech_tool_output)
+                except Exception as e:  # noqa  pylint: disable=broad-except
+                    # Degrade a raw tool exception to the existing tool-error
+                    # path instead of letting it propagate and stall the skill.
+                    self.context.logger.error(f"Mech tool raised an exception: {e}")
+                    mech_tool_output_json = {"error": str(e)}
+                finally:
+                    # Never shutdown(wait=True): on GeneratorExit (service
+                    # shutdown mid-run) that would block the event loop until
+                    # the long tool call finished -- the very thing this fix
+                    # avoids. Detach the worker instead.
+                    executor.shutdown(wait=False)
                 # END MECH INTERACT EMULATION
 
                 if "error" in mech_tool_output_json:
@@ -220,7 +241,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return ApproveMarketsRound.ERROR_PAYLOAD
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully proposed market, received body {body}")
-        time.sleep(3)
+        yield from self.sleep(3)
 
         # Step 2: Approve market
         self.context.logger.info(f"Approving market {market_id=}")
@@ -239,7 +260,7 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return ApproveMarketsRound.ERROR_PAYLOAD
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully approved market, received body {body}")
-        time.sleep(3)
+        yield from self.sleep(3)
 
         # Step 3: Update market data
         self.context.logger.info(f"Updating market {market_id=}")
@@ -262,6 +283,6 @@ class ApproveMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         body = json.loads(http_response.body.decode())
         self.context.logger.info(f"Successfully updated market, received body {body}")
-        time.sleep(3)
+        yield from self.sleep(3)
 
         return json.dumps(body, sort_keys=True)
