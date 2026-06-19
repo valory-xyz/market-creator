@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeiakchdfkoaxr5ypwxzpvv2codwmbd24jks2xqcmm5whsgxcgaa4ya
+agent: valory/market_maker:0.1.0:bafybeia6grmqjzgkmfq76dbcmx7wp7ovbdd3jwim4teq3o6m4jdkjcodr4
 number_of_agents: 1
 deployment:
   agent:
@@ -72,6 +72,18 @@ models:
       termination_sleep: ${TERMINATION_SLEEP:int:900}
       termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
       xdai_threshold: ${XDAI_THRESHOLD:int:3000000000000000000}
+      mech_chain_id: ${MECH_CHAIN_ID:str:gnosis}
+      mech_contract_address: ${MECH_CONTRACT_ADDRESS:str:0x601024E27f1C67B28209E24272CED8A31fc8151F}
+      mech_wrapped_native_token_address: ${MECH_WRAPPED_NATIVE_TOKEN_ADDRESS:str:0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d}
+      mech_interaction_sleep_time: ${MECH_INTERACTION_SLEEP_TIME:int:10}
+      mech_interact_round_timeout_seconds: ${MECH_INTERACT_ROUND_TIMEOUT_SECONDS:int:1200}
+      mech_tool_propose_question: ${MECH_TOOL_PROPOSE_QUESTION:str:propose-question}
+      use_acn_for_delivers: ${USE_ACN_FOR_DELIVERS:bool:false}
+      use_mech_marketplace: ${USE_MECH_MARKETPLACE:bool:true}
+      mech_marketplace_config: ${MECH_MARKETPLACE_CONFIG:dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","use_dynamic_mech_selection":false,"response_timeout":300}}
+      valid_mechs: ${VALID_MECHS:list:["0x601024e27f1c67b28209e24272ced8a31fc8151f"]}
+      penalize_mech_time_window: ${PENALIZE_MECH_TIME_WINDOW:int:1800}
+      deliveries_lookback_days: ${DELIVERIES_LOOKBACK_DAYS:int:30}
       tx_timeout: ${TX_TIMEOUT:float:10.0}
       use_termination: ${USE_TERMINATION:bool:false}
       round_timeout_seconds: ${ROUND_TIMEOUT_SECONDS:float:120}

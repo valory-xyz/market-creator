@@ -22,6 +22,7 @@
 import json
 from typing import Any, Dict, Generator, Optional, Type, cast
 
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.contracts.fpmm_deterministic_factory.contract import (
     FPMMDeterministicFactory,
 )
@@ -69,6 +70,12 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         if settled_tx_hash is None:
             self.context.logger.info("No settled tx hash.")
             return PostTransactionRound.DONE_PAYLOAD
+
+        if (
+            self.synchronized_data.tx_submitter
+            == MechRequestStates.MechRequestRound.auto_round_id()
+        ):
+            return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
 
         if self.synchronized_data.tx_submitter == DepositDaiRound.auto_round_id():
             return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD

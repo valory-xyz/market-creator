@@ -23,6 +23,7 @@ import json
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.post_transaction import (
     PostTransactionBehaviour,
@@ -375,3 +376,15 @@ class TestPostTransactionBehaviour:
             result = _exhaust_gen(gen)
 
         assert result == PostTransactionRound.DONE_PAYLOAD
+
+    def test_get_payload_mech_request_submitter(self) -> None:
+        """Test get_payload when tx_submitter is MechRequestRound."""
+        self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
+        self.behaviour.synchronized_data.tx_submitter = (
+            MechRequestStates.MechRequestRound.auto_round_id()
+        )
+
+        gen = self.behaviour.get_payload()
+        result = _exhaust_gen(gen)
+
+        assert result == PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD

@@ -25,9 +25,6 @@ from packages.valory.skills.abstract_round_abci.behaviours import (
     AbstractRoundBehaviour,
     BaseBehaviour,
 )
-from packages.valory.skills.market_creation_manager_abci.behaviours.approve_markets import (
-    ApproveMarketsBehaviour,
-)
 from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import (
     CollectProposedMarketsBehaviour,
 )
@@ -42,6 +39,12 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.post_transac
 )
 from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_transaction import (
     PrepareTransactionBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.process_proposed_questions import (
+    ProcessProposedQuestionsBehaviour,
+)
+from packages.valory.skills.market_creation_manager_abci.behaviours.request_proposed_questions import (
+    RequestProposedQuestionsBehaviour,
 )
 from packages.valory.skills.market_creation_manager_abci.behaviours.retrieve_approved_market import (
     RetrieveApprovedMarketBehaviour,
@@ -62,7 +65,8 @@ class MarketCreationManagerRoundBehaviour(AbstractRoundBehaviour):
     behaviours: Set[Type[BaseBehaviour]] = {
         CollectRandomnessBehaviour,
         CollectProposedMarketsBehaviour,
-        ApproveMarketsBehaviour,
+        RequestProposedQuestionsBehaviour,
+        ProcessProposedQuestionsBehaviour,
         SelectKeeperMarketProposalBehaviour,
         RetrieveApprovedMarketBehaviour,
         PrepareTransactionBehaviour,

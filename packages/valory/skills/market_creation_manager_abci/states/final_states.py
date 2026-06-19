@@ -48,3 +48,11 @@ class FinishedWithCtRedeemTokensPostTxRound(DegenerateRound):
 
 class FinishedWithRealitioWithdrawBondsPostTxRound(DegenerateRound):
     """FinishedWithRealitioWithdrawBondsPostTxRound"""
+
+
+class FinishedWithMechRequestRound(DegenerateRound):
+    """Degenerate round: transition to MechInteract (start Mech flow)."""
+
+
+class FinishedWithMechPollRound(DegenerateRound):
+    """Degenerate round: transition to MechResponseRound (poll for delivery)."""

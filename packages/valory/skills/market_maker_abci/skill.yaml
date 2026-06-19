@@ -9,12 +9,12 @@ aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
   README.md: bafybeiaa46uuvl2cbxvgdqrqhfh5te6z2iinqktaoz3sycjd6wpar2nfhy
   __init__.py: bafybeicr7qsikxguag7ozqdriirxxmqbhuxidbgpqjv5galsjmxrr5gbwu
-  behaviours.py: bafybeiclbf47mmghjtnkxyzylh7orgkrfpqzj3binlex36ucy5vcshqpv4
-  composition.py: bafybeieudii7cevqathnt2fzcx45s5r6z6sfg77b5g24xx5tl3hl6icwrm
+  behaviours.py: bafybeiea4awdl27oq3bhtmepyv4qhksxclqumwwpxfdzbagrfoxsi2o5ue
+  composition.py: bafybeidd5rlcr36qdixe32dnrlc5qgzhuyjceppuurkr2b7ohzfcek3fne
   dialogues.py: bafybeiafgwadv6kzts6yx5gtjyuvaftnofyn3rrwvczfd5seihpydzukju
-  fsm_specification.yaml: bafybeieupgiolp7q6tdsgxwmhgavv42dpaisz5ffqidwtc4jjw4vhcpuim
+  fsm_specification.yaml: bafybeieosjxl4isu64etiw2elfxitedwqly7d7oi77xmqnna24lhmqrohm
   handlers.py: bafybeiefnf5zg2tjf6mfdaz65ath6ziditzul5u3hrkpl2h5ofwdsaw3vy
-  models.py: bafybeiesxdaoea5oiaorbl72l75ns2wr3v5vfudzib6azajylwxsagtwlq
+  models.py: bafybeidaxa4d7w3566mcjtiakcz5aufwuwovxnsmqfgtzf7juesksllsmu
   tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
   tests/test_behaviours.py: bafybeiapyvud7fsne3cg2oowm2u7jni5ngixv4p3mudukisluccjzpc5l4
@@ -31,7 +31,8 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
 - valory/funds_forwarder_abci:0.1.0:bafybeihuxw5tgnp4hie76as2jwnbp5abxrkmlmmpu4ila6ey34xrfkqqie
 - valory/identify_service_owner_abci:0.1.0:bafybeid7qw3aoorbv2bnxwd54npkgvdxf6kzpfscnmzqiui74jiskjmitm
-- valory/market_creation_manager_abci:0.1.0:bafybeig7ando5pmz5c2mqoqdjsbxsdpklc7kbediqy4gqwxy5sj4dkkkgm
+- valory/market_creation_manager_abci:0.1.0:bafybeih5s535m57okj72zma24ix7uwpefrroqjgv5o7jvy3hsclfefx2ee
+- valory/mech_interact_abci:0.1.0:bafybeidnmszufszq3ro4ebgrqzmhqgctrsc6sykeanfsbvotghvt2cgfsy
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
 - valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeicj3pgdx7q5chbms3pxrb6pcv7lbqhkigwnmjuo54p63ub7mkqe5i
@@ -239,7 +240,67 @@ models:
       use_termination: false
       validate_timeout: 1205
       xdai_threshold: 3000000000000000000
+      mech_chain_id: gnosis
+      mech_contract_address: '0x601024E27f1C67B28209E24272CED8A31fc8151F'
+      mech_wrapped_native_token_address: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
+      mech_interaction_sleep_time: 10
+      mech_interact_round_timeout_seconds: 1200
+      mech_tool_propose_question: propose-question
+      use_acn_for_delivers: false
+      use_mech_marketplace: true
+      mech_marketplace_config:
+        mech_marketplace_address: '0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB'
+        priority_mech_address: '0x601024E27f1C67B28209E24272CED8A31fc8151F'
+        priority_mech_staking_instance_address: '0x998dEFafD094817EF329f6dc79c703f1CF18bC90'
+        priority_mech_service_id: 2198
+        requester_staking_instance_address: '0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d'
+        response_timeout: 300
+        use_dynamic_mech_selection: false
+      valid_mechs:
+      - '0x601024e27f1c67b28209e24272ced8a31fc8151f'
+      penalize_mech_time_window: 1800
+      deliveries_lookback_days: 30
     class_name: Params
+  mech_tools:
+    args:
+      api_id: mech_tools
+      headers:
+        Content-Type: application/json
+      method: GET
+      parameters: {}
+      response_key: tools
+      response_type: list
+      retries: 5
+      url: ''
+    class_name: MechToolsSpecs
+  mechs_subgraph:
+    args:
+      api_id: mechs
+      headers:
+        Content-Type: application/json
+      method: POST
+      parameters: {}
+      response_key: data:meches
+      response_type: list
+      error_key: errors
+      error_index: 0
+      error_type: dict
+      retries: 5
+      url: https://api.subgraph.autonolas.tech/api/proxy/marketplace-gnosis
+      delivery_rate_cap: 10000000000000000
+    class_name: MechsSubgraph
+  mech_response:
+    args:
+      api_id: mech_response
+      headers:
+        Content-Type: application/json
+      method: GET
+      parameters: {}
+      response_key: result
+      response_type: str
+      retries: 5
+      url: ''
+    class_name: MechResponseSpecs
   randomness_api:
     args:
       api_id: cloudflare

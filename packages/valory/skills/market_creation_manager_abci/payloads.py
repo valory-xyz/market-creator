@@ -62,8 +62,15 @@ class CollectProposedMarketsPayload(BaseTxPayload):
 
 
 @dataclass(frozen=True)
-class ApproveMarketsPayload(BaseTxPayload):
-    """Represent a transaction payload for the ApproveMarketsRound."""
+class RequestProposedQuestionsPayload(BaseTxPayload):
+    """Represent a transaction payload for the RequestProposedQuestionsRound."""
+
+    mech_requests: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class ProcessProposedQuestionsPayload(BaseTxPayload):
+    """Represent a transaction payload for the ProcessProposedQuestionsRound."""
 
     content: str
     approved_markets_count: int

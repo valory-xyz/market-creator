@@ -28,6 +28,8 @@ from packages.valory.skills.market_creation_manager_abci.states.final_states imp
     FinishedWithDepositDaiRound,
     FinishedWithFpmmRemoveLiquidityPostTxRound,
     FinishedWithFundsForwarderPostTxRound,
+    FinishedWithMechPollRound,
+    FinishedWithMechRequestRound,
     FinishedWithRealitioWithdrawBondsPostTxRound,
     FinishedWithoutTxRound,
 )
@@ -40,6 +42,8 @@ ALL_FINAL_STATES = [
     FinishedWithFpmmRemoveLiquidityPostTxRound,
     FinishedWithCtRedeemTokensPostTxRound,
     FinishedWithRealitioWithdrawBondsPostTxRound,
+    FinishedWithMechRequestRound,
+    FinishedWithMechPollRound,
 ]
 
 

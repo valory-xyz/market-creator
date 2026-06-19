@@ -19,7 +19,7 @@
 
 """This module contains the shared state for the abci skill of MarketCreationManagerAbciApp."""
 
-from typing import Any, List, Type
+from typing import Any, Type
 
 from aea.exceptions import enforce
 
@@ -62,16 +62,6 @@ class MarketCreationManagerParams(BaseParams):
         )
         self.market_approval_server_api_key = self._ensure(
             key="market_approval_server_api_key", kwargs=kwargs, type_=str
-        )
-        self.newsapi_api_key = self._ensure(
-            key="newsapi_api_key", kwargs=kwargs, type_=str
-        )
-        self.newsapi_endpoint = self._ensure(
-            key="newsapi_endpoint", kwargs=kwargs, type_=str
-        )
-        self.topics = self._ensure(key="topics", kwargs=kwargs, type_=List[str])
-        self.news_sources = self._ensure(
-            key="news_sources", kwargs=kwargs, type_=List[str]
         )
         self.max_proposed_markets = self._ensure(
             "max_proposed_markets", kwargs, type_=int
@@ -151,14 +141,19 @@ class MarketCreationManagerParams(BaseParams):
         self.max_markets_per_story = self._ensure(
             "max_markets_per_story", kwargs, type_=int
         )
-        self.serper_api_key = self._ensure("serper_api_key", kwargs, type_=str)
-        self.subgraph_api_key = self._ensure("subgraph_api_key", kwargs, type_=str)
-        self.google_api_key = self._ensure("google_api_key", kwargs, type_=str)
-        self.google_engine_id = self._ensure("google_engine_id", kwargs, type_=str)
-        self.openai_api_key = self._ensure("openai_api_key", kwargs, type_=str)
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
         self.service_endpoint_base = self._ensure("service_endpoint_base", kwargs, str)
+        # Mech tool for question generation (routed via mech_interact_abci).
+        # Read with kwargs.get so MechParams.__init__ also sees this key.
+        self.mech_tool_propose_question: str = kwargs.get(
+            "mech_tool_propose_question", "propose-question"
+        )
+        # Round timeout for mech interactions (read without pop so
+        # MechParams.__init__ can also consume it).
+        self.mech_interact_round_timeout_seconds: int = kwargs.get(
+            "mech_interact_round_timeout_seconds", 1200
+        )
         super().__init__(*args, **kwargs)
 
 

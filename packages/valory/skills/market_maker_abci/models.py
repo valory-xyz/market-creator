@@ -19,6 +19,8 @@
 
 """This module contains the shared state for the market maker ABCI application."""
 
+# pylint: disable=superfluous-parens,too-many-ancestors
+
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
 )
@@ -46,6 +48,22 @@ from packages.valory.skills.market_creation_manager_abci.rounds import (
     Event as MarketCreationManagerEvent,
 )
 from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
+from packages.valory.skills.mech_interact_abci.models import (
+    MechResponseSpecs as BaseMechResponseSpecs,
+)
+from packages.valory.skills.mech_interact_abci.models import (
+    MechToolsSpecs as BaseMechToolsSpecs,
+)
+from packages.valory.skills.mech_interact_abci.models import (
+    MechsSubgraph as BaseMechsSubgraph,
+)
+from packages.valory.skills.mech_interact_abci.models import (
+    Params as MechInteractAbciParams,
+)
+from packages.valory.skills.mech_interact_abci.models import (
+    SharedState as MechInteractSharedState,
+)
+from packages.valory.skills.mech_interact_abci.rounds import Event as MechInteractEvent
 from packages.valory.skills.omen_ct_redeem_tokens_abci.models import (
     ConditionalTokensSubgraph as BaseConditionalTokensSubgraph,
 )
@@ -86,17 +104,20 @@ RandomnessApi = MarketCreationManagerRandomnessApi
 OmenSubgraph = BaseOmenSubgraph
 ConditionalTokensSubgraph = BaseConditionalTokensSubgraph
 RealitioSubgraph = BaseRealitioSubgraph
+MechResponseSpecs = BaseMechResponseSpecs
+MechToolsSpecs = BaseMechToolsSpecs
+MechsSubgraph = BaseMechsSubgraph
 
 
-class SharedState(BaseSharedState, CtRedeemTokensSharedState):
+class SharedState(MechInteractSharedState, BaseSharedState, CtRedeemTokensSharedState):
     """Keep the current shared state of the skill.
 
     Multi-inherits from sub-skill SharedStates so their ``__init__``
-    initializers (e.g. ``ignored_ct_positions`` from the CT redeem skill)
-    are run via MRO when the framework instantiates this composed class.
+    initializers (e.g. ``ignored_ct_positions`` from the CT redeem skill,
+    and mech state from mech_interact) are run via MRO.
     """
 
-    abci_app_cls = MarketCreatorAbciApp
+    abci_app_cls = MarketCreatorAbciApp  # type: ignore[assignment]
 
     def setup(self) -> None:
         """Set up."""
@@ -140,6 +161,9 @@ class SharedState(BaseSharedState, CtRedeemTokensSharedState):
         MarketCreatorAbciApp.event_to_timeout[
             OmenRealitioWithdrawBondsEvent.ROUND_TIMEOUT
         ] = self.context.params.round_timeout_seconds
+        MarketCreatorAbciApp.event_to_timeout[MechInteractEvent.ROUND_TIMEOUT] = (
+            self.context.params.mech_interact_round_timeout_seconds
+        )
 
 
 class Params(
@@ -148,6 +172,7 @@ class Params(
     FpmmRemoveLiquidityParams,
     CtRedeemTokensParams,
     RealitioWithdrawBondsParams,
+    MechInteractAbciParams,
     TerminationParams,
 ):
     """A model to represent params for multiple abci apps."""

@@ -19,12 +19,17 @@
 
 """Tests for the base module of the MarketCreationManagerAbciApp."""
 
+import json
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from packages.valory.skills.market_creation_manager_abci.states.base import (
     SynchronizedData,
+)
+from packages.valory.skills.mech_interact_abci.states.base import (
+    MechInteractionResponse,
+    MechMetadata,
 )
 
 
@@ -167,3 +172,51 @@ class TestSynchronizedData:
         result = sync_data.participant_to_tx_prep
         mock_deserialize.assert_called_once_with(serialized)
         assert result == expected
+
+    def test_mech_requests_empty(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
+        """Test mech_requests returns empty list when db returns None."""
+        mocked_db.get.return_value = None
+        result = sync_data.mech_requests
+        assert result == []
+
+    def test_mech_requests_with_data(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
+        """Test mech_requests deserializes JSON list of MechMetadata."""
+        item = {"nonce": "abc", "tool": "propose-question", "prompt": "{}"}
+        mocked_db.get.return_value = json.dumps([item])
+        result = sync_data.mech_requests
+        assert len(result) == 1
+        assert isinstance(result[0], MechMetadata)
+        assert result[0].nonce == "abc"
+
+    def test_mech_responses_empty(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
+        """Test mech_responses returns empty list when db returns None."""
+        mocked_db.get.return_value = None
+        result = sync_data.mech_responses
+        assert result == []
+
+    def test_mech_responses_with_json_string(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
+        """Test mech_responses deserializes from a JSON string."""
+        item = {"nonce": "abc", "result": '{"questions":{}}'}
+        mocked_db.get.return_value = json.dumps([item])
+        result = sync_data.mech_responses
+        assert len(result) == 1
+        assert isinstance(result[0], MechInteractionResponse)
+        assert result[0].nonce == "abc"
+
+    def test_mech_responses_with_list(
+        self, sync_data: SynchronizedData, mocked_db: MagicMock
+    ) -> None:
+        """Test mech_responses handles list (already-deserialized) form."""
+        item = {"nonce": "xyz", "result": "{}"}
+        mocked_db.get.return_value = [item]
+        result = sync_data.mech_responses
+        assert len(result) == 1
+        assert result[0].nonce == "xyz"
