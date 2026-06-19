@@ -49,7 +49,7 @@ class RetrieveApprovedMarketPayload(BaseTxPayload):
 
 @dataclass(frozen=True)
 class PostTxPayload(BaseTxPayload):
-    """Represent a transaction payload for the PrepareTransactionRound."""
+    """Represent a transaction payload for the CreateMarketTxRound."""
 
     content: str
 

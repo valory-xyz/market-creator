@@ -17,12 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the PrepareTransactionRound of the MarketCreationManagerAbciApp."""
+"""This module contains the CreateMarketTxRound of the MarketCreationManagerAbciApp."""
 
 from packages.valory.skills.market_creation_manager_abci.states.base import (
     TxPreparationRound,
 )
 
 
-class PrepareTransactionRound(TxPreparationRound):
-    """PrepareTransactionRound"""
+class CreateMarketTxRound(TxPreparationRound):
+    """CreateMarketTxRound"""

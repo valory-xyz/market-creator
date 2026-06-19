@@ -37,6 +37,9 @@ from packages.valory.skills.market_creation_manager_abci.states.collect_proposed
 from packages.valory.skills.market_creation_manager_abci.states.collect_randomness import (
     CollectRandomnessRound,
 )
+from packages.valory.skills.market_creation_manager_abci.states.create_market_tx import (
+    CreateMarketTxRound,
+)
 from packages.valory.skills.market_creation_manager_abci.states.deposit_dai import (
     DepositDaiRound,
 )
@@ -53,9 +56,6 @@ from packages.valory.skills.market_creation_manager_abci.states.final_states imp
 )
 from packages.valory.skills.market_creation_manager_abci.states.post_transaction import (
     PostTransactionRound,
-)
-from packages.valory.skills.market_creation_manager_abci.states.prepare_transaction import (
-    PrepareTransactionRound,
 )
 from packages.valory.skills.market_creation_manager_abci.states.process_proposed_questions import (
     ProcessProposedQuestionsRound,
@@ -129,7 +129,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             - round timeout: 13.
             - api error: 13.
             - no markets retrieved: 13.
-        8. PrepareTransactionRound
+        8. CreateMarketTxRound
             - done: 11.
             - no majority: 13.
             - none: 13.
@@ -215,12 +215,12 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.ROUND_TIMEOUT: RetrieveApprovedMarketRound,
         },
         RetrieveApprovedMarketRound: {
-            Event.DONE: PrepareTransactionRound,
+            Event.DONE: CreateMarketTxRound,
             Event.ROUND_TIMEOUT: FinishedWithoutTxRound,
             Event.ERROR: FinishedWithoutTxRound,
             Event.NO_MARKETS_RETRIEVED: FinishedWithoutTxRound,
         },
-        PrepareTransactionRound: {
+        CreateMarketTxRound: {
             Event.DONE: FinishedMarketCreationManagerRound,
             Event.NO_MAJORITY: FinishedWithoutTxRound,
             Event.NONE: FinishedWithoutTxRound,

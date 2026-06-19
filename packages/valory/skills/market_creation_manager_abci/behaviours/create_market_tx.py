@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the PrepareTransactionBehaviour of the 'market_creation_manager_abci' skill."""
+"""This module contains the CreateMarketTxBehaviour of the 'market_creation_manager_abci' skill."""
 
 from datetime import datetime
 from typing import Dict, Generator, Optional, Tuple, Type, cast
@@ -42,14 +42,14 @@ from packages.valory.skills.market_creation_manager_abci.payloads import (
     MultisigTxPayload,
 )
 from packages.valory.skills.market_creation_manager_abci.rounds import (
-    PrepareTransactionRound,
+    CreateMarketTxRound,
 )
 
 
-class PrepareTransactionBehaviour(MarketCreationManagerBaseBehaviour):
-    """PrepareTransactionBehaviour"""
+class CreateMarketTxBehaviour(MarketCreationManagerBaseBehaviour):
+    """CreateMarketTxBehaviour"""
 
-    matching_round: Type[AbstractRound] = PrepareTransactionRound
+    matching_round: Type[AbstractRound] = CreateMarketTxRound
 
     def _calculate_time_parameters(
         self,

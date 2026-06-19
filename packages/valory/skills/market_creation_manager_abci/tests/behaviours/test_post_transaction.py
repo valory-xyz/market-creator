@@ -170,7 +170,7 @@ class TestPostTransactionBehaviour:
         assert result == PostTransactionRound.DONE_PAYLOAD
 
     def test_get_payload_non_prepare_tx_submitter(self) -> None:
-        """Test get_payload when tx_submitter is not PrepareTransactionRound."""
+        """Test get_payload when tx_submitter is not CreateMarketTxRound."""
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = "some_other_round"
         self.behaviour.synchronized_data.is_approved_question_data_set = True
@@ -355,14 +355,14 @@ class TestPostTransactionBehaviour:
             mock_set_done.assert_called_once()
 
     def test_get_payload_prepare_tx_submitter(self) -> None:
-        """Test get_payload when tx_submitter is PrepareTransactionRound."""
+        """Test get_payload when tx_submitter is CreateMarketTxRound."""
         from packages.valory.skills.market_creation_manager_abci.rounds import (
-            PrepareTransactionRound,
+            CreateMarketTxRound,
         )
 
         self.behaviour.synchronized_data.settled_tx_hash = "0xabc"
         self.behaviour.synchronized_data.tx_submitter = (
-            PrepareTransactionRound.auto_round_id()
+            CreateMarketTxRound.auto_round_id()
         )
         self.behaviour.synchronized_data.is_approved_question_data_set = True
         self.behaviour.synchronized_data.approved_question_data = {"id": "market_1"}
