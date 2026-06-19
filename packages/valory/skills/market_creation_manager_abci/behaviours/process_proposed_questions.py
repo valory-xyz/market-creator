@@ -44,9 +44,9 @@ class ProcessProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
     Entered after MechInteract delivers question proposals (via
     FinishedMechResponseRound -> ProcessProposedQuestionsRound in
-    the composed app).  Reads ``mech_responses`` from SynchronizedData,
-    matches by nonce (stored in ``mech_requests[0].nonce``), parses the
-    tool JSON, and calls the approval server for each valid question.
+    the composed app).  Reads the delivered ``mech_responses`` from
+    SynchronizedData, parses the tool JSON, and calls the approval server
+    for each valid question.
 
     FAIL-CLOSED: any error (missing response, bad JSON, empty questions,
     server errors) results in an empty proposed_markets dict and the round
@@ -94,36 +94,26 @@ class ProcessProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     def _parse_mech_response(
         self,
     ) -> Generator[None, None, Dict[str, Any]]:
-        """Match mech_response by nonce and parse the tool JSON.
+        """Read the delivered mech_response and parse the tool JSON.
 
         :return: dict of questions from the tool output, or empty dict on
             any failure (missing response / bad JSON / no questions key).
         :yield: nothing -- no async I/O needed here.
         """
-        mech_requests = self.synchronized_data.mech_requests
-        if not mech_requests:
-            self.context.logger.warning(
-                "ProcessProposedQuestions: no mech_requests in SynchronizedData."
-            )
-            return {}
-
-        expected_nonce = mech_requests[0].nonce
+        # market-creator sends a single propose-question request per cycle, and
+        # mech_interact_abci clears ``mech_requests`` once consumed -- so read
+        # the delivered response directly rather than matching on the (now
+        # cleared) request nonce. The response's ``error`` field also defaults
+        # to "Unknown" even on success, so key off ``result`` instead.
         mech_responses = self.synchronized_data.mech_responses
-        matched = next((r for r in mech_responses if r.nonce == expected_nonce), None)
-
-        if matched is None:
+        if not mech_responses:
             self.context.logger.warning(
-                f"ProcessProposedQuestions: no Mech response for nonce "
-                f"{expected_nonce}. Treating as empty."
+                "ProcessProposedQuestions: no Mech responses in SynchronizedData. "
+                "Treating as empty."
             )
             return {}
 
-        if matched.error:
-            self.context.logger.warning(
-                f"ProcessProposedQuestions: Mech returned error "
-                f"'{matched.error}'. Treating as empty."
-            )
-            return {}
+        matched = mech_responses[0]
 
         if not matched.result:
             self.context.logger.warning(

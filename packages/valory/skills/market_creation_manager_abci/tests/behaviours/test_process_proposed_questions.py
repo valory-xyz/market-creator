@@ -51,13 +51,6 @@ def _exhaust_gen(gen: Any) -> Any:
         return exc.value
 
 
-def _make_mech_metadata(nonce: str) -> MagicMock:
-    """Make a MechMetadata mock."""
-    m = MagicMock()
-    m.nonce = nonce
-    return m
-
-
 def _make_mech_response(nonce: str, result: Any, error: Any = None) -> MagicMock:
     """Make a MechInteractionResponse mock."""
     r = MagicMock()
@@ -163,38 +156,18 @@ class TestParseMechResponse:
         """Exhaust the _parse_mech_response generator."""
         return _exhaust_gen(self.behaviour._parse_mech_response())
 
-    def test_empty_when_no_mech_requests(self) -> None:
-        """Returns empty dict when mech_requests is empty."""
-        self._synced().mech_requests = []
-        assert self._run() == {}
-
-    def test_empty_when_no_matching_response(self) -> None:
-        """Returns empty dict when no response matches the nonce."""
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
-        self._synced().mech_responses = [
-            _make_mech_response("nonce-other", result='{"questions":{}}')
-        ]
-        assert self._run() == {}
-
-    def test_empty_when_response_has_error(self) -> None:
-        """Returns empty dict when matched response has an error."""
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
-        self._synced().mech_responses = [
-            _make_mech_response("nonce-abc", result=None, error="timeout")
-        ]
+    def test_empty_when_no_mech_responses(self) -> None:
+        """Returns empty dict when there are no Mech responses."""
+        self._synced().mech_responses = []
         assert self._run() == {}
 
     def test_empty_when_result_is_none(self) -> None:
-        """Returns empty dict when result is None with no error."""
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
-        self._synced().mech_responses = [
-            _make_mech_response("nonce-abc", result=None, error=None)
-        ]
+        """Returns empty dict when the delivered result is None."""
+        self._synced().mech_responses = [_make_mech_response("nonce-abc", result=None)]
         assert self._run() == {}
 
     def test_empty_when_result_is_invalid_json(self) -> None:
         """Returns empty dict when result is not valid JSON."""
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
         self._synced().mech_responses = [
             _make_mech_response("nonce-abc", result="not-json")
         ]
@@ -202,7 +175,6 @@ class TestParseMechResponse:
 
     def test_empty_when_no_questions_key(self) -> None:
         """Returns empty dict when JSON has no 'questions' key."""
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
         self._synced().mech_responses = [
             _make_mech_response("nonce-abc", result='{"reasoning": "..."}')
         ]
@@ -210,14 +182,13 @@ class TestParseMechResponse:
 
     def test_empty_when_questions_is_empty_dict(self) -> None:
         """Returns empty dict when 'questions' key is empty."""
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
         self._synced().mech_responses = [
             _make_mech_response("nonce-abc", result='{"questions": {}}')
         ]
         assert self._run() == {}
 
-    def test_returns_questions_on_valid_response(self) -> None:
-        """Returns questions dict on a well-formed Mech response."""
+    def test_returns_questions_despite_unknown_error_default(self) -> None:
+        """Parse questions from the result despite the default error='Unknown'."""
         questions = {
             "q1": {
                 "question": "Will X happen on September 5, 2025?",
@@ -226,9 +197,8 @@ class TestParseMechResponse:
             }
         }
         result_json = json.dumps({"reasoning": "...", "questions": questions})
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
         self._synced().mech_responses = [
-            _make_mech_response("nonce-abc", result=result_json)
+            _make_mech_response("nonce-abc", result=result_json, error="Unknown")
         ]
         assert self._run() == questions
 
@@ -381,7 +351,7 @@ class TestAsyncAct:
 
     def test_async_act_empty_questions(self) -> None:
         """async_act with no mech responses produces empty proposed_markets."""
-        self._synced().mech_requests = []
+        self._synced().mech_responses = []
         self._run_async_act()
 
     def test_async_act_with_valid_question_and_date_mismatch(self) -> None:
@@ -393,7 +363,6 @@ class TestAsyncAct:
         }
         questions = {"q1": market}
         result_json = json.dumps({"reasoning": "...", "questions": questions})
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
         self._synced().mech_responses = [
             _make_mech_response("nonce-abc", result=result_json)
         ]
@@ -422,7 +391,6 @@ class TestAsyncAct:
         }
         questions = {"q1": market}
         result_json = json.dumps({"reasoning": "...", "questions": questions})
-        self._synced().mech_requests = [_make_mech_metadata("nonce-abc")]
         self._synced().mech_responses = [
             _make_mech_response("nonce-abc", result=result_json)
         ]

@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeieh5ksr2jit6kokemzuxbbkrk22q4vp2542vsr52vkunfpqnvk76m
+agent: valory/market_maker:0.1.0:bafybeib5tx27tuaqd6xgwnceoj7x3smp6rx667utzuz7amx64r7gdqzeqe
 number_of_agents: 1
 deployment:
   agent:
@@ -78,6 +78,7 @@ models:
       mech_interaction_sleep_time: ${MECH_INTERACTION_SLEEP_TIME:int:10}
       mech_interact_round_timeout_seconds: ${MECH_INTERACT_ROUND_TIMEOUT_SECONDS:int:1200}
       mech_tool_propose_question: ${MECH_TOOL_PROPOSE_QUESTION:str:propose-question}
+      agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
       use_acn_for_delivers: ${USE_ACN_FOR_DELIVERS:bool:false}
       use_mech_marketplace: ${USE_MECH_MARKETPLACE:bool:true}
       mech_marketplace_config: ${MECH_MARKETPLACE_CONFIG:dict:{"mech_marketplace_address":"0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB","priority_mech_address":"0x601024E27f1C67B28209E24272CED8A31fc8151F","priority_mech_staking_instance_address":"0x998dEFafD094817EF329f6dc79c703f1CF18bC90","priority_mech_service_id":2198,"requester_staking_instance_address":"0xeF44Fb0842DDeF59D37f85D61A1eF492bbA6135d","use_dynamic_mech_selection":false,"response_timeout":300}}
