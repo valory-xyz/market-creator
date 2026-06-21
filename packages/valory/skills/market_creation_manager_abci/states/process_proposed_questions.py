@@ -35,9 +35,9 @@ from packages.valory.skills.market_creation_manager_abci.states.base import (
 class ProcessProposedQuestionsRound(CollectSameUntilThresholdRound):
     """ProcessProposedQuestionsRound -- consume Mech response and approve markets.
 
-    Entered after MechInteract delivers question proposals. Reads
-    ``mech_responses`` from SynchronizedData, matches by nonce, parses
-    the tool JSON, and calls the approval server for each valid question.
+    Entered after MechInteract delivers question proposals. Reads the
+    delivered ``mech_responses`` from SynchronizedData, parses the tool
+    JSON, and calls the approval server for each valid question.
 
     Payload fields mirror RequestProposedQuestionsPayload:
     - content: JSON of proposed markets (or ``{}`` on failure)

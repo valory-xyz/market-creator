@@ -114,7 +114,7 @@ class RequestProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         )
         self.context.logger.info(f"{opening_ts=}")
 
-        if not opening_ts:
+        if opening_ts is None:
             self.context.logger.info(
                 "No opening_ts with pending approvals -- skipping Mech request."
             )

@@ -21,7 +21,7 @@
 
 import json
 from datetime import datetime, timezone
-from typing import Any, Dict, Generator, Type
+from typing import Any, Dict, Generator, Optional, Type
 
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci import (
@@ -48,10 +48,11 @@ class ProcessProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
     SynchronizedData, parses the tool JSON, and calls the approval server
     for each valid question.
 
-    FAIL-CLOSED: any error (missing response, bad JSON, empty questions,
-    server errors) results in an empty proposed_markets dict and the round
-    still advances to RetrieveApprovedMarketRound -- the service never
-    gets stuck here.
+    FAIL-CLOSED: a missing/empty/unparseable Mech response yields no
+    questions, and any individual market that fails validation or an
+    approval-server step is skipped (not recorded in proposed_markets, not
+    counted in approved_markets_count). The round always advances to
+    RetrieveApprovedMarketRound -- the service never gets stuck here.
     """
 
     matching_round: Type[AbstractRound] = ProcessProposedQuestionsRound
@@ -64,16 +65,19 @@ class ProcessProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
             questions = yield from self._parse_mech_response()
             if questions:
-                for market in questions.values():
+                for key, market in questions.items():
                     if not self._is_resolution_date_in_question(market):
                         self.context.logger.error(
                             "Resolution date wrong or not found in "
                             f"question {market=}"
                         )
                         continue
-                    yield from self._propose_and_approve_market(market)
+                    result = yield from self._propose_and_approve_market(market)
+                    if result == ProcessProposedQuestionsRound.ERROR_PAYLOAD:
+                        # Approval server failed -- do not record or count it.
+                        continue
                     approved_markets_count += 1
-                proposed_markets = questions
+                    proposed_markets[key] = market
 
         sender = self.context.agent_address
         payload = ProcessProposedQuestionsPayload(
@@ -147,89 +151,107 @@ class ProcessProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def _is_resolution_date_in_question(self, market: Dict) -> bool:
         """Check that the resolution date appears verbatim in the question text."""
-        if not isinstance(market, dict) or "resolution_time" not in market:
+        if (
+            not isinstance(market, dict)
+            or "resolution_time" not in market
+            or "question" not in market
+        ):
             return False
         dt = datetime.fromtimestamp(market["resolution_time"], tz=timezone.utc)
+        month_name = dt.strftime("%B")
         date_formats = [
-            f"{dt.strftime('%B')} {dt.day}, {dt.year}",
-            f"{dt.strftime('%B')} {dt.strftime('%d')}, {dt.year}",
+            f"{month_name} {dt.day}, {dt.year}",
+            f"{month_name} {dt.strftime('%d')}, {dt.year}",
         ]
         for formatted_date in date_formats:
             if formatted_date in market["question"]:
                 return True
         return False
 
+    def _call_approval_server(
+        self,
+        method: str,
+        endpoint: str,
+        payload: Dict[str, Any],
+        action: str,
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
+        """Call the approval server and return the parsed JSON body.
+
+        :param method: HTTP method (``POST``/``PUT``).
+        :param endpoint: server path, e.g. ``/propose_market``.
+        :param payload: JSON request body.
+        :param action: verb used in log lines (``propose``/``approve``/``update``).
+        :return: the parsed response body on a 200 with a JSON body, else None
+            (non-200 status, or an empty/truncated/non-JSON 200 body).
+        :yield: the HTTP request to the approval server.
+        """
+        http_response = yield from self.get_http_response(
+            method=method,
+            url=self.params.market_approval_server_url + endpoint,
+            headers={
+                "Authorization": self.params.market_approval_server_api_key,
+                "Content-Type": "application/json",
+            },
+            content=json.dumps(payload).encode("utf-8"),
+        )
+        if http_response.status_code != HTTP_OK:
+            self.context.logger.warning(
+                f"Failed to {action} market: "
+                f"{http_response.status_code} {http_response}"
+            )
+            return None
+        try:
+            body = json.loads(http_response.body.decode())
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+            self.context.logger.warning(
+                f"Failed to {action} market: 200 with unparseable body ({exc})."
+            )
+            return None
+        self.context.logger.info(f"Successfully {action}d market, received body {body}")
+        return body
+
     def _propose_and_approve_market(
         self, market: Dict[str, Any]
     ) -> Generator[None, None, str]:
-        """Call the market approval server: propose, approve, update."""
-        headers = {
-            "Authorization": self.params.market_approval_server_api_key,
-            "Content-Type": "application/json",
-        }
+        """Propose, approve, then update a market on the approval server.
+
+        :param market: the proposed market dict (must contain ``id``).
+        :return: the final update body JSON on success, or ERROR_PAYLOAD when
+            the market is malformed or any approval-server step fails.
+        :yield: HTTP requests to the approval server.
+        """
+        if "id" not in market:
+            self.context.logger.warning(
+                f"Proposed market missing 'id'; skipping. market={market}"
+            )
+            return ProcessProposedQuestionsRound.ERROR_PAYLOAD
         market_id = market["id"]
 
-        # Step 1: Propose market
-        self.context.logger.info(f"proposing market {market_id=}")
-        url = self.params.market_approval_server_url + "/propose_market"
-        http_response = yield from self.get_http_response(
-            method="POST",
-            url=url,
-            headers=headers,
-            content=json.dumps(market).encode("utf-8"),
+        body = yield from self._call_approval_server(
+            "POST", "/propose_market", market, "propose"
         )
-        if http_response.status_code != HTTP_OK:
-            self.context.logger.warning(
-                f"Failed to propose market: "
-                f"{http_response.status_code} {http_response}"
-            )
+        if body is None:
             return ProcessProposedQuestionsRound.ERROR_PAYLOAD
-        body = json.loads(http_response.body.decode())
-        self.context.logger.info(f"Successfully proposed market, received body {body}")
         yield from self.sleep(3)
 
-        # Step 2: Approve market
-        self.context.logger.info(f"Approving market {market_id=}")
-        url = self.params.market_approval_server_url + "/approve_market"
-        http_response = yield from self.get_http_response(
-            method="POST",
-            url=url,
-            headers=headers,
-            content=json.dumps({"id": market_id}).encode("utf-8"),
+        body = yield from self._call_approval_server(
+            "POST", "/approve_market", {"id": market_id}, "approve"
         )
-        if http_response.status_code != HTTP_OK:
-            self.context.logger.warning(
-                f"Failed to approve market: "
-                f"{http_response.status_code} {http_response}"
-            )
+        if body is None:
             return ProcessProposedQuestionsRound.ERROR_PAYLOAD
-        body = json.loads(http_response.body.decode())
-        self.context.logger.info(f"Successfully approved market, received body {body}")
         yield from self.sleep(3)
 
-        # Step 3: Update market data
-        self.context.logger.info(f"Updating market {market_id=}")
-        url = self.params.market_approval_server_url + "/update_market"
         approved_by = (
             f"{MARKET_CREATION_MANAGER_PUBLIC_ID}@{self.context.agent_address}"
         )
-        http_response = yield from self.get_http_response(
-            method="PUT",
-            url=url,
-            headers=headers,
-            content=json.dumps({"id": market_id, "approved_by": approved_by}).encode(
-                "utf-8"
-            ),
+        body = yield from self._call_approval_server(
+            "PUT",
+            "/update_market",
+            {"id": market_id, "approved_by": approved_by},
+            "update",
         )
-        if http_response.status_code != HTTP_OK:
-            self.context.logger.warning(
-                f"Failed to update market: "
-                f"{http_response.status_code} {http_response}"
-            )
+        if body is None:
             return ProcessProposedQuestionsRound.ERROR_PAYLOAD
-
-        body = json.loads(http_response.body.decode())
-        self.context.logger.info(f"Successfully updated market, received body {body}")
         yield from self.sleep(3)
 
         return json.dumps(body, sort_keys=True)

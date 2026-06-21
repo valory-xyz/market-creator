@@ -119,6 +119,11 @@ class TestIsResolutionDateInQuestion:
                 {"question": "Will X happen?"},
                 False,
             ),
+            # Missing question key (has resolution_time)
+            (
+                {"resolution_time": _TS_SEP_5_2025},
+                False,
+            ),
             # Non-dict market
             (
                 "not_a_dict",
@@ -171,6 +176,11 @@ class TestParseMechResponse:
         self._synced().mech_responses = [
             _make_mech_response("nonce-abc", result="not-json")
         ]
+        assert self._run() == {}
+
+    def test_empty_when_result_is_non_string(self) -> None:
+        """Returns empty dict when result is non-string (json.loads TypeError)."""
+        self._synced().mech_responses = [_make_mech_response("nonce-abc", result=42)]
         assert self._run() == {}
 
     def test_empty_when_no_questions_key(self) -> None:
@@ -304,6 +314,19 @@ class TestProposeAndApproveMarket:
         )
         assert json.loads(result) == body
 
+    def test_missing_id_returns_error(self) -> None:
+        """Returns ERROR_PAYLOAD when the market has no 'id' (no HTTP call)."""
+        result = self._run_propose({"question": "Q?"})
+        assert result == ProcessProposedQuestionsRound.ERROR_PAYLOAD
+
+    def test_unparseable_200_body_returns_error(self) -> None:
+        """Returns ERROR_PAYLOAD when a 200 response carries a non-JSON body."""
+        bad = MagicMock()
+        bad.status_code = 200
+        bad.body = b"not-json"
+        result = self._run_propose({"id": "m1", "question": "Q?"}, bad)
+        assert result == ProcessProposedQuestionsRound.ERROR_PAYLOAD
+
 
 class TestAsyncAct:
     """Tests for ProcessProposedQuestionsBehaviour.async_act."""
@@ -335,9 +358,16 @@ class TestAsyncAct:
     def _synced(self) -> MagicMock:
         return self.context_mock.state.synchronized_data
 
-    def _run_async_act(self) -> None:
-        """Exhaust async_act generator."""
-        with patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)):
+    def _run_async_act(self) -> Any:
+        """Exhaust async_act and return the emitted payload."""
+        captured: Dict[str, Any] = {}
+
+        def _capture(payload: Any, *args: Any, **kwargs: Any) -> Any:
+            captured["payload"] = payload
+            return None
+            yield  # noqa: unreachable
+
+        with patch.object(self.behaviour, "send_a2a_transaction", new=_capture):
             with patch.object(
                 self.behaviour, "wait_until_round_end", new=_make_gen(None)
             ):
@@ -348,63 +378,84 @@ class TestAsyncAct:
                             next(gen)
                     except StopIteration:
                         pass
+        return captured.get("payload")
+
+    @staticmethod
+    def _patched_propose(called: list, return_value: Any) -> Any:
+        """A fake _propose_and_approve_market that records its calls."""
+
+        def _fake(market_arg: Any) -> Any:
+            called.append(market_arg)
+            return return_value
+            yield  # noqa: unreachable
+
+        return _fake
+
+    _VALID_MARKET = {
+        "id": "m1",
+        "question": "Will X happen on September 5, 2025?",
+        "resolution_time": _TS_SEP_5_2025,
+    }
+
+    def _set_questions(self, market: Dict) -> None:
+        """Put a single-question Mech response into synchronized_data."""
+        result_json = json.dumps({"reasoning": "...", "questions": {"q1": market}})
+        self._synced().mech_responses = [
+            _make_mech_response("nonce-abc", result=result_json)
+        ]
 
     def test_async_act_empty_questions(self) -> None:
-        """async_act with no mech responses produces empty proposed_markets."""
+        """No mech responses -> empty proposed_markets, count unchanged."""
         self._synced().mech_responses = []
-        self._run_async_act()
+        payload = self._run_async_act()
+        assert payload.approved_markets_count == 0
+        assert payload.content == "{}"
 
     def test_async_act_with_valid_question_and_date_mismatch(self) -> None:
-        """async_act skips market when resolution date not in question text."""
+        """Date not in question text -> skipped, not attempted, not counted."""
         market = {
             "id": "m1",
             "question": "No date here?",
             "resolution_time": _TS_SEP_5_2025,
         }
-        questions = {"q1": market}
-        result_json = json.dumps({"reasoning": "...", "questions": questions})
-        self._synced().mech_responses = [
-            _make_mech_response("nonce-abc", result=result_json)
-        ]
-        # No _propose_and_approve_market call because date doesn't match.
-        called_with = []
-
-        def _fake_propose(market_arg: Any) -> Any:
-            called_with.append(market_arg)
-            return None
-            yield  # noqa: unreachable
-
+        self._set_questions(market)
+        called: list = []
         with patch.object(
             self.behaviour,
             "_propose_and_approve_market",
-            new=_fake_propose,
+            new=self._patched_propose(called, "{}"),
         ):
-            self._run_async_act()
-        assert called_with == []
+            payload = self._run_async_act()
+        assert called == []
+        assert payload.approved_markets_count == 0
+        assert payload.content == "{}"
 
     def test_async_act_with_valid_question_approves(self) -> None:
-        """async_act calls _propose_and_approve_market for valid markets."""
-        market = {
-            "id": "m1",
-            "question": "Will X happen on September 5, 2025?",
-            "resolution_time": _TS_SEP_5_2025,
-        }
-        questions = {"q1": market}
-        result_json = json.dumps({"reasoning": "...", "questions": questions})
-        self._synced().mech_responses = [
-            _make_mech_response("nonce-abc", result=result_json)
-        ]
-        called_with = []
-
-        def _fake_propose(market_arg: Any) -> Any:
-            called_with.append(market_arg)
-            return None
-            yield  # noqa: unreachable
-
+        """Valid market that approves -> attempted, counted, and recorded."""
+        self._set_questions(self._VALID_MARKET)
+        called: list = []
         with patch.object(
             self.behaviour,
             "_propose_and_approve_market",
-            new=_fake_propose,
+            new=self._patched_propose(called, '{"ok": 1}'),
         ):
-            self._run_async_act()
-        assert called_with == [market]
+            payload = self._run_async_act()
+        assert called == [self._VALID_MARKET]
+        assert payload.approved_markets_count == 1
+        assert json.loads(payload.content) == {"q1": self._VALID_MARKET}
+
+    def test_async_act_approval_failure_not_counted(self) -> None:
+        """C1: an approval-server failure is attempted but never counted/recorded."""
+        self._set_questions(self._VALID_MARKET)
+        called: list = []
+        with patch.object(
+            self.behaviour,
+            "_propose_and_approve_market",
+            new=self._patched_propose(
+                called, ProcessProposedQuestionsRound.ERROR_PAYLOAD
+            ),
+        ):
+            payload = self._run_async_act()
+        assert called == [self._VALID_MARKET]
+        assert payload.approved_markets_count == 0
+        assert payload.content == "{}"
