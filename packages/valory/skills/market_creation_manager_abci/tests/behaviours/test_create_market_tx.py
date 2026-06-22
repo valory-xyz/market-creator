@@ -17,14 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for market_creation_manager_abci PrepareTransactionBehaviour."""
+"""Tests for market_creation_manager_abci CreateMarketTxBehaviour."""
 
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from packages.valory.skills.market_creation_manager_abci.behaviours.prepare_transaction import (
-    PrepareTransactionBehaviour,
+from packages.valory.skills.market_creation_manager_abci.behaviours.create_market_tx import (
+    CreateMarketTxBehaviour,
 )
 
 CURRENT_FILE_PATH = Path(__file__).resolve()
@@ -32,8 +32,8 @@ PACKAGE_DIR = CURRENT_FILE_PATH.parents[2]
 _ONE_DAY = 86400
 
 
-class TestPrepareTransactionBehaviourMethods:
-    """Test PrepareTransactionBehaviour helper methods."""
+class TestCreateMarketTxBehaviourMethods:
+    """Test CreateMarketTxBehaviour helper methods."""
 
     def setup_method(self) -> None:
         """Setup test fixtures."""
@@ -47,7 +47,7 @@ class TestPrepareTransactionBehaviourMethods:
         context_mock.params.arbitrator_contract = (
             "0x2234567890123456789012345678901234567890"
         )
-        self.behaviour = PrepareTransactionBehaviour(
+        self.behaviour = CreateMarketTxBehaviour(
             name="test", skill_context=context_mock
         )
 
@@ -66,10 +66,10 @@ class TestPrepareTransactionBehaviourMethods:
     def test_matching_round(self) -> None:
         """Test that matching_round is correctly set."""
         from packages.valory.skills.market_creation_manager_abci.rounds import (
-            PrepareTransactionRound,
+            CreateMarketTxRound,
         )
 
-        assert self.behaviour.matching_round == PrepareTransactionRound
+        assert self.behaviour.matching_round == CreateMarketTxRound
 
 
 def _make_gen(return_value: Any) -> Any:
@@ -91,8 +91,8 @@ def _exhaust_gen(gen: Any) -> Any:
         return e.value
 
 
-class TestPrepareTransactionBehaviourGenerators:
-    """Test PrepareTransactionBehaviour generator methods."""
+class TestCreateMarketTxBehaviourGenerators:
+    """Test CreateMarketTxBehaviour generator methods."""
 
     def setup_method(self) -> None:
         """Setup test fixtures."""
@@ -113,7 +113,7 @@ class TestPrepareTransactionBehaviourGenerators:
         context_mock.params.initial_funds = 1000
         context_mock.params.market_fee = 20
         context_mock.params.market_timeout = 7
-        self.behaviour = PrepareTransactionBehaviour(
+        self.behaviour = CreateMarketTxBehaviour(
             name="test", skill_context=context_mock
         )
 

@@ -22,6 +22,7 @@
 import json
 from typing import Any, Dict, Generator, Optional, Type, cast
 
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
 from packages.valory.contracts.fpmm_deterministic_factory.contract import (
     FPMMDeterministicFactory,
 )
@@ -34,9 +35,9 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.base import 
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import PostTxPayload
 from packages.valory.skills.market_creation_manager_abci.rounds import (
+    CreateMarketTxRound,
     DepositDaiRound,
     PostTransactionRound,
-    PrepareTransactionRound,
 )
 from packages.valory.skills.omen_ct_redeem_tokens_abci.rounds import CtRedeemTokensRound
 from packages.valory.skills.omen_fpmm_remove_liquidity_abci.rounds import (
@@ -69,6 +70,12 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
         if settled_tx_hash is None:
             self.context.logger.info("No settled tx hash.")
             return PostTransactionRound.DONE_PAYLOAD
+
+        if (
+            self.synchronized_data.tx_submitter
+            == MechRequestStates.MechRequestRound.auto_round_id()
+        ):
+            return PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
 
         if self.synchronized_data.tx_submitter == DepositDaiRound.auto_round_id():
             return PostTransactionRound.DEPOSIT_DAI_DONE_PAYLOAD
@@ -110,14 +117,11 @@ class PostTransactionBehaviour(MarketCreationManagerBaseBehaviour):
             f"For market with id {market_id}. "
         )
 
-        if (
-            self.synchronized_data.tx_submitter
-            != PrepareTransactionRound.auto_round_id()
-        ):
+        if self.synchronized_data.tx_submitter != CreateMarketTxRound.auto_round_id():
             # we only handle market creation txs atm, any other tx, we don't need to take action
             self.context.logger.info(
                 f"No handling required for tx sender with round id {self.synchronized_data.tx_submitter}. "
-                f"Handling only required for {PrepareTransactionRound.auto_round_id()}."
+                f"Handling only required for {CreateMarketTxRound.auto_round_id()}."
             )
             return PostTransactionRound.DONE_PAYLOAD
 

@@ -35,6 +35,9 @@ from packages.valory.skills.market_creation_manager_abci.behaviours.round_behavi
     MarketCreationManagerRoundBehaviour,
 )
 from packages.valory.skills.market_maker_abci.composition import MarketCreatorAbciApp
+from packages.valory.skills.mech_interact_abci.behaviours.round_behaviour import (
+    MechInteractRoundBehaviour,
+)
 from packages.valory.skills.omen_ct_redeem_tokens_abci.behaviours.round_behaviour import (
     CtRedeemTokensRoundBehaviour,
 )
@@ -73,6 +76,7 @@ class MarketCreatorRoundBehaviour(AbstractRoundBehaviour):
         *CtRedeemTokensRoundBehaviour.behaviours,
         *OmenRealitioWithdrawBondsRoundBehaviour.behaviours,
         *MarketCreationManagerRoundBehaviour.behaviours,
+        *MechInteractRoundBehaviour.behaviours,
         *TransactionSettlementRoundBehaviour.behaviours,
         *ResetPauseABCIConsensusBehaviour.behaviours,
         *TerminationAbciBehaviours.behaviours,

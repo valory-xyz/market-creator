@@ -22,6 +22,11 @@
 import packages.valory.skills.funds_forwarder_abci.rounds as FundsForwarderAbci
 import packages.valory.skills.identify_service_owner_abci.rounds as IdentifyServiceOwnerAbci
 import packages.valory.skills.market_creation_manager_abci.rounds as MarketCreationManagerAbci
+import packages.valory.skills.mech_interact_abci.rounds as MechInteractAbci
+import packages.valory.skills.mech_interact_abci.states.final_states as MechFinalStates
+import packages.valory.skills.mech_interact_abci.states.mech_version as MechVersionStates
+import packages.valory.skills.mech_interact_abci.states.request as MechRequestStates
+import packages.valory.skills.mech_interact_abci.states.response as MechResponseStates
 import packages.valory.skills.omen_ct_redeem_tokens_abci.rounds as OmenCtRedeemTokensAbci
 import packages.valory.skills.omen_fpmm_remove_liquidity_abci.rounds as OmenFpmmRemoveLiquidityAbci
 import packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds as OmenRealitioWithdrawBondsAbci
@@ -49,41 +54,109 @@ from packages.valory.skills.termination_abci.rounds import (
 )
 
 abci_app_transition_mapping: AbciAppTransitionMapping = {
-    # Registration → IdentifyServiceOwner
+    # Registration -> IdentifyServiceOwner
     FinishedRegistrationRound: IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound,
-    # IdentifyServiceOwner → FundsForwarder (ok) / FpmmRemoveLiquidity (error — skip FundsForwarder)
-    IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound: FundsForwarderAbci.FundsForwarderRound,
-    IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound: OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound,
-    # FundsForwarder: tx → TxSettlement (returns via PostTx → FpmmRemoveLiquidity).
-    # No tx → FpmmRemoveLiquidity directly.
-    FundsForwarderAbci.FinishedFundsForwarderNoTxRound: OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound,
-    FundsForwarderAbci.FinishedFundsForwarderWithTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    # Linear recovery chain: each skill either builds a multisend (→ TxSettlement →
-    # PostTx → next skill) or produces no tx (→ next skill directly). Every cycle walks
-    # through all three recovery skills in order before reaching the core market-creation flow.
+    # IdentifyServiceOwner -> FundsForwarder (ok) / FpmmRemoveLiquidity (error)
+    IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerRound: (
+        FundsForwarderAbci.FundsForwarderRound
+    ),
+    IdentifyServiceOwnerAbci.FinishedIdentifyServiceOwnerErrorRound: (
+        OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound
+    ),
+    # FundsForwarder: tx -> TxSettlement; no tx -> FpmmRemoveLiquidity
+    FundsForwarderAbci.FinishedFundsForwarderNoTxRound: (
+        OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound
+    ),
+    FundsForwarderAbci.FinishedFundsForwarderWithTxRound: (
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+    ),
+    # Linear recovery chain (FpmmRemoveLiquidity -> CtRedeemTokens ->
+    # RealitioWithdrawBonds) -- each step either builds a multisend
+    # (-> TxSettlement -> PostTx -> next step) or produces no tx
+    # (-> next step directly).
     #
     # Step 1: FpmmRemoveLiquidity
-    OmenFpmmRemoveLiquidityAbci.FinishedWithFpmmRemoveLiquidityTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    OmenFpmmRemoveLiquidityAbci.FinishedWithoutFpmmRemoveLiquidityTxRound: OmenCtRedeemTokensAbci.CtRedeemTokensRound,
+    OmenFpmmRemoveLiquidityAbci.FinishedWithFpmmRemoveLiquidityTxRound: (
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+    ),
+    OmenFpmmRemoveLiquidityAbci.FinishedWithoutFpmmRemoveLiquidityTxRound: (
+        OmenCtRedeemTokensAbci.CtRedeemTokensRound
+    ),
     # Step 2: CtRedeemTokens
-    OmenCtRedeemTokensAbci.FinishedWithCtRedeemTokensTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    OmenCtRedeemTokensAbci.FinishedWithoutCtRedeemTokensTxRound: OmenRealitioWithdrawBondsAbci.RealitioWithdrawBondsRound,
+    OmenCtRedeemTokensAbci.FinishedWithCtRedeemTokensTxRound: (
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+    ),
+    OmenCtRedeemTokensAbci.FinishedWithoutCtRedeemTokensTxRound: (
+        OmenRealitioWithdrawBondsAbci.RealitioWithdrawBondsRound
+    ),
     # Step 3: RealitioWithdrawBonds
-    OmenRealitioWithdrawBondsAbci.FinishedWithRealitioWithdrawBondsTxRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    OmenRealitioWithdrawBondsAbci.FinishedWithoutRealitioWithdrawBondsTxRound: MarketCreationManagerAbci.DepositDaiRound,
+    OmenRealitioWithdrawBondsAbci.FinishedWithRealitioWithdrawBondsTxRound: (
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+    ),
+    OmenRealitioWithdrawBondsAbci.FinishedWithoutRealitioWithdrawBondsTxRound: (
+        MarketCreationManagerAbci.DepositDaiRound
+    ),
     # PostTx fan-out: each recovery tx returns to the NEXT step of the chain.
-    MarketCreationManagerAbci.FinishedWithFundsForwarderPostTxRound: OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound,
-    MarketCreationManagerAbci.FinishedWithFpmmRemoveLiquidityPostTxRound: OmenCtRedeemTokensAbci.CtRedeemTokensRound,
-    MarketCreationManagerAbci.FinishedWithCtRedeemTokensPostTxRound: OmenRealitioWithdrawBondsAbci.RealitioWithdrawBondsRound,
-    MarketCreationManagerAbci.FinishedWithRealitioWithdrawBondsPostTxRound: MarketCreationManagerAbci.DepositDaiRound,
-    # Core market-creation flow (unchanged) -----------------------------------
+    MarketCreationManagerAbci.FinishedWithFundsForwarderPostTxRound: (
+        OmenFpmmRemoveLiquidityAbci.FpmmRemoveLiquidityRound
+    ),
+    MarketCreationManagerAbci.FinishedWithFpmmRemoveLiquidityPostTxRound: (
+        OmenCtRedeemTokensAbci.CtRedeemTokensRound
+    ),
+    MarketCreationManagerAbci.FinishedWithCtRedeemTokensPostTxRound: (
+        OmenRealitioWithdrawBondsAbci.RealitioWithdrawBondsRound
+    ),
+    MarketCreationManagerAbci.FinishedWithRealitioWithdrawBondsPostTxRound: (
+        MarketCreationManagerAbci.DepositDaiRound
+    ),
+    # Core market-creation flow
     MarketCreationManagerAbci.FinishedWithoutTxRound: ResetAndPauseRound,
-    MarketCreationManagerAbci.FinishedWithDepositDaiRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    MarketCreationManagerAbci.FinishedMarketCreationManagerRound: TransactionSettlementAbci.RandomnessTransactionSubmissionRound,
-    # TxSettlement → PostTransactionRound (multiplexes by tx_submitter)
-    TransactionSettlementAbci.FinishedTransactionSubmissionRound: MarketCreationManagerAbci.PostTransactionRound,
+    MarketCreationManagerAbci.FinishedWithDepositDaiRound: (
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+    ),
+    MarketCreationManagerAbci.FinishedMarketCreationManagerRound: (
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+    ),
+    # TxSettlement -> PostTransactionRound (multiplexes by tx_submitter)
+    TransactionSettlementAbci.FinishedTransactionSubmissionRound: (
+        MarketCreationManagerAbci.PostTransactionRound
+    ),
     TransactionSettlementAbci.FailedRound: ResetAndPauseRound,
-    # Reset → next period
+    # Mech flow: RequestProposedQuestionsRound sends mech_requests
+    # -> FinishedWithMechRequestRound -> MechVersionDetection -> MechRequest
+    MarketCreationManagerAbci.FinishedWithMechRequestRound: (
+        MechVersionStates.MechVersionDetectionRound
+    ),
+    # MechInteract version-detection finals -> MechRequestRound
+    MechFinalStates.FinishedMarketplaceLegacyDetectedRound: (
+        MechRequestStates.MechRequestRound
+    ),
+    MechFinalStates.FinishedMechLegacyDetectedRound: (
+        MechRequestStates.MechRequestRound
+    ),
+    MechFinalStates.FinishedMechInformationRound: MechRequestStates.MechRequestRound,
+    MechFinalStates.FailedMechInformationRound: (
+        MechVersionStates.MechVersionDetectionRound
+    ),
+    # MechRequest tx -> TxSettlement; subscription -> TxSettlement
+    MechFinalStates.FinishedMechRequestRound: (
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+    ),
+    MechFinalStates.FinishedMechPurchaseSubscriptionRound: (
+        TransactionSettlementAbci.RandomnessTransactionSubmissionRound
+    ),
+    # Mech delivered response -> ProcessProposedQuestionsRound (consume it)
+    MechFinalStates.FinishedMechResponseRound: (
+        MarketCreationManagerAbci.ProcessProposedQuestionsRound
+    ),
+    # Timeouts / skips -> continue without blocking
+    MechFinalStates.FinishedMechRequestSkipRound: ResetAndPauseRound,
+    MechFinalStates.FinishedMechResponseTimeoutRound: ResetAndPauseRound,
+    # PostTx: Mech request tx settled -> poll for response
+    MarketCreationManagerAbci.FinishedWithMechPollRound: (
+        MechResponseStates.MechResponseRound
+    ),
+    # Reset -> next period
     FinishedResetAndPauseRound: IdentifyServiceOwnerAbci.IdentifyServiceOwnerRound,
     FinishedResetAndPauseErrorRound: RegistrationRound,
 }
@@ -104,6 +177,7 @@ MarketCreatorAbciApp = chain(
         OmenRealitioWithdrawBondsAbci.OmenRealitioWithdrawBondsAbciApp,
         MarketCreationManagerAbci.MarketCreationManagerAbciApp,
         TransactionSettlementAbci.TransactionSubmissionAbciApp,
+        MechInteractAbci.MechInteractAbciApp,
         ResetPauseAbciApp,
     ),
     abci_app_transition_mapping,

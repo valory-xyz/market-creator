@@ -17,18 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the ApproveMarketsRound of the MarketCreationManagerAbciApp."""
-
-from enum import Enum
-from typing import Optional, Tuple, cast
+"""This module contains the ProcessProposedQuestionsRound of the MarketCreationManagerAbciApp."""
 
 from packages.valory.skills.abstract_round_abci.base import (
-    BaseSynchronizedData,
-    OnlyKeeperSendsRound,
+    CollectSameUntilThresholdRound,
     get_name,
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
-    ApproveMarketsPayload,
+    ProcessProposedQuestionsPayload,
 )
 from packages.valory.skills.market_creation_manager_abci.states.base import (
     Event,
@@ -36,37 +32,29 @@ from packages.valory.skills.market_creation_manager_abci.states.base import (
 )
 
 
-class ApproveMarketsRound(OnlyKeeperSendsRound):
-    """ApproveMarketsRound"""
+class ProcessProposedQuestionsRound(CollectSameUntilThresholdRound):
+    """ProcessProposedQuestionsRound -- consume Mech response and approve markets.
+
+    Entered after MechInteract delivers question proposals. Reads the
+    delivered ``mech_responses`` from SynchronizedData, parses the tool
+    JSON, and calls the approval server for each valid question.
+
+    Payload fields mirror RequestProposedQuestionsPayload:
+    - content: JSON of proposed markets (or ``{}`` on failure)
+    - approved_markets_count: running total (cross-period)
+    - timestamp: last_synced_timestamp
+    """
 
     ERROR_PAYLOAD = "ERROR_PAYLOAD"
-    MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
 
-    payload_class = ApproveMarketsPayload
+    payload_class = ProcessProposedQuestionsPayload
     synchronized_data_class = SynchronizedData
     done_event = Event.DONE
-    fail_event = Event.ERROR
-    payload_key = (
-        get_name(SynchronizedData.approved_markets_data),
+    none_event = Event.NONE
+    no_majority_event = Event.NO_MAJORITY
+    collection_key = get_name(SynchronizedData.participant_to_votes)
+    selection_key = (
+        "content",
         get_name(SynchronizedData.approved_markets_count),
         get_name(SynchronizedData.approved_markets_timestamp),
     )
-
-    def end_block(
-        self,
-    ) -> Optional[Tuple[BaseSynchronizedData, Enum]]:
-        """Process the end of the block."""
-        res = super().end_block()
-        if res is None:
-            return None
-
-        synced_data, event = cast(Tuple[SynchronizedData, Enum], res)
-        payload = cast(ApproveMarketsPayload, self.keeper_payload).content
-
-        if event == Event.DONE and payload == self.ERROR_PAYLOAD:
-            return synced_data, Event.ERROR
-
-        if event == Event.DONE and payload == self.MAX_RETRIES_PAYLOAD:
-            return synced_data, Event.MAX_RETRIES_REACHED
-
-        return synced_data, event

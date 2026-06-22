@@ -43,6 +43,7 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
     FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD = "FPMM_REMOVE_LIQUIDITY_TX_DONE_PAYLOAD"
     CT_REDEEM_TOKENS_TX_DONE_PAYLOAD = "CT_REDEEM_TOKENS_TX_DONE_PAYLOAD"
     REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD = "REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD"
+    MECH_REQUEST_DONE_PAYLOAD = "MECH_REQUEST_DONE_PAYLOAD"
 
     payload_class = PostTxPayload
     synchronized_data_class = SynchronizedData
@@ -52,7 +53,9 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
     collection_key = get_name(SynchronizedData.participant_to_votes)
     selection_key: Tuple[str, ...] = ("ignored",)
 
-    def end_block(self) -> Optional[Tuple[BaseSynchronizedData, Event]]:
+    def end_block(  # pylint: disable=too-many-return-statements
+        self,
+    ) -> Optional[Tuple[BaseSynchronizedData, Event]]:
         """Process the end of the block."""
         if self.threshold_reached:
             if self.most_voted_payload == self.ERROR_PAYLOAD:
@@ -72,6 +75,9 @@ class PostTransactionRound(CollectSameUntilThresholdRound):
 
             if self.most_voted_payload == self.REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD:
                 return self.synchronized_data, Event.REALITIO_WITHDRAW_BONDS_TX_DONE
+
+            if self.most_voted_payload == self.MECH_REQUEST_DONE_PAYLOAD:
+                return self.synchronized_data, Event.MECH_REQUEST_DONE
 
             return self.synchronized_data, Event.DONE
 

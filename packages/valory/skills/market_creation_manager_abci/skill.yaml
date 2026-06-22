@@ -8,60 +8,62 @@ description: The market_creation_manager_abci contains the required business log
 license: Apache-2.0
 aea_version: '>=2.0.0, <3.0.0'
 fingerprint:
-  .gitignore: bafybeihdfdezgtr3s2lzq5y3oaitfrdy4u4pehionju2bdez35wcjgqx6y
   __init__.py: bafybeihiyq6pmvff63y34vwsvawazkh3lw5io3lpsl5ihksvjs5thgylbm
   behaviours/__init__.py: bafybeifp3hykazw2qx32t2lg2mwehcyjdekq3tywde26pm77imco45xz3a
-  behaviours/approve_markets.py: bafybeidt6zivromgcgs774wekt42pye6g22sjjwycp7wk5v536dtizm26a
   behaviours/base.py: bafybeihfr7mmeigisld4gpymiexhkfszuqgj6ddjsctrf3huz6jtgkdyma
   behaviours/collect_proposed_markets.py: bafybeibjhkningmccsdet7lnpnnmf77fgvcumflbfcfeikji3ytechlxc4
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
+  behaviours/create_market_tx.py: bafybeiapvasw74ixmlskmyiz47bosn7kh2y3oo3j4w5gog4flwowdu3ure
   behaviours/deposit_dai.py: bafybeibwx6ypsz6q4qu7rndyz7qtrbrrddvjwqbuur4xn7d7475tj5vw7m
-  behaviours/post_transaction.py: bafybeia5uiqjqax5xcybyhawe5tkn3uoapiv7yp35jma3fv72dmcing2hy
-  behaviours/prepare_transaction.py: bafybeia4gjodkx7cx6j3ooz45wuz5pritjewasie6kgsic3stqpk22ry34
+  behaviours/post_transaction.py: bafybeiby5rga7x2npacatmke4sco3yv3t65wjrounaynjqnpdtmx5lq33m
+  behaviours/process_proposed_questions.py: bafybeielxi7pwslmn4cinjczecrcknxup4xeyjw5knrzt4oqq2366fedqe
+  behaviours/request_proposed_questions.py: bafybeifctxlksctf4tsj7vyehjaohrauqtg5jr3niiv5ihyjrrg4s45ia4
   behaviours/retrieve_approved_market.py: bafybeicjf222ubg3jd4fqndgdh532g6i2uhmioly2hzuilfgd2svsvc4o4
-  behaviours/round_behaviour.py: bafybeibtp6gydtpqh2iyqam6hibuvw4kn5bc5o3qb34zhhvriuk2cd3vwm
+  behaviours/round_behaviour.py: bafybeie5yhspczokwavuzzgnhp3vrrwise6fvef4sx3p3ameg36d6lzfse
   behaviours/select_keeper.py: bafybeiadkoyybfqxc2wsrkjk3hta5yrmp5cf6h44cru3k6pchmmuiwr3by
   dialogues.py: bafybeic6fb46t3c6uti6qbg2fwxuhcbqhzhx5bennahq7wp74atfibdkk4
-  fsm_specification.yaml: bafybeidyuywhpx7my27gvycumdtwvfxxzq4f7wxta2qx3vtxakqtbraj6y
+  fsm_specification.yaml: bafybeicdvshq2nvdomwdtiwrxuyqocqq5wpse7shaqyla56aq35ohj2dzq
   handlers.py: bafybeie634p6j3vwo72nis5jr3mhdd7nunsewevh44lo7vsjneyboellgu
-  models.py: bafybeibjcwxfwk7ettrim7vukcpta7243qeqsuoiuk4j3swodv3a5ryi3u
-  payloads.py: bafybeiaq53apvacfjrujlkuebjlka6fk5s4t6shao3f2sik4rlanedwuw4
-  propose_questions.py: bafybeiegacmhtgrz4jji5cdj6qbbuq23ev3vuw7aoywztex223m5wwt4ny
-  rounds.py: bafybeieormajhn5cqufools6qionvie4c75ppiiygvbnizn76nsmsqk5wq
+  models.py: bafybeicf747sxubpnqb6tlsordvdpmlojj55ofcsfus6er5hpj3jwp3eru
+  payloads.py: bafybeictxg4osgzsgkvuq4t5ogknnalwrxbazbhtkfvkzbxj3rff4ls5xu
+  rounds.py: bafybeigkk6vg2h5q7n4ln3mzdzqeac2qjpz2gm4sya3glq5jkuwikmvmde
   states/__init__.py: bafybeibogw3ljdly5zf2zesfdltrxc4ncw67imtys6srp7w5by2u5ajhhu
-  states/approve_markets.py: bafybeierwnnm2tejqprnx4kfoaxmaajog7jt7lnexzgbycryhmkw62jn2u
-  states/base.py: bafybeigoii7tz3a6a5frar7xekvw7n5jm56igwe6nlpig3h4vlq27qtp54
+  states/base.py: bafybeic2e7s73i3qcmrgwzeofygdva5w5bqeuy3i4ozqjy32xcjdvyl54a
   states/collect_proposed_markets.py: bafybeiaopaehmme7wwlkok74dzshayg4x5hhvub5njlruphuryuyejyd6m
   states/collect_randomness.py: bafybeifkdchmeidte5vfqqpeeomyaxlel4irxtrho6xxelexu5vds4vx54
+  states/create_market_tx.py: bafybeie6cvihvr4vlnj23r3daleyybpk676rny5klushwio3332pmkpwji
   states/deposit_dai.py: bafybeicc27nq6hyj6hyzgfxuru2nghgt65s33xr6aohwgr3nixc5jdrxzu
-  states/final_states.py: bafybeie4ym4zaoui6dhozn6hapq2xiuod7cyqxvgbdxj5hwz2mdadppclm
-  states/post_transaction.py: bafybeiccg356ah44tcukswtuv6siqznoue3xact2niuto5txqozc4e7s6e
-  states/prepare_transaction.py: bafybeibemmt3jm7hsoqjeisikakllokjhgi2yqpozj4foqpfyqa4rv2qza
+  states/final_states.py: bafybeihockvrcynlnn75xr7seeav43f5wmvmldruo6wdnyhkedj3d2o5vy
+  states/post_transaction.py: bafybeihexofhzcjerztcxxme5reewgkuvw7zkjuophn5jyqvj5clncjwse
+  states/process_proposed_questions.py: bafybeicltzljc6tpv76ljwm4ssw64asjfyngkirrouaik2ffb3r6ugbkgi
+  states/request_proposed_questions.py: bafybeiaf7j453i5vz67uoc2a5a7o3b2vwgd5vssjlumsni3wvg7fagfibm
   states/retrieve_approved_market.py: bafybeibx3brusywumqh6g24liwscq2y4ts4bkdd5k733yhtcf4gktykdde
   states/select_keeper.py: bafybeicag5feasxynp65toviurqfx62lklmfky7cln5sv6onubesppsd5e
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
   tests/behaviours/__init__.py: bafybeifngz2wcqbk7sior2um2gh4j55i7ugi7mjhz3tak7zezplkccfovi
   tests/behaviours/conftest.py: bafybeiai4oxmqtharmvmmbobtvdhalsxe5dv5jr7wi3qlrfyyocy7o7b7y
-  tests/behaviours/test_approve_markets.py: bafybeih4mnbpu5i6kdzccv2iul7vthyc3dcugbebr6cvqfbacnwqfjeymm
-  tests/behaviours/test_approve_markets_behaviour.py: bafybeiandmz47phcwjabwrpb25xmqskv62pkvls7ypjeotqm22ivw3zzf4
   tests/behaviours/test_base.py: bafybeibiddu5gldclwzlnl6aenkbphz5oltortg52ye5nmwqrikz3ifmn4
   tests/behaviours/test_collect_proposed_markets.py: bafybeibknuchv6ueexfr77ktqpayac4ewybhzq2dj3z3d2tcqinja4wr4y
+  tests/behaviours/test_create_market_tx.py: bafybeieov4qd5ewgqbbvchnb2wgitaxlmyj4v7k2w7m2hwkfrxrfecvxii
   tests/behaviours/test_deposit_dai.py: bafybeietyzfzvyeldpw5hn7x44ip22hwvyrtuz5lgko3gayalbxe6didbu
-  tests/behaviours/test_post_transaction.py: bafybeicq3fwqjllwmtekxmbompxfbnzqr7ftfba2uw3i5jesamfxwtcby4
-  tests/behaviours/test_prepare_transaction.py: bafybeicej35dlvw7jgb3ro4mioreygn7ms37zqhtzzmbahbnkuqhvh6iwi
+  tests/behaviours/test_post_transaction.py: bafybeiaki63y5njbsptvyy6kfoole4lpbxma5y3hqd4hfibub2lftdlwyq
+  tests/behaviours/test_process_proposed_questions.py: bafybeiagpj6237ipxwatc3oqu7cqt7zhtmpviogehjwyrbq4fh4bvq7tay
+  tests/behaviours/test_request_proposed_questions.py: bafybeifudw3wwwozfapqdz5ojczpx4hxbbgvynnxsdp2n7wogpqni5eaxu
+  tests/behaviours/test_request_proposed_questions_behaviour.py: bafybeiajgjamodbzwpxyapedeuwubb4bubpjsuae5pazoppod4arlj57de
   tests/behaviours/test_retrieve_approved_market.py: bafybeig2yo7mc5nghmihttws5lzd4hqnmkpqqb6tqxmgnymbvkpqhwjfqa
-  tests/conftest.py: bafybeigxdlpumw6ncuke2674lljno63eipnaken5ckpzt3uas7kefaxgmq
+  tests/conftest.py: bafybeicvfro4xvjpm5gfl44ulc5hbsf2tbxpd5hufi6umwh2umtvbmpsju
   tests/states/__init__.py: bafybeia5upph3nlp3opku7erao46kkvbsddderrgmwfrcustzobnq2h44e
-  tests/states/test_approve_markets.py: bafybeih4v3ml2gizo356a6z4tqwrdmfnxkqgs6tmhlzzvpb45fypoedhlu
-  tests/states/test_base.py: bafybeiec6qizlqf72yq55mm6nu2rwqtlrdyj47srn5g22wrz3bo3625muq
+  tests/states/test_base.py: bafybeih2hk5ux7na7lbhjilnzeoqjl6ub2ajnr2u2yfeaxuwfuuxgmf7qu
   tests/states/test_collect_proposed_markets.py: bafybeiegx53b4vktvw35r2tqfzhi462vcagydiii36oqd5jilggoi374v4
-  tests/states/test_final_states.py: bafybeie4hoa37wxb7ges5pjf2rv4x3w5gf4xmrwsisbulygwbyhxlogx6m
-  tests/states/test_post_transaction.py: bafybeigh7et3fn7sofc6mgt27qqjx4lpbvueritzqeietmngfvtywy3hwq
+  tests/states/test_final_states.py: bafybeie3vtecmgyisi7cqrgzlwhbbg32jnvemqy42sjkhrkfuezkssvxvu
+  tests/states/test_post_transaction.py: bafybeiainlhodrw2eiagaps7mezjjlu2jcuzsdhhb4ay4odjqukxdijcwa
+  tests/states/test_process_proposed_questions.py: bafybeidueh3jbtls4mbyexvqmep4m73d36mtup2ze2d5avq63rnre3pwyq
+  tests/states/test_request_proposed_questions.py: bafybeiffv2w4palmhnkx2raujyzaex3vrokfammv3ieq2qatsw6v5ztf4e
   tests/states/test_retrieve_approved_market.py: bafybeiggsxsrnbj3keevbim7mqs6fro2jcteg5457uiw34sg6kpxfuvnzi
   tests/test_dialogues.py: bafybeihlhfzepbrtx74qf6375v3onnx3aydpagpgt3gatycxj7qkfq7hdy
   tests/test_handlers.py: bafybeicjrrjj4utmbslhpaquvxkdsbfjasv2t2vf233yr6bu2rimfvamxa
-  tests/test_payloads.py: bafybeiae4qpw5zq7vlg3d4wqtifgvrbip7nzhi63levjvhljga64g7r6rm
-  tests/test_propose_questions.py: bafybeigbdb2a3k6rkqndrgsox6x2wtg6efppqg3kythvhvsnihlckqlzty
+  tests/test_models.py: bafybeieubyqptg2hnccz7zovoa37uzszgq3ysjma3aoetqstmghd4zoqsy
+  tests/test_payloads.py: bafybeiemw5w7as2u5ecmsqidng65oogqj3mfssa2oqjgdss6vm5zotzu74
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
@@ -76,6 +78,7 @@ protocols:
 - valory/ledger_api:1.0.0:bafybeiecq56phjfws36rgrefw6niyo4ezesloodsfis647mpm5ygqo4ysi
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
+- valory/mech_interact_abci:0.1.0:bafybeidnmszufszq3ro4ebgrqzmhqgctrsc6sykeanfsbvotghvt2cgfsy
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
 - valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeicj3pgdx7q5chbms3pxrb6pcv7lbqhkigwnmjuo54p63ub7mkqe5i
@@ -168,8 +171,6 @@ models:
           version: {}
         genesis_time: '2022-05-20T16:00:21.735122717Z'
         voting_power: '10'
-      google_api_key: google_api_key
-      google_engine_id: google_engine_id
       history_check_timeout: 1205
       initial_funds: 1.0
       ipfs_address: https://gateway.autonolas.tech/ipfs/
@@ -179,6 +180,8 @@ models:
       light_slash_unit_amount: 5000000000000000
       market_approval_server_api_key: api_key
       market_approval_server_url: http://127.0.0.1:5000
+      mech_interact_round_timeout_seconds: 1200
+      mech_tool_propose_question: propose-question
       market_fee: 2.0
       market_proposal_round_timeout_seconds_per_day: 45
       market_timeout: 1
@@ -193,18 +196,6 @@ models:
       min_market_proposal_interval_seconds: 7200
       multisend_address: '0x0000000000000000000000000000000000000000'
       multisend_batch_size: 5
-      news_sources:
-      - bbc-news
-      - bbc-sport
-      - abc-news
-      - cnn
-      - reuters
-      - usa-today
-      - breitbart-news
-      - the-verge
-      - techradar
-      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
-      newsapi_endpoint: https://newsapi.org/v2
       on_chain_service_id: null
       openai_api_key: openai_api_key
       realitio_answer_question_bounty: 0

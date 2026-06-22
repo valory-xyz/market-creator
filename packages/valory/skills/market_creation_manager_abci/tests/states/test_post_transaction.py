@@ -97,6 +97,10 @@ class TestPostTransactionRound:
             PostTransactionRound.REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD
             == "REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD"
         )
+        assert (
+            PostTransactionRound.MECH_REQUEST_DONE_PAYLOAD
+            == "MECH_REQUEST_DONE_PAYLOAD"
+        )
 
 
 class TestPostTransactionRoundEndBlock:
@@ -125,6 +129,7 @@ class TestPostTransactionRoundEndBlock:
                 "REALITIO_WITHDRAW_BONDS_TX_DONE_PAYLOAD",
                 Event.REALITIO_WITHDRAW_BONDS_TX_DONE,
             ),
+            ("MECH_REQUEST_DONE_PAYLOAD", Event.MECH_REQUEST_DONE),
             ("some_other_payload", Event.DONE),
         ],
     )

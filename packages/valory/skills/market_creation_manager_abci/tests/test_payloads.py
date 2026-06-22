@@ -22,11 +22,12 @@
 import pytest
 
 from packages.valory.skills.market_creation_manager_abci.payloads import (
-    ApproveMarketsPayload,
     CollectProposedMarketsPayload,
     CollectRandomnessPayload,
     MultisigTxPayload,
     PostTxPayload,
+    ProcessProposedQuestionsPayload,
+    RequestProposedQuestionsPayload,
     RetrieveApprovedMarketPayload,
     SelectKeeperPayload,
 )
@@ -58,7 +59,13 @@ SENDER = "sender_address"
             {"content": '{"proposed_markets": []}'},
         ),
         (
-            ApproveMarketsPayload,
+            RequestProposedQuestionsPayload,
+            {
+                "mech_requests": '[{"nonce":"abc","tool":"propose-question","prompt":"{}"}]'
+            },
+        ),
+        (
+            ProcessProposedQuestionsPayload,
             {
                 "content": '{"approved": true}',
                 "approved_markets_count": 3,

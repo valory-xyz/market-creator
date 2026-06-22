@@ -21,7 +21,7 @@
 
 import json
 from enum import Enum
-from typing import Optional, Tuple, cast
+from typing import List, Optional, Tuple, cast
 
 from packages.valory.skills.abstract_round_abci.base import (
     CollectSameUntilThresholdRound,
@@ -31,6 +31,10 @@ from packages.valory.skills.abstract_round_abci.base import (
 )
 from packages.valory.skills.market_creation_manager_abci.payloads import (
     MultisigTxPayload,
+)
+from packages.valory.skills.mech_interact_abci.states.base import (
+    MechInteractionResponse,
+    MechMetadata,
 )
 from packages.valory.skills.transaction_settlement_abci.rounds import (
     SynchronizedData as TxSynchronizedData,
@@ -54,6 +58,8 @@ class Event(Enum):
     FPMM_REMOVE_LIQUIDITY_TX_DONE = "fpmm_remove_liquidity_tx_done"
     CT_REDEEM_TOKENS_TX_DONE = "ct_redeem_tokens_tx_done"
     REALITIO_WITHDRAW_BONDS_TX_DONE = "realitio_withdraw_bonds_tx_done"
+    MECH_REQUEST_DONE = "mech_request_done"
+    SKIP = "skip"
 
 
 DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}
@@ -152,6 +158,27 @@ class SynchronizedData(TxSynchronizedData):
     def tx_submitter(self) -> str:
         """Get the round that send the transaction through transaction settlement."""
         return cast(str, self.db.get_strict("tx_submitter"))
+
+    @property
+    def mech_requests(self) -> List[MechMetadata]:
+        """Get the mech requests."""
+        serialized = self.db.get("mech_requests", "[]")
+        if serialized is None:
+            serialized = "[]"
+        requests = json.loads(serialized)
+        return [MechMetadata(**item) for item in requests]
+
+    @property
+    def mech_responses(self) -> List[MechInteractionResponse]:
+        """Get the mech responses."""
+        serialized = self.db.get("mech_responses", "[]")
+        if serialized is None:
+            serialized = "[]"
+        if isinstance(serialized, list):
+            responses = serialized
+        else:
+            responses = json.loads(serialized)
+        return [MechInteractionResponse(**item) for item in responses]
 
     @property
     def participant_to_tx_prep(self) -> DeserializedCollection:
