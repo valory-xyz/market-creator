@@ -51,6 +51,7 @@ _REQUIRED_KWARGS = {
     "min_market_proposal_interval_seconds": 3600,
     "market_proposal_round_timeout_seconds_per_day": 60,
     "max_markets_per_story": 5,
+    "topics": ["business", "science"],
     "initial_funds": 100.0,
     "xdai_threshold": 1000000000000000000,
     "service_endpoint_base": "https://example.com",
@@ -88,6 +89,11 @@ class TestMarketCreationManagerParams:
         """Test realitio_contract is set."""
         instance = self._make_instance()
         assert instance.realitio_contract == "0x1234"
+
+    def test_init_sets_topics(self) -> None:
+        """Test topics is set from kwargs."""
+        instance = self._make_instance()
+        assert instance.topics == ["business", "science"]
 
     def test_init_sets_mech_tool_propose_question_default(self) -> None:
         """Test mech_tool_propose_question defaults to 'propose-question'."""

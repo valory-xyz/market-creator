@@ -135,6 +135,7 @@ class RequestProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
                 {
                     "resolution_time": resolution_time,
                     "num_questions": num_questions,
+                    "topics": self.params.topics,
                 },
                 sort_keys=True,
             ),

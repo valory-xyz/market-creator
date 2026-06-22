@@ -57,6 +57,7 @@ class TestRequestProposedQuestionsBehaviour:
         context_mock.params = MagicMock()
         context_mock.params.mech_tool_propose_question = "propose-question"
         context_mock.params.max_markets_per_story = 5
+        context_mock.params.topics = ["business", "science"]
         context_mock.state.round_sequence = MagicMock()
         context_mock.state.synchronized_data = MagicMock()
         context_mock.benchmark_tool = MagicMock()
@@ -138,6 +139,8 @@ class TestRequestProposedQuestionsBehaviour:
         # resolution time is the opening timestamp minus one day (86400s)
         assert prompt["resolution_time"] == int(opening_ts) - 86400
         assert prompt["num_questions"] == num_pending
+        # operator-configured topics are forwarded to the Mech tool via the prompt
+        assert prompt["topics"] == ["business", "science"]
 
     def test_build_mech_request_caps_num_questions_at_max(self) -> None:
         """Test num_questions is capped at max_markets_per_story."""

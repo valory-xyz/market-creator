@@ -19,7 +19,7 @@
 
 """This module contains the shared state for the abci skill of MarketCreationManagerAbciApp."""
 
-from typing import Any, Type
+from typing import Any, List, Type
 
 from aea.exceptions import enforce
 
@@ -141,6 +141,7 @@ class MarketCreationManagerParams(BaseParams):
         self.max_markets_per_story = self._ensure(
             "max_markets_per_story", kwargs, type_=int
         )
+        self.topics = self._ensure("topics", kwargs, type_=List[str])
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
         self.service_endpoint_base = self._ensure("service_endpoint_base", kwargs, str)
