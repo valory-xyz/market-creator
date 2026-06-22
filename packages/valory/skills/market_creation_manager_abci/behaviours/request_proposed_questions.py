@@ -128,6 +128,14 @@ class RequestProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         )
 
         nonce = str(uuid4())
+        # Mech tools receive structured params as top-level kwargs (the mech
+        # executor spreads the request JSON via ``run(**task_data)``).  The
+        # natural-language ``prompt`` is the wrong channel for params, so the
+        # operator-configurable inputs (topics, num_questions, resolution_time)
+        # travel in ``request_context`` -- the dedicated params dict on
+        # MechMetadata (schema 2.0).  ``resolution_time``/``num_questions`` are
+        # also kept in the prompt for backward compatibility with the current
+        # tool, which reads them from the prompt JSON.
         mech_request = MechMetadata(
             nonce=nonce,
             tool=self.params.mech_tool_propose_question,
@@ -135,10 +143,14 @@ class RequestProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
                 {
                     "resolution_time": resolution_time,
                     "num_questions": num_questions,
-                    "topics": self.params.topics,
                 },
                 sort_keys=True,
             ),
+            request_context={
+                "topics": self.params.topics,
+                "num_questions": num_questions,
+                "resolution_time": resolution_time,
+            },
         )
 
         self.context.logger.info(

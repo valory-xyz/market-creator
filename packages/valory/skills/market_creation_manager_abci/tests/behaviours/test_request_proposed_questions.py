@@ -139,8 +139,12 @@ class TestRequestProposedQuestionsBehaviour:
         # resolution time is the opening timestamp minus one day (86400s)
         assert prompt["resolution_time"] == int(opening_ts) - 86400
         assert prompt["num_questions"] == num_pending
-        # operator-configured topics are forwarded to the Mech tool via the prompt
-        assert prompt["topics"] == ["business", "science"]
+        # operator-configured params travel via request_context (the dedicated
+        # params dict the Mech executor spreads as top-level tool kwargs)
+        ctx = item["request_context"]
+        assert ctx["topics"] == ["business", "science"]
+        assert ctx["num_questions"] == num_pending
+        assert ctx["resolution_time"] == int(opening_ts) - 86400
 
     def test_build_mech_request_caps_num_questions_at_max(self) -> None:
         """Test num_questions is capped at max_markets_per_story."""
