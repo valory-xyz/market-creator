@@ -142,6 +142,7 @@ class MarketCreationManagerParams(BaseParams):
             "max_markets_per_story", kwargs, type_=int
         )
         self.topics = self._ensure("topics", kwargs, type_=List[str])
+        self.news_sources = self._ensure("news_sources", kwargs, type_=List[str])
         self.initial_funds = self._ensure("initial_funds", kwargs, type_=float)
         self.xdai_threshold = self._ensure("xdai_threshold", kwargs, type_=int)
         self.service_endpoint_base = self._ensure("service_endpoint_base", kwargs, str)

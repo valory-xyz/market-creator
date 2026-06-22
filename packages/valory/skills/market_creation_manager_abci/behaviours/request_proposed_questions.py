@@ -139,6 +139,7 @@ class RequestProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
             prompt="Propose prediction-market questions from recent news.",
             extra_attributes={
                 "topics": self.params.topics,
+                "news_sources": self.params.news_sources,
                 "num_questions": num_questions,
                 "resolution_time": resolution_time,
             },

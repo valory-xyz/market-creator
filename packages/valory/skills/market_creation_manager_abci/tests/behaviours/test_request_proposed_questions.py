@@ -58,6 +58,7 @@ class TestRequestProposedQuestionsBehaviour:
         context_mock.params.mech_tool_propose_question = "propose-question"
         context_mock.params.max_markets_per_story = 5
         context_mock.params.topics = ["business", "science"]
+        context_mock.params.news_sources = ["bbc-news"]
         context_mock.state.round_sequence = MagicMock()
         context_mock.state.synchronized_data = MagicMock()
         context_mock.benchmark_tool = MagicMock()
@@ -141,6 +142,7 @@ class TestRequestProposedQuestionsBehaviour:
         assert isinstance(item["prompt"], str)
         extras = item["extra_attributes"]
         assert extras["topics"] == ["business", "science"]
+        assert extras["news_sources"] == ["bbc-news"]
         assert extras["num_questions"] == num_pending
         # resolution time is the opening timestamp minus one day (86400s)
         assert extras["resolution_time"] == int(opening_ts) - 86400
