@@ -68,7 +68,7 @@ prerelease = "allow"
 # for the mech_interact_abci skill and the Omen contract / recovery
 # skill packages.
 upstream_pins = [
-    "valory-xyz/mech-interact@v0.32.2",
+    "valory-xyz/mech-interact@v0.32.3",
     "valory-xyz/genai@v7.2.1",
     "valory-xyz/omen-protocol@v0.1.1",
 ]

@@ -17,14 +17,14 @@ fingerprint:
   behaviours/deposit_dai.py: bafybeibwx6ypsz6q4qu7rndyz7qtrbrrddvjwqbuur4xn7d7475tj5vw7m
   behaviours/post_transaction.py: bafybeiby5rga7x2npacatmke4sco3yv3t65wjrounaynjqnpdtmx5lq33m
   behaviours/process_proposed_questions.py: bafybeielxi7pwslmn4cinjczecrcknxup4xeyjw5knrzt4oqq2366fedqe
-  behaviours/request_proposed_questions.py: bafybeifctxlksctf4tsj7vyehjaohrauqtg5jr3niiv5ihyjrrg4s45ia4
+  behaviours/request_proposed_questions.py: bafybeib3m67ulryvqyks3ntebyxp5f2yzmz47vo7y4ffrxrzjvywueyd5y
   behaviours/retrieve_approved_market.py: bafybeicjf222ubg3jd4fqndgdh532g6i2uhmioly2hzuilfgd2svsvc4o4
   behaviours/round_behaviour.py: bafybeie5yhspczokwavuzzgnhp3vrrwise6fvef4sx3p3ameg36d6lzfse
   behaviours/select_keeper.py: bafybeiadkoyybfqxc2wsrkjk3hta5yrmp5cf6h44cru3k6pchmmuiwr3by
   dialogues.py: bafybeic6fb46t3c6uti6qbg2fwxuhcbqhzhx5bennahq7wp74atfibdkk4
   fsm_specification.yaml: bafybeicdvshq2nvdomwdtiwrxuyqocqq5wpse7shaqyla56aq35ohj2dzq
   handlers.py: bafybeie634p6j3vwo72nis5jr3mhdd7nunsewevh44lo7vsjneyboellgu
-  models.py: bafybeicf747sxubpnqb6tlsordvdpmlojj55ofcsfus6er5hpj3jwp3eru
+  models.py: bafybeigakkvfzw5fmnfsa5rsj2u67tze6em7mwnio5yboknj5uqnsaf35u
   payloads.py: bafybeictxg4osgzsgkvuq4t5ogknnalwrxbazbhtkfvkzbxj3rff4ls5xu
   rounds.py: bafybeigkk6vg2h5q7n4ln3mzdzqeac2qjpz2gm4sya3glq5jkuwikmvmde
   states/__init__.py: bafybeibogw3ljdly5zf2zesfdltrxc4ncw67imtys6srp7w5by2u5ajhhu
@@ -48,7 +48,7 @@ fingerprint:
   tests/behaviours/test_deposit_dai.py: bafybeietyzfzvyeldpw5hn7x44ip22hwvyrtuz5lgko3gayalbxe6didbu
   tests/behaviours/test_post_transaction.py: bafybeiaki63y5njbsptvyy6kfoole4lpbxma5y3hqd4hfibub2lftdlwyq
   tests/behaviours/test_process_proposed_questions.py: bafybeiagpj6237ipxwatc3oqu7cqt7zhtmpviogehjwyrbq4fh4bvq7tay
-  tests/behaviours/test_request_proposed_questions.py: bafybeifudw3wwwozfapqdz5ojczpx4hxbbgvynnxsdp2n7wogpqni5eaxu
+  tests/behaviours/test_request_proposed_questions.py: bafybeihfpvp7xyjfy4nho2p7waeukvb4bzobxqyiu6mtkke2gdsczq7wwa
   tests/behaviours/test_request_proposed_questions_behaviour.py: bafybeiajgjamodbzwpxyapedeuwubb4bubpjsuae5pazoppod4arlj57de
   tests/behaviours/test_retrieve_approved_market.py: bafybeig2yo7mc5nghmihttws5lzd4hqnmkpqqb6tqxmgnymbvkpqhwjfqa
   tests/conftest.py: bafybeicvfro4xvjpm5gfl44ulc5hbsf2tbxpd5hufi6umwh2umtvbmpsju
@@ -62,7 +62,7 @@ fingerprint:
   tests/states/test_retrieve_approved_market.py: bafybeiggsxsrnbj3keevbim7mqs6fro2jcteg5457uiw34sg6kpxfuvnzi
   tests/test_dialogues.py: bafybeihlhfzepbrtx74qf6375v3onnx3aydpagpgt3gatycxj7qkfq7hdy
   tests/test_handlers.py: bafybeicjrrjj4utmbslhpaquvxkdsbfjasv2t2vf233yr6bu2rimfvamxa
-  tests/test_models.py: bafybeieubyqptg2hnccz7zovoa37uzszgq3ysjma3aoetqstmghd4zoqsy
+  tests/test_models.py: bafybeifc5ozablssajovuouodqnxkmqc6k3lplyjpanmfk3dfvwlgi5pde
   tests/test_payloads.py: bafybeiemw5w7as2u5ecmsqidng65oogqj3mfssa2oqjgdss6vm5zotzu74
 fingerprint_ignore_patterns: []
 connections: []
@@ -78,7 +78,7 @@ protocols:
 - valory/ledger_api:1.0.0:bafybeiecq56phjfws36rgrefw6niyo4ezesloodsfis647mpm5ygqo4ysi
 skills:
 - valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
-- valory/mech_interact_abci:0.1.0:bafybeidnmszufszq3ro4ebgrqzmhqgctrsc6sykeanfsbvotghvt2cgfsy
+- valory/mech_interact_abci:0.1.0:bafybeihn6ic3exr3umjl5kgmlos3d2sjy6rs3sfogvdtw5e5lenpjaxwou
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
 - valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeicj3pgdx7q5chbms3pxrb6pcv7lbqhkigwnmjuo54p63ub7mkqe5i
@@ -196,6 +196,16 @@ models:
       min_market_proposal_interval_seconds: 7200
       multisend_address: '0x0000000000000000000000000000000000000000'
       multisend_batch_size: 5
+      news_sources:
+      - bbc-news
+      - bbc-sport
+      - abc-news
+      - cnn
+      - reuters
+      - usa-today
+      - breitbart-news
+      - the-verge
+      - techradar
       on_chain_service_id: null
       openai_api_key: openai_api_key
       realitio_answer_question_bounty: 0

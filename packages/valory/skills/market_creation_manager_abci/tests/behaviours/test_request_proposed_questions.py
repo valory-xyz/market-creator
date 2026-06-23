@@ -57,6 +57,8 @@ class TestRequestProposedQuestionsBehaviour:
         context_mock.params = MagicMock()
         context_mock.params.mech_tool_propose_question = "propose-question"
         context_mock.params.max_markets_per_story = 5
+        context_mock.params.topics = ["business", "science"]
+        context_mock.params.news_sources = ["bbc-news"]
         context_mock.state.round_sequence = MagicMock()
         context_mock.state.synchronized_data = MagicMock()
         context_mock.benchmark_tool = MagicMock()
@@ -134,10 +136,16 @@ class TestRequestProposedQuestionsBehaviour:
         assert item["tool"] == "propose-question"
         assert "nonce" in item
         assert len(item["nonce"]) > 0
-        prompt = json.loads(item["prompt"])
+        # the prompt is a plain description; operator params travel via
+        # extra_attributes (mech_interact_abci merges them top-level into the
+        # tool's run() kwargs)
+        assert isinstance(item["prompt"], str)
+        extras = item["extra_attributes"]
+        assert extras["topics"] == ["business", "science"]
+        assert extras["news_sources"] == ["bbc-news"]
+        assert extras["num_questions"] == num_pending
         # resolution time is the opening timestamp minus one day (86400s)
-        assert prompt["resolution_time"] == int(opening_ts) - 86400
-        assert prompt["num_questions"] == num_pending
+        assert extras["resolution_time"] == int(opening_ts) - 86400
 
     def test_build_mech_request_caps_num_questions_at_max(self) -> None:
         """Test num_questions is capped at max_markets_per_story."""
@@ -153,8 +161,8 @@ class TestRequestProposedQuestionsBehaviour:
 
         result = _exhaust_gen(self.behaviour._build_mech_request())
         assert result is not None
-        prompt = json.loads(json.loads(result)[0]["prompt"])
-        assert prompt["num_questions"] == 2
+        extras = json.loads(result)[0]["extra_attributes"]
+        assert extras["num_questions"] == 2
 
     def test_build_mech_request_picks_first_nonzero_opening_ts(self) -> None:
         """Test selects the first opening_ts dict entry with >0 approvals."""
@@ -170,9 +178,9 @@ class TestRequestProposedQuestionsBehaviour:
 
         result = _exhaust_gen(self.behaviour._build_mech_request())
         assert result is not None
-        prompt = json.loads(json.loads(result)[0]["prompt"])
+        extras = json.loads(result)[0]["extra_attributes"]
         # Should pick 1700086400 (first non-zero)
-        assert prompt["resolution_time"] == 1700086400 - 86400
+        assert extras["resolution_time"] == 1700086400 - 86400
 
     def test_not_sender_act_waits(self) -> None:
         """Test _not_sender_act yields to wait_until_round_end and sets done."""
