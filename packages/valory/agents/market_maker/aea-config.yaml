@@ -42,8 +42,8 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
 - valory/funds_forwarder_abci:0.1.0:bafybeihuxw5tgnp4hie76as2jwnbp5abxrkmlmmpu4ila6ey34xrfkqqie
 - valory/identify_service_owner_abci:0.1.0:bafybeid7qw3aoorbv2bnxwd54npkgvdxf6kzpfscnmzqiui74jiskjmitm
-- valory/market_creation_manager_abci:0.1.0:bafybeic3tyq4vbj6wouco67up6v6w2kbcz6agzkbca5dfoxg6bo7yhr2pq
-- valory/market_maker_abci:0.1.0:bafybeifmo2rxmwfl2ikf2h4bcyqq7vnm2rbzxec2jauo5wif7tjpl4ew3u
+- valory/market_creation_manager_abci:0.1.0:bafybeibzunjv7diinsc4jbu6z7jeehnp4gsn4vcs6q66snt666jfmiyzmy
+- valory/market_maker_abci:0.1.0:bafybeidg7qrgjvkxxniwngfofcyljesq3ma6rafku5fmjexgel3grly7zu
 - valory/mech_interact_abci:0.1.0:bafybeihn6ic3exr3umjl5kgmlos3d2sjy6rs3sfogvdtw5e5lenpjaxwou
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm

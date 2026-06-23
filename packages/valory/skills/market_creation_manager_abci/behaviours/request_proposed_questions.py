@@ -131,12 +131,17 @@ class RequestProposedQuestionsBehaviour(MarketCreationManagerBaseBehaviour):
         # The propose-question tool reads its inputs from top-level run(**kwargs).
         # The mech executor spreads the request JSON, and mech_interact_abci
         # merges ``extra_attributes`` into that JSON top-level -- so operator
-        # params travel there and reach the tool as kwargs (the prompt stays a
-        # plain description; ``request_context`` is reserved for analysis data).
+        # params travel there and reach the tool as kwargs.
+        #
+        # ``prompt`` is intentionally blank: unlike a general LLM tool, the
+        # propose-question tool ignores ``prompt`` entirely and uses its own
+        # internal prompts. It is a required field on ``MechMetadata``, so it
+        # cannot be dropped -- an empty string documents that nothing here is
+        # consumed by the tool.
         mech_request = MechMetadata(
             nonce=nonce,
             tool=self.params.mech_tool_propose_question,
-            prompt="Propose prediction-market questions from recent news.",
+            prompt="",
             extra_attributes={
                 "topics": self.params.topics,
                 "news_sources": self.params.news_sources,
