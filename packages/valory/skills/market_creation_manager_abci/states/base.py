@@ -60,6 +60,7 @@ class Event(Enum):
     REALITIO_WITHDRAW_BONDS_TX_DONE = "realitio_withdraw_bonds_tx_done"
     MECH_REQUEST_DONE = "mech_request_done"
     SKIP = "skip"
+    INSUFFICIENT_FUNDS = "insufficient_funds"
 
 
 DEFAULT_PROPOSED_MARKETS_DATA = {"proposed_markets": [], "timestamp": 0}

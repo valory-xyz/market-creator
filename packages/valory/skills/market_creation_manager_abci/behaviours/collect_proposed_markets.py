@@ -22,8 +22,10 @@
 import json
 from collections import defaultdict
 from string import Template
-from typing import Any, Dict, Generator, Type
+from typing import Any, Dict, Generator, Type, cast
 
+from packages.valory.contracts.erc20.contract import ERC20TokenContract
+from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.abstract_round_abci.base import AbstractRound
 from packages.valory.skills.market_creation_manager_abci.behaviours.base import (
     HTTP_OK,
@@ -71,9 +73,26 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def async_act(self) -> Generator:
         """Do the act, supporting asynchronous execution."""
+        sender = self.context.agent_address
+
+        # Guard: skip the entire propose -> Mech-request -> create cycle when
+        # the safe cannot fund even one market (initial_funds). Creating it
+        # would only revert on-chain (GS013) and waste the Mech request fee, so
+        # branch out via INSUFFICIENT_FUNDS and let the period reset/pause.
+        with self.context.benchmark_tool.measure(self.behaviour_id).local():
+            have_funds = yield from self._have_funds_for_market()
+        if not have_funds:
+            payload = CollectProposedMarketsPayload(
+                sender=sender,
+                content=CollectProposedMarketsRound.INSUFFICIENT_FUNDS_PAYLOAD,
+            )
+            with self.context.benchmark_tool.measure(self.behaviour_id).consensus():
+                yield from self.send_a2a_transaction(payload)
+                yield from self.wait_until_round_end()
+            self.set_done()
+            return
 
         with self.context.benchmark_tool.measure(self.behaviour_id).local():
-            sender = self.context.agent_address
             current_timestamp = self.last_synced_timestamp
             self.context.logger.info(f"current_timestamp={current_timestamp}")
 
@@ -201,6 +220,34 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             yield from self.wait_until_round_end()
 
         self.set_done()
+
+    def _have_funds_for_market(self) -> Generator[None, None, bool]:
+        """Return True if the safe holds enough wxDAI to fund one market."""
+        # Compare the safe's wxDAI (collateral) balance against the amount
+        # ``createFPMM`` pulls -- ``to_wei(initial_funds / 100)``. On a transient
+        # balance-read failure the cycle is not blocked (returns True).
+        required = int(self.params.initial_funds / 100 * 10**18)
+        response = yield from self.get_contract_api_response(
+            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
+            contract_address=self.params.collateral_tokens_contract,
+            contract_id=str(ERC20TokenContract.contract_id),
+            contract_callable="check_balance",
+            account=self.synchronized_data.safe_contract_address,
+            chain_id=self.params.default_chain_id,
+        )
+        if response.performative != ContractApiMessage.Performative.STATE:
+            self.context.logger.warning(f"check_balance unsuccessful!: {response}")
+            return True
+        balance = cast(int, response.state.body["token"])
+        if balance < required:
+            self.context.logger.error(
+                "Insufficient wxDAI to create a market: have "
+                f"{balance / 10 ** 18} wxDAI, need {required / 10 ** 18} wxDAI "
+                "(initial_funds per market). Skipping the Mech request and "
+                "market creation this cycle."
+            )
+            return False
+        return True
 
     def _collect_approved_markets(self) -> Generator[None, None, Dict[str, Any]]:
         """Auxiliary method to collect approved and unprocessed markets from the endpoint."""
