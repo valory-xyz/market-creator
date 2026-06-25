@@ -5,6 +5,7 @@ alphabet_in:
 - ERROR
 - FPMM_REMOVE_LIQUIDITY_TX_DONE
 - FUNDS_FORWARDER_TX_DONE
+- INSUFFICIENT_FUNDS
 - MAX_APPROVED_MARKETS_REACHED
 - MAX_RETRIES_REACHED
 - MECH_REQUEST_DONE
@@ -54,6 +55,7 @@ states:
 transition_func:
     (CollectProposedMarketsRound, DONE): RequestProposedQuestionsRound
     (CollectProposedMarketsRound, ERROR): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, INSUFFICIENT_FUNDS): FinishedWithoutTxRound
     (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, NONE): RetrieveApprovedMarketRound

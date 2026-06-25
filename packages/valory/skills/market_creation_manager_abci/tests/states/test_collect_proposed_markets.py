@@ -92,6 +92,10 @@ class TestCollectProposedMarketsRound:
             CollectProposedMarketsRound.SKIP_MARKET_APPROVAL_PAYLOAD
             == "SKIP_MARKET_APPROVAL_PAYLOAD"
         )
+        assert (
+            CollectProposedMarketsRound.INSUFFICIENT_FUNDS_PAYLOAD
+            == "INSUFFICIENT_FUNDS_PAYLOAD"
+        )
 
 
 class TestCollectProposedMarketsRoundEndBlock:
@@ -125,6 +129,7 @@ class TestCollectProposedMarketsRoundEndBlock:
                 Event.MAX_APPROVED_MARKETS_REACHED,
             ),
             ("SKIP_MARKET_APPROVAL_PAYLOAD", Event.SKIP_MARKET_APPROVAL),
+            ("INSUFFICIENT_FUNDS_PAYLOAD", Event.INSUFFICIENT_FUNDS),
         ],
     )
     def test_end_block_special_payloads(

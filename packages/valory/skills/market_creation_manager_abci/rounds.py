@@ -110,6 +110,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             - max approved markets reached: 7.
             - max retries reached: 7.
             - skip market approval: 7.
+            - insufficient funds: 13.
             - no majority: 7.
             - none: 7.
             - round timeout: 7.
@@ -197,6 +198,7 @@ class MarketCreationManagerAbciApp(AbciApp[Event]):
             Event.MAX_APPROVED_MARKETS_REACHED: RetrieveApprovedMarketRound,
             Event.MAX_RETRIES_REACHED: RetrieveApprovedMarketRound,
             Event.SKIP_MARKET_APPROVAL: RetrieveApprovedMarketRound,
+            Event.INSUFFICIENT_FUNDS: FinishedWithoutTxRound,
             Event.NO_MAJORITY: RetrieveApprovedMarketRound,
             Event.NONE: RetrieveApprovedMarketRound,
             Event.ROUND_TIMEOUT: RetrieveApprovedMarketRound,
