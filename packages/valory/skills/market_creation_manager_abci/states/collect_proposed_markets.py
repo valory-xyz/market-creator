@@ -42,6 +42,7 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
     MAX_RETRIES_PAYLOAD = "MAX_RETRIES_PAYLOAD"
     MAX_APPROVED_MARKETS_REACHED_PAYLOAD = "MAX_APPROVED_MARKETS_REACHED_PAYLOAD"
     SKIP_MARKET_APPROVAL_PAYLOAD = "SKIP_MARKET_APPROVAL_PAYLOAD"
+    INSUFFICIENT_FUNDS_PAYLOAD = "INSUFFICIENT_FUNDS_PAYLOAD"
 
     payload_class = CollectProposedMarketsPayload
     synchronized_data_class = SynchronizedData
@@ -71,5 +72,8 @@ class CollectProposedMarketsRound(CollectSameUntilThresholdRound):
 
         if event == Event.DONE and payload == self.SKIP_MARKET_APPROVAL_PAYLOAD:
             return synced_data, Event.SKIP_MARKET_APPROVAL
+
+        if event == Event.DONE and payload == self.INSUFFICIENT_FUNDS_PAYLOAD:
+            return synced_data, Event.INSUFFICIENT_FUNDS
 
         return synced_data, event

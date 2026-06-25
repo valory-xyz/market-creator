@@ -87,6 +87,7 @@ transition_func:
     (CheckTransactionHistoryRound, NO_MAJORITY): CheckTransactionHistoryRound
     (CollectProposedMarketsRound, DONE): RequestProposedQuestionsRound
     (CollectProposedMarketsRound, ERROR): RetrieveApprovedMarketRound
+    (CollectProposedMarketsRound, INSUFFICIENT_FUNDS): ResetAndPauseRound
     (CollectProposedMarketsRound, MAX_APPROVED_MARKETS_REACHED): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, MAX_RETRIES_REACHED): RetrieveApprovedMarketRound
     (CollectProposedMarketsRound, NONE): RetrieveApprovedMarketRound

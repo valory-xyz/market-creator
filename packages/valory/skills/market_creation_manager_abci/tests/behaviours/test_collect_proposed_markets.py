@@ -23,6 +23,7 @@ import json
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import (
     CollectProposedMarketsBehaviour,
     FPMM_QUERY,
@@ -190,6 +191,63 @@ class TestCollectProposedMarketsBehaviour:
             == CollectProposedMarketsRound
         )
 
+    def test_have_funds_for_market_sufficient(self) -> None:
+        """_have_funds_for_market returns True when wxDAI covers initial_funds."""
+        self.behaviour.params.initial_funds = 100.0  # required = 1e18 wei
+        self.behaviour.params.collateral_tokens_contract = "0xWxdai"
+        self.behaviour.params.default_chain_id = "gnosis"
+        resp = MagicMock()
+        resp.performative = ContractApiMessage.Performative.STATE
+        resp.state.body = {"token": 2 * 10**18}
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(resp)
+        ):
+            result = _exhaust_gen(self.behaviour._have_funds_for_market())
+        assert result is True
+
+    def test_have_funds_for_market_insufficient(self) -> None:
+        """_have_funds_for_market returns False and logs when wxDAI < initial_funds."""
+        self.behaviour.params.initial_funds = 100.0  # required = 1e18 wei
+        self.behaviour.params.collateral_tokens_contract = "0xWxdai"
+        self.behaviour.params.default_chain_id = "gnosis"
+        resp = MagicMock()
+        resp.performative = ContractApiMessage.Performative.STATE
+        resp.state.body = {"token": 5 * 10**17}  # 0.5 wxDAI < 1 wxDAI
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(resp)
+        ):
+            result = _exhaust_gen(self.behaviour._have_funds_for_market())
+        assert result is False
+        errors = [str(c) for c in self.behaviour.context.logger.error.call_args_list]
+        assert any("Insufficient wxDAI" in c for c in errors)
+
+    def test_have_funds_for_market_read_failure(self) -> None:
+        """_have_funds_for_market returns True (no block) on a balance-read error."""
+        self.behaviour.params.initial_funds = 100.0
+        self.behaviour.params.collateral_tokens_contract = "0xWxdai"
+        self.behaviour.params.default_chain_id = "gnosis"
+        resp = MagicMock()
+        resp.performative = ContractApiMessage.Performative.ERROR
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(resp)
+        ):
+            result = _exhaust_gen(self.behaviour._have_funds_for_market())
+        assert result is True
+
+    def test_have_funds_for_market_missing_token_key(self) -> None:
+        """_have_funds_for_market fails open (True) when 'token' key is absent."""
+        self.behaviour.params.initial_funds = 100.0
+        self.behaviour.params.collateral_tokens_contract = "0xWxdai"
+        self.behaviour.params.default_chain_id = "gnosis"
+        resp = MagicMock()
+        resp.performative = ContractApiMessage.Performative.STATE
+        resp.state.body = {}  # 'token' key absent
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(resp)
+        ):
+            result = _exhaust_gen(self.behaviour._have_funds_for_market())
+        assert result is True
+
 
 class TestCollectProposedMarketsBehaviourAsyncAct:
     """Tests for CollectProposedMarketsBehaviour async_act."""
@@ -249,6 +307,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
                 "_collect_approved_markets",
                 new=_make_gen({"approved_markets": []}),
             ),
+            patch.object(self.behaviour, "_have_funds_for_market", new=_make_gen(True)),
             patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
             patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
             patch.object(self.behaviour, "set_done") as mock_set_done,
@@ -285,6 +344,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
                 "_collect_approved_markets",
                 new=_make_gen({"approved_markets": []}),
             ),
+            patch.object(self.behaviour, "_have_funds_for_market", new=_make_gen(True)),
             patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
             patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
             patch.object(self.behaviour, "set_done"),
@@ -325,6 +385,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
                 "_collect_approved_markets",
                 new=_make_gen({"approved_markets": []}),
             ),
+            patch.object(self.behaviour, "_have_funds_for_market", new=_make_gen(True)),
             patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
             patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
             patch.object(self.behaviour, "set_done"),
@@ -374,6 +435,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
                 "_collect_approved_markets",
                 new=_make_gen({"approved_markets": []}),
             ),
+            patch.object(self.behaviour, "_have_funds_for_market", new=_make_gen(True)),
             patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
             patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
             patch.object(self.behaviour, "set_done"),
@@ -414,12 +476,35 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
                 "_collect_approved_markets",
                 new=_make_gen({"approved_markets": [{"id": "m1"}]}),
             ),
+            patch.object(self.behaviour, "_have_funds_for_market", new=_make_gen(True)),
             patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
             patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
             patch.object(self.behaviour, "set_done"),
         ):
             gen = self.behaviour.async_act()
             _exhaust_gen(gen)
+
+    def test_async_act_insufficient_funds(self) -> None:
+        """async_act branches to INSUFFICIENT_FUNDS_PAYLOAD when funds are short."""
+        # MagicMocks whose side_effect yields nothing, so we can both drive the
+        # `yield from` and assert the calls (incl. wait_until_round_end).
+        send_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
+        wait_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
+        with (
+            patch.object(
+                self.behaviour, "_have_funds_for_market", new=_make_gen(False)
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=send_mock),
+            patch.object(self.behaviour, "wait_until_round_end", new=wait_mock),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
+            _exhaust_gen(self.behaviour.async_act())
+
+        mock_set_done.assert_called_once()
+        wait_mock.assert_called_once()
+        send_mock.assert_called_once()
+        payload = send_mock.call_args[0][0]
+        assert payload.content == CollectProposedMarketsRound.INSUFFICIENT_FUNDS_PAYLOAD
 
     def test_async_act_success(self) -> None:
         """Test async_act when all conditions pass and returns JSON content."""
@@ -452,6 +537,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
                 "_collect_approved_markets",
                 new=_make_gen({"approved_markets": []}),
             ),
+            patch.object(self.behaviour, "_have_funds_for_market", new=_make_gen(True)),
             patch.object(self.behaviour, "send_a2a_transaction", new=_make_gen(None)),
             patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
             patch.object(self.behaviour, "set_done") as mock_set_done,
