@@ -234,6 +234,20 @@ class TestCollectProposedMarketsBehaviour:
             result = _exhaust_gen(self.behaviour._have_funds_for_market())
         assert result is True
 
+    def test_have_funds_for_market_missing_token_key(self) -> None:
+        """_have_funds_for_market fails open (True) when 'token' key is absent."""
+        self.behaviour.params.initial_funds = 100.0
+        self.behaviour.params.collateral_tokens_contract = "0xWxdai"
+        self.behaviour.params.default_chain_id = "gnosis"
+        resp = MagicMock()
+        resp.performative = ContractApiMessage.Performative.STATE
+        resp.state.body = {}  # 'token' key absent
+        with patch.object(
+            self.behaviour, "get_contract_api_response", new=_make_gen(resp)
+        ):
+            result = _exhaust_gen(self.behaviour._have_funds_for_market())
+        assert result is True
+
 
 class TestCollectProposedMarketsBehaviourAsyncAct:
     """Tests for CollectProposedMarketsBehaviour async_act."""
@@ -472,28 +486,25 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
 
     def test_async_act_insufficient_funds(self) -> None:
         """async_act branches to INSUFFICIENT_FUNDS_PAYLOAD when funds are short."""
-        captured = {}
-
-        def _capture_send(payload: Any, *a: Any, **k: Any) -> Any:
-            captured["payload"] = payload
-            return
-            yield  # noqa: unreachable - makes this a generator
-
+        # MagicMocks whose side_effect yields nothing, so we can both drive the
+        # `yield from` and assert the calls (incl. wait_until_round_end).
+        send_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
+        wait_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
         with (
             patch.object(
                 self.behaviour, "_have_funds_for_market", new=_make_gen(False)
             ),
-            patch.object(self.behaviour, "send_a2a_transaction", new=_capture_send),
-            patch.object(self.behaviour, "wait_until_round_end", new=_make_gen(None)),
+            patch.object(self.behaviour, "send_a2a_transaction", new=send_mock),
+            patch.object(self.behaviour, "wait_until_round_end", new=wait_mock),
             patch.object(self.behaviour, "set_done") as mock_set_done,
         ):
-            gen = self.behaviour.async_act()
-            _exhaust_gen(gen)
-            mock_set_done.assert_called_once()
-            assert (
-                captured["payload"].content
-                == CollectProposedMarketsRound.INSUFFICIENT_FUNDS_PAYLOAD
-            )
+            _exhaust_gen(self.behaviour.async_act())
+
+        mock_set_done.assert_called_once()
+        wait_mock.assert_called_once()
+        send_mock.assert_called_once()
+        payload = send_mock.call_args[0][0]
+        assert payload.content == CollectProposedMarketsRound.INSUFFICIENT_FUNDS_PAYLOAD
 
     def test_async_act_success(self) -> None:
         """Test async_act when all conditions pass and returns JSON content."""

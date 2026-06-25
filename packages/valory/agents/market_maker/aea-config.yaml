@@ -42,8 +42,8 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
 - valory/funds_forwarder_abci:0.1.0:bafybeihuxw5tgnp4hie76as2jwnbp5abxrkmlmmpu4ila6ey34xrfkqqie
 - valory/identify_service_owner_abci:0.1.0:bafybeid7qw3aoorbv2bnxwd54npkgvdxf6kzpfscnmzqiui74jiskjmitm
-- valory/market_creation_manager_abci:0.1.0:bafybeigbmzv7iydgvdzxtlsdosclwiganqy5v3kxymh7oznuftlagxm3wi
-- valory/market_maker_abci:0.1.0:bafybeihf3tjb7efb5nvpi2biznptydy36n3j34p33zo2yom3kggostanlm
+- valory/market_creation_manager_abci:0.1.0:bafybeifa6z6ul2xg5zyx2l7klre7znapixpsmuc7l53nmyzduekxoe4cle
+- valory/market_maker_abci:0.1.0:bafybeidiyfqwf6k5oxcnhq2njh7ldzyzztk5dro4z32babcyinfj7lplam
 - valory/mech_interact_abci:0.1.0:bafybeihn6ic3exr3umjl5kgmlos3d2sjy6rs3sfogvdtw5e5lenpjaxwou
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
