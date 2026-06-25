@@ -20,65 +20,67 @@ Each cycle the agent runs an ABCI FSM that:
 
 ```mermaid
 stateDiagram-v2
-    direction TB
-    [*] --> Reg
+  direction TB
 
-    state "AgentRegistration" as Reg
-    state "ResetAndPause" as Reset
-    state "IdentifyServiceOwner" as Ident
-    state "FundsForwarder" as Funds
-    state "OmenFpmmRemoveLiquidity" as RemLiq
-    state "OmenCtRedeemTokens" as Redeem
-    state "OmenRealitioWithdrawBonds" as Bonds
-    state "TransactionSettlement + PostTransaction" as TxSettle
-    state "MechInteract (propose-question oracle)" as Mech
+  classDef dev fill:#e1f5ee,stroke:#0f6e56,color:#04342c
+  classDef tp  fill:#e6f1fb,stroke:#185fa5,color:#042c53
 
-    state "MarketCreationManager [dev]" as MCM {
-        direction TB
-        [*] --> Dep
-        state "DepositDai" as Dep
-        state "CollectProposedMarkets" as Col
-        state "RequestProposedQuestions" as Req
-        state "ProcessProposedQuestions" as Proc
-        state "RetrieveApprovedMarket" as Ret
-        state "CreateMarketTx" as Cre
-        Dep --> Col
-        Col --> Req: markets needed
-        Col --> Ret: backlog / throttled
-        Col --> [*]: INSUFFICIENT_FUNDS
-        Req --> Proc: mech response
-        Proc --> Ret
-        Ret --> Cre: approved market
-        Ret --> [*]: none
-        Cre --> [*]: create-market tx
-    }
+  [*] --> Reg
 
-    Reg --> Reset
-    Reset --> Ident: each cycle
-    Ident --> Funds
-    Funds --> RemLiq
-    RemLiq --> Redeem
-    Redeem --> Bonds
-    Bonds --> MCM
-    MCM --> TxSettle: prepared tx
-    MCM --> Mech: mech request
-    TxSettle --> MCM: settled (PostTransaction)
-    Mech --> MCM: response
-    MCM --> Reset: nothing to settle
+  state "AgentRegistration" as Reg
+  state "IdentifyServiceOwner" as Ident
+  state "FundsForwarder" as Funds
+  state "OmenFpmmRemoveLiquidity (recovery 1)" as RemLiq
+  state "OmenCtRedeemTokens (recovery 2)" as Redeem
+  state "OmenRealitioWithdrawBonds (recovery 3)" as Bonds
+  state "ResetAndPause" as Reset
+  state "MechInteract (propose-question oracle)" as Mech
 
-    classDef dev fill:#e1f5ee,stroke:#0f6e56,color:#04342c
-    classDef tp fill:#e6f1fb,stroke:#185fa5,color:#042c53
-    class MCM dev
-    class Reg,Reset,Ident,Funds,RemLiq,Redeem,Bonds,TxSettle,Mech tp
+  state "MarketCreationManager (dev)" as MCM {
+    state "DepositDai (wrap xDAI)" as Deposit
+    state "CollectRandomness" as Rand
+    state "SelectKeeper" as Keeper
+    state "CollectProposedMarkets" as Propose
+    state "RequestProposedQuestions" as Request
+    state "ProcessProposedQuestions" as Process
+    state "RetrieveApprovedMarket" as Retrieve
+    state "CreateMarketTx" as Create
+
+    Deposit --> Rand: DEPOSIT_DAI_DONE (via TxSettlement + PostTransaction)
+    Rand --> Keeper: DONE
+    Keeper --> Propose: DONE
+    Propose --> Request: DONE
+    Propose --> Retrieve: SKIP_MARKET_APPROVAL
+    Process --> Retrieve: DONE
+    Retrieve --> Create: DONE
+  }
+
+  Reg --> Ident
+  Ident --> Funds
+  Ident --> RemLiq: on error
+  Funds --> RemLiq
+  RemLiq --> Redeem
+  Redeem --> Bonds
+  Bonds --> Deposit
+  Reset --> Ident: next period
+  Reset --> Reg: on error
+
+  Request --> Mech: MECH_REQUEST_DONE
+  Mech --> Process: response delivered
+  Mech --> Reset: skip / timeout
+
+  Propose --> Reset: INSUFFICIENT_FUNDS
+  Retrieve --> Reset: NO_MARKETS_RETRIEVED
+  Create --> Reset: DONE (via TxSettlement + PostTransaction)
+
+  class MCM dev
+  class Reg,Ident,Funds,RemLiq,Redeem,Bonds,Reset,Mech tp
 ```
-
-Green = the skill owned by this repo (`dev`); blue = third-party sub-apps synced from upstream. The three recovery sub-apps run as a chain before market creation; each routes through `TransactionSettlement` when it has a tx, and `PostTransaction` returns control to the next step. A `Termination` background app handles graceful shutdown.
 
 ### Key design decisions
 
 - **Question generation runs in the Mech, not the agent.** The service only sends a `propose-question` request via `mech_interact_abci`; the OpenAI / NewsAPI / Serper keys it needs live on the **Mech**, not on this service. Operator params (`TOPICS`, `NEWS_SOURCES`, `num_questions`) travel as Mech `extra_attributes`.
 - **Approval-server indirection.** Generated questions are pushed to an external approval server; only *approved* markets are created on-chain, so markets can be gated before funds are committed.
-- **Funding guard.** `CollectProposedMarkets` emits `INSUFFICIENT_FUNDS` and skips the whole propose -> Mech -> create cycle when the safe's wxDAI cannot fund a market, avoiding a wasted Mech fee and an on-chain `createFPMM` revert.
 - **Shared recovery chain.** LP removal, CT redemption and bond withdrawal reuse the same sub-skills as market-resolver.
 
 ## Prepare the environment
@@ -114,7 +116,7 @@ Defaults live in [service.yaml](packages/valory/services/market_maker/service.ya
 | `MARKET_APPROVAL_SERVER_URL` / `MARKET_APPROVAL_SERVER_API_KEY` | Approval-server endpoint and key (server reachable from the agent). |
 | `MARKETS_TO_APPROVE_PER_DAY` | Target number of markets per opening day. |
 | `APPROVE_MARKET_EVENT_DAYS_OFFSET` | How far ahead markets are opened (days). |
-| `TOPICS` / `NEWS_SOURCES` | News topics / sources, forwarded to the Mech tool as `extra_attributes`. |
+| `TOPICS` / `NEWS_SOURCES` | News topics / sources, forwarded to the Mech tool. |
 | `MAX_MARKETS_PER_STORY` | Upper bound on `num_questions` requested per Mech call. |
 | `INITIAL_FUNDS` | Initial wxDAI liquidity per market (the funding the guard checks against). |
 | `MARKET_FEE` | FPMM LP fee, percent. |
@@ -145,6 +147,22 @@ autonomy deploy run --build-dir abci_build/
 aea-helpers run-service --name valory/market_maker --env-file .env
 ```
 
+## Development
+
+After editing anything under `packages/`:
+
+1. **Format + lint** — `make formatters`, then `make code-checks` (black, isort, flake8, mypy, pylint, darglint).
+2. **FSM changes** — keep the `Event` enum, `rounds.py`, `fsm_specification.yaml`, and tests in sync, then regenerate the specs + docstrings:
+
+   ```bash
+   autonomy analyse fsm-specs --update --package packages/valory/skills/market_creation_manager_abci
+   autonomy analyse fsm-specs --update --package packages/valory/skills/market_maker_abci
+   autonomy analyse docstrings --update
+   ```
+
+3. **Lock package hashes** — `autonomy packages lock`.
+4. **Tests** (100% statement + branch coverage enforced) — `tomte tox -e py3.11-linux`.
+
 ## Third-party dependencies
 
 Synced from IPFS via `autonomy packages sync` (not committed to git):
@@ -156,6 +174,12 @@ Synced from IPFS via `autonomy packages sync` (not committed to git):
 | [mech-interact](https://github.com/valory-xyz/mech-interact) | `mech_interact_abci` skill, mech / mech_mm / ierc1155 contracts |
 | [omen-protocol](https://github.com/valory-xyz/omen-protocol) | realitio, realitio_proxy, conditional_tokens, fpmm contracts; the LP-removal / CT-redeem / bond-withdrawal recovery skills |
 | [genai](https://github.com/valory-xyz/genai) | GenAI / NVM subscription packages |
+
+## Further reading
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — development workflow and conventions
+- [`SECURITY.md`](SECURITY.md) — security policy
+- Reference service: [valory-xyz/trader](https://github.com/valory-xyz/trader); sibling resolver: [valory-xyz/market-resolver](https://github.com/valory-xyz/market-resolver)
 
 ## License
 
