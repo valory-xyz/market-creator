@@ -86,6 +86,27 @@ class TestSharedState:
         """Test inheritance."""
         assert issubclass(SharedState, BaseSharedState)
 
+    def test_realitio_claim_build_cache_initialized(self) -> None:
+        """The withdraw-bonds claim cache must be initialized on the shared state.
+
+        Regression: ``RealitioWithdrawBondsBehaviour._build_claim_txs``
+        reads ``self.context.state.realitio_claim_build_cache``. That
+        attribute only exists if ``RealitioWithdrawBondsSharedState`` is in
+        this composed ``SharedState``'s MRO so its ``__init__`` runs via the
+        cooperative ``super()`` chain (same mechanism as
+        ``ignored_ct_positions``). When it was absent the round raised
+        ``AttributeError`` -> ``stop_and_exit`` -> Propel restart loop.
+        """
+        from unittest.mock import MagicMock
+
+        from packages.valory.skills.omen_realitio_withdraw_bonds_abci.models import (
+            SharedState as RealitioWithdrawBondsSharedState,
+        )
+
+        assert RealitioWithdrawBondsSharedState in SharedState.__mro__
+        state = SharedState(name="state", skill_context=MagicMock())
+        assert state.realitio_claim_build_cache == {}
+
     def test_abci_app_cls(self) -> None:
         """Test abci_app_cls is set."""
         from packages.valory.skills.market_maker_abci.composition import (

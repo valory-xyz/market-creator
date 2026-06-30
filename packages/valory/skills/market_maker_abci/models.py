@@ -88,6 +88,9 @@ from packages.valory.skills.omen_realitio_withdraw_bonds_abci.models import (
 from packages.valory.skills.omen_realitio_withdraw_bonds_abci.models import (
     RealitioWithdrawBondsParams,
 )
+from packages.valory.skills.omen_realitio_withdraw_bonds_abci.models import (
+    SharedState as RealitioWithdrawBondsSharedState,
+)
 from packages.valory.skills.omen_realitio_withdraw_bonds_abci.rounds import (
     Event as OmenRealitioWithdrawBondsEvent,
 )
@@ -109,12 +112,21 @@ MechToolsSpecs = BaseMechToolsSpecs
 MechsSubgraph = BaseMechsSubgraph
 
 
-class SharedState(MechInteractSharedState, BaseSharedState, CtRedeemTokensSharedState):
+class SharedState(
+    MechInteractSharedState,
+    BaseSharedState,
+    CtRedeemTokensSharedState,
+    RealitioWithdrawBondsSharedState,
+):
     """Keep the current shared state of the skill.
 
     Multi-inherits from sub-skill SharedStates so their ``__init__``
     initializers (e.g. ``ignored_ct_positions`` from the CT redeem skill,
-    and mech state from mech_interact) are run via MRO.
+    ``realitio_claim_build_cache`` from the Realitio withdraw-bonds skill,
+    and mech state from mech_interact) are run via MRO. Omitting a
+    sub-skill whose behaviour reads ``self.context.state.<attr>`` causes
+    that attribute to be absent on the composed runtime state, raising
+    ``AttributeError`` and (under ``stop_and_exit``) crash-looping.
     """
 
     abci_app_cls = MarketCreatorAbciApp  # type: ignore[assignment]
