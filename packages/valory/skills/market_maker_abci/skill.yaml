@@ -14,13 +14,13 @@ fingerprint:
   dialogues.py: bafybeiafgwadv6kzts6yx5gtjyuvaftnofyn3rrwvczfd5seihpydzukju
   fsm_specification.yaml: bafybeif6md363gmewsuegx6254k2gnsh46p7vqa6spj5efqowc6mgccx2m
   handlers.py: bafybeiefnf5zg2tjf6mfdaz65ath6ziditzul5u3hrkpl2h5ofwdsaw3vy
-  models.py: bafybeidaxa4d7w3566mcjtiakcz5aufwuwovxnsmqfgtzf7juesksllsmu
+  models.py: bafybeiec2hpb7fngpsq7euhxuqnrprrnkabofsmdvbl2jd2nwawz7w6pty
   tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
   tests/test_behaviours.py: bafybeiapyvud7fsne3cg2oowm2u7jni5ngixv4p3mudukisluccjzpc5l4
   tests/test_dialogues.py: bafybeiedpuwlfc24gxkjoi4wvncfnjsgc7xfqiajqmvrjdvfpfrw2bcqnm
   tests/test_handlers.py: bafybeia3adw5llfkkcugytry3l2xpn2tz4irecqoihyndrhessmic7o2nq
-  tests/test_models.py: bafybeihpplz5jpldwc3dwoiikpgq5pzfijgrparak25k722l6lw3ypifli
+  tests/test_models.py: bafybeidyfl3f2v6b4a34j3hqt2mllygpdaxnkpwjfqqozxumepp6eh2iui
 fingerprint_ignore_patterns: []
 connections:
 - valory/http_server:0.22.0:bafybeihs6dufyaa5l4uorplzx3wiyna5qlq2x43tmyl3yonkl265vspdle
