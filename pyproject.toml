@@ -70,7 +70,7 @@ prerelease = "allow"
 upstream_pins = [
     "valory-xyz/mech-interact@v0.32.3",
     "valory-xyz/genai@v7.2.1",
-    "valory-xyz/omen-protocol@v0.1.1",
+    "valory-xyz/omen-protocol@v0.1.2",
 ]
 # IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package
 # fingerprints look like generic API keys to gitleaks; allowlist them.
