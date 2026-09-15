@@ -13,29 +13,37 @@ app runs registration, then an ownership check, a funds-forwarder pass, and the
 three Omen recovery skills (FPMM liquidity removal, Conditional Tokens
 redemption, Realitio bond withdrawal), before entering the market-creation logic.
 
-`MarketCreationManagerAbciApp` starts at `CollectRandomnessRound` and proceeds:
+`MarketCreationManagerAbciApp` declares `CollectRandomnessRound` as its
+`default_start_state`, but that is the standalone entry. In the composed app the
+Omen recovery chain always hands over at `DepositDaiRound`, from both
+`FinishedWithoutRealitioWithdrawBondsTxRound` and
+`FinishedWithRealitioWithdrawBondsPostTxRound`, so wrapping xDAI into wxDAI is a
+per-period step rather than an error path. From there:
 
-1. `CollectRandomnessRound` then `SelectKeeperRound` pick the agent that drives the cycle.
-2. `CollectProposedMarketsRound` asks the approval server for already-approved
-   markets and the Omen subgraph for markets opening in the window. Four gates can
+1. `DepositDaiRound` wraps xDAI into wxDAI. Either it emits `NONE` or the
+   deposit settles and `PostTransactionRound` returns `DEPOSIT_DAI_DONE`; both
+   lead to `CollectRandomnessRound`. `PostTransactionRound` on `ERROR` re-enters
+   `DepositDaiRound`, which is the failure re-entry rather than the only entry.
+2. `CollectRandomnessRound` then `SelectKeeperRound` pick the agent that drives the cycle.
+3. `CollectProposedMarketsRound` asks the approval server for already-approved
+   markets and the Omen subgraph for markets opening in the window. Five gates can
    short-circuit to `RetrieveApprovedMarketRound`: the `max_approved_markets` cap,
-   two `min_approve_markets_epoch_seconds` timers, and unprocessed approved markets
-   already waiting. A wxDAI balance below `initial_funds * 1e16` emits
+   two `min_approve_markets_epoch_seconds` timers, `num_markets_to_approve <= 0`
+   ("No market approval required."), and unprocessed approved markets already
+   waiting. A wxDAI balance below `initial_funds * 1e16` emits
    `INSUFFICIENT_FUNDS` instead.
-3. `RequestProposedQuestionsRound` builds a Mech request for the
+4. `RequestProposedQuestionsRound` builds a Mech request for the
    `propose-question` tool, passing `topics`, `news_sources`, `num_questions` and
    `resolution_time` as `extra_attributes`. Question generation, the LLM calls and
    the NewsAPI fetch all happen inside the Mech tool, not in this service.
-4. `ProcessProposedQuestionsRound` parses the Mech response and posts the
+5. `ProcessProposedQuestionsRound` parses the Mech response and posts the
    questions to the approval server.
-5. `RetrieveApprovedMarketRound` claims one approved market, and
+6. `RetrieveApprovedMarketRound` claims one approved market, and
    `CreateMarketTxRound` builds the multisend that deploys the FPMM, adds
    liquidity and creates the Realitio question.
 
-`DepositDaiRound` wraps xDAI into wxDAI and is reached from `PostTransactionRound`
-on `ERROR`, not on the main path. `PostTransactionRound` is the multiplexer after
-every settlement: it reads which transaction type was submitted and routes to the
-matching final state.
+`PostTransactionRound` is the multiplexer after every settlement: it reads which
+transaction type was submitted and routes to the matching final state.
 
 ### Contracts
 
@@ -138,9 +146,11 @@ tomte tox -e py
 tomte tox -e py -r
 ```
 
-The old `py{version}-{platform}` and `unit-tests` environments no longer exist;
-`py` is the single test environment, and CI varies the interpreter through its
-own matrix rather than through env names.
+`unit-tests` no longer exists. `py{version}-{platform}` does: it is in the
+`envlist` of tomte's canonical tox.ini, and CI feeds its matrix into those env
+names (`tomte tox -e py${{ matrix.python-version }}-linux`, and the `-darwin`
+and `-win` variants). Locally `tomte tox -e py` is the shorter recipe, since
+tox's implicit `py` env inherits `[testenv]` and its pytest invocation.
 
 ### Formatting (auto-fix)
 
@@ -208,7 +218,9 @@ CI workflow: `.github/workflows/common_checks.yml`
 
 - The `test` job runs a matrix of three operating systems (Linux, macOS, Windows) across the full supported Python range; the exact runner pins are in the workflow
 - The `lock_check`, `copyright_and_dependencies_check` and `linter_checks` jobs run on a single Python version
+- `scan` runs gitleaks, separately from the three above
 - `test` declares `needs: [lock_check, copyright_and_dependencies_check, linter_checks]`, so a single failing check makes every `test (...)` row report `skipping` rather than running
+- `all_checks_passed` is the job that actually gates the merge. It is `needs`-gated on all five others, including `scan` and `test`, and fails if any of them failed or was cancelled
 - tomte is pinned by git SHA (see `[tool.tomte].tomte_dep_pin`), not by a released version
 
 ## Key Gotchas
@@ -299,7 +311,7 @@ See [FSM_AUDIT.md](FSM_AUDIT.md) for the full audit report with all findings and
 - **Round**: A consensus round where agents submit payloads and vote
 - **Behaviour**: Logic executed by each agent during a round (collects data, builds transactions)
 - **Skill**: An AEA skill containing rounds, behaviours, handlers, payloads, and models
-- **Composed app**: `market_maker_abci` chains 11 sub-apps, from `AgentRegistrationAbciApp` through the three `omen_*` recovery skills and `MarketCreationManagerAbciApp` to `MechInteractAbciApp`, `TransactionSubmissionAbciApp` and `ResetPauseAbciApp`, with `TerminationAbciApp` as a background app
+- **Composed app**: `market_maker_abci` chains 10 sub-apps, from `AgentRegistrationAbciApp` through the three `omen_*` recovery skills and `MarketCreationManagerAbciApp` to `TransactionSubmissionAbciApp`, `MechInteractAbciApp` and `ResetPauseAbciApp`; `TerminationAbciApp` is added separately via `.add_background_app()`, making 11 in total
 - **`autonomy packages sync --all`**: Fetches all third-party dependencies declared in `packages.json` from IPFS
 
 ## Third-party Dependency Repositories
