@@ -21,7 +21,7 @@
 
 import json
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import (
@@ -159,7 +159,7 @@ class TestCollectProposedMarketsBehaviour:
         assert len(result["fixedProductMarketMakers"]) == 1
 
     def test_collect_latest_open_markets_none(self) -> None:
-        """Test _collect_latest_open_markets when subgraph returns None."""
+        """A failed subgraph query propagates None, not an empty result."""
         with patch.object(
             self.behaviour,
             "get_subgraph_result",
@@ -171,7 +171,30 @@ class TestCollectProposedMarketsBehaviour:
             )
             result = _exhaust_gen(gen)
 
-        assert result == {"fixedProductMarketMakers": []}
+        # An empty ``fixedProductMarketMakers`` list would be indistinguishable
+        # from "no open markets" and would approve the full daily quota.
+        assert result is None
+
+    def test_assess_market_approval_errors_on_subgraph_failure(self) -> None:
+        """A failed subgraph query yields ERROR, not a full quota of markets."""
+        self.behaviour.context.params.approve_market_event_days_offset = 5
+        with (
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=PropertyMock,
+                return_value=1700000000,
+            ),
+            patch.object(
+                self.behaviour,
+                "_collect_latest_open_markets",
+                new=_make_gen(None),
+            ),
+        ):
+            gen = self.behaviour._assess_market_approval()
+            result = _exhaust_gen(gen)
+
+        assert result == CollectProposedMarketsRound.ERROR_PAYLOAD
 
     def test_fpmm_query_template_defined(self) -> None:
         """Test that FPMM_QUERY template contains expected fields."""
