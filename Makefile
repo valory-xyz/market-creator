@@ -73,7 +73,7 @@ generators:
 
 .PHONY: common-checks-1
 common-checks-1:
-	tomte check-copyright --author author_name
+	tomte check-copyright --author valory
 	tomte check-doc-links
 	tox -qq -p -e check-hash -e check-packages -e check-doc-hashes
 
