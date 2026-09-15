@@ -42,8 +42,8 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
 - valory/funds_forwarder_abci:0.1.0:bafybeihuxw5tgnp4hie76as2jwnbp5abxrkmlmmpu4ila6ey34xrfkqqie
 - valory/identify_service_owner_abci:0.1.0:bafybeid7qw3aoorbv2bnxwd54npkgvdxf6kzpfscnmzqiui74jiskjmitm
-- valory/market_creation_manager_abci:0.1.0:bafybeibymyjm4ju47kt7jrntsa5gy2a3puwzgkbbjrtd7st3dllun7zk5q
-- valory/market_maker_abci:0.1.0:bafybeidr73xlhql4lck2cj5clwcfswfcqhb2t7plhpmm2x3edmjiyt6xfa
+- valory/market_creation_manager_abci:0.1.0:bafybeiadtrnvnnyfaqnpryeacmitxkyo22zjliq4dpifvxx3lxph3inirm
+- valory/market_maker_abci:0.1.0:bafybeihotabilihxhxkav2grswnheo4s7et5vwe56ifqubhcp5ryl7lpvm
 - valory/mech_interact_abci:0.1.0:bafybeihn6ic3exr3umjl5kgmlos3d2sjy6rs3sfogvdtw5e5lenpjaxwou
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
@@ -84,10 +84,6 @@ logging_config:
 skill_exception_policy: stop_and_exit
 connection_exception_policy: just_log
 dependencies:
-  gql:
-    version: ==3.5.0
-  graphql-core:
-    version: <3.3,>=3.2
   hypothesis:
     version: ==6.21.6
   open-aea-ledger-cosmos:
@@ -96,8 +92,6 @@ dependencies:
     version: ==2.2.7
   open-aea-test-autonomy:
     version: ==0.21.23
-  requests-toolbelt:
-    version: ==1.0.0
 customs: []
 default_connection: null
 ---

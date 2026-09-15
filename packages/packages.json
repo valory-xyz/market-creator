@@ -1,10 +1,10 @@
 {
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeiazddwzm6dc6625dkynx4devvfy5rq3fbh3vrpj4h66r7lusj6vua",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeibymyjm4ju47kt7jrntsa5gy2a3puwzgkbbjrtd7st3dllun7zk5q",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeidr73xlhql4lck2cj5clwcfswfcqhb2t7plhpmm2x3edmjiyt6xfa",
-        "agent/valory/market_maker/0.1.0": "bafybeif3h2ejdzrc3jnmik2lhsc7rp7ikdigowg7cj7zef4uq2cgbvhaxe",
-        "service/valory/market_maker/0.1.0": "bafybeiglbntee32p2ospxv4hhcap7pebacu254mklgpb2uzljffkgwtbly"
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiadtrnvnnyfaqnpryeacmitxkyo22zjliq4dpifvxx3lxph3inirm",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeihotabilihxhxkav2grswnheo4s7et5vwe56ifqubhcp5ryl7lpvm",
+        "agent/valory/market_maker/0.1.0": "bafybeiepkcitrknhvotnzty4ylebanhu6kj7ehpozunpp7fucfmpplidki",
+        "service/valory/market_maker/0.1.0": "bafybeigmkgmht7gnwi5swdkrkqlj7pinh3cwfrocwocvyattvhjzy3enl4"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
@@ -48,7 +48,6 @@
         "connection/valory/http_server/0.22.0": "bafybeihs6dufyaa5l4uorplzx3wiyna5qlq2x43tmyl3yonkl265vspdle",
         "connection/valory/abci/0.1.0": "bafybeiafvaguchnkp2fmhf6gtayc3gpnxkglagghb4ukbqtouni5tveigi",
         "connection/valory/ipfs/0.1.0": "bafybeihxytzo7tunodztv424xsnnufewbowucdsxtdzdcik2rskcn7plta",
-        "connection/valory/openai/0.1.0": "bafybeihdg3jlch6geqxbnfnbrq6kbserhyh2sil4b237qh7s44lr2jzs3e",
         "skill/valory/abstract_abci/0.1.0": "bafybeie5et43th2nta76cd3kpm3fmurd7oyzk3qxim76octvt56m6r2poi",
         "skill/valory/abstract_round_abci/0.1.0": "bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq",
         "skill/valory/transaction_settlement_abci/0.1.0": "bafybeibv3tycpdhphlblu62zpcbjsj7hnwkutexxqagorkelhjlt4t4fii",
