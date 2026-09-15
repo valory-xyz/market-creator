@@ -71,15 +71,7 @@ jobs:
         run: tomte tox -e check-third-party-hashes
       - name: Check doc links
         run: |
-          tomte check-doc-links \
-            --url-skips https://github.com/valory-xyz/market-creator.git \
-            --http-skips http://host.docker.internal:8545 \
-            --http-skips http://host.docker.internal:5000 \
-            --http-skips http://127.0.0.1:5000 \
-            --url-skips http://host.docker.internal:5000 \
-            --url-skips http://127.0.0.1:5000 \
-            --url-skips http://server_ip:5000 \
-            --url-skips https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md
+          tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git
       - name: Check doc IPFS hashes
         run: tomte tox -e check-doc-hashes
 

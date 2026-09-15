@@ -74,7 +74,7 @@ generators:
 .PHONY: common-checks-1
 common-checks-1:
 	tomte check-copyright --author author_name
-	tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git --http-skips http://host.docker.internal:8545 --http-skips http://host.docker.internal:5000 --url-skips http://host.docker.internal:5000 --url-skips http://server_ip:5000 --url-skips https://github.com/protofire/omen-exchange/blob/a98fff28a71fa53b43e7ae069924564dd597d9ba/README.md
+	tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git
 	tox -qq -p -e check-hash -e check-packages -e check-doc-hashes
 
 .PHONY: run-agent

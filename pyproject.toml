@@ -44,15 +44,7 @@ dependencies = [
     "py-multicodec==0.2.1",
     "eth-utils==5.3.0",
     "setuptools>=78.0.1,<79",
-    # httpx had no upper bound of its own here: the ceiling came from openai
-    # (<1) and gql (<1), both removed above. solana and dnspython require it
-    # unbounded, and [tool.uv] prerelease = "allow" then resolves the 1.0.dev
-    # line, which publishes no license metadata and fails liccheck.
-    "httpx==0.28.1",
-    # cffi 2.1.0 reports its license as MIT-0 (was MIT), which tomte's
-    # PARANOID liccheck rejects. Constrain to the previous minor until the
-    # tomte allowlist covers MIT-0. See [tool.uv].override-dependencies for
-    # the transitive-resolution counterpart.
+    # cffi is capped in two places on purpose; see [tool.uv] below for why.
     "cffi<2.1.0",
 ]
 
@@ -66,10 +58,27 @@ dev = [
 
 [tool.uv]
 default-groups = "all"
-prerelease = "allow"
-# cffi 2.1.0 (transitive via cryptography << open-aea-ledger-solana) reports
-# its license as MIT-0, which tomte's PARANOID liccheck rejects.
-override-dependencies = ["cffi<2.1"]
+# `prerelease = "allow"` used to sit here, added without rationale in 7bfbd5b
+# (the Poetry to uv migration). It made every upper bound in the tree
+# load-bearing: removing a package took its ceilings with it and uv was then
+# free to resolve a .devN. Dropping it restores uv's default,
+# `if-necessary-or-explicit`, which still honours the explicit prerelease
+# specifiers this repo needs (ipfshttpclient==0.8.0a2) while refusing to invent
+# new ones. httpx then resolves to 0.28.1 on its own, with no pin.
+#
+# cffi: single source of truth for the cap in [project].dependencies too.
+# 2.1.0 reports its license as MIT-0 (was MIT), which tomte's PARANOID liccheck
+# rejects. Drop both entries once that allowlist covers MIT-0.
+#
+# A constraint, not an override: an override replaces the whole requirement
+# including its environment markers, which silently widened cffi from
+# "cryptography and pynacl except PyPy, trio only on Windows" to unconditional.
+# A constraint narrows the version and leaves those markers alone.
+#
+# The cap is ALSO a direct entry above, because the liccheck tox env is
+# usedevelop and installs [project].dependencies, which a [tool.uv] constraint
+# does not reach.
+constraint-dependencies = ["cffi<2.1"]
 
 [tool.tomte]
 # Third-party packages on disk are synced from open-autonomy + open-aea

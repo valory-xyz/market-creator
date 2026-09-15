@@ -24,9 +24,6 @@ from unittest.mock import MagicMock
 import pytest
 from hypothesis import HealthCheck, settings  # type: ignore[import-not-found]
 
-# openai/tiktoken/anthropic/google mocks are in the parent
-# tests/conftest.py (shared across all test subdirs).
-
 # Configure Hypothesis for CI/dev environments
 settings.register_profile(
     "ci",
