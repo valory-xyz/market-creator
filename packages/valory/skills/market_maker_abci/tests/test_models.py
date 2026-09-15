@@ -220,12 +220,11 @@ class TestSkillYamlParamsContract:
     SKILL_YAML = Path(__file__).parent.parent / "skill.yaml"
     SKILLS_DIR = Path(__file__).parent.parent.parent
 
+    # Matches, in order: any _ensure variant taking the key positionally or by
+    # keyword; a non-popping or popping kwargs read; and direct subscript access.
     READ_PATTERNS = (
-        # self._ensure("key", ...) / self._ensure(key="key", ...) / _ensure_gte
         re.compile(r"_ensure[a-z_]*\(\s*(?:key\s*=\s*)?[\"']([a-z0-9_]+)[\"']"),
-        # kwargs.get("key") / kwargs.pop("key")
         re.compile(r"kwargs\.(?:get|pop)\(\s*[\"']([a-z0-9_]+)[\"']"),
-        # kwargs["key"]
         re.compile(r"kwargs\[\s*[\"']([a-z0-9_]+)[\"']\s*\]"),
     )
 
