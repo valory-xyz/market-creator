@@ -21,7 +21,7 @@
 
 import json
 from typing import Any
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import (
@@ -171,8 +171,6 @@ class TestCollectProposedMarketsBehaviour:
             )
             result = _exhaust_gen(gen)
 
-        # An empty ``fixedProductMarketMakers`` list would be indistinguishable
-        # from "no open markets" and would approve the full daily quota.
         assert result is None
 
     def test_assess_market_approval_errors_on_subgraph_failure(self) -> None:
@@ -182,8 +180,7 @@ class TestCollectProposedMarketsBehaviour:
             patch.object(
                 type(self.behaviour),
                 "last_synced_timestamp",
-                new_callable=PropertyMock,
-                return_value=1700000000,
+                new_callable=lambda: property(lambda self: 1700000000),
             ),
             patch.object(
                 self.behaviour,
@@ -528,6 +525,33 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
         send_mock.assert_called_once()
         payload = send_mock.call_args[0][0]
         assert payload.content == CollectProposedMarketsRound.INSUFFICIENT_FUNDS_PAYLOAD
+
+    def test_async_act_subgraph_failure(self) -> None:
+        """async_act branches to ERROR_PAYLOAD when the subgraph query fails."""
+        send_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
+        wait_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
+        self.behaviour.context.params.approve_market_event_days_offset = 5
+        with (
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1700000000),
+            ),
+            patch.object(self.behaviour, "_have_funds_for_market", new=_make_gen(True)),
+            patch.object(
+                self.behaviour, "_collect_latest_open_markets", new=_make_gen(None)
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=send_mock),
+            patch.object(self.behaviour, "wait_until_round_end", new=wait_mock),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
+            _exhaust_gen(self.behaviour.async_act())
+
+        mock_set_done.assert_called_once()
+        wait_mock.assert_called_once()
+        send_mock.assert_called_once()
+        payload = send_mock.call_args[0][0]
+        assert payload.content == CollectProposedMarketsRound.ERROR_PAYLOAD
 
     def test_async_act_success(self) -> None:
         """Test async_act when all conditions pass and returns JSON content."""

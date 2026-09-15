@@ -123,11 +123,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             openingTimestamp_gte, openingTimestamp_lte
         )
         if latest_open_markets is None:
-            self.context.logger.error(
-                "Could not determine existing open markets: the Omen subgraph "
-                "query failed. Skipping market approval this cycle rather than "
-                "treating the failure as zero existing markets."
-            )
+            self.context.logger.error("Failed to collect existing open markets.")
             return CollectProposedMarketsRound.ERROR_PAYLOAD
         existing_market_count: Dict[int, int] = defaultdict(int)
 
@@ -302,11 +298,10 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         )
 
         if response is None:
-            # Do NOT fall back to an empty result. An empty
-            # ``fixedProductMarketMakers`` list is indistinguishable from
-            # "this safe has no open markets", which makes the caller approve
-            # the full daily quota and commit ``initial_funds`` per market on
-            # what is actually an auth or connectivity failure. ``None`` is
-            # propagated so the caller can emit ERROR and skip the cycle.
             return None
-        return response.get("data", {})
+        data = response.get("data")
+        if not data or "fixedProductMarketMakers" not in data:
+            # A 200 body without a usable ``data`` block is still a failed
+            # query, and must not reach the caller as an empty market list.
+            return None
+        return data

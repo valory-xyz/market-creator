@@ -1,10 +1,10 @@
 {
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeiazddwzm6dc6625dkynx4devvfy5rq3fbh3vrpj4h66r7lusj6vua",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeifw53itmhwihy7lyvnwlaaqytl5lrerxfpauv6hjprjgx5ueqcosm",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeidtydbeqpcqmf2t7mvfu572xzvqkx3ibdduabi3b3mmpfpq5gzfei",
-        "agent/valory/market_maker/0.1.0": "bafybeiglzcaypss72uud2jbyrlunnm6n34q47b24fv5wofqgqz6g26bgdq",
-        "service/valory/market_maker/0.1.0": "bafybeiemngd3sxnsnvfwrpohpy7pj7rs2bcffiiw4vyurnnkqklw3duyvy"
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeicq5pin7ldktmo4g5t4yhrcgns6bdu5uk47ciapl7o2uhvm5lmxrm",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeibcgawxydwrog2bmrei7yc6u5tg7vxyb25dt4hn37z64jyzwc6nlq",
+        "agent/valory/market_maker/0.1.0": "bafybeihqa7ohtjvciqqtg2k5qdzii63v4atzy45vjcb3di23l64b2a564y",
+        "service/valory/market_maker/0.1.0": "bafybeid3fqyzuqrgrk5kyizvwrwhxuqnj6eqi2iwj5wsruiioa373sa3ui"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
