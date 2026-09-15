@@ -121,7 +121,7 @@ Defaults live in [service.yaml](packages/valory/services/market_maker/service.ya
 | `INITIAL_FUNDS` | Initial wxDAI liquidity per market (the funding the guard checks against). |
 | `MARKET_FEE` | FPMM LP fee, percent. |
 | `MARKET_TIMEOUT` | Realitio answer window, days. |
-| `COLLATERAL_TOKEN_CONTRACT` | Collateral token (default [WxDAI](https://gnosisscan.io/address/0xe91d153e0b41518a2ce8dd3d7944fa863463a97d)). |
+| `COLLATERAL_TOKENS_CONTRACT` | Collateral token (default [WxDAI](https://gnosisscan.io/address/0xe91d153e0b41518a2ce8dd3d7944fa863463a97d)). |
 
 ### Market approval server
 
@@ -161,7 +161,7 @@ After editing anything under `packages/`:
    ```
 
 3. **Lock package hashes** — `autonomy packages lock`.
-4. **Tests** (100% statement + branch coverage enforced) — `tomte tox -e py3.11-linux`.
+4. **Tests** (100% statement + branch coverage enforced) — `tomte tox -e py`.
 
 ## Third-party dependencies
 
