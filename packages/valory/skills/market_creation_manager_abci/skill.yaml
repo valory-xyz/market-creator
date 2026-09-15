@@ -41,7 +41,7 @@ fingerprint:
   states/select_keeper.py: bafybeicag5feasxynp65toviurqfx62lklmfky7cln5sv6onubesppsd5e
   tests/__init__.py: bafybeihfxvqnyfly72tbxnnnglshcilm2kanihqnjiasvcz3ec3csw32ti
   tests/behaviours/__init__.py: bafybeifngz2wcqbk7sior2um2gh4j55i7ugi7mjhz3tak7zezplkccfovi
-  tests/behaviours/conftest.py: bafybeiai4oxmqtharmvmmbobtvdhalsxe5dv5jr7wi3qlrfyyocy7o7b7y
+  tests/behaviours/conftest.py: bafybeig3x2wqmyrazuoaimywfu5ni6ex4gqmrdp7vvjrpo425xbogulone
   tests/behaviours/test_base.py: bafybeibiddu5gldclwzlnl6aenkbphz5oltortg52ye5nmwqrikz3ifmn4
   tests/behaviours/test_collect_proposed_markets.py: bafybeibefqoq4dnhubpzxtmyracvxfqvhcaclwsmb3pesqywvkbhjkaoc4
   tests/behaviours/test_create_market_tx.py: bafybeieov4qd5ewgqbbvchnb2wgitaxlmyj4v7k2w7m2hwkfrxrfecvxii
@@ -51,7 +51,7 @@ fingerprint:
   tests/behaviours/test_request_proposed_questions.py: bafybeihfpvp7xyjfy4nho2p7waeukvb4bzobxqyiu6mtkke2gdsczq7wwa
   tests/behaviours/test_request_proposed_questions_behaviour.py: bafybeiajgjamodbzwpxyapedeuwubb4bubpjsuae5pazoppod4arlj57de
   tests/behaviours/test_retrieve_approved_market.py: bafybeig2yo7mc5nghmihttws5lzd4hqnmkpqqb6tqxmgnymbvkpqhwjfqa
-  tests/conftest.py: bafybeicvfro4xvjpm5gfl44ulc5hbsf2tbxpd5hufi6umwh2umtvbmpsju
+  tests/conftest.py: bafybeiawchmkylfcavckf73slvfqnyrz73owyubjua3k2e3txvsrkqs7hm
   tests/states/__init__.py: bafybeia5upph3nlp3opku7erao46kkvbsddderrgmwfrcustzobnq2h44e
   tests/states/test_base.py: bafybeih2hk5ux7na7lbhjilnzeoqjl6ub2ajnr2u2yfeaxuwfuuxgmf7qu
   tests/states/test_collect_proposed_markets.py: bafybeigt24i7vtylhjjlbsswf4wd2lf2dwkxw2uwcgk5xeu5h7sv7qgqbi
@@ -207,7 +207,6 @@ models:
       - the-verge
       - techradar
       on_chain_service_id: null
-      openai_api_key: openai_api_key
       realitio_answer_question_bounty: 0
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
@@ -219,7 +218,6 @@ models:
       retry_timeout: 3
       round_timeout_seconds: 120.0
       serious_slash_unit_amount: 8000000000000000
-      serper_api_key: serper_api_key
       service_endpoint_base: https://dummy_service.autonolas.tech/
       service_id: market_creation_manager
       service_registry_address: null
@@ -232,7 +230,6 @@ models:
       slash_cooldown_hours: 3
       slash_threshold_amount: 10000000000000000
       sleep_time: 1
-      subgraph_api_key: subgraph_api_key
       tendermint_check_sleep_delay: 3
       tendermint_com_url: http://localhost:8080
       tendermint_max_retries: 5
@@ -280,18 +277,6 @@ models:
   tendermint_dialogues:
     args: {}
     class_name: TendermintDialogues
-dependencies:
-  gql:
-    version: ==3.5.0
-  graphql-core:
-    version: <3.3,>=3.2
-  openai:
-    version: ==1.93.0
-  pydantic:
-    version: <3,>=2.11.9
-  requests:
-    version: <2.33.0,>=2.28.1
-  tiktoken:
-    version: ==0.9.0
+dependencies: {}
 is_abstract: true
 customs: []
