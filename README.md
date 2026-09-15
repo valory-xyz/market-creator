@@ -161,7 +161,7 @@ After editing anything under `packages/`:
    ```
 
 3. **Lock package hashes** — `autonomy packages lock`.
-4. **Tests** (100% statement + branch coverage enforced) — `tomte tox -e py3.11-linux`.
+4. **Tests** (100% statement + branch coverage enforced) — `tomte tox -e py`.
 
 ## Third-party dependencies
 

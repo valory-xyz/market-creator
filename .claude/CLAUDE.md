@@ -104,8 +104,8 @@ Package ownership is defined in `packages/packages.json`:
 - [uv](https://docs.astral.sh/uv/)
 - [tomte](https://github.com/valory-xyz/tomte), pinned by git SHA in `[dependency-groups].dev` and `[tool.tomte].tomte_dep_pin`
 
-This repo is on the tomte 0.7.0 generation, so every environment is invoked as
-`tomte tox -e <env>`, not bare `tox -e <env>`. tomte renders the canonical
+Every environment is invoked as `tomte tox -e <env>`, not bare `tox -e <env>`.
+tomte renders the canonical
 tox.ini from `[tool.tomte]` in `pyproject.toml` plus `[tomte-extensions]` in
 `tox.ini`; the repo's own `tox.ini` only supplies extension points. Run
 `tomte tox --show` to see the rendered config and the real env list.
@@ -206,8 +206,8 @@ Place tests in the `tests/` directory of each package. Follow existing patterns 
 
 CI workflow: `.github/workflows/common_checks.yml`
 
-- The `test` job matrix is `[ubuntu-24.04, macos-15, windows-2025]` x Python 3.10 to 3.14, so 15 jobs
-- The `lock_check`, `copyright_and_dependencies_check` and `linter_checks` jobs run on Python 3.10 only
+- The `test` job runs a matrix of three operating systems (Linux, macOS, Windows) across the full supported Python range; the exact runner pins are in the workflow
+- The `lock_check`, `copyright_and_dependencies_check` and `linter_checks` jobs run on a single Python version
 - `test` declares `needs: [lock_check, copyright_and_dependencies_check, linter_checks]`, so a single failing check makes every `test (...)` row report `skipping` rather than running
 - tomte is pinned by git SHA (see `[tool.tomte].tomte_dep_pin`), not by a released version
 
@@ -239,15 +239,15 @@ Packages whose license metadata PARANOID liccheck cannot accept are listed under
 `[Authorized Packages]` in `tox.ini`: `setuptools` and `flask-cors` report
 `UNKNOWN`, `open-autonomy` reports `Other/Proprietary`, `anchorpy` / `based58` /
 `jsonalias` publish no License field, `blake3` uses a dual-license string, and
-`dnspython` is ISC. A package that RELICENSED is a different case and is pinned
-in `pyproject.toml` instead, so the tree keeps an approved license: `cffi<2.1.0`
-in `[project].dependencies` plus `constraint-dependencies = ["cffi<2.1"]` under
-`[tool.uv]`, because cffi 2.1.0 moved from MIT to MIT-0. Both entries are
-load-bearing: the constraint binds `uv lock` and `uv sync` without replacing the
-environment markers an override would strip, while the direct entry is the only
-one the liccheck env sees, since it is `usedevelop` and resolves
-`[project].dependencies` through tox-uv. `httpx<1` is there for the same reason.
-See the `oa-linters` skill.
+`dnspython` is ISC. A package that RELICENSED into something the allowlist
+lacks is a different case, and is capped in `pyproject.toml` instead so the tree
+keeps an approved license. `cffi` is the current example. Such a cap is written
+twice on purpose: a `constraint-dependencies` entry under `[tool.uv]` binds
+`uv lock` and `uv sync` without replacing the environment markers an override
+would strip, while a direct `[project].dependencies` entry is the only one the
+liccheck env sees, because that env is `usedevelop` and resolves through tox-uv.
+`httpx` carries a cap for the same second reason. The pins themselves, and why
+each exists, are commented in `pyproject.toml`. See the `oa-linters` skill.
 
 ### tox cache
 
