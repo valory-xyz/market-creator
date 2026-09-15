@@ -22,7 +22,7 @@
 import json
 from collections import defaultdict
 from string import Template
-from typing import Any, Dict, Generator, Type
+from typing import Any, Dict, Generator, Optional, Type
 
 from packages.valory.contracts.erc20.contract import ERC20TokenContract
 from packages.valory.protocols.contract_api import ContractApiMessage
@@ -122,6 +122,13 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
         latest_open_markets = yield from self._collect_latest_open_markets(
             openingTimestamp_gte, openingTimestamp_lte
         )
+        if latest_open_markets is None:
+            self.context.logger.error(
+                "Could not determine existing open markets: the Omen subgraph "
+                "query failed. Skipping market approval this cycle rather than "
+                "treating the failure as zero existing markets."
+            )
+            return CollectProposedMarketsRound.ERROR_PAYLOAD
         existing_market_count: Dict[int, int] = defaultdict(int)
 
         for market in latest_open_markets["fixedProductMarketMakers"]:
@@ -280,7 +287,7 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
     def _collect_latest_open_markets(
         self, openingTimestamp_gte: int, openingTimestamp_lte: int
-    ) -> Generator[None, None, Dict[str, Any]]:
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
         """Collect FPMM from subgraph."""
         creator = self.synchronized_data.safe_contract_address.lower()
 
@@ -294,7 +301,12 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             )
         )
 
-        # TODO Handle retries
         if response is None:
-            return {"fixedProductMarketMakers": []}
+            # Do NOT fall back to an empty result. An empty
+            # ``fixedProductMarketMakers`` list is indistinguishable from
+            # "this safe has no open markets", which makes the caller approve
+            # the full daily quota and commit ``initial_funds`` per market on
+            # what is actually an auth or connectivity failure. ``None`` is
+            # propagated so the caller can emit ERROR and skip the cycle.
+            return None
         return response.get("data", {})

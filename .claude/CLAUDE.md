@@ -20,9 +20,12 @@ Omen recovery chain always hands over at `DepositDaiRound`, from both
 `FinishedWithRealitioWithdrawBondsPostTxRound`, so wrapping xDAI into wxDAI is a
 per-period step rather than an error path. From there:
 
-1. `DepositDaiRound` wraps xDAI into wxDAI. Either it emits `NONE` or the
-   deposit settles and `PostTransactionRound` returns `DEPOSIT_DAI_DONE`; both
-   lead to `CollectRandomnessRound`. `PostTransactionRound` on `ERROR` re-enters
+1. `DepositDaiRound` wraps the safe's xDAI above `xdai_threshold` into wxDAI,
+   retaining the threshold for non-market-creation use. It emits `NONE` when the
+   balance is at or below the threshold, and also on a failed balance read or a
+   failed transaction build. Otherwise the deposit settles and
+   `PostTransactionRound` returns `DEPOSIT_DAI_DONE`; either way the next round
+   is `CollectRandomnessRound`. `PostTransactionRound` on `ERROR` re-enters
    `DepositDaiRound`, which is the failure re-entry rather than the only entry.
 2. `CollectRandomnessRound` then `SelectKeeperRound` pick the agent that drives the cycle.
 3. `CollectProposedMarketsRound` asks the approval server for already-approved
