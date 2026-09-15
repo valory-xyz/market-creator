@@ -241,8 +241,13 @@ Packages whose license metadata PARANOID liccheck cannot accept are listed under
 `jsonalias` publish no License field, `blake3` uses a dual-license string, and
 `dnspython` is ISC. A package that RELICENSED is a different case and is pinned
 in `pyproject.toml` instead, so the tree keeps an approved license: `cffi<2.1.0`
-plus `override-dependencies = ["cffi<2.1"]` under `[tool.uv]`, because cffi 2.1.0
-moved from MIT to MIT-0. See the `oa-linters` skill.
+in `[project].dependencies` plus `constraint-dependencies = ["cffi<2.1"]` under
+`[tool.uv]`, because cffi 2.1.0 moved from MIT to MIT-0. Both entries are
+load-bearing: the constraint binds `uv lock` and `uv sync` without replacing the
+environment markers an override would strip, while the direct entry is the only
+one the liccheck env sees, since it is `usedevelop` and resolves
+`[project].dependencies` through tox-uv. `httpx<1` is there for the same reason.
+See the `oa-linters` skill.
 
 ### tox cache
 
