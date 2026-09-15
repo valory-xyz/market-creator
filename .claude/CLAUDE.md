@@ -8,18 +8,34 @@ Market Creator is an **autonomous service** built on the [Open Autonomy](https:/
 
 ## What the Service Does
 
-The service autonomously creates and manages prediction markets on Gnosis Chain. Each period (cycle) it:
+The service autonomously creates prediction markets on Gnosis Chain. The composed
+app runs registration, then an ownership check, a funds-forwarder pass, and the
+three Omen recovery skills (FPMM liquidity removal, Conditional Tokens
+redemption, Realitio bond withdrawal), before entering the market-creation logic.
 
-1. **Syncs existing markets** (`SyncMarketsRound`) — scans on-chain events to track markets it has created
-2. **Removes liquidity** (`RemoveFundingRound`) — withdraws liquidity from expired/resolved markets
-3. **Deposits DAI** (`DepositDaiRound`) — wraps xDAI into wxDAI for market funding
-4. **Gets pending questions** (`GetPendingQuestionsRound`) — queries Realitio for questions needing answers on markets it created
-5. **Requests Mech** — delegates question evaluation to a Mech agent (AI oracle) via `mech_interact_abci`
-6. **Answers questions** (`AnswerQuestionsRound`) — submits Mech responses as Realitio answers
-7. **Redeems bonds** (`RedeemBondRound`) — claims bonds from answered questions
-8. **Proposes new markets** (`CollectProposedMarketsRound`) — fetches market proposals from an external approval server
-9. **Approves markets** (`ApproveMarketsRound`) — validates proposals via LLM/Mech
-10. **Creates markets on-chain** (`RetrieveApprovedMarketRound` → `PrepareTransactionRound`) — builds multisend transactions to deploy FPMM contracts, add liquidity, and create Realitio questions
+`MarketCreationManagerAbciApp` starts at `CollectRandomnessRound` and proceeds:
+
+1. `CollectRandomnessRound` then `SelectKeeperRound` pick the agent that drives the cycle.
+2. `CollectProposedMarketsRound` asks the approval server for already-approved
+   markets and the Omen subgraph for markets opening in the window. Four gates can
+   short-circuit to `RetrieveApprovedMarketRound`: the `max_approved_markets` cap,
+   two `min_approve_markets_epoch_seconds` timers, and unprocessed approved markets
+   already waiting. A wxDAI balance below `initial_funds * 1e16` emits
+   `INSUFFICIENT_FUNDS` instead.
+3. `RequestProposedQuestionsRound` builds a Mech request for the
+   `propose-question` tool, passing `topics`, `news_sources`, `num_questions` and
+   `resolution_time` as `extra_attributes`. Question generation, the LLM calls and
+   the NewsAPI fetch all happen inside the Mech tool, not in this service.
+4. `ProcessProposedQuestionsRound` parses the Mech response and posts the
+   questions to the approval server.
+5. `RetrieveApprovedMarketRound` claims one approved market, and
+   `CreateMarketTxRound` builds the multisend that deploys the FPMM, adds
+   liquidity and creates the Realitio question.
+
+`DepositDaiRound` wraps xDAI into wxDAI and is reached from `PostTransactionRound`
+on `ERROR`, not on the main path. `PostTransactionRound` is the multiplexer after
+every settlement: it reads which transaction type was submitted and routes to the
+matching final state.
 
 ### Contracts
 
@@ -28,14 +44,19 @@ The service autonomously creates and manages prediction markets on Gnosis Chain.
 
 ### Skill architecture
 
-- **`market_creation_manager_abci`**: The core FSM skill with all business logic. Contains 13 active rounds, 8 final states, and corresponding behaviours. The FSM specification is in `fsm_specification.yaml` and the transition graph is in `rounds.py`.
+- **`market_creation_manager_abci`**: The core FSM skill with all business logic. Its `fsm_specification.yaml` declares 18 states: 9 rounds (`CollectRandomnessRound`, `SelectKeeperRound`, `CollectProposedMarketsRound`, `RequestProposedQuestionsRound`, `ProcessProposedQuestionsRound`, `RetrieveApprovedMarketRound`, `CreateMarketTxRound`, `DepositDaiRound`, `PostTransactionRound`) and 9 final states. The transition graph lives in `rounds.py` and must stay in sync with the yaml.
 - **`market_maker_abci`**: The composed (chained) ABCI app defined in `composition.py`. It wires together:
-  - `AgentRegistrationAbciApp` — agent startup and registration
-  - `MarketCreationManagerAbciApp` — the core logic above
-  - `TransactionSubmissionAbciApp` — on-chain transaction settlement (multisig safe)
-  - `MechInteractAbciApp` — Mech agent request/response cycle
-  - `ResetPauseAbciApp` — period reset between cycles
-  - `TerminationAbciApp` — graceful shutdown (background app)
+  - `AgentRegistrationAbciApp`: agent startup and registration
+  - `IdentifyServiceOwnerAbciApp`: checks the on-chain service owner
+  - `FundsForwarderAbciApp`: forwards funds per `funds_forwarder_token_config`
+  - `OmenFpmmRemoveLiquidityAbciApp`: withdraws LP from closed markets
+  - `OmenCtRedeemTokensAbciApp`: redeems Conditional Tokens positions
+  - `OmenRealitioWithdrawBondsAbciApp`: claims Realitio answer bonds
+  - `MarketCreationManagerAbciApp`: the core logic above
+  - `TransactionSubmissionAbciApp`: on-chain transaction settlement (multisig safe)
+  - `MechInteractAbciApp`: Mech agent request/response cycle
+  - `ResetPauseAbciApp`: period reset between cycles
+  - `TerminationAbciApp`: graceful shutdown (background app)
 
   The transition mapping in `composition.py` defines how final states of one sub-app connect to initial states of another. For example, `FinishedMarketCreationManagerRound` → `TransactionSettlementAbci` (to submit the prepared tx), and after settlement `PostTransactionRound` routes back to the appropriate next step based on which transaction type was settled.
 
@@ -79,10 +100,15 @@ Package ownership is defined in `packages/packages.json`:
 
 ### Prerequisites
 
-- Python 3.10–3.14
+- Python 3.10 to 3.14 (`requires-python = ">=3.10,<3.15"`)
 - [uv](https://docs.astral.sh/uv/)
-- [tox](https://tox.wiki/)
-- [tomte](https://github.com/valory-xyz/tomte) (installed via tox deps)
+- [tomte](https://github.com/valory-xyz/tomte), pinned by git SHA in `[dependency-groups].dev` and `[tool.tomte].tomte_dep_pin`
+
+This repo is on the tomte 0.7.0 generation, so every environment is invoked as
+`tomte tox -e <env>`, not bare `tox -e <env>`. tomte renders the canonical
+tox.ini from `[tool.tomte]` in `pyproject.toml` plus `[tomte-extensions]` in
+`tox.ini`; the repo's own `tox.ini` only supplies extension points. Run
+`tomte tox --show` to see the rendered config and the real env list.
 
 ### Setup
 
@@ -105,22 +131,21 @@ This is done automatically by tox test environments.
 ### Running tests
 
 ```bash
-# Run all unit tests (Linux, Python 3.11)
-tox -e py3.11-linux
+# Run all unit tests with coverage
+tomte tox -e py
 
-# Convenience: run all unit tests in one pytest invocation with combined coverage
-tox -e unit-tests
-
-# Recreate tox virtualenv (clear cache)
-tox -e py3.11-linux -r
+# Recreate the tox virtualenv (clear cache)
+tomte tox -e py -r
 ```
 
-Test environments follow the pattern `py{version}-{platform}` where platform is `linux`, `win`, or `darwin`.
+The old `py{version}-{platform}` and `unit-tests` environments no longer exist;
+`py` is the single test environment, and CI varies the interpreter through its
+own matrix rather than through env names.
 
 ### Formatting (auto-fix)
 
 ```bash
-tox -e black && tox -e isort
+tomte tox -e black && tomte tox -e isort
 ```
 
 ### Locking packages
@@ -134,23 +159,23 @@ autonomy packages lock
 ### Linting & static analysis
 
 ```bash
-tox -e black-check    # Code formatting check
-tox -e isort-check    # Import sorting check
-tox -e flake8         # Linting
-tox -e mypy           # Type checking
-tox -e pylint         # Pylint
-tox -e darglint       # Docstring linting
-tox -e bandit         # Security linting
-tox -e safety         # Dependency vulnerability check
-tox -e liccheck       # License compliance check
+tomte tox -e black-check    # Code formatting check
+tomte tox -e isort-check    # Import sorting check
+tomte tox -e flake8         # Linting
+tomte tox -e mypy           # Type checking
+tomte tox -e pylint         # Pylint
+tomte tox -e darglint       # Docstring linting
+tomte tox -e bandit         # Security linting
+tomte tox -e safety         # Dependency vulnerability check
+tomte tox -e liccheck       # License compliance check
 ```
 
 ### Package integrity
 
 ```bash
-tox -e check-hash           # Verify package hashes
-tox -e check-packages       # Validate package structure
-tox -e check-abciapp-specs  # Validate FSM specifications
+tomte tox -e check-hash           # Verify package hashes
+tomte tox -e check-packages       # Validate package structure
+tomte tox -e check-abciapp-specs  # Validate FSM specifications
 ```
 
 ## Testing
@@ -161,9 +186,9 @@ All test environments enforce **100% statement + branch coverage** via `--cov-fa
 
 Coverage is measured per-package (3 separate pytest invocations in CI) with `--cov-append` to accumulate results:
 
-1. `market_creation_manager_abci` (first, no append)
-2. `market_maker_abci` (append)
-3. `fpmm_deterministic_factory` (append)
+1. `market_creation_manager_abci` (first, no append) - 276 tests
+2. `market_maker_abci` (append) - 58 tests
+3. `fpmm_deterministic_factory` (append) - 11 tests
 
 ### Test conventions
 
@@ -171,7 +196,7 @@ Coverage is measured per-package (3 separate pytest invocations in CI) with `--c
 - Shared fixtures in `conftest.py` files
 - No network/RPC calls — fully deterministic
 - Tests assert on public outcomes (payloads, events), not implementation details
-- Total: **568 tests**
+- Total: **345 tests**
 
 ### Adding new tests
 
@@ -181,9 +206,10 @@ Place tests in the `tests/` directory of each package. Follow existing patterns 
 
 CI workflow: `.github/workflows/common_checks.yml`
 
-- Cross-platform matrix: Ubuntu, macOS, Windows
-- Python versions: 3.10–3.14
-- Uses `tomte[tox]==0.6.5` for test orchestration
+- The `test` job matrix is `[ubuntu-24.04, macos-15, windows-2025]` x Python 3.10 to 3.14, so 15 jobs
+- The `lock_check`, `copyright_and_dependencies_check` and `linter_checks` jobs run on Python 3.10 only
+- `test` declares `needs: [lock_check, copyright_and_dependencies_check, linter_checks]`, so a single failing check makes every `test (...)` row report `skipping` rather than running
+- tomte is pinned by git SHA (see `[tool.tomte].tomte_dep_pin`), not by a released version
 
 ## Key Gotchas
 
@@ -193,23 +219,34 @@ This file is required for Python to resolve `packages.valory.*` imports from the
 
 ### `PYTHONPATH` uses `{env:PWD:%CD%}`
 
-The tox config sets `PYTHONPATH={env:PWD:%CD%}` for cross-platform compatibility (`PWD` on Unix, `%CD%` on Windows). This is the standard pattern from the trader repo — do not change it to `{toxinidir}`.
+`PYTHONPATH={env:PWD:%CD%}` gives cross-platform compatibility (`PWD` on Unix, `%CD%` on Windows). It now comes from tomte's rendered canonical tox.ini rather than from this repo's `tox.ini`, so there is nothing to edit here; do not try to change it to `{toxinidir}`.
 
 ### Third-party packages are not committed
 
 Packages synced via `autonomy packages sync --all` are fetched from IPFS at test time. They appear in `packages/` but are in `.gitignore`. Do not commit them.
 
-### `propose_questions.py` is excluded from coverage
+### Question generation lives in the Mech, not here
 
-This file is omitted in `.coveragerc` because it contains Mech tool logic that runs inside the Mech agent, not inside the market-creator service.
+`propose_questions.py` used to sit in this skill and was excluded from coverage.
+It moved to the `propose-question` Mech tool in `mech-predict` (2026-06), and the
+`newsapi`, `openai` and `serperapi` keys it used are configured on the Mech. This
+service only sends `topics` and `news_sources` in the Mech request. There is no
+coverage exclusion for it any more.
 
-### liccheck and setuptools
+### liccheck and `[Authorized Packages]`
 
-`setuptools` is added to `[Authorized Packages]` in `tox.ini` because its license metadata (`UNKNOWN`) is not auto-detected by liccheck.
+Packages whose license metadata PARANOID liccheck cannot accept are listed under
+`[Authorized Packages]` in `tox.ini`: `setuptools` and `flask-cors` report
+`UNKNOWN`, `open-autonomy` reports `Other/Proprietary`, `anchorpy` / `based58` /
+`jsonalias` publish no License field, `blake3` uses a dual-license string, and
+`dnspython` is ISC. A package that RELICENSED is a different case and is pinned
+in `pyproject.toml` instead, so the tree keeps an approved license: `cffi<2.1.0`
+plus `override-dependencies = ["cffi<2.1"]` under `[tool.uv]`, because cffi 2.1.0
+moved from MIT to MIT-0. See the `oa-linters` skill.
 
 ### tox cache
 
-If you get stale dependency errors, clear tox cache: `rm -rf .tox` or use `tox -e <env> -r`.
+If you get stale dependency errors, clear the tox cache: `rm -rf .tox` or use `tomte tox -e <env> -r`. A stale `.tox/liccheck` in particular can pass locally while CI fails, because CI always resolves fresh.
 
 ## Claude Skills
 
@@ -257,7 +294,7 @@ See [FSM_AUDIT.md](FSM_AUDIT.md) for the full audit report with all findings and
 - **Round**: A consensus round where agents submit payloads and vote
 - **Behaviour**: Logic executed by each agent during a round (collects data, builds transactions)
 - **Skill**: An AEA skill containing rounds, behaviours, handlers, payloads, and models
-- **Composed app**: `market_maker_abci` composes `market_creation_manager_abci` with framework skills (registration, reset/pause, transaction settlement, termination)
+- **Composed app**: `market_maker_abci` chains 11 sub-apps, from `AgentRegistrationAbciApp` through the three `omen_*` recovery skills and `MarketCreationManagerAbciApp` to `MechInteractAbciApp`, `TransactionSubmissionAbciApp` and `ResetPauseAbciApp`, with `TerminationAbciApp` as a background app
 - **`autonomy packages sync --all`**: Fetches all third-party dependencies declared in `packages.json` from IPFS
 
 ## Third-party Dependency Repositories
