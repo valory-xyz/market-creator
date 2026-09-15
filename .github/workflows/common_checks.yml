@@ -71,7 +71,7 @@ jobs:
         run: tomte tox -e check-third-party-hashes
       - name: Check doc links
         run: |
-          tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git
+          tomte check-doc-links
       - name: Check doc IPFS hashes
         run: tomte tox -e check-doc-hashes
 

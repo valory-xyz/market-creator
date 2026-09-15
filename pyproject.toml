@@ -47,7 +47,7 @@ dependencies = [
     # cffi is capped in two places on purpose; see [tool.uv] below for why.
     "cffi<2.1.0",
     # httpx has no upper bound of its own in this tree: solana requires
-    # >=0.23.0 and dnspython[doh] >=0.28.0, both unbounded, so a resolver is
+    # >=0.23.0 and is its only other requirement edge, so a resolver is
     # free to take the 1.0.dev line, which publishes no license metadata and
     # fails liccheck. Dropping prerelease = "allow" (see [tool.uv]) fixes
     # `uv lock` and `uv sync`, but NOT the liccheck tox env, which is
@@ -80,9 +80,10 @@ default-groups = "all"
 # rejects. Drop both entries once that allowlist covers MIT-0.
 #
 # A constraint, not an override: an override replaces the whole requirement
-# including its environment markers, which silently widened cffi from
-# "cryptography and pynacl except PyPy, trio only on Windows" to unconditional.
-# A constraint narrows the version and leaves those markers alone.
+# including its environment markers, which rewrote cryptography's and pynacl's
+# "!= PyPy" and trio's Windows-only edges to unconditional. A constraint leaves
+# those alone. This is lock metadata, not the install set -- the direct entry
+# below is itself unmarked, so cffi installs everywhere either way.
 #
 # The cap is ALSO a direct entry above, because the liccheck tox env is
 # usedevelop and installs [project].dependencies, which a [tool.uv] constraint

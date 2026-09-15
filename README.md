@@ -112,7 +112,7 @@ Defaults live in [service.yaml](packages/valory/services/market_maker/service.ya
 | `SAFE_CONTRACT_ADDRESS` | Gnosis Safe multisig controlled by the agents. |
 | `GNOSIS_LEDGER_RPC` | Gnosis RPC endpoint (use a private one in production). |
 | `ON_CHAIN_SERVICE_ID` | Olas registry service id. |
-| `SUBGRAPH_API_KEY` | The Graph key for the Omen/Realitio subgraphs. Not a `service.yaml` override: it is interpolated into `CT_SUBGRAPH_URL`, `OMEN_SUBGRAPH_URL` and `REALITIO_SUBGRAPH_URL` by the deployment env files. |
+| `CT_SUBGRAPH_URL` / `OMEN_SUBGRAPH_URL` / `REALITIO_SUBGRAPH_URL` | Full The Graph gateway URLs, each with your API key already in the path. Set all three: the defaults contain a literal `[api-key]` placeholder, and an unset one fails every query silently, which the service cannot tell apart from "no open markets". |
 | `MARKET_APPROVAL_SERVER_URL` / `MARKET_APPROVAL_SERVER_API_KEY` | Approval-server endpoint and key (server reachable from the agent). |
 | `MARKETS_TO_APPROVE_PER_DAY` | Target number of markets per opening day. |
 | `APPROVE_MARKET_EVENT_DAYS_OFFSET` | How far ahead markets are opened (days). |

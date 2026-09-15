@@ -74,7 +74,7 @@ generators:
 .PHONY: common-checks-1
 common-checks-1:
 	tomte check-copyright --author author_name
-	tomte check-doc-links --url-skips https://github.com/valory-xyz/market-creator.git
+	tomte check-doc-links
 	tox -qq -p -e check-hash -e check-packages -e check-doc-hashes
 
 .PHONY: run-agent
