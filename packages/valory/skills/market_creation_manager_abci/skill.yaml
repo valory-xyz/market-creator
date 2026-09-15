@@ -174,7 +174,6 @@ models:
       history_check_timeout: 1205
       initial_funds: 1.0
       ipfs_address: https://gateway.autonolas.tech/ipfs/
-      ipfs_domain_name: null
       keeper_allowed_retries: 3
       keeper_timeout: 30.0
       light_slash_unit_amount: 5000000000000000
@@ -207,7 +206,6 @@ models:
       - the-verge
       - techradar
       on_chain_service_id: null
-      openai_api_key: openai_api_key
       realitio_answer_question_bounty: 0
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
@@ -219,7 +217,6 @@ models:
       retry_timeout: 3
       round_timeout_seconds: 120.0
       serious_slash_unit_amount: 8000000000000000
-      serper_api_key: serper_api_key
       service_endpoint_base: https://dummy_service.autonolas.tech/
       service_id: market_creation_manager
       service_registry_address: null
@@ -232,7 +229,6 @@ models:
       slash_cooldown_hours: 3
       slash_threshold_amount: 10000000000000000
       sleep_time: 1
-      subgraph_api_key: subgraph_api_key
       tendermint_check_sleep_delay: 3
       tendermint_com_url: http://localhost:8080
       tendermint_max_retries: 5
