@@ -31,7 +31,7 @@ skills:
 - valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
 - valory/funds_forwarder_abci:0.1.0:bafybeihuxw5tgnp4hie76as2jwnbp5abxrkmlmmpu4ila6ey34xrfkqqie
 - valory/identify_service_owner_abci:0.1.0:bafybeid7qw3aoorbv2bnxwd54npkgvdxf6kzpfscnmzqiui74jiskjmitm
-- valory/market_creation_manager_abci:0.1.0:bafybeib7cfg3cismd55moa6ckephltavxo64drw43hlnnpfrzjmxfh4t2m
+- valory/market_creation_manager_abci:0.1.0:bafybeicj7dlxbolkdidkf3j4vq5n2nss7wcoiabrcrmn4p6sejbcqnspca
 - valory/mech_interact_abci:0.1.0:bafybeihn6ic3exr3umjl5kgmlos3d2sjy6rs3sfogvdtw5e5lenpjaxwou
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
@@ -148,8 +148,6 @@ models:
             - ed25519
           version: {}
         voting_power: '10'
-      google_api_key: google_api_key
-      google_engine_id: google_engine_id
       history_check_timeout: 1205
       init_fallback_gas: 270000
       initial_funds: 1.0
@@ -185,10 +183,7 @@ models:
       - breitbart-news
       - the-verge
       - techradar
-      newsapi_api_key: f1ea36ae6175474bbcbae11eca64d0b9
-      newsapi_endpoint: https://newsapi.org/v2
       on_chain_service_id: null
-      openai_api_key: openai_api_key
       realitio_answer_question_bounty: 0
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'
@@ -201,7 +196,6 @@ models:
       retry_timeout: 3
       round_timeout_seconds: 120.0
       serious_slash_unit_amount: 8000000000000000
-      serper_api_key: serper_api_key
       service_endpoint_base: https://dummy_service.autonolas.tech/
       service_id: market_creator
       service_registry_address: null
@@ -214,7 +208,6 @@ models:
       slash_cooldown_hours: 3
       slash_threshold_amount: 10000000000000000
       sleep_time: 1
-      subgraph_api_key: subgraph_api_key
       tendermint_check_sleep_delay: 3
       tendermint_com_url: http://localhost:8080
       tendermint_max_retries: 5
