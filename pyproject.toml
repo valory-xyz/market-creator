@@ -46,6 +46,15 @@ dependencies = [
     "setuptools>=78.0.1,<79",
     # cffi is capped in two places on purpose; see [tool.uv] below for why.
     "cffi<2.1.0",
+    # httpx has no upper bound of its own in this tree: solana requires
+    # >=0.23.0 and dnspython[doh] >=0.28.0, both unbounded, so a resolver is
+    # free to take the 1.0.dev line, which publishes no license metadata and
+    # fails liccheck. Dropping prerelease = "allow" (see [tool.uv]) fixes
+    # `uv lock` and `uv sync`, but NOT the liccheck tox env, which is
+    # usedevelop and resolves [project].dependencies through tox-uv. Only a
+    # direct entry reaches it. `<1` rather than an exact pin: the requirement
+    # is "not the 1.0.dev line", nothing needs a specific 0.28.x.
+    "httpx<1",
 ]
 
 [project.urls]
