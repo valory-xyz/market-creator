@@ -23,6 +23,8 @@ import json
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.skills.market_creation_manager_abci.behaviours.collect_proposed_markets import (
     CollectProposedMarketsBehaviour,
@@ -172,6 +174,47 @@ class TestCollectProposedMarketsBehaviour:
             result = _exhaust_gen(gen)
 
         assert result is None
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            # The real 200 body the default service.yaml URL returns when the
+            # [api-key] placeholder is left in place: no `data` key at all.
+            {"errors": [{"message": "auth error: malformed API key"}]},
+            {"data": None},
+            {"data": {}},
+            {"data": {"somethingElse": []}},
+        ],
+    )
+    def test_collect_latest_open_markets_rejects_unusable_200(self, body: dict) -> None:
+        """A 200 body without usable data is a failure, not an empty market set."""
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=_make_gen(body),
+        ):
+            gen = self.behaviour._collect_latest_open_markets(
+                openingTimestamp_gte=1700000000,
+                openingTimestamp_lte=1700100000,
+            )
+            result = _exhaust_gen(gen)
+
+        assert result is None
+
+    def test_collect_latest_open_markets_accepts_genuine_empty(self) -> None:
+        """A well-formed empty market list is a real answer, not a failure."""
+        with patch.object(
+            self.behaviour,
+            "get_subgraph_result",
+            new=_make_gen({"data": {"fixedProductMarketMakers": []}}),
+        ):
+            gen = self.behaviour._collect_latest_open_markets(
+                openingTimestamp_gte=1700000000,
+                openingTimestamp_lte=1700100000,
+            )
+            result = _exhaust_gen(gen)
+
+        assert result == {"fixedProductMarketMakers": []}
 
     def test_assess_market_approval_errors_on_subgraph_failure(self) -> None:
         """A failed subgraph query yields ERROR, not a full quota of markets."""

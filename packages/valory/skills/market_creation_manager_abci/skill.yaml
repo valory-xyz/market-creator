@@ -43,7 +43,7 @@ fingerprint:
   tests/behaviours/__init__.py: bafybeifngz2wcqbk7sior2um2gh4j55i7ugi7mjhz3tak7zezplkccfovi
   tests/behaviours/conftest.py: bafybeig3x2wqmyrazuoaimywfu5ni6ex4gqmrdp7vvjrpo425xbogulone
   tests/behaviours/test_base.py: bafybeibiddu5gldclwzlnl6aenkbphz5oltortg52ye5nmwqrikz3ifmn4
-  tests/behaviours/test_collect_proposed_markets.py: bafybeicll5tw7f4baurnpvortdqr63sdnoki2f222crdp4pzsrfc2s2fiy
+  tests/behaviours/test_collect_proposed_markets.py: bafybeieyj76ekh3wgcthtixnrlg722alshgha27lqtwhwzib2i5btdj7q4
   tests/behaviours/test_create_market_tx.py: bafybeieov4qd5ewgqbbvchnb2wgitaxlmyj4v7k2w7m2hwkfrxrfecvxii
   tests/behaviours/test_deposit_dai.py: bafybeietyzfzvyeldpw5hn7x44ip22hwvyrtuz5lgko3gayalbxe6didbu
   tests/behaviours/test_post_transaction.py: bafybeiaki63y5njbsptvyy6kfoole4lpbxma5y3hqd4hfibub2lftdlwyq
