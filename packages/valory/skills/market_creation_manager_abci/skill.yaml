@@ -11,7 +11,7 @@ fingerprint:
   __init__.py: bafybeihiyq6pmvff63y34vwsvawazkh3lw5io3lpsl5ihksvjs5thgylbm
   behaviours/__init__.py: bafybeifp3hykazw2qx32t2lg2mwehcyjdekq3tywde26pm77imco45xz3a
   behaviours/base.py: bafybeihfr7mmeigisld4gpymiexhkfszuqgj6ddjsctrf3huz6jtgkdyma
-  behaviours/collect_proposed_markets.py: bafybeieysqs6smc6ebqcixkyhvvou7o6bxjt4hfb6gqf7kmoaubpsf4j5y
+  behaviours/collect_proposed_markets.py: bafybeiba6zakt2j5dhfspt2fnscjhe7qn244gj5pfduwxpq5twebbcom3m
   behaviours/collect_randomness.py: bafybeif44ekctv2h3s6jm3nbytj27re2wug46itvvygpodxhmk2eki2qa4
   behaviours/create_market_tx.py: bafybeiapvasw74ixmlskmyiz47bosn7kh2y3oo3j4w5gog4flwowdu3ure
   behaviours/deposit_dai.py: bafybeibwx6ypsz6q4qu7rndyz7qtrbrrddvjwqbuur4xn7d7475tj5vw7m
@@ -43,7 +43,7 @@ fingerprint:
   tests/behaviours/__init__.py: bafybeifngz2wcqbk7sior2um2gh4j55i7ugi7mjhz3tak7zezplkccfovi
   tests/behaviours/conftest.py: bafybeig3x2wqmyrazuoaimywfu5ni6ex4gqmrdp7vvjrpo425xbogulone
   tests/behaviours/test_base.py: bafybeibiddu5gldclwzlnl6aenkbphz5oltortg52ye5nmwqrikz3ifmn4
-  tests/behaviours/test_collect_proposed_markets.py: bafybeibefqoq4dnhubpzxtmyracvxfqvhcaclwsmb3pesqywvkbhjkaoc4
+  tests/behaviours/test_collect_proposed_markets.py: bafybeieyj76ekh3wgcthtixnrlg722alshgha27lqtwhwzib2i5btdj7q4
   tests/behaviours/test_create_market_tx.py: bafybeieov4qd5ewgqbbvchnb2wgitaxlmyj4v7k2w7m2hwkfrxrfecvxii
   tests/behaviours/test_deposit_dai.py: bafybeietyzfzvyeldpw5hn7x44ip22hwvyrtuz5lgko3gayalbxe6didbu
   tests/behaviours/test_post_transaction.py: bafybeiaki63y5njbsptvyy6kfoole4lpbxma5y3hqd4hfibub2lftdlwyq

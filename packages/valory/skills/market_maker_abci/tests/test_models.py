@@ -19,7 +19,11 @@
 
 """Tests for the market_maker_abci models."""
 
+import re
+from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+import yaml
 
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
@@ -196,3 +200,50 @@ class TestParams:
 
         assert issubclass(Params, MarketCreationManagerParams)
         assert issubclass(Params, TerminationParams)
+
+
+class TestSkillYamlParamsContract:
+    """Assert every param declared in skill.yaml is read by some Params class.
+
+    The yaml-to-code contract is only enforced in one direction. ``_ensure``
+    raises ``AEAEnforceError`` when a key is missing, so "code needs X, yaml
+    lacks it" fails loudly at skill load. The reverse is silent: a key nobody
+    reads reaches ``SkillComponent.__init__``, which only logs a warning that
+    nothing asserts on. Seven dead params survived roughly two years here
+    through exactly that gap.
+
+    Residual kwargs are NOT a usable signal for this: ``_ensure`` pops the key
+    but ``kwargs.get`` does not, so every param read the non-popping way stays
+    in the dict and would look dead. This scans for the read instead.
+    """
+
+    SKILL_YAML = Path(__file__).parent.parent / "skill.yaml"
+    SKILLS_DIR = Path(__file__).parent.parent.parent
+
+    # Matches, in order: any _ensure variant taking the key positionally or by
+    # keyword; a non-popping or popping kwargs read; and direct subscript access.
+    READ_PATTERNS = (
+        re.compile(r"_ensure[a-z_]*\(\s*(?:key\s*=\s*)?[\"']([a-z0-9_]+)[\"']"),
+        re.compile(r"kwargs\.(?:get|pop)\(\s*[\"']([a-z0-9_]+)[\"']"),
+        re.compile(r"kwargs\[\s*[\"']([a-z0-9_]+)[\"']\s*\]"),
+    )
+
+    def _consumed_keys(self) -> set:
+        """Collect every param key read by any models.py under packages/valory/skills."""
+        consumed = set()
+        for models_py in self.SKILLS_DIR.glob("*/models.py"):
+            source = models_py.read_text(errors="ignore")
+            for pattern in self.READ_PATTERNS:
+                consumed.update(pattern.findall(source))
+        return consumed
+
+    def test_every_declared_param_is_read(self) -> None:
+        """No param may be declared in skill.yaml and read by nothing."""
+        declared = set(
+            yaml.safe_load(self.SKILL_YAML.read_text())["models"]["params"]["args"]
+        )
+        unread = sorted(declared - self._consumed_keys())
+        assert not unread, (
+            "skill.yaml declares params that no Params class reads, so they are "
+            f"silently dropped at runtime: {unread}"
+        )
