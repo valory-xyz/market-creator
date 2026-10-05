@@ -53,13 +53,15 @@ import logging
 import os
 import secrets
 import sys
+import threading
+import time
 import uuid
 from datetime import datetime
 from enum import Enum
 from logging.handlers import RotatingFileHandler
 from typing import Any, Dict, Optional, Tuple
 
-from flask import Flask, Response, json, jsonify, render_template, request
+from flask import Flask, Response, g, json, jsonify, render_template, request
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -91,6 +93,24 @@ processed_markets: Dict[str, Any] = {}
 
 # Dictionary to store the SHA-256 hash of valid API keys and user names.
 api_keys: Dict[str, str] = {}
+
+# The server is multi-threaded and every request reads or writes the global
+# databases above, so requests are processed one at a time.
+databases_lock = threading.Lock()
+
+
+@app.before_request
+def acquire_databases_lock() -> None:
+    """Acquires the databases lock before processing a request."""
+    databases_lock.acquire()
+    g.databases_lock_acquired = True
+
+
+@app.teardown_request
+def release_databases_lock(_exc: Optional[BaseException] = None) -> None:
+    """Releases the databases lock after processing a request."""
+    if g.pop("databases_lock_acquired", False):
+        databases_lock.release()
 
 
 def get_databases() -> Dict[str, Dict[str, Any]]:
@@ -125,7 +145,11 @@ def load_config() -> None:
 
 
 def save_config() -> None:
-    """Saves the configuration to a JSON file."""
+    """Saves the configuration to a JSON file.
+
+    The data is written to a temporary file which then replaces the config
+    file, so a process killed mid-save leaves the previous config file intact.
+    """
     data = {
         "proposed_markets": proposed_markets,
         "approved_markets": approved_markets,
@@ -133,8 +157,43 @@ def save_config() -> None:
         "processed_markets": processed_markets,
         "api_keys": api_keys,
     }
-    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+    tmp_file = f"{CONFIG_FILE}.tmp"
+    with open(tmp_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp_file, CONFIG_FILE)
+
+
+def _is_expired(market: Dict[str, Any], now: int) -> bool:
+    """Checks whether the resolution time of a market has passed."""
+    try:
+        return int(market["resolution_time"]) < now
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
+def prune_expired_proposed_markets() -> bool:
+    """Removes the proposed markets whose resolution time has passed.
+
+    Such markets can no longer be created. The caller must save the config
+    when this function returns True.
+
+    :return: True if any market was pruned.
+    """
+    now = int(time.time())
+    expired = [
+        market_id
+        for market_id, market in list(proposed_markets.items())
+        if _is_expired(market, now)
+    ]
+    if not expired:
+        return False
+
+    for market_id in expired:
+        del proposed_markets[market_id]
+    logger.info("Removed %s expired proposed markets", len(expired))
+    return True
 
 
 def hash_api_key(m: str) -> str:
@@ -320,6 +379,7 @@ def propose_market() -> Tuple[Response, int]:
 
         market["state"] = MarketState.PROPOSED
         market["utc_timestamp_proposed"] = int(datetime.utcnow().timestamp())
+        prune_expired_proposed_markets()
         proposed_markets[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} added successfully."}), 200
@@ -547,6 +607,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 load_config()
+if prune_expired_proposed_markets():
+    save_config()
 if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
     # Run with SSL/TLS (HTTPS)
     logger.info("Running server in HTTPS mode")
