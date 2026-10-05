@@ -1847,6 +1847,10 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+approval-server = [
+    { name = "flask" },
+    { name = "flask-cors" },
+]
 dev = [
     { name = "tomte", extra = ["cli", "tests"] },
 ]
@@ -1892,6 +1896,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+approval-server = [
+    { name = "flask" },
+    { name = "flask-cors", specifier = ">=5.0.0,<6" },
+]
 dev = [{ name = "tomte", extras = ["cli", "tests"], git = "https://github.com/valory-xyz/tomte.git?rev=503160d1167d020d9a6163ce866547b2af7113b1" }]
 
 [[package]]

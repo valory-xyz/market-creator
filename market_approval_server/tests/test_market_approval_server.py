@@ -158,8 +158,32 @@ def test_save_config_is_atomic(
         server.save_config()
 
     assert config_file.read_text(encoding="utf-8") == before
-    # The change which could not be saved is gone from memory too.
     assert set(server.proposed_markets) == {"future"}
+
+
+def test_failed_save_exits_when_the_databases_cannot_be_restored(
+    load_server: ServerLoader, config_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The process exits when a save fails and the config file cannot be reloaded."""
+    server = load_server()
+    exit_codes = []
+
+    def _replace(*_args: Any, **_kwargs: Any) -> None:
+        raise OSError("disk full")
+
+    def _exit(code: int) -> None:
+        exit_codes.append(code)
+        raise SystemExit(code)
+
+    monkeypatch.setattr(os, "replace", _replace)
+    monkeypatch.setattr(os, "_exit", _exit)
+    config_file.write_text("{", encoding="utf-8")
+    server.proposed_markets["unsaved"] = _market("unsaved", FUTURE)
+
+    with pytest.raises(SystemExit):
+        server.save_config()
+
+    assert exit_codes == [1]
 
 
 def test_a_request_which_fails_to_save_changes_nothing(

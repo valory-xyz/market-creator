@@ -88,6 +88,10 @@ jobs:
               autonomy build-image -e open-autonomy==0.21.23 || exit 1
               autonomy build-image -e open-autonomy==0.21.23 --version $VERSION || exit 1
 
+      - name: Build the market approval server image
+        run: |
+          source env.sh
+          docker build -t "$DOCKER_USER/market_approval_server:$VERSION" market_approval_server
       - name: Docker login
         run: |
             echo  $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
@@ -96,12 +100,7 @@ jobs:
           source env.sh
           echo "Pushing $DOCKER_USER/oar-$AGENT:$VERSION"
           echo "Pushing $DOCKER_USER/oar-$AGENT:$DEFAULT_IMAGE_TAG"
+          echo "Pushing $DOCKER_USER/market_approval_server:$VERSION"
           docker push $DOCKER_USER/oar-$AGENT:$VERSION
           docker push $DOCKER_USER/oar-$AGENT:$DEFAULT_IMAGE_TAG
-      - name: Build and push the market approval server image
-        run: |
-          source env.sh
-          IMAGE="$DOCKER_USER/market_approval_server:$VERSION"
-          echo "Pushing $IMAGE"
-          docker build -t "$IMAGE" market_approval_server
-          docker push "$IMAGE"
+          docker push "$DOCKER_USER/market_approval_server:$VERSION"

@@ -172,7 +172,7 @@ What a deployment has to provide:
 - A readiness probe on `GET /`. That page is served without the lock, so it answers while a save is in progress. Every other endpoint waits for the lock.
 - Memory for the state held in memory plus a serialized copy of it during a save or a large `GET`. Size the limit from the state file, and back up the volume.
 
-To deploy a new version, set the new image tag and roll the pod. The server reads the existing state file at startup, and removes the proposed markets whose resolution time has passed. The format of the state file has not changed, so a rollback is the previous tag.
+To deploy a new version, set the new image tag and roll the pod. The server reads the existing state file at startup, and removes the proposed markets whose resolution time has passed. To roll back, set the previous tag.
 
 #### Release
 

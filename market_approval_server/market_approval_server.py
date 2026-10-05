@@ -164,17 +164,19 @@ def load_config() -> None:
 
 
 def _restore_databases() -> None:
-    """Reloads the databases from the config file after a failed save.
-
-    The config file still holds the last saved state, so this discards the
-    changes of the request whose save failed.
-    """
+    """Reloads the databases from the config file, or exits if that fails."""
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
     except (OSError, ValueError):
-        logger.exception("Could not restore the databases from %s", CONFIG_FILE)
-        return
+        # The databases hold a change which was reported as failed. Serving
+        # on would let a later save write it to disk.
+        logger.critical(
+            "Could not restore the databases from %s, exiting",
+            CONFIG_FILE,
+            exc_info=True,
+        )
+        os._exit(1)
     _set_databases(data)
 
 
@@ -184,8 +186,9 @@ def save_config() -> None:
     The data is written to a temporary file which then replaces the config
     file, so a process killed mid-save leaves the previous config file intact.
     A failed save is logged and re-raised, after the databases in memory are
-    reloaded from the config file. A request which fails to save therefore
-    changes nothing, in memory or on disk.
+    reloaded from the config file, which still holds the last saved state. A
+    request which fails to save therefore changes nothing, in memory or on
+    disk. If the reload fails too, the process exits.
     """
     data = {
         "proposed_markets": proposed_markets,
@@ -216,7 +219,9 @@ def save_config() -> None:
     try:
         _fsync_directory(os.path.dirname(CONFIG_FILE) or ".")
     except OSError:
-        logger.warning("Could not flush the directory of %s", CONFIG_FILE)
+        logger.warning(
+            "Could not flush the directory of %s", CONFIG_FILE, exc_info=True
+        )
 
 
 def _open_private(path: str, flags: int) -> int:

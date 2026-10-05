@@ -202,15 +202,21 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+      - name: Check that requirements.txt matches uv.lock
+        run: |
+          pip install uv
+          uv export --frozen --only-group approval-server --no-emit-project > /tmp/requirements.txt
+          diff /tmp/requirements.txt market_approval_server/requirements.txt
       - name: Unit tests
         run: |
-          pip install -r market_approval_server/requirements.txt 'pytest>=8.2,<10'
+          pip install -r market_approval_server/requirements.txt
+          pip install 'pytest>=8.2,<10'
           python -m pytest market_approval_server/tests
       - name: Build the image
         run: docker build -t market_approval_server:ci market_approval_server
       - name: Smoke test the image
         run: |
-          mkdir state
+          mkdir -p state
           echo '{"proposed_markets": {}, "approved_markets": {}, "rejected_markets": {}, "processed_markets": {}, "api_keys": {}}' > state/server_config.json
           docker run -d --name server -p 5000:5000 -v "$PWD/state:/data" \
             -e MARKET_APPROVAL_SERVER_CONFIG_FILE=/data/server_config.json market_approval_server:ci
