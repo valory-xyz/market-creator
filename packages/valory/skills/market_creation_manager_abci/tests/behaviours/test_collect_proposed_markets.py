@@ -596,12 +596,33 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
         payload = send_mock.call_args[0][0]
         assert payload.content == CollectProposedMarketsRound.ERROR_PAYLOAD
 
-    def test_async_act_approval_server_failure(self) -> None:
-        """async_act branches to ERROR_PAYLOAD when the approval server call fails."""
+    @pytest.mark.parametrize(
+        "status_code, body",
+        [
+            (503, b"upstream connect error"),
+            (200, b"not json"),
+            (200, b"{}"),
+        ],
+    )
+    def test_async_act_approval_server_failure(
+        self, status_code: int, body: bytes
+    ) -> None:
+        """async_act sends ERROR_PAYLOAD when the approval server response is unusable.
+
+        The max-approved-markets cap is reached, so the test also pins that the
+        failure is handled before the gates: checked after them, the payload
+        would be MAX_APPROVED_MARKETS_REACHED_PAYLOAD.
+
+        :param status_code: status code of the approval server response.
+        :param body: body of the approval server response.
+        """
         mock_synced = MagicMock()
-        mock_synced.approved_markets_count = 0
+        mock_synced.approved_markets_count = 15
         mock_synced.approved_markets_timestamp = 0
         mock_synced.safe_contract_address = "0xsafe"
+        mock_response = MagicMock()
+        mock_response.status_code = status_code
+        mock_response.body = body
         send_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
         wait_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
         self.behaviour.context.params.approve_market_event_days_offset = 5
@@ -623,7 +644,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
                 new=_make_gen({"fixedProductMarketMakers": []}),
             ),
             patch.object(
-                self.behaviour, "_collect_approved_markets", new=_make_gen(None)
+                self.behaviour, "get_http_response", new=_make_gen(mock_response)
             ),
             patch.object(self.behaviour, "send_a2a_transaction", new=send_mock),
             patch.object(self.behaviour, "wait_until_round_end", new=wait_mock),
@@ -632,6 +653,7 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
             _exhaust_gen(self.behaviour.async_act())
 
         mock_set_done.assert_called_once()
+        wait_mock.assert_called_once()
         send_mock.assert_called_once()
         payload = send_mock.call_args[0][0]
         assert payload.content == CollectProposedMarketsRound.ERROR_PAYLOAD

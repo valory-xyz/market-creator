@@ -48,6 +48,7 @@ CLI Usage:
         curl -X DELETE -H "Authorization: YOUR_API_KEY" -k http://127.0.0.1:5000/clear_all
 """
 
+import contextlib
 import hashlib
 import logging
 import os
@@ -68,6 +69,7 @@ app = Flask(__name__)
 CORS(app)
 
 CONFIG_FILE = os.getenv("MARKET_APPROVAL_SERVER_CONFIG_FILE", "server_config.json")
+TMP_CONFIG_FILE = f"{CONFIG_FILE}.tmp"
 LOG_FILE = "market_approval_server.log"
 CERT_FILE = "server_cert.pem"
 KEY_FILE = "server_key.pem"
@@ -103,7 +105,13 @@ databases_lock = threading.Lock()
 def acquire_databases_lock() -> None:
     """Acquires the databases lock before processing a request."""
     databases_lock.acquire()
-    g.databases_lock_acquired = True
+    try:
+        g.databases_lock_acquired = True
+    except BaseException:
+        # An asynchronous exception (e.g. KeyboardInterrupt) raised before the
+        # flag is set would otherwise leave the lock held forever.
+        databases_lock.release()
+        raise
 
 
 @app.teardown_request
@@ -149,6 +157,8 @@ def save_config() -> None:
 
     The data is written to a temporary file which then replaces the config
     file, so a process killed mid-save leaves the previous config file intact.
+    A failed save is logged and re-raised: the databases in memory then hold
+    changes which are not on disk.
     """
     data = {
         "proposed_markets": proposed_markets,
@@ -157,19 +167,42 @@ def save_config() -> None:
         "processed_markets": processed_markets,
         "api_keys": api_keys,
     }
-    tmp_file = f"{CONFIG_FILE}.tmp"
-    with open(tmp_file, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp_file, CONFIG_FILE)
+    try:
+        with open(TMP_CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(TMP_CONFIG_FILE, CONFIG_FILE)
+        _fsync_directory(os.path.dirname(CONFIG_FILE) or ".")
+    except Exception:
+        logger.exception("Failed to save config file: %s", CONFIG_FILE)
+        raise
 
 
-def _is_expired(market: Dict[str, Any], now: int) -> bool:
-    """Checks whether the resolution time of a market has passed."""
+def _fsync_directory(path: str) -> None:
+    """Flushes a directory to disk, so that a file rename in it survives a crash."""
+    if not hasattr(os, "O_DIRECTORY"):
+        # Directories cannot be opened on this platform (e.g. Windows).
+        return
+    dir_fd = os.open(path, os.O_DIRECTORY)
+    try:
+        os.fsync(dir_fd)
+    finally:
+        os.close(dir_fd)
+
+
+def _is_expired(market_id: str, market: Dict[str, Any], now: int) -> bool:
+    """Checks whether the resolution time of a market has passed.
+
+    A market with a missing or malformed resolution time is kept.
+    """
     try:
         return int(market["resolution_time"]) < now
-    except (KeyError, TypeError, ValueError):
+    except (KeyError, TypeError, ValueError, OverflowError):
+        logger.warning(
+            "Proposed market %s has no valid resolution_time, not pruning it",
+            market_id,
+        )
         return False
 
 
@@ -184,8 +217,8 @@ def prune_expired_proposed_markets() -> bool:
     now = int(time.time())
     expired = [
         market_id
-        for market_id, market in list(proposed_markets.items())
-        if _is_expired(market, now)
+        for market_id, market in proposed_markets.items()
+        if _is_expired(market_id, market, now)
     ]
     if not expired:
         return False
@@ -359,6 +392,10 @@ def propose_market() -> Tuple[Response, int]:
         market_id = market_id.lower()
         market["id"] = market_id
 
+        # Prune before the duplicate check, so that the id of an expired
+        # market can be reused. The save below also stores the pruning.
+        prune_expired_proposed_markets()
+
         if any(
             market_id in db
             for db in [
@@ -379,7 +416,6 @@ def propose_market() -> Tuple[Response, int]:
 
         market["state"] = MarketState.PROPOSED
         market["utc_timestamp_proposed"] = int(datetime.utcnow().timestamp())
-        prune_expired_proposed_markets()
         proposed_markets[market_id] = market
         save_config()
         return jsonify({"info": f"Market ID {market_id} added successfully."}), 200
@@ -606,9 +642,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+with contextlib.suppress(OSError):
+    # Left behind by a process killed mid-save.
+    os.remove(TMP_CONFIG_FILE)
 load_config()
 if prune_expired_proposed_markets():
-    save_config()
+    try:
+        save_config()
+    except OSError:
+        # Already logged by save_config. Keep serving, e.g. on a read-only volume.
+        logger.warning("The pruned config is held in memory only")
 if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
     # Run with SSL/TLS (HTTPS)
     logger.info("Running server in HTTPS mode")
