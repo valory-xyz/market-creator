@@ -172,6 +172,11 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
 
         # Collect approved markets (not yet processed by the service)
         approved_markets = yield from self._collect_approved_markets()
+        if approved_markets is None:
+            # Without the approval server the proposed questions cannot be
+            # stored, so do not go on to pay for a Mech request.
+            self.context.logger.error("Failed to collect approved markets.")
+            return CollectProposedMarketsRound.ERROR_PAYLOAD
 
         # Main logic of the behaviour
         if (
@@ -245,8 +250,10 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             return False
         return True
 
-    def _collect_approved_markets(self) -> Generator[None, None, Dict[str, Any]]:
-        """Auxiliary method to collect approved and unprocessed markets from the endpoint."""
+    def _collect_approved_markets(
+        self,
+    ) -> Generator[None, None, Optional[Dict[str, Any]]]:
+        """Collect approved and unprocessed markets, or None if the server call fails."""
         self.context.logger.info("Collecting approved markets.")
 
         url = f"{self.params.market_approval_server_url}/approved_markets"
@@ -263,18 +270,17 @@ class CollectProposedMarketsBehaviour(MarketCreationManagerBaseBehaviour):
             self.context.logger.warning(
                 f"Failed to retrieve approved markets: {http_response.status_code} {http_response}"
             )
-            # TODO return error instead?
-            return {"approved_markets": {}}
+            return None
 
         try:
             body = json.loads(http_response.body.decode())
         except json.JSONDecodeError:
             self.context.logger.error("Invalid JSON response received.")
-            return {"approved_markets": {}}
+            return None
 
         if "approved_markets" not in body:
             self.context.logger.error("Missing 'approved_markets' key in response.")
-            return {"approved_markets": {}}
+            return None
 
         self.context.logger.info(
             f"Successfully collected approved markets, received body {body}"

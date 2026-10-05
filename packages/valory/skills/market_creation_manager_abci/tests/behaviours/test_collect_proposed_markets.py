@@ -102,7 +102,7 @@ class TestCollectProposedMarketsBehaviour:
             gen = self.behaviour._collect_approved_markets()
             result = _exhaust_gen(gen)
 
-        assert result == {"approved_markets": {}}
+        assert result is None
 
     def test_collect_approved_markets_json_decode_error(self) -> None:
         """Test _collect_approved_markets when body cannot be decoded as JSON."""
@@ -118,7 +118,7 @@ class TestCollectProposedMarketsBehaviour:
             gen = self.behaviour._collect_approved_markets()
             result = _exhaust_gen(gen)
 
-        assert result == {"approved_markets": {}}
+        assert result is None
 
     def test_collect_approved_markets_missing_key(self) -> None:
         """Test _collect_approved_markets when JSON has no 'approved_markets' key."""
@@ -134,7 +134,7 @@ class TestCollectProposedMarketsBehaviour:
             gen = self.behaviour._collect_approved_markets()
             result = _exhaust_gen(gen)
 
-        assert result == {"approved_markets": {}}
+        assert result is None
 
     def test_collect_latest_open_markets_success(self) -> None:
         """Test _collect_latest_open_markets with valid subgraph data."""
@@ -592,6 +592,46 @@ class TestCollectProposedMarketsBehaviourAsyncAct:
 
         mock_set_done.assert_called_once()
         wait_mock.assert_called_once()
+        send_mock.assert_called_once()
+        payload = send_mock.call_args[0][0]
+        assert payload.content == CollectProposedMarketsRound.ERROR_PAYLOAD
+
+    def test_async_act_approval_server_failure(self) -> None:
+        """async_act branches to ERROR_PAYLOAD when the approval server call fails."""
+        mock_synced = MagicMock()
+        mock_synced.approved_markets_count = 0
+        mock_synced.approved_markets_timestamp = 0
+        mock_synced.safe_contract_address = "0xsafe"
+        send_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
+        wait_mock = MagicMock(side_effect=lambda *a, **k: iter(()))
+        self.behaviour.context.params.approve_market_event_days_offset = 5
+        with (
+            patch.object(
+                type(self.behaviour),
+                "synchronized_data",
+                new_callable=lambda: property(lambda self: mock_synced),
+            ),
+            patch.object(
+                type(self.behaviour),
+                "last_synced_timestamp",
+                new_callable=lambda: property(lambda self: 1700000000),
+            ),
+            patch.object(self.behaviour, "_have_funds_for_market", new=_make_gen(True)),
+            patch.object(
+                self.behaviour,
+                "_collect_latest_open_markets",
+                new=_make_gen({"fixedProductMarketMakers": []}),
+            ),
+            patch.object(
+                self.behaviour, "_collect_approved_markets", new=_make_gen(None)
+            ),
+            patch.object(self.behaviour, "send_a2a_transaction", new=send_mock),
+            patch.object(self.behaviour, "wait_until_round_end", new=wait_mock),
+            patch.object(self.behaviour, "set_done") as mock_set_done,
+        ):
+            _exhaust_gen(self.behaviour.async_act())
+
+        mock_set_done.assert_called_once()
         send_mock.assert_called_once()
         payload = send_mock.call_args[0][0]
         assert payload.content == CollectProposedMarketsRound.ERROR_PAYLOAD
