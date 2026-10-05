@@ -54,6 +54,12 @@ jobs:
               export TAG=$(git describe --exact-match --tags $(git rev-parse HEAD)) || exit 1
               if [ $? -eq 0 ]; then
                   export TAG=`echo $TAG | sed 's/^v//'`
+                  # env.sh is sourced by later steps that hold the registry
+                  # credentials, so only a plain version may be written to it.
+                  if ! echo "$TAG" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z]+)*$'; then
+                      echo "Tag is not a version: refusing to continue"
+                      exit 1
+                  fi
               else
                   echo "You are not on a tagged branch"
                   exit 1
@@ -95,7 +101,7 @@ jobs:
       - name: Build and push the market approval server image
         run: |
           source env.sh
-          IMAGE=$DOCKER_USER/market_approval_server:$VERSION
+          IMAGE="$DOCKER_USER/market_approval_server:$VERSION"
           echo "Pushing $IMAGE"
-          docker build -t $IMAGE market_approval_server
-          docker push $IMAGE
+          docker build -t "$IMAGE" market_approval_server
+          docker push "$IMAGE"

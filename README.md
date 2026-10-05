@@ -146,6 +146,8 @@ docker run -p 5000:5000 -v /path/to/state:/data \
   valory/market_approval_server:local
 ```
 
+The container serves plain HTTP on port 5000, and the API key travels in the `Authorization` header, so put it behind something that terminates TLS. The certificate branch at the end of `market_approval_server.py` is not used by the image: `flask run` ignores that `app.run()` call.
+
 Run one container per state file. Requests are serialized by a lock inside the process, so two containers sharing a file would overwrite each other.
 
 #### Release
