@@ -53,6 +53,7 @@ import hashlib
 import logging
 import os
 import secrets
+import shutil
 import sys
 import threading
 import time
@@ -168,15 +169,24 @@ def save_config() -> None:
         "api_keys": api_keys,
     }
     try:
-        with open(TMP_CONFIG_FILE, "w", encoding="utf-8") as f:
+        with open(TMP_CONFIG_FILE, "w", encoding="utf-8", opener=_open_private) as f:
             json.dump(data, f, indent=4)
             f.flush()
             os.fsync(f.fileno())
+        # The replaced file takes the permissions of the temporary one, so
+        # give it those of the config file it replaces.
+        with contextlib.suppress(FileNotFoundError):
+            shutil.copymode(CONFIG_FILE, TMP_CONFIG_FILE)
         os.replace(TMP_CONFIG_FILE, CONFIG_FILE)
         _fsync_directory(os.path.dirname(CONFIG_FILE) or ".")
     except Exception:
         logger.exception("Failed to save config file: %s", CONFIG_FILE)
         raise
+
+
+def _open_private(path: str, flags: int) -> int:
+    """Opens a file which, when created, is readable by its owner only."""
+    return os.open(path, flags, 0o600)
 
 
 def _fsync_directory(path: str) -> None:
