@@ -35,7 +35,7 @@ dependencies = [
     "pytz==2022.2.1",
     "typing_extensions<=4.15.0,>=3.10.0.2",
     "hexbytes==1.3.1",
-    "packaging==26",
+    "packaging>=26.3,<27",
     "openapi-core==0.22.0",
     "openapi-spec-validator>=0.7.0,<0.8.0",
     "flask-cors>=5.0.0,<6",
@@ -62,7 +62,7 @@ Repository = "https://github.com/valory-xyz/market-creator"
 
 [dependency-groups]
 dev = [
-    "tomte[cli, tests] @ git+https://github.com/valory-xyz/tomte.git@0819eea387c622cc53b398a2d3ea86e94a55cf82",
+    "tomte[cli, tests] @ git+https://github.com/valory-xyz/tomte.git@503160d1167d020d9a6163ce866547b2af7113b1",
 ]
 
 [tool.uv]
@@ -122,7 +122,7 @@ gitleaks_extra_paths = [
     "market_approval_server/.*",
     "\\.claude/.*",
 ]
-tomte_dep_pin = " @ git+https://github.com/valory-xyz/tomte.git@0819eea387c622cc53b398a2d3ea86e94a55cf82"
+tomte_dep_pin = " @ git+https://github.com/valory-xyz/tomte.git@503160d1167d020d9a6163ce866547b2af7113b1"
 
 [tool.uv.build-backend]
 module-name = ["packages"]
