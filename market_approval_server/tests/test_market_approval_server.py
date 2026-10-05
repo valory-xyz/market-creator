@@ -24,6 +24,7 @@ import importlib
 import json
 import os
 import sys
+import threading
 import time
 from pathlib import Path
 from types import ModuleType
@@ -214,3 +215,21 @@ def test_lock_is_released_after_every_request(load_server: ServerLoader) -> None
     assert not server.databases_lock.locked()
     assert client.get("/proposed_markets").status_code == 200
     assert not server.databases_lock.locked()
+
+
+def test_main_page_does_not_wait_for_the_lock(load_server: ServerLoader) -> None:
+    """The main page answers while another request holds the databases lock."""
+    server = load_server()
+    client = server.app.test_client()
+    status_codes = []
+
+    def _get_main_page() -> None:
+        status_codes.append(client.get("/").status_code)
+
+    with server.databases_lock:
+        thread = threading.Thread(target=_get_main_page, daemon=True)
+        thread.start()
+        thread.join(timeout=10)
+        assert not thread.is_alive()
+
+    assert status_codes == [200]
