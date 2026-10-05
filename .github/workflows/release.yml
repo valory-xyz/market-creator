@@ -92,3 +92,10 @@ jobs:
           echo "Pushing $DOCKER_USER/oar-$AGENT:$DEFAULT_IMAGE_TAG"
           docker push $DOCKER_USER/oar-$AGENT:$VERSION
           docker push $DOCKER_USER/oar-$AGENT:$DEFAULT_IMAGE_TAG
+      - name: Build and push the market approval server image
+        run: |
+          source env.sh
+          IMAGE=$DOCKER_USER/market_approval_server:$VERSION
+          echo "Pushing $IMAGE"
+          docker build -t $IMAGE market_approval_server
+          docker push $IMAGE

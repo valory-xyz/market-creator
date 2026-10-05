@@ -133,6 +133,27 @@ echo -n "your_api_key" | sha256sum   # hash goes into the config under "api_keys
 python market_approval_server/market_approval_server.py   # serves on :5000
 ```
 
+The server keeps its whole state in one JSON file, at the path given by `MARKET_APPROVAL_SERVER_CONFIG_FILE` (default `server_config.json` in the working directory). The file must exist before the server starts.
+
+#### Docker image
+
+The image is `valory/market_approval_server:<version>`. It is built from [market_approval_server/Dockerfile](market_approval_server/Dockerfile) and contains the server and its template only. The state file is never part of the image: mount a volume and point `MARKET_APPROVAL_SERVER_CONFIG_FILE` at a file on it.
+
+```bash
+docker build -t valory/market_approval_server:local market_approval_server
+docker run -p 5000:5000 -v /path/to/state:/data \
+  -e MARKET_APPROVAL_SERVER_CONFIG_FILE=/data/server_config.json \
+  valory/market_approval_server:local
+```
+
+Run one container per state file. Requests are serialized by a lock inside the process, so two containers sharing a file would overwrite each other.
+
+#### Release
+
+The image is released together with the agent. Publishing a GitHub release `vX.Y.Z` runs [release.yml](.github/workflows/release.yml), which pushes `valory/market_approval_server:X.Y.Z` next to `valory/oar-market_maker:X.Y.Z`. The tag has no `v` prefix, there is one image for every deployment, and `latest` is not pushed.
+
+A release does not change a running server. To deploy it, set the new tag in the deployment configuration of each server and roll the pod. The state file format did not change, so a rollback is the previous tag.
+
 ## Run the service
 
 ```bash

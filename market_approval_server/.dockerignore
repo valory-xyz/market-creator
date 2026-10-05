@@ -1,0 +1,6 @@
+# Allowlist: nothing enters the build context unless listed here, so a state
+# file or a log in this directory cannot end up in the image.
+*
+!requirements.txt
+!market_approval_server.py
+!templates/
