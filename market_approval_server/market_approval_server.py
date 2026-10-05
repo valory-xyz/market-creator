@@ -140,24 +140,42 @@ def get_databases() -> Dict[str, Dict[str, Any]]:
     }
 
 
+def _set_databases(data: Dict[str, Any]) -> None:
+    """Sets the databases and the API keys to the content of a config file."""
+    global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys  # pylint: disable=global-statement
+    proposed_markets = data.get("proposed_markets", {})
+    approved_markets = data.get("approved_markets", {})
+    rejected_markets = data.get("rejected_markets", {})
+    processed_markets = data.get("processed_markets", {})
+    api_keys = data.get("api_keys", {})
+
+
 def load_config() -> None:
     """Loads the configuration from a JSON file."""
-    global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys  # pylint: disable=global-statement
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             logger.info("Using config file: %s", CONFIG_FILE)
             data = json.load(f)
     except FileNotFoundError:
-        # If the file is not found, set the dictionaries to empty
         logger.info("FileNotFoundError: %s", CONFIG_FILE)
         sys.exit(1)
     else:
-        # If the file is found, set the dictionaries to the loaded data
-        proposed_markets = data.get("proposed_markets", {})
-        approved_markets = data.get("approved_markets", {})
-        rejected_markets = data.get("rejected_markets", {})
-        processed_markets = data.get("processed_markets", {})
-        api_keys = data.get("api_keys", {})
+        _set_databases(data)
+
+
+def _restore_databases() -> None:
+    """Reloads the databases from the config file after a failed save.
+
+    The config file still holds the last saved state, so this discards the
+    changes of the request whose save failed.
+    """
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        logger.exception("Could not restore the databases from %s", CONFIG_FILE)
+        return
+    _set_databases(data)
 
 
 def save_config() -> None:
@@ -165,8 +183,9 @@ def save_config() -> None:
 
     The data is written to a temporary file which then replaces the config
     file, so a process killed mid-save leaves the previous config file intact.
-    A failed save is logged and re-raised: the databases in memory then hold
-    changes which are not on disk.
+    A failed save is logged and re-raised, after the databases in memory are
+    reloaded from the config file. A request which fails to save therefore
+    changes nothing, in memory or on disk.
     """
     data = {
         "proposed_markets": proposed_markets,
@@ -187,6 +206,7 @@ def save_config() -> None:
         os.replace(TMP_CONFIG_FILE, CONFIG_FILE)
     except Exception:
         logger.exception("Failed to save config file: %s", CONFIG_FILE)
+        _restore_databases()
         raise
 
     # The rename has landed, so the config file and the databases in memory
@@ -676,7 +696,7 @@ if prune_expired_proposed_markets():
         save_config()
     except OSError:
         # Already logged by save_config. Keep serving, e.g. on a read-only volume.
-        logger.warning("The pruned config is held in memory only")
+        logger.warning("The expired proposed markets could not be removed")
 if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
     # Run with SSL/TLS (HTTPS)
     logger.info("Running server in HTTPS mode")

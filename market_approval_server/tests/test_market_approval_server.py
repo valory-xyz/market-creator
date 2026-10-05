@@ -125,7 +125,7 @@ def test_startup_removes_leftover_tmp_file(
 def test_startup_survives_a_failing_save(
     load_server: ServerLoader, config_file: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Startup serves the pruned state from memory when the config cannot be written."""
+    """Startup keeps serving the state on disk when the config cannot be written."""
 
     def _raise(*_args: Any, **_kwargs: Any) -> None:
         raise PermissionError("read-only")
@@ -134,8 +134,9 @@ def test_startup_survives_a_failing_save(
 
     server = load_server(proposed_markets={"past": _market("past", PAST)})
 
-    assert not server.proposed_markets
+    assert set(server.proposed_markets) == {"past"}
     assert set(_on_disk(config_file)["proposed_markets"]) == {"past"}
+    assert server.app.test_client().get("/proposed_markets").status_code == 200
 
 
 def test_save_config_is_atomic(
@@ -157,6 +158,41 @@ def test_save_config_is_atomic(
         server.save_config()
 
     assert config_file.read_text(encoding="utf-8") == before
+    # The change which could not be saved is gone from memory too.
+    assert set(server.proposed_markets) == {"future"}
+
+
+def test_a_request_which_fails_to_save_changes_nothing(
+    load_server: ServerLoader, config_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A market whose save failed is not kept in memory, so a retry succeeds."""
+    server = load_server(approved_markets={"approved": _market("approved", FUTURE)})
+    client = server.app.test_client()
+
+    def _raise(*_args: Any, **_kwargs: Any) -> None:
+        raise OSError("disk full")
+
+    with monkeypatch.context() as patched:
+        patched.setattr(os, "replace", _raise)
+        response = client.post(
+            "/propose_market", json=_market("new", FUTURE), headers=HEADERS
+        )
+        assert response.status_code == 500
+        response = client.post("/get_process_random_approved_market", headers=HEADERS)
+        assert response.status_code == 500
+
+    assert "new" not in server.proposed_markets
+    assert set(server.approved_markets) == {"approved"}
+    assert not server.processed_markets
+    assert set(_on_disk(config_file)["approved_markets"]) == {"approved"}
+
+    response = client.post(
+        "/propose_market", json=_market("new", FUTURE), headers=HEADERS
+    )
+    assert response.status_code == 200
+    response = client.post("/get_process_random_approved_market", headers=HEADERS)
+    assert response.status_code == 200
+    assert response.get_json()["id"] == "approved"
 
 
 def test_save_config_survives_a_failing_directory_flush(
