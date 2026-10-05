@@ -109,7 +109,7 @@ LOCK_FREE_ENDPOINTS = frozenset({"main_page", "static"})
 
 @app.before_request
 def acquire_databases_lock() -> None:
-    """Acquires the databases lock before processing a request."""
+    """Acquires the lock for requests that read or write the databases."""
     if request.endpoint in LOCK_FREE_ENDPOINTS:
         return
     databases_lock.acquire()
@@ -185,10 +185,18 @@ def save_config() -> None:
         with contextlib.suppress(FileNotFoundError):
             shutil.copymode(CONFIG_FILE, TMP_CONFIG_FILE)
         os.replace(TMP_CONFIG_FILE, CONFIG_FILE)
-        _fsync_directory(os.path.dirname(CONFIG_FILE) or ".")
     except Exception:
         logger.exception("Failed to save config file: %s", CONFIG_FILE)
         raise
+
+    # The rename has landed, so the config file and the databases in memory
+    # agree. Flushing the directory is best effort: some mounts do not
+    # support it, and failing the request here would report an error for a
+    # change which was made.
+    try:
+        _fsync_directory(os.path.dirname(CONFIG_FILE) or ".")
+    except OSError:
+        logger.warning("Could not flush the directory of %s", CONFIG_FILE)
 
 
 def _open_private(path: str, flags: int) -> int:
@@ -410,7 +418,7 @@ def propose_market() -> Tuple[Response, int]:
         market["id"] = market_id
 
         # Prune before the duplicate check, so that the id of an expired
-        # market can be reused. The save below also stores the pruning.
+        # market can be reused.
         prune_expired_proposed_markets()
 
         if any(

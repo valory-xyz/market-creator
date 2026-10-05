@@ -159,6 +159,23 @@ def test_save_config_is_atomic(
     assert config_file.read_text(encoding="utf-8") == before
 
 
+def test_save_config_survives_a_failing_directory_flush(
+    load_server: ServerLoader, config_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A save succeeds when only the flush of the directory fails."""
+    server = load_server()
+
+    def _raise(_path: str) -> None:
+        raise OSError("fsync is not supported on this mount")
+
+    monkeypatch.setattr(server, "_fsync_directory", _raise)
+    server.proposed_markets["future"] = _market("future", FUTURE)
+
+    server.save_config()
+
+    assert set(_on_disk(config_file)["proposed_markets"]) == {"future"}
+
+
 @pytest.mark.skipif(os.name == "nt", reason="POSIX file permissions")
 @pytest.mark.parametrize("mode", [0o600, 0o644])
 def test_save_config_keeps_the_file_permissions(
