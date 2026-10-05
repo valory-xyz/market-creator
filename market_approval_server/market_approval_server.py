@@ -101,10 +101,17 @@ api_keys: Dict[str, str] = {}
 # databases above, so requests are processed one at a time.
 databases_lock = threading.Lock()
 
+# Endpoints which do not touch the databases. They are served without the
+# lock, so that the main page, which deployments use as a readiness probe,
+# answers while a save is in progress.
+LOCK_FREE_ENDPOINTS = frozenset({"main_page", "static"})
+
 
 @app.before_request
 def acquire_databases_lock() -> None:
     """Acquires the databases lock before processing a request."""
+    if request.endpoint in LOCK_FREE_ENDPOINTS:
+        return
     databases_lock.acquire()
     try:
         g.databases_lock_acquired = True
