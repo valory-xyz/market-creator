@@ -158,6 +158,20 @@ def test_save_config_is_atomic(
     assert config_file.read_text(encoding="utf-8") == before
 
 
+@pytest.mark.skipif(os.name == "nt", reason="POSIX file permissions")
+@pytest.mark.parametrize("mode", [0o600, 0o644])
+def test_save_config_keeps_the_file_permissions(
+    load_server: ServerLoader, config_file: Path, mode: int
+) -> None:
+    """A save does not change the permissions of the config file."""
+    server = load_server()
+    config_file.chmod(mode)
+
+    server.save_config()
+
+    assert config_file.stat().st_mode & 0o777 == mode
+
+
 def test_propose_market_can_reuse_an_expired_id(
     load_server: ServerLoader, config_file: Path
 ) -> None:
