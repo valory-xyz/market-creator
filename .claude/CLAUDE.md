@@ -223,7 +223,8 @@ CI workflow: `.github/workflows/common_checks.yml`
 - The `lock_check`, `copyright_and_dependencies_check` and `linter_checks` jobs run on a single Python version
 - `scan` runs gitleaks, separately from the three above
 - `test` declares `needs: [lock_check, copyright_and_dependencies_check, linter_checks]`, so a single failing check makes every `test (...)` row report `skipping` rather than running
-- `all_checks_passed` is the job that actually gates the merge. It is `needs`-gated on all five others, including `scan` and `test`, and fails if any of them failed or was cancelled
+- `approval_server` runs the unit tests in `market_approval_server/tests/` against `market_approval_server/requirements.txt`, builds the server image and starts it once. It does not depend on the other jobs
+- `all_checks_passed` is the job that actually gates the merge. It is `needs`-gated on all six others, including `scan`, `test` and `approval_server`, and fails if any of them failed or was cancelled
 - tomte is pinned by git SHA (see `[tool.tomte].tomte_dep_pin`), not by a released version
 
 ## Key Gotchas

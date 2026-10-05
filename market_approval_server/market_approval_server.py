@@ -109,7 +109,7 @@ LOCK_FREE_ENDPOINTS = frozenset({"main_page", "static"})
 
 @app.before_request
 def acquire_databases_lock() -> None:
-    """Acquires the databases lock before processing a request."""
+    """Acquires the lock for requests that read or write the databases."""
     if request.endpoint in LOCK_FREE_ENDPOINTS:
         return
     databases_lock.acquire()
@@ -140,24 +140,44 @@ def get_databases() -> Dict[str, Dict[str, Any]]:
     }
 
 
+def _set_databases(data: Dict[str, Any]) -> None:
+    """Sets the databases and the API keys to the content of a config file."""
+    global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys  # pylint: disable=global-statement
+    proposed_markets = data.get("proposed_markets", {})
+    approved_markets = data.get("approved_markets", {})
+    rejected_markets = data.get("rejected_markets", {})
+    processed_markets = data.get("processed_markets", {})
+    api_keys = data.get("api_keys", {})
+
+
 def load_config() -> None:
     """Loads the configuration from a JSON file."""
-    global proposed_markets, approved_markets, rejected_markets, processed_markets, api_keys  # pylint: disable=global-statement
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             logger.info("Using config file: %s", CONFIG_FILE)
             data = json.load(f)
     except FileNotFoundError:
-        # If the file is not found, set the dictionaries to empty
         logger.info("FileNotFoundError: %s", CONFIG_FILE)
         sys.exit(1)
     else:
-        # If the file is found, set the dictionaries to the loaded data
-        proposed_markets = data.get("proposed_markets", {})
-        approved_markets = data.get("approved_markets", {})
-        rejected_markets = data.get("rejected_markets", {})
-        processed_markets = data.get("processed_markets", {})
-        api_keys = data.get("api_keys", {})
+        _set_databases(data)
+
+
+def _restore_databases() -> None:
+    """Reloads the databases from the config file, or exits if that fails."""
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        # The databases hold a change which was reported as failed. Serving
+        # on would let a later save write it to disk.
+        logger.critical(
+            "Could not restore the databases from %s, exiting",
+            CONFIG_FILE,
+            exc_info=True,
+        )
+        os._exit(1)
+    _set_databases(data)
 
 
 def save_config() -> None:
@@ -165,8 +185,10 @@ def save_config() -> None:
 
     The data is written to a temporary file which then replaces the config
     file, so a process killed mid-save leaves the previous config file intact.
-    A failed save is logged and re-raised: the databases in memory then hold
-    changes which are not on disk.
+    A failed save is logged and re-raised, after the databases in memory are
+    reloaded from the config file, which still holds the last saved state. A
+    request which fails to save therefore changes nothing, in memory or on
+    disk. If the reload fails too, the process exits.
     """
     data = {
         "proposed_markets": proposed_markets,
@@ -185,10 +207,21 @@ def save_config() -> None:
         with contextlib.suppress(FileNotFoundError):
             shutil.copymode(CONFIG_FILE, TMP_CONFIG_FILE)
         os.replace(TMP_CONFIG_FILE, CONFIG_FILE)
-        _fsync_directory(os.path.dirname(CONFIG_FILE) or ".")
     except Exception:
         logger.exception("Failed to save config file: %s", CONFIG_FILE)
+        _restore_databases()
         raise
+
+    # The rename has landed, so the config file and the databases in memory
+    # agree. Flushing the directory is best effort: some mounts do not
+    # support it, and failing the request here would report an error for a
+    # change which was made.
+    try:
+        _fsync_directory(os.path.dirname(CONFIG_FILE) or ".")
+    except OSError:
+        logger.warning(
+            "Could not flush the directory of %s", CONFIG_FILE, exc_info=True
+        )
 
 
 def _open_private(path: str, flags: int) -> int:
@@ -410,7 +443,7 @@ def propose_market() -> Tuple[Response, int]:
         market["id"] = market_id
 
         # Prune before the duplicate check, so that the id of an expired
-        # market can be reused. The save below also stores the pruning.
+        # market can be reused.
         prune_expired_proposed_markets()
 
         if any(
@@ -668,7 +701,7 @@ if prune_expired_proposed_markets():
         save_config()
     except OSError:
         # Already logged by save_config. Keep serving, e.g. on a read-only volume.
-        logger.warning("The pruned config is held in memory only")
+        logger.warning("The expired proposed markets could not be removed")
 if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
     # Run with SSL/TLS (HTTPS)
     logger.info("Running server in HTTPS mode")

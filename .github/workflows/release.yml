@@ -54,6 +54,12 @@ jobs:
               export TAG=$(git describe --exact-match --tags $(git rev-parse HEAD)) || exit 1
               if [ $? -eq 0 ]; then
                   export TAG=`echo $TAG | sed 's/^v//'`
+                  # env.sh is sourced by later steps that hold the registry
+                  # credentials, so only a plain version may be written to it.
+                  if ! echo "$TAG" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z]+)*$'; then
+                      echo "Tag is not a version: refusing to continue"
+                      exit 1
+                  fi
               else
                   echo "You are not on a tagged branch"
                   exit 1
@@ -82,6 +88,10 @@ jobs:
               autonomy build-image -e open-autonomy==0.21.23 || exit 1
               autonomy build-image -e open-autonomy==0.21.23 --version $VERSION || exit 1
 
+      - name: Build the market approval server image
+        run: |
+          source env.sh
+          docker build -t "$DOCKER_USER/market_approval_server:$VERSION" market_approval_server
       - name: Docker login
         run: |
             echo  $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
@@ -90,5 +100,7 @@ jobs:
           source env.sh
           echo "Pushing $DOCKER_USER/oar-$AGENT:$VERSION"
           echo "Pushing $DOCKER_USER/oar-$AGENT:$DEFAULT_IMAGE_TAG"
+          echo "Pushing $DOCKER_USER/market_approval_server:$VERSION"
           docker push $DOCKER_USER/oar-$AGENT:$VERSION
           docker push $DOCKER_USER/oar-$AGENT:$DEFAULT_IMAGE_TAG
+          docker push "$DOCKER_USER/market_approval_server:$VERSION"

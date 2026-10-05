@@ -125,7 +125,7 @@ def test_startup_removes_leftover_tmp_file(
 def test_startup_survives_a_failing_save(
     load_server: ServerLoader, config_file: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Startup serves the pruned state from memory when the config cannot be written."""
+    """Startup keeps serving the state on disk when the config cannot be written."""
 
     def _raise(*_args: Any, **_kwargs: Any) -> None:
         raise PermissionError("read-only")
@@ -134,8 +134,9 @@ def test_startup_survives_a_failing_save(
 
     server = load_server(proposed_markets={"past": _market("past", PAST)})
 
-    assert not server.proposed_markets
+    assert set(server.proposed_markets) == {"past"}
     assert set(_on_disk(config_file)["proposed_markets"]) == {"past"}
+    assert server.app.test_client().get("/proposed_markets").status_code == 200
 
 
 def test_save_config_is_atomic(
@@ -157,6 +158,82 @@ def test_save_config_is_atomic(
         server.save_config()
 
     assert config_file.read_text(encoding="utf-8") == before
+    assert set(server.proposed_markets) == {"future"}
+
+
+def test_failed_save_exits_when_the_databases_cannot_be_restored(
+    load_server: ServerLoader, config_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The process exits when a save fails and the config file cannot be reloaded."""
+    server = load_server()
+    exit_codes = []
+
+    def _replace(*_args: Any, **_kwargs: Any) -> None:
+        raise OSError("disk full")
+
+    def _exit(code: int) -> None:
+        exit_codes.append(code)
+        raise SystemExit(code)
+
+    monkeypatch.setattr(os, "replace", _replace)
+    monkeypatch.setattr(os, "_exit", _exit)
+    config_file.write_text("{", encoding="utf-8")
+    server.proposed_markets["unsaved"] = _market("unsaved", FUTURE)
+
+    with pytest.raises(SystemExit):
+        server.save_config()
+
+    assert exit_codes == [1]
+
+
+def test_a_request_which_fails_to_save_changes_nothing(
+    load_server: ServerLoader, config_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A market whose save failed is not kept in memory, so a retry succeeds."""
+    server = load_server(approved_markets={"approved": _market("approved", FUTURE)})
+    client = server.app.test_client()
+
+    def _raise(*_args: Any, **_kwargs: Any) -> None:
+        raise OSError("disk full")
+
+    with monkeypatch.context() as patched:
+        patched.setattr(os, "replace", _raise)
+        response = client.post(
+            "/propose_market", json=_market("new", FUTURE), headers=HEADERS
+        )
+        assert response.status_code == 500
+        response = client.post("/get_process_random_approved_market", headers=HEADERS)
+        assert response.status_code == 500
+
+    assert "new" not in server.proposed_markets
+    assert set(server.approved_markets) == {"approved"}
+    assert not server.processed_markets
+    assert set(_on_disk(config_file)["approved_markets"]) == {"approved"}
+
+    response = client.post(
+        "/propose_market", json=_market("new", FUTURE), headers=HEADERS
+    )
+    assert response.status_code == 200
+    response = client.post("/get_process_random_approved_market", headers=HEADERS)
+    assert response.status_code == 200
+    assert response.get_json()["id"] == "approved"
+
+
+def test_save_config_survives_a_failing_directory_flush(
+    load_server: ServerLoader, config_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A save succeeds when only the flush of the directory fails."""
+    server = load_server()
+
+    def _raise(_path: str) -> None:
+        raise OSError("fsync is not supported on this mount")
+
+    monkeypatch.setattr(server, "_fsync_directory", _raise)
+    server.proposed_markets["future"] = _market("future", FUTURE)
+
+    server.save_config()
+
+    assert set(_on_disk(config_file)["proposed_markets"]) == {"future"}
 
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX file permissions")
