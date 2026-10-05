@@ -1875,7 +1875,7 @@ requires-dist = [
     { name = "open-autonomy", extras = ["cli"], specifier = "==0.21.23" },
     { name = "openapi-core", specifier = "==0.22.0" },
     { name = "openapi-spec-validator", specifier = ">=0.7.0,<0.8.0" },
-    { name = "packaging", specifier = "==26" },
+    { name = "packaging", specifier = ">=26.3,<27" },
     { name = "protobuf", specifier = ">=5,<6" },
     { name = "py-eth-sig-utils", specifier = "==0.4.0" },
     { name = "py-multibase", specifier = "==1.0.3" },
@@ -1892,7 +1892,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "tomte", extras = ["cli", "tests"], git = "https://github.com/valory-xyz/tomte.git?rev=0819eea387c622cc53b398a2d3ea86e94a55cf82" }]
+dev = [{ name = "tomte", extras = ["cli", "tests"], git = "https://github.com/valory-xyz/tomte.git?rev=503160d1167d020d9a6163ce866547b2af7113b1" }]
 
 [[package]]
 name = "markupsafe"
@@ -2495,11 +2495,11 @@ wheels = [
 
 [[package]]
 name = "packaging"
-version = "26.0"
+version = "26.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz", hash = "sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4", size = 143416, upload-time = "2026-01-21T20:50:39.064Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz", hash = "sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79", size = 313412, upload-time = "2026-08-04T18:15:28.737Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/b9/c538f279a4e237a006a2c98387d081e9eb060d203d8ed34467cc0f0b9b53/packaging-26.0-py3-none-any.whl", hash = "sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529", size = 74366, upload-time = "2026-01-21T20:50:37.788Z" },
+    { url = "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl", hash = "sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c", size = 129956, upload-time = "2026-08-04T18:15:27.159Z" },
 ]
 
 [[package]]
@@ -3715,8 +3715,8 @@ wheels = [
 
 [[package]]
 name = "tomte"
-version = "0.7.0"
-source = { git = "https://github.com/valory-xyz/tomte.git?rev=0819eea387c622cc53b398a2d3ea86e94a55cf82#0819eea387c622cc53b398a2d3ea86e94a55cf82" }
+version = "0.7.3"
+source = { git = "https://github.com/valory-xyz/tomte.git?rev=503160d1167d020d9a6163ce866547b2af7113b1#503160d1167d020d9a6163ce866547b2af7113b1" }
 
 [package.optional-dependencies]
 cli = [
