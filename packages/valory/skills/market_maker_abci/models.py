@@ -21,6 +21,8 @@
 
 # pylint: disable=superfluous-parens,too-many-ancestors
 
+from typing import Any
+
 from packages.valory.skills.abstract_round_abci.models import (
     BenchmarkTool as BaseBenchmarkTool,
 )
@@ -188,3 +190,8 @@ class Params(
     TerminationParams,
 ):
     """A model to represent params for multiple abci apps."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize the parameters object."""
+        self.prometheus_port: int = self._ensure("prometheus_port", kwargs, int)
+        super().__init__(*args, **kwargs)

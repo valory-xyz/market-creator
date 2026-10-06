@@ -27,6 +27,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 from aea.protocols.base import Message
+from prometheus_client import Gauge, start_http_server
 
 from packages.valory.connections.http_server.connection import (
     PUBLIC_ID as HTTP_SERVER_PUBLIC_ID,
@@ -73,6 +74,13 @@ TRANSITION_TOLERANCE_FACTOR = (
     2.0  # < 2x the expected pause (and tm healthy) means "transitioning fast"
 )
 HEALTH_VERSION = 2
+
+# The configured daily quota, published so a dashboard can plot it next to
+# the number of markets actually created.
+MARKETS_TO_APPROVE_PER_DAY_GAUGE = Gauge(
+    "market_creator_markets_to_approve_per_day",
+    "Configured number of markets to approve per day",
+)
 
 
 class HttpCode(Enum):
@@ -124,6 +132,17 @@ class HttpHandler(BaseHttpHandler):
         }
 
         self.json_content_header = "Content-Type: application/json\n"
+
+        self.start_prometheus_server()
+
+    def start_prometheus_server(self) -> None:
+        """Publish the configured params and start the Prometheus server."""
+        params = self.context.params
+        MARKETS_TO_APPROVE_PER_DAY_GAUGE.set(params.markets_to_approve_per_day)
+        start_http_server(params.prometheus_port)
+        self.context.logger.info(
+            f"Prometheus server started on port {params.prometheus_port}."
+        )
 
     @property
     def synchronized_data(self) -> SynchronizedData:

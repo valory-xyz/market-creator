@@ -199,8 +199,8 @@ All test environments enforce **100% statement + branch coverage** via `--cov-fa
 
 Coverage is measured per-package (3 separate pytest invocations in CI) with `--cov-append` to accumulate results:
 
-1. `market_creation_manager_abci` (first, no append) - 276 tests
-2. `market_maker_abci` (append) - 58 tests
+1. `market_creation_manager_abci` (first, no append) - 286 tests
+2. `market_maker_abci` (append) - 63 tests
 3. `fpmm_deterministic_factory` (append) - 11 tests
 
 ### Test conventions
@@ -209,7 +209,7 @@ Coverage is measured per-package (3 separate pytest invocations in CI) with `--c
 - Shared fixtures in `conftest.py` files
 - No network/RPC calls — fully deterministic
 - Tests assert on public outcomes (payloads, events), not implementation details
-- Total: **345 tests**
+- Total: **360 tests**
 
 ### Adding new tests
 
