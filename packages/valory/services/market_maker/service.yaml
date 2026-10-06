@@ -5,9 +5,9 @@ description: The market maker service.
 aea_version: '>=2.0.0, <3.0.0'
 license: Apache-2.0
 fingerprint:
-  README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
+  README.md: bafybeid6scb5qp6jakvbdkeya7gb2nua2vuewn5xdvisznejgbwun6azn4
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeibmlezgreg7rfes67gbkasvo3wcoc5fwsjtxjfq2csfiizbcnl7by
+agent: valory/market_maker:0.1.0:bafybeidltopygvscxtujgdcp6ickwjl6nsmrcanetfo6esf3yv7iqgdrwq
 number_of_agents: 1
 deployment:
   agent:

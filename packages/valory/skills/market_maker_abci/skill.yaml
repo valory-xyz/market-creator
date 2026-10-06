@@ -19,8 +19,8 @@ fingerprint:
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
   tests/test_behaviours.py: bafybeiapyvud7fsne3cg2oowm2u7jni5ngixv4p3mudukisluccjzpc5l4
   tests/test_dialogues.py: bafybeiedpuwlfc24gxkjoi4wvncfnjsgc7xfqiajqmvrjdvfpfrw2bcqnm
-  tests/test_handlers.py: bafybeiezunddvd6i7icgjq3yki556gykbytyynuf4vb4jxzf7m6s223y5e
-  tests/test_models.py: bafybeiffxkv4ectszetvsdmutx6nqjzkilz37i42cvxmankfosv5zekhgi
+  tests/test_handlers.py: bafybeib6ndskvxbwt7sivvnf7ksf6rlkryg7l6cxkvaujlasjtibmskzbu
+  tests/test_models.py: bafybeig6g7jnvjixheyodz2f6t7rkarlm2r42v5e42ghtwnoao5xkxmwja
 fingerprint_ignore_patterns: []
 connections:
 - valory/http_server:0.22.0:bafybeihs6dufyaa5l4uorplzx3wiyna5qlq2x43tmyl3yonkl265vspdle

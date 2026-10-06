@@ -21,7 +21,7 @@
 
 import re
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import yaml
 
@@ -210,6 +210,7 @@ class TestParams:
             MarketCreationManagerParams, "__init__", return_value=None
         ) as parent_init:
             Params.__init__(mock_self, prometheus_port=9123, other="kept")
+        mock_self._ensure.assert_called_once_with("prometheus_port", ANY, int)
         assert mock_self.prometheus_port == 9123
         parent_init.assert_called_once_with(other="kept")
 

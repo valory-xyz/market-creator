@@ -43,7 +43,7 @@ skills:
 - valory/funds_forwarder_abci:0.1.0:bafybeihuxw5tgnp4hie76as2jwnbp5abxrkmlmmpu4ila6ey34xrfkqqie
 - valory/identify_service_owner_abci:0.1.0:bafybeid7qw3aoorbv2bnxwd54npkgvdxf6kzpfscnmzqiui74jiskjmitm
 - valory/market_creation_manager_abci:0.1.0:bafybeicy2bn2nzggdv3yhyixekma26sf5gr7uknchemn2zto4h7y2pjv7a
-- valory/market_maker_abci:0.1.0:bafybeiccpobjckruyc44t2ygkbjy3scmaecnjc4lf2ujd5pbctmw3jcc6a
+- valory/market_maker_abci:0.1.0:bafybeic3ol7eqign6nxjwqexro7lbuzcc6aom7qx34quexnut3a7iaq4yy
 - valory/mech_interact_abci:0.1.0:bafybeihn6ic3exr3umjl5kgmlos3d2sjy6rs3sfogvdtw5e5lenpjaxwou
 - valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
 - valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
