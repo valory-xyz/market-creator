@@ -8,7 +8,3 @@ Market Maker service processes worldwide news using an LLM and opens prediction 
 4. Collect user-approved markets from the market approval service.
 5. Send the necessary transactions to the Gnosis chain to open and fund the chosen prediction market.
 6. Repeat steps 1-5. When `NUM_MARKETS` (configurable) have been created, the service will cycle in a waiting state.
-
-### Metrics
-
-The agent serves Prometheus metrics on port 9000 by default, and `PROMETHEUS_PORT` overrides it. The same variable sets the container side of the `deployment.agent.ports` mapping in `service.yaml`, so the published port follows the override when the variable is set while the deployment is built. The host side of the mapping stays 9000.

@@ -58,6 +58,7 @@ from packages.valory.skills.market_maker_abci.handlers import (
     IpfsHandler,
     LedgerApiHandler,
     MarketCreatorABCIRoundHandler,
+    PROMETHEUS_PORT,
     SigningHandler,
     TendermintHandler,
 )
@@ -75,13 +76,11 @@ def start_http_server_mock() -> Generator[MagicMock, None, None]:
 def _make_http_handler(
     endpoint: str = "http://localhost:8080/api",
     markets_to_approve_per_day: int = 10,
-    prometheus_port: int = 9000,
 ) -> HttpHandler:
     """Create an HttpHandler with a mocked context, bypassing property restrictions."""
     context = MagicMock()
     context.params.service_endpoint_base = endpoint
     context.params.markets_to_approve_per_day = markets_to_approve_per_day
-    context.params.prometheus_port = prometheus_port
     handler = HttpHandler.__new__(HttpHandler)
     handler._context = context  # type: ignore[attr-defined]
     handler._skill_context = context  # type: ignore[attr-defined]
@@ -204,12 +203,14 @@ class TestHttpHandler:
 class TestPrometheusServer:
     """Test the Prometheus server started by HttpHandler.setup."""
 
-    def test_setup_starts_server_on_configured_port(
+    def test_setup_starts_server_on_prometheus_port(
         self, start_http_server_mock: MagicMock
     ) -> None:
-        """Test that setup starts the server on params.prometheus_port."""
-        _make_http_handler(prometheus_port=9123)
-        start_http_server_mock.assert_called_once_with(9123)
+        """Test that setup starts the server on PROMETHEUS_PORT."""
+        _make_http_handler()
+        start_http_server_mock.assert_called_once_with(PROMETHEUS_PORT)
+        # service.yaml maps this container port under deployment.agent.ports.
+        assert PROMETHEUS_PORT == 9000
 
     @pytest.mark.parametrize("quota", [18, 3])
     def test_setup_publishes_markets_to_approve_per_day(self, quota: int) -> None:

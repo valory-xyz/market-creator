@@ -74,6 +74,7 @@ TRANSITION_TOLERANCE_FACTOR = (
     2.0  # < 2x the expected pause (and tm healthy) means "transitioning fast"
 )
 HEALTH_VERSION = 2
+PROMETHEUS_PORT = 9000
 
 # The configured daily quota, published so a dashboard can plot it next to
 # the number of markets actually created.
@@ -137,11 +138,12 @@ class HttpHandler(BaseHttpHandler):
 
     def start_prometheus_server(self) -> None:
         """Publish the configured params and start the Prometheus server."""
-        params = self.context.params
-        MARKETS_TO_APPROVE_PER_DAY_GAUGE.set(params.markets_to_approve_per_day)
-        start_http_server(params.prometheus_port)
+        MARKETS_TO_APPROVE_PER_DAY_GAUGE.set(
+            self.context.params.markets_to_approve_per_day
+        )
+        start_http_server(PROMETHEUS_PORT)
         self.context.logger.info(
-            f"Prometheus server started on port {params.prometheus_port}."
+            f"Prometheus server started on port {PROMETHEUS_PORT}."
         )
 
     @property

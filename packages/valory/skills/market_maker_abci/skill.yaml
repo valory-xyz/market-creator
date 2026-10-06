@@ -13,14 +13,14 @@ fingerprint:
   composition.py: bafybeidd5rlcr36qdixe32dnrlc5qgzhuyjceppuurkr2b7ohzfcek3fne
   dialogues.py: bafybeiafgwadv6kzts6yx5gtjyuvaftnofyn3rrwvczfd5seihpydzukju
   fsm_specification.yaml: bafybeif6md363gmewsuegx6254k2gnsh46p7vqa6spj5efqowc6mgccx2m
-  handlers.py: bafybeifup6sheemcux6eowkaiaupfolfzkldcc2ovyhdyyhplb2uo7onv4
-  models.py: bafybeidgsrphzggpqqacyg2mlsfrk22jgowi2mbyczap7b3f37m6wmjc2e
+  handlers.py: bafybeihzrs5q6alp74th7roqazcs6pkailyj5ajg7u2udhg3cz4xda54de
+  models.py: bafybeiec2hpb7fngpsq7euhxuqnrprrnkabofsmdvbl2jd2nwawz7w6pty
   tests/__init__.py: bafybeibbn4ofwna62otdupfcz34fy3bgir6phq3s7q4e4cma4pfoxgeyrq
   tests/conftest.py: bafybeig6ks3pok5kcsvfetmy4f5bp5q2suxquma45bxs5cdir42rlgffyi
   tests/test_behaviours.py: bafybeiapyvud7fsne3cg2oowm2u7jni5ngixv4p3mudukisluccjzpc5l4
   tests/test_dialogues.py: bafybeiedpuwlfc24gxkjoi4wvncfnjsgc7xfqiajqmvrjdvfpfrw2bcqnm
-  tests/test_handlers.py: bafybeib6ndskvxbwt7sivvnf7ksf6rlkryg7l6cxkvaujlasjtibmskzbu
-  tests/test_models.py: bafybeig6g7jnvjixheyodz2f6t7rkarlm2r42v5e42ghtwnoao5xkxmwja
+  tests/test_handlers.py: bafybeieffdjnrj5a2krcjitkbw44jgccsccodrcuqi2qtthnotsbf6fudq
+  tests/test_models.py: bafybeihilrmhpwyqmla6uzfkzbhzc5xt6uxk65aekh76xpurnho26znccu
 fingerprint_ignore_patterns: []
 connections:
 - valory/http_server:0.22.0:bafybeihs6dufyaa5l4uorplzx3wiyna5qlq2x43tmyl3yonkl265vspdle
@@ -184,7 +184,6 @@ models:
       - the-verge
       - techradar
       on_chain_service_id: null
-      prometheus_port: 9000
       realitio_answer_question_bounty: 0
       realitio_contract: '0x0000000000000000000000000000000000000000'
       realitio_oracle_proxy_contract: '0x0000000000000000000000000000000000000000'

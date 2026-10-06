@@ -5,16 +5,16 @@ description: The market maker service.
 aea_version: '>=2.0.0, <3.0.0'
 license: Apache-2.0
 fingerprint:
-  README.md: bafybeie4pqeguakkpbyglechi4in5yc5rckz7hteyawrapvm6i6fzycxau
+  README.md: bafybeibwz3af6326msp4h3kqehijvmyhaytvyfbo3o2npc2w4b6zrg6pfq
 fingerprint_ignore_patterns: []
-agent: valory/market_maker:0.1.0:bafybeidltopygvscxtujgdcp6ickwjl6nsmrcanetfo6esf3yv7iqgdrwq
+agent: valory/market_maker:0.1.0:bafybeif2fgdd67k57irapzycaivmkz67xo46qu4nzxeyrjxxhfdzmt2b5u
 number_of_agents: 1
 deployment:
   agent:
     ports:
       0:
         8001: 8000
-        9000: ${PROMETHEUS_PORT:int:9000}
+        9000: 9000
 ---
 public_id: valory/market_maker_abci:0.1.0
 type: skill
@@ -93,7 +93,6 @@ models:
       light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
       serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
       service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
-      prometheus_port: ${PROMETHEUS_PORT:int:9000}
       expected_service_owner_address: ${EXPECTED_SERVICE_OWNER_ADDRESS:str:0x0000000000000000000000000000000000000000}
       funds_forwarder_token_config: ${FUNDS_FORWARDER_TOKEN_CONFIG:dict:{"0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d":{"retain_balance":300000000000000000000,"max_transfer":1000000000000000000000,
         "min_transfer":100000000000000000000}}}

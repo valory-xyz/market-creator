@@ -21,7 +21,7 @@
 
 import re
 from pathlib import Path
-from unittest.mock import ANY, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import yaml
 
@@ -199,20 +199,6 @@ class TestParams:
         """Test Params inherits from all required param classes."""
         assert issubclass(Params, MarketCreationManagerParams)
         assert issubclass(Params, TerminationParams)
-
-    def test_init_sets_prometheus_port(self) -> None:
-        """Test prometheus_port is read from kwargs before the parents run."""
-        mock_self = MagicMock(spec=Params)
-        mock_self._ensure = MagicMock(
-            side_effect=lambda key, kwargs, type_: kwargs.pop(key)
-        )
-        with patch.object(
-            MarketCreationManagerParams, "__init__", return_value=None
-        ) as parent_init:
-            Params.__init__(mock_self, prometheus_port=9123, other="kept")
-        mock_self._ensure.assert_called_once_with("prometheus_port", ANY, int)
-        assert mock_self.prometheus_port == 9123
-        parent_init.assert_called_once_with(other="kept")
 
 
 class TestSkillYamlParamsContract:
