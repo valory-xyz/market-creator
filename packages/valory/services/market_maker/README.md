@@ -11,4 +11,4 @@ Market Maker service processes worldwide news using an LLM and opens prediction 
 
 ### Metrics
 
-The agent serves Prometheus metrics on container port 9000, which `deployment.agent.ports` maps in `service.yaml`. `PROMETHEUS_PORT` changes the port the agent listens on but not that mapping, so it is meant for local runs outside a container. A containerised deployment that overrides it also needs a matching `deployment.agent.ports` entry.
+The agent serves Prometheus metrics on port 9000 by default, and `PROMETHEUS_PORT` overrides it. The same variable sets the container side of the `deployment.agent.ports` mapping in `service.yaml`, so the published port follows the override when the variable is set while the deployment is built. The host side of the mapping stays 9000.

@@ -5,7 +5,7 @@ description: The market maker service.
 aea_version: '>=2.0.0, <3.0.0'
 license: Apache-2.0
 fingerprint:
-  README.md: bafybeid6scb5qp6jakvbdkeya7gb2nua2vuewn5xdvisznejgbwun6azn4
+  README.md: bafybeie4pqeguakkpbyglechi4in5yc5rckz7hteyawrapvm6i6fzycxau
 fingerprint_ignore_patterns: []
 agent: valory/market_maker:0.1.0:bafybeidltopygvscxtujgdcp6ickwjl6nsmrcanetfo6esf3yv7iqgdrwq
 number_of_agents: 1
@@ -14,7 +14,7 @@ deployment:
     ports:
       0:
         8001: 8000
-        9000: 9000
+        9000: ${PROMETHEUS_PORT:int:9000}
 ---
 public_id: valory/market_maker_abci:0.1.0
 type: skill
