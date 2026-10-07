@@ -200,19 +200,6 @@ class TestParams:
         assert issubclass(Params, MarketCreationManagerParams)
         assert issubclass(Params, TerminationParams)
 
-    def test_init_sets_prometheus_port(self) -> None:
-        """Test prometheus_port is read from kwargs before the parents run."""
-        mock_self = MagicMock(spec=Params)
-        mock_self._ensure = MagicMock(
-            side_effect=lambda key, kwargs, type_: kwargs.pop(key)
-        )
-        with patch.object(
-            MarketCreationManagerParams, "__init__", return_value=None
-        ) as parent_init:
-            Params.__init__(mock_self, prometheus_port=9123, other="kept")
-        assert mock_self.prometheus_port == 9123
-        parent_init.assert_called_once_with(other="kept")
-
 
 class TestSkillYamlParamsContract:
     """Assert every param declared in skill.yaml is read by some Params class.

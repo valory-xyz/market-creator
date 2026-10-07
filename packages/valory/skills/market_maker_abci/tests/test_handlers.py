@@ -22,6 +22,7 @@
 import json
 import re
 from datetime import datetime
+from typing import Generator
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
@@ -57,6 +58,7 @@ from packages.valory.skills.market_maker_abci.handlers import (
     IpfsHandler,
     LedgerApiHandler,
     MarketCreatorABCIRoundHandler,
+    PROMETHEUS_PORT,
     SigningHandler,
     TendermintHandler,
 )
@@ -64,22 +66,25 @@ from packages.valory.skills.market_maker_abci.handlers import (
 METRIC_NAME = "market_creator_markets_to_approve_per_day"
 
 
+@pytest.fixture(autouse=True)
+def start_http_server_mock() -> Generator[MagicMock, None, None]:
+    """Keep HttpHandler.setup() from binding a real port in any test."""
+    with patch.object(handlers_module, "start_http_server") as mock:
+        yield mock
+
+
 def _make_http_handler(
     endpoint: str = "http://localhost:8080/api",
     markets_to_approve_per_day: int = 10,
-    prometheus_port: int = 9000,
 ) -> HttpHandler:
     """Create an HttpHandler with a mocked context, bypassing property restrictions."""
     context = MagicMock()
     context.params.service_endpoint_base = endpoint
     context.params.markets_to_approve_per_day = markets_to_approve_per_day
-    context.params.prometheus_port = prometheus_port
     handler = HttpHandler.__new__(HttpHandler)
     handler._context = context  # type: ignore[attr-defined]
     handler._skill_context = context  # type: ignore[attr-defined]
-    # setup() would otherwise bind a real port on every handler built here.
-    with patch.object(handlers_module, "start_http_server"):
-        handler.setup()
+    handler.setup()
     # Tests that count log calls should only see what happens after setup.
     context.logger.reset_mock()
     return handler
@@ -198,16 +203,14 @@ class TestHttpHandler:
 class TestPrometheusServer:
     """Test the Prometheus server started by HttpHandler.setup."""
 
-    def test_setup_starts_server_on_configured_port(self) -> None:
-        """Test that setup starts the server on params.prometheus_port."""
-        handler = _make_http_handler()
-        with patch.object(handlers_module, "start_http_server") as start_mock:
-            handler.context.params.prometheus_port = 9123
-            handler.setup()
-        start_mock.assert_called_once_with(9123)
-        handler.context.logger.info.assert_called_once_with(  # type: ignore
-            "Prometheus server started on port 9123."
-        )
+    def test_setup_starts_server_on_prometheus_port(
+        self, start_http_server_mock: MagicMock
+    ) -> None:
+        """Test that setup starts the server on PROMETHEUS_PORT."""
+        _make_http_handler()
+        start_http_server_mock.assert_called_once_with(PROMETHEUS_PORT)
+        # service.yaml maps this container port under deployment.agent.ports.
+        assert PROMETHEUS_PORT == 9000
 
     @pytest.mark.parametrize("quota", [18, 3])
     def test_setup_publishes_markets_to_approve_per_day(self, quota: int) -> None:
