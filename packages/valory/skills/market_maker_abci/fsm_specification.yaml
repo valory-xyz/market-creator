@@ -21,6 +21,9 @@ alphabet_in:
 - NO_MAJORITY
 - NO_MARKETPLACE
 - NO_MARKETS_RETRIEVED
+- OFFCHAIN_ALL_FAILED
+- OFFCHAIN_DEPOSIT_NEEDED
+- OFFCHAIN_DONE
 - REALITIO_WITHDRAW_BONDS_TX_DONE
 - RESET_AND_PAUSE_TIMEOUT
 - RESET_TIMEOUT
@@ -33,7 +36,10 @@ alphabet_in:
 - V2
 - VALIDATE_TIMEOUT
 default_start_state: RegistrationStartupRound
-final_states: []
+final_states:
+- FailedOffchainMechRequestRound
+- FinishedOffchainMechDepositNeededRound
+- FinishedOffchainMechRequestRound
 label: MarketCreatorAbciApp
 start_states:
 - RegistrationRound
@@ -47,7 +53,10 @@ states:
 - CreateMarketTxRound
 - CtRedeemTokensRound
 - DepositDaiRound
+- FailedOffchainMechRequestRound
 - FinalizationRound
+- FinishedOffchainMechDepositNeededRound
+- FinishedOffchainMechRequestRound
 - FpmmRemoveLiquidityRound
 - FundsForwarderRound
 - IdentifyServiceOwnerRound
@@ -142,6 +151,9 @@ transition_func:
     (MechRequestRound, BUY_SUBSCRIPTION): MechPurchaseSubscriptionRound
     (MechRequestRound, DONE): RandomnessTransactionSubmissionRound
     (MechRequestRound, NO_MAJORITY): MechRequestRound
+    (MechRequestRound, OFFCHAIN_ALL_FAILED): FailedOffchainMechRequestRound
+    (MechRequestRound, OFFCHAIN_DEPOSIT_NEEDED): FinishedOffchainMechDepositNeededRound
+    (MechRequestRound, OFFCHAIN_DONE): FinishedOffchainMechRequestRound
     (MechRequestRound, ROUND_TIMEOUT): MechRequestRound
     (MechRequestRound, SKIP_REQUEST): ResetAndPauseRound
     (MechResponseRound, DONE): ProcessProposedQuestionsRound

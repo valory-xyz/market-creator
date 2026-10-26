@@ -217,6 +217,7 @@ Synced from IPFS via `autonomy packages sync` (not committed to git):
 | [open-autonomy](https://github.com/valory-xyz/open-autonomy) | `abstract_round_abci`, registration, transaction_settlement, reset_pause, termination |
 | [open-aea](https://github.com/valory-xyz/open-aea) | protocols, connections, base contracts (gnosis_safe, multisend, service_registry) |
 | [mech-interact](https://github.com/valory-xyz/mech-interact) | `mech_interact_abci` skill, mech / mech_mm / ierc1155 contracts |
+| [mech](https://github.com/valory-xyz/mech) | balance_tracker / balance_tracker_fixed_price_native contracts |
 | [omen-protocol](https://github.com/valory-xyz/omen-protocol) | realitio, realitio_proxy, conditional_tokens, fpmm contracts; the LP-removal / CT-redeem / bond-withdrawal recovery skills |
 | [genai](https://github.com/valory-xyz/genai) | GenAI / NVM subscription packages |
 
