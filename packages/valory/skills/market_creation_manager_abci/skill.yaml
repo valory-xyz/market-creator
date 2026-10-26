@@ -68,21 +68,21 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts:
 - valory/conditional_tokens:0.1.0:bafybeifqpw3hnllwy3s2ktcsfup3usgaykh5gbhieyf2wb2s4iwemykn2i
-- valory/erc20:0.1.0:bafybeig4tin5v5ahiiz4fysocl7gjhpjtgzko3w6cr2iz3q5a4bxutwewu
-- valory/fpmm_deterministic_factory:0.1.0:bafybeiazddwzm6dc6625dkynx4devvfy5rq3fbh3vrpj4h66r7lusj6vua
-- valory/gnosis_safe:0.1.0:bafybeif6cfjeruji2ovns6dhc5qivvjr7t7rh5mmudgh5gvumezin26qne
-- valory/multisend:0.1.0:bafybeidl74hh6g34kgxay3fzapz26dhfmc6s2kjnt6edmaxgrklhge3omy
+- valory/erc20:0.1.0:bafybeigafpclygxbid3tbtavpjtz4rxqi4j7uwqlhxbumdm6itzmat6m3m
+- valory/fpmm_deterministic_factory:0.1.0:bafybeie3mgwj5yz4or2zhlpdcz4ns4b7sdcbzamqpcmjbhf5nh6zsjokce
+- valory/gnosis_safe:0.1.0:bafybeifv2ajl76hvtpdtcv2alkislkqr5t7jcyspd5cimmnkfhnyemeux4
+- valory/multisend:0.1.0:bafybeibyx4c6bpkragj5j2augv27til6xrdlnpgyrlttg5dsccxje4yis4
 - valory/realitio:0.1.0:bafybeibfy6dqkwsz4xersouotswcug27awkvtsmjlo3r7b476qgeujn3eu
 protocols:
 - valory/contract_api:1.0.0:bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la
 - valory/ledger_api:1.0.0:bafybeiecq56phjfws36rgrefw6niyo4ezesloodsfis647mpm5ygqo4ysi
 skills:
-- valory/abstract_round_abci:0.1.0:bafybeicioxhbhnsoqyqvkeevd7df7r2vubbiglyf7ucps2el73objazjsq
-- valory/mech_interact_abci:0.1.0:bafybeihn6ic3exr3umjl5kgmlos3d2sjy6rs3sfogvdtw5e5lenpjaxwou
-- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeif6w2bplgceactukt5b6qpth5nxspdeljsxaywrlyxvymdxxiefsq
-- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeibuldgtifqjst4oeremvl6huzvdnq36opgwv2wupsnplf4er5frpm
-- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeiabqn6mcg4nw3mqbyxcuiyxgwlf7e2il3cj4awpmdi7bibqlwvklq
-- valory/transaction_settlement_abci:0.1.0:bafybeibv3tycpdhphlblu62zpcbjsj7hnwkutexxqagorkelhjlt4t4fii
+- valory/abstract_round_abci:0.1.0:bafybeiedcsiiv4s3iu4uilbbys3yemzs2vvkblbwtumnrcwqbnalgiv5pi
+- valory/mech_interact_abci:0.1.0:bafybeid6ay4xgm4bs4nmbarl5fc6ygonrunh5im3acdu2xe2yzgzbp2b3m
+- valory/omen_ct_redeem_tokens_abci:0.1.0:bafybeibgvy6shgzjcabm2gcmjc2gft7ja3g46jbmcylgxrlscsmcw3aaqm
+- valory/omen_fpmm_remove_liquidity_abci:0.1.0:bafybeiew2i2wp4jvtbw5ppxdakw2qvte7ulz4kkfgczshbbqfbchyg4rgm
+- valory/omen_realitio_withdraw_bonds_abci:0.1.0:bafybeickxlykeaqxuyw3mp54kdrlqx7bmqotd66pnx2rozzviolr3t4i6m
+- valory/transaction_settlement_abci:0.1.0:bafybeidkkgo6tmpybsmzun3tnxrfzdkjvtvaxgqhx52yw3657tn25ybkri
 behaviours:
   main:
     args: {}
