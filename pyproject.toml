@@ -105,7 +105,7 @@ constraint-dependencies = ["cffi<2.1"]
 # for the mech_interact_abci skill and the Omen contract / recovery
 # skill packages.
 upstream_pins = [
-    "valory-xyz/mech-interact@v0.32.3",
+    "valory-xyz/mech-interact@v0.33.9",
     # mech ships the balance_tracker contracts that mech_interact_abci
     # references via its skill.yaml.
     "valory-xyz/mech@v0.36.0",
