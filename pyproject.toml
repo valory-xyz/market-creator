@@ -109,8 +109,8 @@ upstream_pins = [
     # mech ships the balance_tracker contracts that mech_interact_abci
     # references via its skill.yaml.
     "valory-xyz/mech@v0.36.0",
-    "valory-xyz/genai@v7.2.1",
-    "valory-xyz/omen-protocol@v0.1.4",
+    "valory-xyz/genai@v7.2.5",
+    "valory-xyz/omen-protocol@v0.1.5",
 ]
 # IPFS CIDv1 hashes (`bafybei...`) used by Open Autonomy package
 # fingerprints look like generic API keys to gitleaks; allowlist them.
