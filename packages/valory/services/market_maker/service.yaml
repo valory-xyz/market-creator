@@ -11,6 +11,8 @@ agent: valory/market_maker:0.1.0:bafybeifl7xe4r544l5lc55jg75il32fnapxuuvt5s3i5ji
 number_of_agents: 1
 deployment:
   agent:
+    volumes:
+      ./data: /data
     ports:
       0:
         8001: 8000
