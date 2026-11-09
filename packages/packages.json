@@ -1,10 +1,10 @@
 {
     "dev": {
         "contract/valory/fpmm_deterministic_factory/0.1.0": "bafybeie3mgwj5yz4or2zhlpdcz4ns4b7sdcbzamqpcmjbhf5nh6zsjokce",
-        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeiemz3y4czs7nt3rzgbflycamvjlx6c2vd3enqtbdg6uwcbo43gqki",
-        "skill/valory/market_maker_abci/0.1.0": "bafybeid4p44q5nkjry5fdajmvtmxsrf5eppz3vuemrgost7iaf4u3csgyq",
-        "agent/valory/market_maker/0.1.0": "bafybeihxmyl2b2427dtudqdtqgprybgfg5xyvvld6qxqn7wjxksibvqjba",
-        "service/valory/market_maker/0.1.0": "bafybeigi6sqcb52vhpiuzcm3jhlhw3ki2jshbfh52h3aczicdyk3tm64lm"
+        "skill/valory/market_creation_manager_abci/0.1.0": "bafybeihttjbp4fi7vztl3jn653b46fsik43fwzhzf7itil6j52ddn65xbm",
+        "skill/valory/market_maker_abci/0.1.0": "bafybeifryhqe4zwwhu6qn6cjrepnb7xihq3mrosdidnpts7xknhuykuc6u",
+        "agent/valory/market_maker/0.1.0": "bafybeifl7xe4r544l5lc55jg75il32fnapxuuvt5s3i5jiuq6zv2pxx2li",
+        "service/valory/market_maker/0.1.0": "bafybeidacwt7dkfmwfj6xf6yqycpfqldc4x74qai6sctpthdgjc7w3bc3m"
     },
     "third_party": {
         "protocol/valory/contract_api/1.0.0": "bafybeibld2xb5m7kyluiptkamp4nrt6oeomkohz7a3yppbv2oo7qw2e4la",
@@ -60,7 +60,7 @@
         "skill/valory/identify_service_owner_abci/0.1.0": "bafybeicujogydxwsn3yjqgrjzrwgkeinxjyupsapl7g3b6wnc4krfk3upu",
         "skill/valory/funds_forwarder_abci/0.1.0": "bafybeiepusn4y66o5ydx4veou6n6f5glsh2uam26dvhdxomdyjbdmjkytu",
         "skill/valory/mech_interact_abci/0.1.0": "bafybeid6ay4xgm4bs4nmbarl5fc6ygonrunh5im3acdu2xe2yzgzbp2b3m",
-        "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeic3ggfheci4vvlpfyiytsq3h2sevp7l5xdhmwodvaleszflat2xmm",
+        "skill/valory/omen_ct_redeem_tokens_abci/0.1.0": "bafybeihabn3duppzfhpyrxyw5xr26lrv6qgbwpw4gj4bemkszsguv2jzyi",
         "skill/valory/omen_fpmm_remove_liquidity_abci/0.1.0": "bafybeiew2i2wp4jvtbw5ppxdakw2qvte7ulz4kkfgczshbbqfbchyg4rgm",
         "skill/valory/omen_realitio_withdraw_bonds_abci/0.1.0": "bafybeickxlykeaqxuyw3mp54kdrlqx7bmqotd66pnx2rozzviolr3t4i6m"
     }
